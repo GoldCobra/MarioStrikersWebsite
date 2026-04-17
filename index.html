@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mario Strikers Community</title>
-  <link rel="stylesheet" href="./css/global.css?v=20260416-cleanup-v4">
+  <link rel="stylesheet" href="./css/global.css?v=20260417-landing-club-v3">
 </head>
 <body data-page="index">
   <div id="1">
@@ -12,9 +12,21 @@
     <div id="global-subnav"></div>
   </div>
 
-  <main class="page-content"></main>
+  <main class="page-content">
+    <section class="landing-club" aria-label="Mario Strikers Club">
+      <img class="landing-club-image" src="./assets/landing/strikers-club.png" alt="Mario Strikers Club">
+      <p class="landing-club-label">STRIKERS CLUB</p>
+      <div class="landing-club-overlay" aria-live="polite">
+        <div class="landing-club-text-block">
+          <p class="landing-club-headline">THE SEASON IS UNDERWAY!</p>
+          <p id="landing-season-countdown" class="landing-club-countdown">SEASON ENDS: 00<span class="landing-countdown-unit">D</span> 00<span class="landing-countdown-unit">H</span> 00<span class="landing-countdown-unit">M</span></p>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <script src="./js/global-nav.js?v=20260416-cleanup-v4" defer></script>
+  <script src="./js/landing-countdown.js?v=20260417-landing-club-v1" defer></script>
 </body>
 </html>
 

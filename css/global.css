@@ -184,6 +184,92 @@ body::before {
   display: block;
 }
 
+body[data-page="index"] .page-content {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0.45rem 0.75rem 1.8rem;
+}
+
+.landing-club {
+  width: min(690px, 65vw);
+  margin: 0 auto;
+  position: relative;
+}
+
+.landing-club-image {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+.landing-club-label {
+  position: absolute;
+  left: 1.4%;
+  top: 32.5%;
+  transform: translateY(-100%);
+  margin: 0;
+  color: #f5c300;
+  font-family: "ITC Grizzly", sans-serif;
+  font-size: calc(clamp(0.7rem, 1.05vw, 1rem) + 6px);
+  letter-spacing: 0.03em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: -2px 2px 0 #000;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.landing-club-overlay {
+  position: absolute;
+  left: 38%;
+  bottom: 40%;
+  transform: translateX(-50%);
+  width: 92%;
+  text-align: center;
+  pointer-events: none;
+}
+
+.landing-club-text-block {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-club-headline {
+  margin: 0;
+  color: #f5c300;
+  font-family: "ITC Grizzly", sans-serif;
+  font-size: calc(clamp(0.78rem, 1.28vw, 1.26rem) + 7px);
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+  text-shadow: -3px 3px 0 #000;
+  text-transform: uppercase;
+}
+
+#landing-season-countdown {
+  margin-top: 0;
+  margin-left: 0;
+  transform: translate(10px, 30px);
+}
+
+.landing-club-countdown {
+  margin: 0;
+  color: #fff;
+  font-family: "ITC Grizzly", sans-serif;
+  font-size: calc(clamp(0.78rem, 1.28vw, 1.26rem) + 2px);
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+  text-shadow: -3px 2px 0 #000;
+  text-transform: uppercase;
+}
+
+.landing-countdown-unit {
+  color: #a8a8a8;
+}
+
 .msbl-leaderboards-shell {
   --msbl-panel-bg-image: url("../assets/leaderboards/tabs.png");
   --msbl-panel-bg-x: left;
