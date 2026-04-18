@@ -211,7 +211,7 @@
   var GAME_CONFIGS = {
     sms: {
       pageTitle: "The Super Mario Strikers (Mario Smash Football) Competitive Ruleset",
-      revisedText: "Last revised: March 14, 2024",
+      revisedText: "Last revised April 17, 2026",
       sourceHref: "https://docs.google.com/document/d/e/2PACX-1vRUeYhYOYrG3jF5yA26U7joUx4uft4yMfqva3mHuw_ZDbTCZaEccZmRTv_bReo1MkPpoSIWst_loqbu/pub",
       sourceLabel: "Published SMS Rules",
       gameSpecific: {
@@ -339,7 +339,7 @@
 
     msc: {
       pageTitle: "The Mario Strikers Charged (Football) Competitive Ruleset",
-      revisedText: "Last revised April 16, 2026",
+      revisedText: "Last revised April 17, 2026",
       sourceHref: "https://docs.google.com/document/d/e/2PACX-1vRQgUz-inFiaOJVnVDWLITqM6g3vm89lI_GstwX7cQl3Pj-Tb8QtAk5mH-HDlPbNnqKyqw4PyZaOxwX/pub",
       sourceLabel: "Published MSC Rules",
       gameSpecific: {
@@ -444,8 +444,8 @@
     },
 
     msbl: {
-      pageTitle: "The Mario Strikers: Battle League (Football) Competitive Rulebook",
-      revisedText: "Last revised July 6, 2023",
+      pageTitle: "The Mario Strikers: Battle League (Football) Competitive Ruleset",
+      revisedText: "Last revised April 17, 2026",
       sourceHref: "https://docs.google.com/document/d/e/2PACX-1vTs8u7wkcFsjVTv4246QygJMPiVDxzJqruouF_Jjq0C8kxLiG6bzgPBq87m522163_I-YZU4ZTwvtlH/pub",
       sourceLabel: "Published MSBL Rules",
       gameSpecific: {

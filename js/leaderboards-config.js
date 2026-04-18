@@ -1,33 +1,32 @@
 (function () {
   "use strict";
 
-  function createStandardTabs(gameKey) {
-    return [
-      { key: "elo1v1", label: "ELO 1v1", href: gameKey + "-elo1v1.html" },
-      { key: "elo2v2", label: "ELO 2v2", href: gameKey + "-elo2v2.html" },
-      { key: "whr", label: "WHR", href: gameKey + "-whr.html" }
-    ];
-  }
+  var GLOBAL_LEADERBOARD_TABS = [
+    { key: "msbl-elo1v1", label: "ELO 1v1", href: "msbl-elo1v1.html", icon: "msblball.png" },
+    { key: "msbl-elo2v2", label: "ELO 2v2", href: "msbl-elo2v2.html", icon: "msblball.png" },
+    { key: "msbl-whr", label: "WHR", href: "msbl-whr.html", icon: "msblball.png" },
+    { key: "msc-elo1v1", label: "ELO 1v1", href: "msc-elo1v1.html", icon: "mscball.png" },
+    { key: "msc-whr", label: "WHR", href: "msc-whr.html", icon: "mscball.png" },
+    { key: "sms-elo1v1", label: "ELO 1v1", href: "sms-elo1v1.html", icon: "smsball.png" },
+    { key: "sms-whr", label: "WHR", href: "sms-whr.html", icon: "smsball.png" }
+  ];
 
-  function createGameConfig(gameKey, title, ariaLabel, defaultTabKey) {
+  function createGlobalConfig(pageKey) {
     return {
-      gameCode: gameKey,
-      title: title,
-      tabAriaLabel: ariaLabel,
-      defaultTabKey: defaultTabKey,
-      tabs: createStandardTabs(gameKey)
+      gameCode: pageKey,
+      title: "Leaderboards",
+      tabAriaLabel: "Leaderboard tabs",
+      tabs: GLOBAL_LEADERBOARD_TABS
     };
   }
 
   window.LEADERBOARDS_CONFIG = {
-    "msbl-elo1v1": createGameConfig("msbl", "MSBL Leaderboards", "MSBL leaderboard modes", "elo1v1"),
-    "msbl-elo2v2": createGameConfig("msbl", "MSBL Leaderboards", "MSBL leaderboard modes", "elo2v2"),
-    "msbl-whr": createGameConfig("msbl", "MSBL Leaderboards", "MSBL leaderboard modes", "whr"),
-    "msc-elo1v1": createGameConfig("msc", "MSC Leaderboards", "MSC leaderboard modes", "elo1v1"),
-    "msc-elo2v2": createGameConfig("msc", "MSC Leaderboards", "MSC leaderboard modes", "elo2v2"),
-    "msc-whr": createGameConfig("msc", "MSC Leaderboards", "MSC leaderboard modes", "whr"),
-    "sms-elo1v1": createGameConfig("sms", "SMS Leaderboards", "SMS leaderboard modes", "elo1v1"),
-    "sms-elo2v2": createGameConfig("sms", "SMS Leaderboards", "SMS leaderboard modes", "elo2v2"),
-    "sms-whr": createGameConfig("sms", "SMS Leaderboards", "SMS leaderboard modes", "whr")
+    "msbl-elo1v1": createGlobalConfig("msbl-elo1v1"),
+    "msbl-elo2v2": createGlobalConfig("msbl-elo2v2"),
+    "msbl-whr": createGlobalConfig("msbl-whr"),
+    "msc-elo1v1": createGlobalConfig("msc-elo1v1"),
+    "msc-whr": createGlobalConfig("msc-whr"),
+    "sms-elo1v1": createGlobalConfig("sms-elo1v1"),
+    "sms-whr": createGlobalConfig("sms-whr")
   };
 })();

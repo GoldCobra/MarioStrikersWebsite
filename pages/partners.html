@@ -3,8 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preload" href="../assets/fonts/itc-grizzly.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="../assets/fonts/Trade%20Gothic%20Next%20LT%20Pro%20BdCn.woff" as="font" type="font/woff" crossorigin>
   <title>Partners | Mario Strikers Community</title>
-  <link rel="stylesheet" href="../css/global.css?v=20260416-cleanup-v4">
+  <link rel="stylesheet" href="../css/global.css?v=20260418-runtime-cleanup-v8">
 </head>
 <body data-page="partners">
   <div id="1">
@@ -12,12 +14,25 @@
     <div id="global-subnav"></div>
   </div>
 
-  <main class="page-content"></main>
+  <main class="page-content competitive-rules-page">
+    <section id="partners-root" aria-label="Partners">
+      <article class="competitive-rules" aria-label="Partner list">
+        <section class="cr-section partner-card">
+          <img class="partner-card-logo" src="../assets/partners/_nintenhub.png" alt="Nintenhub logo" loading="eager" decoding="async">
+          <h2>NINTENHUB</h2>
+          <p>Nintenhub is a Nintendo-focused community hub that brings together fans, communities, and Nintendo-related content under one shared brand.</p>
+        </section>
+        <section class="cr-section partner-card">
+          <img class="partner-card-logo" src="../assets/partners/_wolftv.png" alt="WolfTV logo" loading="eager" decoding="async">
+          <h2>WOLFTV</h2>
+          <p>WolfTV is a Europe-based gaming community focused on smaller titles and emerging competitive scenes. With online tournaments and community programs like Battle for the Den, Wolf Warrior, From Pack to Pack, ARMS Territorial League, and The Playing Grounds, WolfTV creates a home for players who value competition, community, and underrepresented games.</p>
+        </section>
+      </article>
+    </section>
+  </main>
 
-  <script src="../js/global-nav.js?v=20260416-cleanup-v4" defer></script>
+  <script src="../js/global-tabs-engine.js?v=20260418-runtime-cleanup-v8" defer></script>
+  <script src="../js/global-nav.js?v=20260418-runtime-cleanup-v8" defer></script>
 </body>
 </html>
-
-
-
 

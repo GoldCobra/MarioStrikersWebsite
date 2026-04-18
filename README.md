@@ -1,9 +1,10 @@
-﻿# Mario Strikers Community Website
+# Mario Strikers Community Website
 
 Current runtime is intentionally simple:
 - Static frontend (`index.html`, `pages/*`, `css/global.css`, `js/*`)
 - Read-only backend bridge (`backend/*`) that fetches live ratings directly from the Bot MSSQL source
 - No Postgres, no local leaderboard storage
+- One global cache tag for frontend includes: `20260418-runtime-cleanup-v8`
 
 ## API Contract (unchanged for frontend)
 
@@ -13,7 +14,7 @@ Current runtime is intentionally simple:
 
 Supported route values:
 - `:game` in `sms | msc | msbl`
-- `:mode` in `elo1v1 | elo2v2 | whr`
+- `:mode` in `elo1v1 | elo2v2 | whr` (`elo2v2` currently surfaced in frontend for MSBL)
 
 ## Backend Setup
 
@@ -82,23 +83,42 @@ Global competitive-rules pages use one shared template and styles in `css/global
 
 ## Frontend Route Contract
 
-Main pages:
-- `pages/msl.html`
+Top-level pages:
+- `index.html` (Home / Landing)
+- `pages/games.html`
+- `pages/competitive.html`
+- `pages/players.html`
+- `pages/partners.html`
+
+Games section pages:
 - `pages/msbl.html`
 - `pages/msc.html`
 - `pages/sms.html`
-- `pages/partners.html`
+- `pages/msc-setup-guide.html`
+- `pages/sms-setup-guide.html`
 
 Leaderboard pages (canonical):
 - `pages/msbl-elo1v1.html`
 - `pages/msbl-elo2v2.html`
 - `pages/msbl-whr.html`
 - `pages/msc-elo1v1.html`
-- `pages/msc-elo2v2.html`
 - `pages/msc-whr.html`
 - `pages/sms-elo1v1.html`
-- `pages/sms-elo2v2.html`
 - `pages/sms-whr.html`
+
+Competitive section pages:
+- `pages/msl.html`
+- `pages/msl-league-rules.html`
+- `pages/msl-leaderboards.html`
+- `pages/msl-league-site.html`
+- `pages/community-tournaments.html`
+
+Game-specific utility pages:
+- `pages/players-msbl-clubs.html` (used as `GAMES > MSBL > STRIKER CLUBS`)
+
+Reserve pages (kept intentionally, currently not linked in active nav):
+- `pages/players-profiles.html`
+- `pages/msl-leaderboards.html`
 
 Legacy alias routes have been removed. Use only the canonical leaderboard routes listed above.
 
@@ -106,4 +126,5 @@ Current routes:
 - `pages/msc-competitiverules.html` (fully populated)
 - `pages/msbl-competitiverules.html` (fully populated, shared template)
 - `pages/sms-competitiverules.html` (fully populated, shared template)
+
 
