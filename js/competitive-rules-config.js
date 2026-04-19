@@ -86,6 +86,8 @@
           title: "Competitive Integrity",
           blocks: [
             paragraph("All games must use organizer-approved settings and versions. Unapproved gameplay-altering methods are prohibited unless explicitly listed as legal in game-specific rules."),
+            paragraph("Wired Ethernet is strongly recommended for the most stable competitive match quality and lower latency. It is not mandatory."),
+            paragraph("Players should use a connection that avoids avoidable disruptions."),
             paragraph("Players must cooperate with staff requests for evidence, testing, and match-state reconstruction during disputes."),
             paragraph("Players must communicate clearly and act in good faith during setup, gameplay, and dispute resolution.")
           ]
@@ -230,7 +232,6 @@
             blocks: [
               ul([
                 "Netplay lobby \"Network\" must be set to \"Fair Input Delay\".",
-                "Wired Ethernet is strongly recommended for best gameplay quality, but not mandatory.",
                 "Players should agree on a stable buffer and generally use the lowest value that avoids lag.",
                 "A baseline formula is BUFFER = PING / 8, but values may be lower or higher if both players agree.",
                 "The absolute minimum buffer is 6, and the absolute maximum buffer is 20.",
