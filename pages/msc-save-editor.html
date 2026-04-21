@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preload" href="../assets/fonts/itc-grizzly.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="../assets/fonts/Trade%20Gothic%20Next%20LT%20Pro%20BdCn.woff" as="font" type="font/woff" crossorigin>
+  <title>MSC Save Editor | Mario Strikers Community</title>
+  <link rel="stylesheet" href="../css/global.css?v=20260421-save-editor-v32">
+</head>
+<body data-page="msc-save-editor">
+  <div id="1">
+    <div id="global-nav"></div>
+    <div id="global-subnav"></div>
+  </div>
+
+  <main class="page-content save-editor-page" aria-label="MSC save editor">
+    <section class="save-editor-panel">
+      <p class="save-editor-description">This Save Editor is built primarily for competitive play, letting you quickly create team presets, share them with other players, and apply the default competitive settings (automatically done).</p>
+      <div class="save-editor-actions" role="group" aria-label="Save editor actions">
+        <button id="save-editor-load" class="save-editor-btn" type="button"><span class="save-editor-btn-label">Load</span></button>
+        <button id="save-editor-apply" class="save-editor-btn" type="button" disabled><span class="save-editor-btn-label">Write</span></button>
+        <button id="save-editor-xml-import" class="save-editor-btn" type="button" disabled><span class="save-editor-btn-label">XML-Import</span></button>
+        <button id="save-editor-xml-export" class="save-editor-btn" type="button" disabled><span class="save-editor-btn-label">XML-Export</span></button>
+        <button id="save-editor-save" class="save-editor-btn" type="button" disabled><span class="save-editor-btn-label">Export Save</span></button>
+      </div>
+      <input id="save-editor-file-input" class="save-editor-file-input" type="file">
+      <input id="save-editor-xml-input" class="save-editor-file-input" type="file" accept=".xml,text/xml,application/xml">
+      <a id="save-editor-download" class="save-editor-download-link" download="Strikers2"></a>
+      <a id="save-editor-xml-download" class="save-editor-download-link" download="msc-presets-r4qp01.xml"></a>
+      <section class="save-editor-formation-panel" aria-label="Team preset formation">
+        <div class="save-editor-formation">
+          <button id="save-editor-slot-top" class="save-editor-slot save-editor-slot-top" data-slot="top" type="button">
+            <img id="save-editor-slot-top-icon" class="save-editor-slot-icon" alt="Top sidekick">
+          </button>
+          <button id="save-editor-slot-back" class="save-editor-slot save-editor-slot-back" data-slot="back" type="button">
+            <img id="save-editor-slot-back-icon" class="save-editor-slot-icon" alt="Back sidekick">
+          </button>
+          <button id="save-editor-slot-bottom" class="save-editor-slot save-editor-slot-bottom" data-slot="bottom" type="button">
+            <img id="save-editor-slot-bottom-icon" class="save-editor-slot-icon" alt="Bottom sidekick">
+          </button>
+          <button id="save-editor-slot-captain" class="save-editor-slot save-editor-slot-captain" data-slot="captain" type="button">
+            <img id="save-editor-slot-captain-icon" class="save-editor-slot-icon" alt="Captain">
+          </button>
+        </div>
+      </section>
+      <section class="save-editor-picker" aria-label="Character icon picker">
+        <div id="save-editor-picker-grid" class="save-editor-picker-grid"></div>
+      </section>
+      <section class="save-editor-form save-editor-form-hidden" aria-label="Team preset editor">
+        <label class="save-editor-field">
+          <span>CAPTAIN</span>
+          <select id="save-editor-captain"></select>
+        </label>
+        <label class="save-editor-field">
+          <span>TOP</span>
+          <select id="save-editor-top"></select>
+        </label>
+        <label class="save-editor-field">
+          <span>BOTTOM</span>
+          <select id="save-editor-bottom"></select>
+        </label>
+        <label class="save-editor-field">
+          <span>BACK</span>
+          <select id="save-editor-back"></select>
+        </label>
+      </section>
+      <p id="save-editor-status" class="save-editor-note"></p>
+    </section>
+  </main>
+
+  <script src="../js/msc-save-editor-contract-pal.js?v=20260421-save-editor-v32" defer></script>
+  <script src="../js/msc-save-editor.js?v=20260421-save-editor-v32" defer></script>
+  <script src="../js/global-tabs-engine.js?v=20260418-runtime-cleanup-v8" defer></script>
+  <script src="../js/global-nav.js?v=20260418-runtime-cleanup-v8" defer></script>
+</body>
+</html>

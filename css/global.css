@@ -439,7 +439,7 @@ body[data-page="index"] .page-content {
 
 .landing-club {
   width: min(700px, 78vw);
-  margin: 0 auto;
+  margin: -0.3rem auto 0;
   position: relative;
 }
 
@@ -479,17 +479,19 @@ body[data-page="index"] .page-content {
 .landing-club-text-block {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  text-align: left;
   width: min(92%, 620px);
   margin-inline: auto;
   margin-top: clamp(1.2rem, 4.4vw, 2.6rem);
-  padding-left: clamp(0.9rem, 3vw, 2.1rem);
+  padding-left: clamp(5.2rem, 14vw, 8.8rem);
   transform: translate(clamp(-122px, -9.5vw, -80px), clamp(-7px, -0.55vw, -4px));
 }
 
 .landing-club-headline {
   margin: 0;
+  text-align: left;
   color: #f5c300;
   font-family: "ITC Grizzly", sans-serif;
   font-size: calc(clamp(0.78rem, 1.28vw, 1.26rem) + 7px);
@@ -500,21 +502,61 @@ body[data-page="index"] .page-content {
 }
 
 #landing-season-countdown {
-  margin: clamp(0.9rem, 2.4vw, 1.7rem) 0 0;
+  margin: clamp(0.9rem, 2.4vw, 1.7rem) 0 0 clamp(1.35rem, 4.2vw, 2.8rem);
 }
 
 .landing-club-countdown {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  --landing-countdown-char-gap: 0.06em;
+  --landing-countdown-segment-gap: 0.4em;
+  gap: clamp(0.3rem, 0.85vw, 0.5rem);
   margin: 0;
   color: #fff;
   font-family: "ITC Grizzly", sans-serif;
   font-size: calc(clamp(0.78rem, 1.28vw, 1.26rem) + 2px);
-  letter-spacing: 0.03em;
-  line-height: 1.1;
+  letter-spacing: 0;
+  line-height: 1.05;
   text-shadow: -3px 2px 0 #000;
   text-transform: uppercase;
 }
 
-.landing-countdown-unit {
+.landing-countdown-prefix {
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  flex: 0 0 auto;
+}
+
+.landing-countdown-group {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: var(--landing-countdown-segment-gap);
+  letter-spacing: 0;
+  flex: 0 0 auto;
+}
+
+.landing-countdown-segment {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: var(--landing-countdown-char-gap);
+  width: auto;
+  white-space: nowrap;
+  overflow: visible;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  line-height: 1.05;
+}
+
+.landing-countdown-char {
+  display: inline-block;
+  min-width: 0.62ch;
+  text-align: center;
+}
+
+.landing-countdown-char-unit {
   color: #8f8f8f;
 }
 
@@ -1017,9 +1059,499 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
   content: none;
 }
 
+.cr-link-preserve-case {
+  text-transform: none;
+}
+
 .cr-note {
   margin-top: 0.4rem;
   color: #ffdca1;
+}
+
+.setup-guide-page #msc-setup-guide-root {
+  display: block;
+  padding-top: var(--space-3);
+}
+
+body[data-subnav="off"] .setup-guide-page #msc-setup-guide-root {
+  padding-top: 0;
+}
+
+.setup-guide-article > .setup-guide-section {
+  margin-top: clamp(1.45rem, 3.3vw, 2.05rem);
+}
+
+.setup-guide-article > .setup-guide-section:first-of-type {
+  margin-top: 0;
+}
+
+.setup-guide-media {
+  margin: clamp(0.55rem, 1.25vw, 0.9rem) 0;
+}
+
+.setup-guide-media img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.setup-guide-code {
+  margin: 0.45rem 0 0.75rem;
+  padding: 0.58rem 0.72rem;
+  border-left: 3px solid #c77603;
+  background: rgba(0, 0, 0, 0.34);
+  color: #f4f4f4;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: clamp(0.7rem, 0.88vw, 0.85rem);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.setup-guide-warning {
+  color: #ffdca1;
+}
+
+.setup-guide-warning-icon {
+  width: 0.50em;
+  height: auto;
+  margin-right: 0.38em;
+  vertical-align: -0.28em;
+}
+
+.setup-guide-note {
+  font-size: calc(1em - 4px);
+  font-style: normal;
+}
+
+.setup-guide-meta-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-top: 0.55rem;
+}
+
+.setup-guide-meta-line .cr-note {
+  margin: 0;
+}
+
+.setup-guide-credits {
+  margin: 0;
+  text-align: right;
+  color: #ffffff;
+  font-family: "Trade Gothic Next BdCn", sans-serif;
+  font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+}
+
+.save-editor-page {
+  padding-top: 0;
+}
+
+.save-editor-panel {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 0.75rem;
+  justify-items: stretch;
+}
+
+.save-editor-description {
+  width: min(700px, 100%);
+  margin: 0 auto;
+  color: #d6d6d6;
+  font-family: "Trade Gothic Next BdCn", sans-serif;
+  font-size: clamp(0.92rem, 1.06vw, 1.02rem);
+  line-height: 1.32;
+  text-align: center;
+}
+
+.save-editor-formation-panel {
+  width: min(700px, 100%);
+  margin: 0 auto;
+}
+
+.save-editor-formation {
+  position: relative;
+  width: min(620px, 100%);
+  min-height: clamp(220px, 44vw, 300px);
+  margin: 0 auto;
+}
+
+.save-editor-slot {
+  --slot-size: clamp(80px, 11vw, 104px);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--slot-size);
+  height: var(--slot-size);
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  background-image: url("../assets/msc-saveeditor/char-circle.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  padding: 0;
+  cursor: pointer;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+.save-editor-slot:hover {
+  filter: brightness(1.07);
+}
+
+.save-editor-slot.is-active-slot {
+  background-image: url("../assets/msc-saveeditor/char-circle-active.png");
+  filter: brightness(1);
+}
+
+.save-editor-slot:focus-visible {
+  outline: 2px solid #f5c300;
+  outline-offset: 2px;
+}
+
+.save-editor-slot-top {
+  left: 55%;
+  top: 26%;
+}
+
+.save-editor-slot-back {
+  left: 27%;
+  top: 50%;
+}
+
+.save-editor-slot-bottom {
+  left: 55%;
+  top: 74%;
+}
+
+.save-editor-slot-captain {
+  left: 73%;
+  top: 50%;
+}
+
+.save-editor-slot-icon {
+  width: 76%;
+  height: 76%;
+  object-fit: contain;
+  image-rendering: auto;
+  pointer-events: none;
+}
+
+.save-editor-picker {
+  width: min(700px, 100%);
+  margin: 0 auto;
+  margin-top: -0.25rem;
+  display: grid;
+  gap: 0.52rem;
+  overflow: visible;
+}
+
+.save-editor-picker-grid {
+  --picker-box-size: 58px;
+  --picker-art-zoom: 1.04;
+  --picker-icon-scale: 94%;
+  width: min(680px, 100%);
+  margin: 0 auto;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--picker-box-size), var(--picker-box-size)));
+  justify-content: center;
+  padding-inline: 8px;
+  column-gap: clamp(1rem, 2.2vw, 1.35rem);
+  row-gap: clamp(0.35rem, 1vw, 0.55rem);
+  overflow: visible;
+}
+
+.save-editor-picker-grid.is-captain-layout {
+  grid-template-columns: repeat(6, var(--picker-box-size));
+}
+
+.save-editor-icon-option {
+  width: var(--picker-box-size);
+  height: var(--picker-box-size);
+  aspect-ratio: 1 / 1;
+  border: 0;
+  background-color: transparent;
+  background-image: none;
+  position: relative;
+  overflow: visible;
+  display: grid;
+  place-items: center;
+  padding: 0.16rem;
+  cursor: pointer;
+}
+
+.save-editor-icon-option::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  background-image: url("../assets/msc-saveeditor/char-rows-bg.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  transform: scale(var(--picker-art-zoom));
+  transform-origin: center;
+  filter: drop-shadow(-3px 2px 0 #000);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.save-editor-icon-option:hover {
+  filter: none;
+}
+
+.save-editor-icon-option:hover::before {
+  filter: drop-shadow(-3px 2px 0 #000) brightness(1.05);
+}
+
+.save-editor-icon-option.is-selected {
+  filter: none;
+}
+
+.save-editor-icon-option.is-selected::before {
+  filter: drop-shadow(-3px 2px 0 #000) brightness(1.12);
+}
+
+.save-editor-icon-option:focus-visible {
+  outline: 2px solid #f5c300;
+  outline-offset: 1px;
+}
+
+.save-editor-icon-option img {
+  width: var(--picker-icon-scale);
+  height: var(--picker-icon-scale);
+  object-fit: contain;
+  pointer-events: none;
+  position: relative;
+  z-index: 1;
+}
+
+.save-editor-actions {
+  width: min(700px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.save-editor-btn {
+  min-height: 40px;
+  width: 100%;
+  border: 0;
+  background-color: transparent;
+  background-image: url("../assets/msc-saveeditor/menu-buttons.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f5c300;
+  font-family: "Trade Gothic Next BdCn", sans-serif;
+  font-size: clamp(0.92rem, 1.2vw, 1.05rem);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.save-editor-btn-label {
+  transform: translateY(-1px);
+}
+
+.save-editor-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.save-editor-file-input,
+.save-editor-download-link {
+  display: none;
+}
+
+.save-editor-form {
+  width: min(640px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.save-editor-form-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+}
+
+.save-editor-field {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.save-editor-field > span {
+  color: #f5c300;
+  font-family: "Trade Gothic Next BdCn", sans-serif;
+  font-size: clamp(0.78rem, 0.95vw, 0.9rem);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.save-editor-field > select {
+  min-height: 36px;
+  border: 1px solid #c77603;
+  background: rgba(20, 0, 0, 0.86);
+  color: #ffffff;
+  font-family: "Trade Gothic Next BdCn", sans-serif;
+  font-size: clamp(0.95rem, 1.1vw, 1rem);
+  padding: 0 0.42rem;
+  box-sizing: border-box;
+}
+
+.save-editor-note {
+  margin: 0;
+  color: #ffffff;
+  font-family: "Trade Gothic Next BdCn", sans-serif;
+  font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+  text-align: center;
+}
+
+.save-editor-note.is-warning {
+  color: #c77603;
+}
+
+.save-editor-note.is-error {
+  color: #ff9f9f;
+}
+
+.save-editor-note.is-success {
+  color: #c77603;
+}
+
+@media (max-width: 900px) {
+  .save-editor-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .save-editor-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .save-editor-slot-top {
+    left: 53%;
+  }
+
+  .save-editor-slot-back {
+    left: 23%;
+  }
+
+  .save-editor-slot-bottom {
+    left: 53%;
+  }
+
+  .save-editor-slot-captain {
+    left: 71%;
+  }
+}
+
+@media (max-width: 560px) {
+  .save-editor-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .save-editor-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .save-editor-formation {
+    min-height: clamp(200px, 62vw, 260px);
+  }
+
+  .save-editor-slot-top {
+    left: 51%;
+    top: 24%;
+  }
+
+  .save-editor-slot-back {
+    left: 21%;
+    top: 50%;
+  }
+
+  .save-editor-picker-grid.is-captain-layout {
+    grid-template-columns: repeat(3, var(--picker-box-size));
+  }
+
+  .save-editor-slot-bottom {
+    left: 51%;
+    top: 76%;
+  }
+
+  .save-editor-slot-captain {
+    left: 69%;
+    top: 50%;
+  }
+}
+
+.tab-placeholder-page {
+  min-height: clamp(320px, 56vh, 640px);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 1.2rem;
+  padding-top: clamp(1.4rem, 4.2vw, 2.6rem);
+  padding-bottom: clamp(1.4rem, 4.2vw, 2.6rem);
+}
+
+.tab-placeholder-status {
+  margin: 0;
+  color: #fff;
+  font-family: "ITC Grizzly", sans-serif;
+  font-size: clamp(1.45rem, 4.2vw, 2.45rem);
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: -2px 2px 0 #000;
+}
+
+.tab-placeholder-switches {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.tab-placeholder-switch {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 34px;
+  padding: 0.32rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.22);
+  color: #fff;
+  font-family: "Trade Gothic Next BdCn", sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.tab-placeholder-switch.is-active {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 @media (min-width: 601px) and (max-width: 1024px) {
@@ -1118,12 +1650,12 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
 
   .landing-club-text-block {
     margin-top: clamp(0.45rem, 4vw, 1.2rem);
-    padding-left: clamp(0.55rem, 2.5vw, 1.5rem);
+    padding-left: clamp(3.9rem, 10.5vw, 6.2rem);
     transform: translate(clamp(-78px, -12.5vw, -50px), clamp(-5px, -0.8vw, -3px));
   }
 
   #landing-season-countdown {
-    margin-top: clamp(0.62rem, 2.6vw, 1rem);
+    margin: clamp(0.62rem, 2.6vw, 1rem) 0 0 clamp(1.1rem, 3.9vw, 2.2rem);
   }
 
   .competitive-rules-page {

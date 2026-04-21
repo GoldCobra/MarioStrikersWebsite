@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en-US">
 <head>
   <meta charset="utf-8">
@@ -6,7 +6,7 @@
   <link rel="preload" href="../assets/fonts/itc-grizzly.woff" as="font" type="font/woff" crossorigin>
   <link rel="preload" href="../assets/fonts/Trade%20Gothic%20Next%20LT%20Pro%20BdCn.woff" as="font" type="font/woff" crossorigin>
   <title>MSC Setup Guide | Mario Strikers Community</title>
-  <link rel="stylesheet" href="../css/global.css?v=20260418-runtime-cleanup-v8">
+  <link rel="stylesheet" href="../css/global.css?v=20260420-msc-setup-guide-v1">
 </head>
 <body data-page="msc-setup-guide">
   <div id="1">
@@ -14,13 +14,597 @@
     <div id="global-subnav"></div>
   </div>
 
-  <main class="page-content"></main>
+  <main class="page-content competitive-rules-page setup-guide-page">
+    <section id="msc-setup-guide-root" aria-label="MSC setup guide">
+    <header class="competitive-rules-header" aria-label="MSC setup guide header">
+    <h1 class="cr-page-title">The Ultimate Guide for MARIO STRIKERS CHARGED Online (Wii &amp; Dolphin)</h1>
+    <p class="cr-page-revised">Last revised August 2023</p>
+    </header>
+    <article class="competitive-rules setup-guide-article" aria-label="MSC setup guide">
+    <section class="cr-section setup-guide-section">
+    <h2>TABLE OF CONTENTS</h2>
+    <ul class="cr-list">
+    <li><a class="cr-link" href="#msc-setup-section-1">1. Terms and Definitions</a></li>
+    <li><a class="cr-link" href="#msc-setup-section-2">2. A: Wii/Wii U Setup</a></li>
+    <li><a class="cr-link" href="#msc-setup-section-3">3. B: Dolphin Setup</a></li>
+    <li><a class="cr-link" href="#msc-setup-section-4">4. In-Game Optimization and Competitive Stability</a></li>
+    <li><a class="cr-link" href="#msc-setup-section-5">5. Troubleshooting and References</a></li>
+    </ul>
+    </section>
+    <section class="cr-section setup-guide-section">
+    <h2 id="msc-setup-section-1">1. Terms and Definitions</h2>
+    <p>NINTENDO WFC: Nintendo's original online service for Nintendo Wii and DS games. It was terminated in 2014.</p>
+    <p>WIIMMFI: A community-run online service that replaces Nintendo WFC for supported games.</p>
+    <p>DOLPHIN: An emulator for Nintendo GameCube and Wii games that can run on PC.</p>
+    <p>NETPLAY: A Dolphin feature that lets players host or join an online room using a shared code.</p>
+    <p>HOMEBREW: Unofficial software/tools for Wii or Wii U, commonly used to run apps and game loaders (for example USB Loader GX).</p>
+    <p>WI-FI (WLAN): A wireless local network connection used by devices to connect to a router without a cable.</p>
+    <p>ROUTER: The network device in your home that connects your devices to the internet (often your Wi-Fi box).</p>
+    <p>ETHERNET: A wired network connection standard (LAN). In this guide, it means using a cable instead of Wi-Fi for a more stable connection.</p>
+    <p>MOBILE ROUTER OR HOTSPOT: A phone or mobile device feature that shares mobile data as a Wi-Fi network.</p>
+    <p>SSID: The name of a Wi-Fi network.</p>
+    <p>DNS: Domain Name System. In this context, custom DNS settings can redirect game network requests from Nintendo WFC endpoints to Wiimmfi endpoints.</p>
+    <p>REGION-LOCK: A restriction where games/services only connect between matching regions. For MARIO STRIKERS CHARGED online, players must use the same game region.</p>
+    <p>PORT: A network endpoint used by apps/services to send and receive traffic. If required ports are blocked, online services may fail to connect.</p>
+    <p>FIREWALL: A security system that filters incoming and outgoing network traffic based on rules. You may need to allow Dolphin through your firewall for online play.</p>
+    <p class="cr-note">Choose your path: use Section 2 for Wii setup or Section 3 for Dolphin setup.</p>
+    </section>
+    <section class="cr-section setup-guide-section">
+    <h2 id="msc-setup-section-2">2. A: Wii/Wii U Setup</h2>
+    <p>Requirements:</p>
+    <p>Wii or Wii U with vWii mode (eShop game version is not supported)</p>
+    <p>A copy of MARIO STRIKERS CHARGED</p>
+    <p>Homebrew (loads the game through USB/SD card) or the DNS method (loads the game directly from the disc for a non-modded console)</p>
+    <h3>2.1 Homebrew Method</h3>
+    <p>The Homebrew method lets you mod your Wii or Wii U console. This allows you to launch MARIO STRIKERS CHARGED, cross-play with Dolphin users, and play without a physical copy through a USB loader.</p>
+    <p>Follow these links if you cannot use a valid copy or if you need cross-play with the PAL version of the game (competitions use the PAL version, and Homebrew allows region loading on NTSC consoles):</p>
+    <p>Homebrew Wii: <a class="cr-link" href="https://wii.guide/" target="_blank" rel="noopener noreferrer">Wii Guide</a></p>
+    <p>Homebrew Wii U: <a class="cr-link" href="https://wiiu.hacks.guide/#/introduction" target="_blank" rel="noopener noreferrer">Wii U Hacks Guide</a></p>
+    <h3>2.2 DNS Method (Wii Only)</h3>
+    <p>This DNS method is supported on Nintendo Wii only and is not supported on Wii U.</p>
+    <p>To use Wiimmfi (required for non-modded Wii online play in MARIO STRIKERS CHARGED), configure your Wii internet DNS settings as follows:</p>
+    <ol>
+    <li>Go into your Wii Options</li>
+    <li>Wii Settings &gt; Page 2</li>
+    <li>Internet</li>
+    <li>Connection Settings</li>
+    <li>Select your active Connection from the list</li>
+    <li>Change settings</li>
+    <li>Click the right arrow button until you reach the screen where you can change DNS settings</li>
+    <li>Select No and then Advanced Settings</li>
+    <li>Set Primary DNS to 95.217.77.181 and Secondary DNS to 8.8.8.8</li>
+    <li>Confirm and start a Connection Test</li>
+    <li>If the connection test fails, make sure your Wii has Internet access and double-check your settings (see Section 5.1).</li>
+    </ol>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image57.png" alt="MSC setup guide image image57.png"></figure>
+    <h3>2.3 Connection Quality for Wii</h3>
+    <h4>2.3.1 LAN Adapter</h4>
+    <p>To ensure the best possible connection speed on Wii, it is highly recommended to use a <a class="cr-link" href="https://www.amazon.com/UGREEN-Ethernet-Compatible-Nintendo-Chromebook/dp/B08DRKYKMM" target="_blank" rel="noopener noreferrer">Wii LAN Adapter</a>, which allows a wired connection from your Wii to your router.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image8.png" alt="MSC setup guide image image8.png" style="width:50%;max-width:50%;"></figure>
+    <h4>2.3.2 Latency and Speed</h4>
+    <p>For online play, stability matters more than raw internet speed.</p>
+    <p class="setup-guide-warning"><img class="setup-guide-warning-icon" src="../assets/text-boxes/ex-mark.png" alt="Warning">Download/upload speed is not the main factor for match quality. Ping is the most important factor.</p>
+    <ul class="cr-list">
+    <li>What is ping?</li>
+    </ul>
+    <p>Ping is the delay between your input and the game response. Lower ping means smoother control.</p>
+    <ul class="cr-list">
+    <li>What ping is good?</li>
+    </ul>
+    <p>40-60 ms or lower is a good competitive target. Under 30 ms is ideal. Above 100 ms causes clear delay, and above 170 ms some matches may fail to connect.</p>
+    <p>Example: 10 ms usually feels much smoother than 100 ms.</p>
+    <ul class="cr-list">
+    <li>What is lag?</li>
+    </ul>
+    <p>Lag means delayed or unstable gameplay. Inputs can feel late, the game may freeze briefly, then catch up, or disconnect.</p>
+    <h4>2.3.3 Ping Optimization</h4>
+    <ol>
+    <li>Check your ping before playing. Wii ping is often higher than PC ping.<br>
+    <a class="cr-link" href="http://www.speedtest.net" target="_blank" rel="noopener noreferrer">OOKLA SPEEDTEST</a><br>
+    <a class="cr-link" href="http://internethealthtest.org" target="_blank" rel="noopener noreferrer">INTERNET HEALTH TEST</a><br>
+    <a class="cr-link" href="https://speedof.me" target="_blank" rel="noopener noreferrer">SPEEDOF.ME</a></li>
+    <li>If you use Wi-Fi, stay close to your router.</li>
+    <li>Use a wired connection when possible (Wii LAN Adapter).</li>
+    <li>A powerline adapter can improve connection stability.</li>
+    <li>During matches, avoid heavy network use (YouTube, Netflix, Twitch, large downloads).</li>
+    <li>Disconnect unused devices from your network when possible.</li>
+    <li>If available, use fiber or a higher-quality internet plan.</li>
+    <li>If issues continue, check for outages with your internet provider.</li>
+    <li>Advanced users: prioritize your Wii or Wii U in router settings (QoS/device priority).</li>
+    </ol>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image26.png" alt="MSC setup guide image image26.png"></figure>
+    </section>
+    <section class="cr-section setup-guide-section">
+    <h2 id="msc-setup-section-3">3. B: Dolphin Setup</h2>
+    <p>This section explains how to get started with Dolphin Emulator.</p>
+    <h3>3.1 Requirements and Specs</h3>
+    <p><a class="cr-link" href="https://dolphin-emu.org/download/?ref=btn" target="_blank" rel="noopener noreferrer">Dolphin version 2603<span class="cr-link-preserve-case">a</span></a> or newer</p>
+    <p>Requirements:</p>
+    <ul>
+    <li>MARIO STRIKERS CHARGED (R4QP01) game file (ISO, WBFS, RVZ, ...). NKit should be avoided whenever possible.</li>
+    <li>A NAND backup for Dolphin Wiimmfi to enable cross-play with Wii players (see Section 3.4.1).</li>
+    <li>Any controller or Wii Remote with MotionPlus (emulates an IR pointer through motion sensors).</li>
+    <li>A computer/laptop with Bluetooth or a Bluetooth USB dongle (for wireless controllers).</li>
+    <li><a class="cr-link" href="https://drive.google.com/file/d/10WiwobQaAyv__KCLKtbW3CYtlMDa4Qzq/view?usp=sharing" target="_blank" rel="noopener noreferrer">Wii Remote MotionPlus Profile for Dolphin</a> or <a class="cr-link" href="https://drive.google.com/file/d/10X8IYytPqs2lUQX5AcRalLRIhdq5pbmM/view?usp=sharing" target="_blank" rel="noopener noreferrer">Customizable Profile with Mouse Used as IR Pointer</a>.</li>
+    <li><strong>Recommended PC Specifications</strong><br>OS: Windows 11<br>CPU: Intel Core i5 or better<br>GPU: Intel HD 520 / NVIDIA GTX 950 / AMD Radeon RX 470 or better<br>Memory: 8GB<br><span class="setup-guide-note">*Windows 10 is no longer recommended because Microsoft support has ended.</span></li>
+    </ul>
+    <h3>3.2 Graphics and Core Emulator Settings</h3>
+    <ol>
+    <li>Go to Options &gt; Graphics Settings.</li>
+    </ol>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image51.png" alt="MSC setup guide image image51.png"></figure>
+    <ol start="2">
+    <li>This opens the graphics configuration window.</li>
+    </ol>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image48.png" alt="MSC setup guide image image48.png"></figure>
+    <p>Under the General tab, select Direct3D 12 if you have a relatively recent computer (2018+).</p>
+    <p>On low-end computers, you may need to use Direct3D 11 if Direct3D 12 stutters.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image64.png" alt="MSC setup guide image image64.png"></figure>
+    <ol start="3">
+    <li>The adapter below Backend must be your gaming graphics card.</li>
+    </ol>
+    <p class="setup-guide-warning"><img class="setup-guide-warning-icon" src="../assets/text-boxes/ex-mark.png" alt="Warning">If you're using a laptop on Windows 10, you may need to manually select your high-performance graphics card instead of Intel HD Graphics.</p>
+    <ol start="4">
+    <li>Click the Enhancements tab.</li>
+    </ol>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image60.png" alt="MSC setup guide image image60.png"></figure>
+    <p>There you can select the resolution in which MARIO STRIKERS CHARGED will be emulated.</p>
+    <p>The higher the internal resolution is, the more it demands a powerful computer to run smoothly.</p>
+    <p>In general, 2x Native (1280x1056) for 720p should run well on any modern, average computer. High-end computers should be able to handle 3x Native (1920x1584) for 1080p. But if your device is low end, you might be stuck with the default: Native (640x528).</p>
+    <p>Anti-aliasing:</p>
+    <p>For Wii games, only high-end computers can reliably handle anti-aliasing. Unless you are very particular about rendering quality, you likely will not notice a major difference.</p>
+    <p>Full Screen:</p>
+    <p>By default, Dolphin loads games in a window. Press Alt+Enter to enter full screen. Press Alt+Enter again to go back to window mode. You can also click on Full Screen to enter full screen.</p>
+    <ol start="5">
+    <li>Go to the &#x27;Hacks&#x27; tab and tick &#x27;GPU Texture Decoding&#x27; if you have a good graphics card.</li>
+    </ol>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image39.png" alt="MSC setup guide image image39.png"></figure>
+    <p><a class="cr-link" href="https://youtu.be/KzvMOgCw6p4?t=140" target="_blank" rel="noopener noreferrer">This 'SUPER SMASH BROS. MELEE' tutorial for optimizing Dolphin graphics card settings also applies to MARIO STRIKERS CHARGED</a> if you still have issues running the game.</p>
+    <h4>3.2.1 Core System Settings</h4>
+    <p>To ensure you have the smoothest Dolphin experience on MARIO STRIKERS CHARGED, you need to do the following.</p>
+    <p>Go to Settings and, under the General tab, make sure &#x27;Enable Dual Core&#x27; is ticked.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image3.png" alt="MSC setup guide image image3.png"></figure>
+    <p>Go to the Paths tab and select your games folder and Wii NAND root folder (if you have one).</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image61.png" alt="MSC setup guide image image61.png"></figure>
+    <p>Then, under the Wii tab, tick &#x27;Use PAL 60 Mode&#x27; so the game can run smoothly at 60 FPS.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image41.png" alt="MSC setup guide image image41.png"></figure>
+<h3>3.3 Controller Setup (Core)</h3>
+    <ol>
+    <li>If you want to use a Wii Remote + Nunchuk on Dolphin, first download the 'Wii Remote MotionPlus' profile (see requirements above).</li>
+    </ol>
+    <p>Drag the .ini file to the folder below.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image13.png" alt="MSC setup guide image image13.png"></figure>
+    <ol start="2">
+    <li>Go to Options &gt; Controller settings.</li>
+    </ol>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image32.png" alt="MSC setup guide image image32.png"></figure>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image54.png" alt="MSC setup guide image image54.png"></figure>
+    <p>In the controller settings window, configure Dolphin exactly as shown above, with all four ports set to &quot;Emulated Wii Remote.&quot;</p>
+    <ol start="3">
+    <li>For Wii Remote users, activate Bluetooth first. Tick the &#x27;Continuous scanning&#x27; and &#x27;Connect Wii remotes for Emulated Controllers&#x27; boxes. Then press the red button on the back of your Wii Remote to sync with Dolphin, and configure Wii Remote 1 by loading the Wii Remote profile.</li>
+    </ol>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image40.png" alt="MSC setup guide image image40.png"></figure>
+    <p>If you encounter problems with your Wii Remote, here is a <a class="cr-link" href="https://www.youtube.com/watch?v=iF6mQv3cUos" target="_blank" rel="noopener noreferrer">YouTube tutorial</a>.</p>
+    <ol start="4">
+    <li>For non-Wii Remote users, map your controls using the information below.</li>
+    </ol>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image22.jpg" alt="MSC setup guide image image22.jpg"></figure>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image29.png" alt="MSC setup guide image image29.png"></figure>
+    <p class="setup-guide-warning"><img class="setup-guide-warning-icon" src="../assets/text-boxes/ex-mark.png" alt="Warning">The IR Pointer is the only way to move the cursor/hand in in-game menus.</p>
+    <p>Use the Customizable Profile that uses Mouse as IR Pointer (see requirements).</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image23.png" alt="MSC setup guide image image23.png"></figure>
+    <ol start="5">
+    <li>For non-Wii Remote controllers, make sure Extension is set to &#x27;Nunchuk&#x27; under the &#x27;General and Options&#x27; tab.</li>
+    </ol>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image21.png" alt="MSC setup guide image image21.png"></figure>
+    <p>Configure the Motion Simulation tab as follows:</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image45.png" alt="MSC setup guide image image45.png"></figure>
+    <p>Also make sure your virtual Nunchuk stick is calibrated under the &#x27;Extension&#x27; tab.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image52.png" alt="MSC setup guide image image52.png"></figure>
+    
+    <h3>3.4 Online Setup: Wiimmfi &amp; Netplay</h3>
+    <p>Wiimmfi is currently the recommended way to play MARIO STRIKERS CHARGED online.</p>
+    <h4>3.4.1 Use Wiimmfi with Dolphin</h4>
+    <p>To use Wiimmfi servers with Dolphin, you need a NAND backup from a Wii. This gives you a Mii account with a friend code on Dolphin, which enables cross-play with Wii friend codes.</p>
+    <p>This <a class="cr-link" href="https://wiki.dolphin-emu.org/index.php?title=NAND_Usage_Guide" target="_blank" rel="noopener noreferrer">link</a> explains how to dump a NAND with BootMii. You can also import the community NAND.</p>
+    <p><a class="cr-link" href="https://www.youtube.com/watch?v=6JSFCsTg27g" target="_blank" rel="noopener noreferrer">How to Import the Mario Strikers Community NAND</a></p>
+    <p>At this point, you should have nand.bin + key.bin files on your PC and have selected your NAND path as explained previously (Go to Settings &gt; Path &gt; Wii NAND Root folder).</p>
+    <p>Now in Dolphin, you should see Tools &gt; Load Wii System Menu.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image27.png" alt="MSC setup guide image image27.png"></figure>
+    <p>Click it to boot the Wii Menu. From there, go to the Mii Channel and create a new Mii so Wiimmfi can register a new profile.</p>
+    <p>PS: If needed, you can follow this tutorial to add a Mii in Dolphin.</p>
+    <p><a class="cr-link" href="https://www.youtube.com/watch?v=n1Cg6Sjvg08" target="_blank" rel="noopener noreferrer">How To Add Your Mii To Dolphin</a></p>
+    <p>Once you're done, stop the emulation and then load the Wii Menu again as before.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image15.png" alt="MSC setup guide image image15.png"></figure>
+    <p>Go to Wii Options &gt; Wii Settings &gt; Internet &gt; Connection Settings and create a wired connection (it does not matter if your PC/laptop is on Wi-Fi).</p>
+    <p>The connection test should be successful. Refuse the update if prompted and select to use this connection.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image43.png" alt="MSC setup guide image image43.png"></figure>
+    <p>You can stop the emulation again and launch MARIO STRIKERS CHARGED directly from your Dolphin game list. You can now use Wiimmfi servers on Dolphin!</p>
+    <p class="setup-guide-warning"><img class="setup-guide-warning-icon" src="../assets/text-boxes/ex-mark.png" alt="Warning">If you encounter error code 20100, your game file is likely unpatched or needs the latest <a class="cr-link" href="https://wiimmfi.de/patcher/iso" target="_blank" rel="noopener noreferrer">Wiimmfi patch</a> (see Section 5.1).</p>
+    <h4>3.4.2 Use Netplay with Dolphin</h4>
+    <p>If you don't have a NAND backup, or your Wii console has been banned, you can use Netplay to play MARIO STRIKERS CHARGED multiplayer.</p>
+    <p>With Netplay, you can play with up to four players and run 2v2 matches.</p>
+    <p class="setup-guide-warning"><img class="setup-guide-warning-icon" src="../assets/text-boxes/ex-mark.png" alt="Warning">Every player needs the same Dolphin version to connect (see Section 5.1).</p>
+    <p>For Netplay to work, click Tools &gt; Start Netplay.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image36.png" alt="MSC setup guide image image36.png"></figure>
+    <p>A small window opens.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image33.png" alt="MSC setup guide image image33.png"></figure>
+    <p>The 'Connect' tab is for joining a host via a Code.</p>
+    <p>The 'Host' tab is for hosting a room.</p>
+    <p>To create a room, set the connection type to 'Traversal server,' then select a game to host.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image4.png" alt="MSC setup guide image image4.png"></figure>
+    <p>Once you click 'Host,' a new window appears for your room. I highly recommend going to 'Data,' ticking 'Sync Saves' and 'Load Saves,' and unticking the rest as shown below:</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image6.png" alt="MSC setup guide image image6.png"></figure>
+    <p>That's the only way to not get your game save overwritten every time you join someone on Netplay.</p>
+    <p>Click Copy. This copies the Room ID code used to join the room.</p>
+    <p>Now click 'Assign Controller Ports' or your controls will not work in-game. Click that button, remove every GC port, and assign Wii Remote 1 and 2 to the correct players (you can add Wii Remote 3 and 4 if there are 3-4 players in the room).</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image50.png" alt="MSC setup guide image image50.png"></figure>
+    <p>Now set the buffer. When players join, adjust the buffer based on the highest ping in the room.</p>
+    <p>The SUPER SMASH BROS. MELEE community suggested the following rule of thumb for pad buffer:</p>
+    <p>Use 1 buffer per 8 ms, rounded up to the nearest whole number (1 Pad Buffer = 1/4 frame of lag).</p>
+    <p>Example: highest ping in room -&gt; 58ms/8 = 7.25 = 8 buffer.</p>
+    <p>I personally suggest dividing ping by 10 and adding 2 or 3 buffer to cover potential lag spikes. You can also remove 1 or 2 buffer if the game feels smooth.</p>
+    <p>You can now click Start, and the game should work correctly.</p>
+    <p class="setup-guide-warning"><img class="setup-guide-warning-icon" src="../assets/text-boxes/ex-mark.png" alt="Warning">Make sure every player has all four Wii Remote slots in controller settings set to 'Emulated Wii Remote,' or your cursor may not move in-game (see Section 5.1).</p>
+    
+<h3>3.5 Optional: Joy-Con / Switch Pro Flow</h3>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image72.jpg" alt="MSC setup guide image image72.jpg"></figure>
+    <p>This section explains how to connect Joy-Cons or Switch Pro Controllers using the Dolphin presets I created. If you're interested, you can also follow <a class="cr-link" href="https://www.youtube.com/watch?v=giS9ERN9ctI" target="_blank" rel="noopener noreferrer">Steam Link</a> after this tutorial to play MARIO STRIKERS CHARGED on a phone/tablet for a handheld-style experience.</p>
+    <p>Additional Requirements:</p>
+    <p><a class="cr-link" href="https://drive.google.com/open?id=1J0GtpVCSTADb_YtVzdeiJymaIu2Tpik7&amp;authuser=spikermkds%40gmail.com&amp;usp=drive_fsw/view?usp=sharing" target="_blank" rel="noopener noreferrer">Joy-Con Presets for Dolphin</a> or</p>
+    <p><a class="cr-link" href="https://drive.google.com/drive/folders/1L2eR_IV45OmGsnuEFrBKis3DTbw4CIT8?usp=drive_link" target="_blank" rel="noopener noreferrer">Switch Pro Controller Profile for Dolphin</a></p>
+    <p><a class="cr-link" href="https://github.com/Davidobot/BetterJoy" target="_blank" rel="noopener noreferrer">BetterJoy 7.1+ for Joy-Cons or Switch Pro Controller support</a></p>
+    <p>Joy-Con or Switch Pro Controller</p>
+    <p>Nintendo Switch (to calibrate your Joy-Cons)</p>
+    <h4>3.5.1 Connect Joy-Cons / Switch Pro Controller</h4>
+    <p>To connect your Joy-Cons, download and install BetterJoy. This software makes Joy-Con/Switch Pro inputs appear as PS4/Xbox controller inputs, and it also recognizes Joy-Con/Switch Pro motion and sensor data.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image63.png" alt="MSC setup guide image image63.png"></figure>
+    <p>After downloading BetterJoy, extract the zip file and go to the Drivers folder.</p>
+    <p>Install ViGEmBusSetup_x64.msi, then open the HIDGuardian folder and run Install.bat.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image49.png" alt="MSC setup guide image image49.png"></figure>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image7.png" alt="MSC setup guide image image7.png"></figure>
+    <p>Once that is done, return to the root of the BetterJoy folder and launch BetterJoyForCemu.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image2.png" alt="MSC setup guide image image2.png"></figure>
+    <p>In the BetterJoy window, click the small arrow on the right side to open the Config panel used by your Joy-Cons or Switch Pro Controller.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image14.png" alt="MSC setup guide image image14.png"></figure>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image34.png" alt="MSC setup guide image image34.png"></figure>
+    <p>Check the values and make sure BetterJoy is configured exactly as shown below (otherwise it won't work or you may get input delay).</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image25.png" alt="MSC setup guide image image25.png"></figure>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image1.png" alt="MSC setup guide image image1.png"></figure>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image30.png" alt="MSC setup guide image image30.png"></figure>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image58.png" alt="MSC setup guide image image58.png"></figure>
+    <p>These are the only values you need to set exactly as shown.</p>
+    <p>After pre-configuration, click Apply (otherwise your changes will not be saved).</p>
+    <p>You can now go to your Windows Bluetooth settings and connect your Joy-Con or Switch Pro Controller via Bluetooth. To enable pairing, you need to hold the SYNC Button (or the button at the back of the Switch Pro Controller).</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image11.png" alt="MSC setup guide image image11.png"></figure>
+    <p>When it&#x27;s configured correctly, you should see something like this:</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image9.png" alt="MSC setup guide image image9.png"></figure>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image46.png" alt="MSC setup guide image image46.png"></figure>
+    <p>Return to BetterJoy and you should see this, or this:</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image35.png" alt="MSC setup guide image image35.png"></figure>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image14.png" alt="MSC setup guide image image14.png"></figure>
+    <p>Two important things to know for Joy-Cons:</p>
+    <p>1. If you want to play alone with both Joy-Cons, they should be set upward like in the previous image.</p>
+    <p>2. If you want to play locally with someone or use a single Joy-Con, set it as shown below (clicking it changes its position).</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image24.png" alt="MSC setup guide image image24.png"></figure>
+    <p>For that scenario, tick the &quot;Do not rejoin Joy-Cons&quot; box in the Config panel.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image37.png" alt="MSC setup guide image image37.png"></figure>
+    <ol>
+    <li>Now that you're successfully connected, click Apply and minimize the window (do not close it, or Dolphin will not recognize the Joy-Con).</li>
+    </ol>
+    <h4>3.5.2 Configure Controls in Dolphin</h4>
+    <p>Open Dolphin and go to Controller Settings &gt; Alternate Input Sources.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image62.png" alt="MSC setup guide image image62.png"></figure>
+    <p>Click Add and enter the same server port used in BetterJoy (26761).</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image56.png" alt="MSC setup guide image image56.png"></figure>
+    <p>Open Wii Remote 1. Among the devices, you will see &#x27;DSUClient&#x27;.</p>
+    <p>DSUClient/0/ = Joy-Con 1</p>
+    <p>DSUClient/1/ = Joy-Con 2</p>
+    <p>You can now customize your controls using the information in Chapter 3.3, but I highly recommend using the Dolphin presets provided.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image20.png" alt="MSC setup guide image image20.png"></figure>
+    <p>The 1st folder contains presets for local multiplayer.</p>
+    <p>The 2nd folder contains presets for solo play with both Joy-Cons.</p>
+    <p>The 3rd folder contains presets for single Joy-Con play.</p>
+    <p>The next chapter explains these presets in detail.</p>
+    <h4>3.5.3 Joy-Con Preset Guide</h4>
+    <p>Move the Joy-Con preset .ini files you want to use for Dolphin to the following path:</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image13.png" alt="MSC setup guide image image13.png"></figure>
+    <p>Dual Joy-Con presets:</p>
+    <p>JoyConsDual MSC Switch.ini</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image71.png" alt="MSC setup guide image image71.png"></figure>
+    <p>JoyConsDual MSC Switch inverted.ini (changes are in orange)</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image68.png" alt="MSC setup guide image image68.png"></figure>
+    <p>Single Joy-Con Left (Blue/Minus) presets:</p>
+    <p>Single Joycon Left(-).ini</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image67.png" alt="MSC setup guide image image67.png"></figure>
+    <p>Single Joycon Left(-) Inverted.ini (changes are in orange)</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image66.png" alt="MSC setup guide image image66.png"></figure>
+    <p>Single Joy-Con Right (Red/Plus) presets:</p>
+    <p>Single Joycon Right(+).ini</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image70.png" alt="MSC setup guide image image70.png"></figure>
+    <p>Single Joycon Right(+)Inverted.ini (changes are in orange)</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image69.png" alt="MSC setup guide image image69.png"></figure>
+    
+</section>
+    <section class="cr-section setup-guide-section">
+    <h2 id="msc-setup-section-4">4. In-Game Optimization and Competitive Stability</h2>
+    <p>This guide helps both newcomers and experienced players improve their MARIO STRIKERS CHARGED gameplay experience.</p>
+    <p>These optimizations can be used for both casual and competitive play and are highly recommended.</p>
+    <h3>4.1 Camera and Sidekick Presets</h3>
+    <h4>4.1.1 Camera Settings</h4>
+    <p>In both Mario Strikers games, it is recommended to zoom out as much as possible for the best full-field view.</p>
+    <p>To do this, follow these steps.</p>
+    <ol>
+    <li>In the MARIO STRIKERS CHARGED menu, go to OPTIONS (wrench icon).</li>
+    <li>VISUAL OPTIONS</li>
+    <li>Select Camera Type STATIC and Level 1.</li>
+    <li>Accept</li>
+    </ol>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image65.png" alt="MSC setup guide image image65.png"></figure>
+    <h4>4.1.2 Preset Sidekicks for Online Play</h4>
+    <p>Is there anything worse than playing online and having to choose your captain's sidekicks every time, or accidentally loading a predefined team?</p>
+    <p>Here is the solution:</p>
+    <p>Select the sidekicks of your captains offline, start a match against the CPU and leave the match afterwards.</p>
+    <p>Log in via Wiimmfi and this information should remain saved in your Mii profile.</p>
+    <h3>4.2 Console Display and Output Settings</h3>
+    <h4>4.2.1 Widescreen Settings</h4>
+    <p>Always set your Wii's aspect ratio to 16:9, which works best with the camera settings configured above. To do this, follow the steps below:</p>
+    <ol>
+    <li>Go into your Wii Options</li>
+    <li>Wii Settings</li>
+    <li>Screen</li>
+    <li>Widescreen Settings</li>
+    <li>Select Widescreen (16:9) and confirm.</li>
+    </ol>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image28.png" alt="MSC setup guide image image28.png"></figure>
+    <h4>4.2.2 TV Type</h4>
+    <p>To improve the visual quality and FPS of Wii games, please follow the steps below:</p>
+    <ol>
+    <li>Go into your Wii Options</li>
+    <li>Wii Settings</li>
+    <li>TV Type</li>
+    <li>Select EDTV / HDTV (480p) if available, otherwise select 60Hz (480i)</li>
+    </ol>
+    <p>Please note that EDTV / HDTV (480p) will only be available if you have a Component cable connected to your Wii.</p>
+    <figure class="setup-guide-media"><img loading="lazy" decoding="async" src="../assets/setup-guides/msc/image12.png" alt="MSC setup guide image image12.png"></figure>
+    <ul class="cr-list">
+    <li>Do not forget to set your TV/Monitor to Game mode in order to reduce input lag.</li>
+    </ul>
+    <h3>4.3 QOL Gecko Codes</h3>
+    <h4>4.3.1 Optional Convenience Codes</h4>
+    <p>Additional quality-of-life and fun codes</p>
+    <p>Unlock Everything (Characters, Stadiums and Cheats) (PAL)</p>
+    <pre class="setup-guide-code">04c5f2f0 00000001
+04c5f2e4 00000001
+04c5f300 00000001
+04c5f2fc 00000000
+04c5f304 00000000
+04c5f2dc 00000000
+04c5f2d8 00000000
+C210F71C 00000002
+3800FFFF B00386AC
+60000000 00000000
+C210F63C 00000002
+3860FFFF 907F0068
+60000000 00000000</pre>
+    <p>Fix NK-Bug permanently (PAL)</p>
+    <pre class="setup-guide-code">48000000 806DF7A0
+DE000000 80008180
+14000178 01010012
+E0000000 80008000</pre>
+    <p>All stadiums are fast-paced (Bowser Stadium speed on slow fields)</p>
+    <pre class="setup-guide-code">C20081EC 0000000D
+D01F000C 3D60909B
+616B6560 7C1F5800
+40820010 3D803F26
+618C6666 919F000C
+396BFFF0 7C1F5800
+4082000C 3D800000
+919F000C 396BFFF0
+7C1F5800 40820010
+3D803E4C 618CCCCD
+919F000C 396BFFF0
+7C1F5800 40820010
+3D803F19 618C999A
+919F000C 00000000</pre>
+    <p>Blue Peach outfit against red opponents</p>
+    <pre class="setup-guide-code">04504ed0 000000f0
+C21C51F0 00000007
+93A30008 3C608050
+38634D00 2C1D0003
+4082000C 38800001
+48000008 38800005
+90830000 9083005C
+9083033C 908303F4
+60000000 00000000
+C21A34CC 00000003
+80BE0000 2C050005
+40A20008 38600000
+2C030000 00000000
+C208EEB4 00000003
+80BD0000 2C050005
+40A20008 38600000
+2C030000 00000000
+C2275070 00000003
+80BD0000 2C050005
+40A20008 38600000
+2C030000 00000000
+C22784A8 00000003
+80BC0000 2C050005
+40A20008 38600000
+2C030000 00000000</pre>
+    <p>Show white shot counter in the results screen</p>
+    <pre class="setup-guide-code">C0000000 00000008
+3D8080C8 3D4080C6
+A12CE830 A16CE832
+7D6B4A14 B16A644E
+A16CE834 B16A6450
+A12CE7DE A16CE7E0
+7D6B4A14 B16A64C0
+A16CE7E2 B16A64C2
+4E800020 00000000</pre>
+    <p>*Instead of &quot;Mega Strike goals / Mega Strike shots,&quot; it shows &quot;White and Yellow shots / Red and Orange shots.&quot;</p>
+    <p>Control Kritter</p>
+    <pre class="setup-guide-code">48000000 8056a760
+de000000 00007fff
+020001b4 00000000
+e0000000 80008000
+28585ee2 00001000
+280001b4 00ff0000
+000001b4 00000001
+e0000000 00000000
+28585ee2 00000100
+280001b4 00ff0100
+000001b4 00000000
+e0000000 80008000
+285860d2 00001000
+280001b4 00ff0000
+000001b4 00000002
+e0000000 00000000
+285860d2 00000100
+280001b4 00ff0200
+000001b4 00000000
+e0000000 80008000
+285862c2 00001000
+280001b4 00ff0000
+000001b4 00000003
+e0000000 00000000
+285862c2 00000100
+280001b4 00ff0300
+000001b4 00000000
+e0000000 80008000
+285864b2 00001000
+280001b4 00ff0000
+000001b4 00000004
+e0000000 00000000
+285864b2 00000100
+280001b4 00ff0400
+000001b4 00000000
+e0000000 80008000
+C0000000 00000015
+3D808000 88AC01B4
+2C050001 41800094
+3D808057 814CA760
+7C0A6040 41800084
+3D208058 2C050001
+40820008 A1295EE2
+2C050002 40820008
+A12960D2 2C050003
+40820008 A12962C2
+2C050004 40820008
+A12964B2 C04A067C
+3D603E00 916A067C
+C06A067C 71250008
+41820008 EC42182A
+71250004 41820008
+EC421828 D04A067C
+C04A0678 71250002
+41820008 EC42182A
+71250001 41820008
+EC421828 D04A0678
+4E800020 00000000
+28585ee2 00000010
+280001b4 ff000000
+000001b5 00000001
+e0000000 00000000
+28585ee2 00000100
+280001b4 ff000001
+000001b5 00000000
+e0000000 80008000
+285860d2 00000010
+280001b4 ff000000
+000001b5 00000002
+e0000000 00000000
+285860d2 00000100
+280001b4 ff000002
+000001b5 00000000
+e0000000 80008000
+285862c2 00000010
+280001b4 ff000000
+000001b5 00000003
+e0000000 00000000
+285862c2 00000100
+280001b4 ff000003
+000001b5 00000000
+e0000000 80008000
+285864b2 00000010
+280001b4 ff000000
+000001b5 00000004
+e0000000 00000000
+285864b2 00000100
+280001b4 ff000004
+000001b5 00000000
+e0000000 80008000
+C0000000 00000015
+3D808000 88AC01B5
+2C050001 41800094
+3D808057 814CA764
+7C0A6040 41800084
+3D208058 2C050001
+40820008 A1295EE2
+2C050002 40820008
+A12960D2 2C050003
+40820008 A12962C2
+2C050004 40820008
+A12964B2 C04A067C
+3D603E00 916A067C
+C06A067C 71250008
+41820008 EC42182A
+71250004 41820008
+EC421828 D04A067C
+C04A0678 71250002
+41820008 EC42182A
+71250001 41820008
+EC421828 D04A0678
+4E800020 00000000</pre>
+    <p>Press - to take control of the home Kritter.</p>
+    <p>Press + to take control of the away Kritter.</p>
+    <p>Press 2 to stop controlling Kritters.</p>
+    <p>Tennis tiebreaker in First-to-X goals</p>
+    <pre class="setup-guide-code">C21012E0 0000000C
+3E6080C5 6273F7B0
+A2930002 2C080001
+4181000C A25300BE
+7E549378 3A94FFFF
+7C144000 40820028
+A2A6002E 7C14A800
+4082001C 2C1400FF
+41820014 819300D4
+2C0C0002 40820008
+3A940001 3A940001
+B2930002 B106002C
+60000000 00000000</pre>
+    <ul class="cr-list">
+    <li>Outscore your opponent by at least 2 goals to win.</li>
+    <li>Activates only if you select &quot;safe megastrikes&quot; from the player-cheats menu.</li>
+    </ul>
+    <h3>4.4 Gameplay Tips</h3>
+    <p>Here is a playlist of the most relevant tutorials if you wish to learn MSC mechanics and improve your gameplay.</p>
+    <p><a class="cr-link" href="https://youtube.com/playlist?list=PLLAlWhwo9P26CQhRR7yaSblmea687HiWE" target="_blank" rel="noopener noreferrer">MSC Guides (a.k.a. !msctutorial)</a></p>
+    </section>
+    <section class="cr-section setup-guide-section">
+    <h2 id="msc-setup-section-5">5. Troubleshooting and References</h2>
+    <h3>5.1 Troubleshooting Quickchecks</h3>
+    <ul class="cr-list">
+    <li>Connection fails on Wii DNS method: recheck DNS values in Section 2.2 and rerun the connection test.</li>
+    <li>High delay or unstable matches: apply the connection checklist in Section 2.3.3.</li>
+    <li>Wiimmfi Error 20100 on Dolphin: your game is likely unpatched. Apply the latest Wiimmfi patch and retry.</li>
+    <li>Netplay room issues: confirm all players use the same Dolphin version and verify controller port assignment in Section 3.4.2.</li>
+    <li>Cursor does not move in-game: set all required controller slots to Emulated Wii Remote.</li>
+    </ul>
+    </section>
+    <div class="setup-guide-meta-line">
+      <p class="cr-note">Source document: <a class="cr-link" href="https://docs.google.com/document/d/1a49tGOAVqi5mW9RqfZF3QanELxw8Ogsq4NQ068B8Zco/edit?tab=t.0" target="_blank" rel="noopener noreferrer">Published MSC Setup Guide</a></p>
+      <p class="setup-guide-credits">Credits @ImSpiker</p>
+    </div>
+    </article>
+    </section>
+  </main>
 
-  <script src="../js/global-tabs-engine.js?v=20260418-runtime-cleanup-v8" defer></script>
-  <script src="../js/global-nav.js?v=20260418-runtime-cleanup-v8" defer></script>
+  <script src="../js/global-tabs-engine.js?v=20260420-msc-setup-guide-v1" defer></script>
+  <script src="../js/global-nav.js?v=20260420-msc-setup-guide-v1" defer></script>
 </body>
 </html>
-
 
 
 

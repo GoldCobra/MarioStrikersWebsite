@@ -37,7 +37,8 @@
           label: "Strikers Charged",
           slug: "msc",
           children: [
-            { key: "setup-guide", label: "Setup Guide", slug: "msc-setup-guide" }
+            { key: "setup-guide", label: "Setup Guide", slug: "msc-setup-guide" },
+            { key: "save-editor", label: "Save Editor", slug: "msc-save-editor" }
           ]
         },
         {
@@ -59,7 +60,6 @@
           label: "Rules",
           slug: "msbl-competitiverules",
           children: [
-            { key: "msl-rules", label: "MSL", slug: "msl-league-rules" },
             { key: "msbl-rules", label: "MSBL", slug: "msbl-competitiverules" },
             { key: "msc-rules", label: "MSC", slug: "msc-competitiverules" },
             { key: "sms-rules", label: "SMS", slug: "sms-competitiverules" }
@@ -107,6 +107,7 @@
     "msc": { topKey: "games", secondKey: "msc" },
     "sms": { topKey: "games", secondKey: "sms" },
     "msc-setup-guide": { topKey: "games", secondKey: "msc", leafKey: "setup-guide" },
+    "msc-save-editor": { topKey: "games", secondKey: "msc", leafKey: "save-editor" },
     "sms-setup-guide": { topKey: "games", secondKey: "sms", leafKey: "setup-guide" },
     "msbl-competitiverules": { topKey: "competitive", secondKey: "rules", leafKey: "msbl-rules" },
     "msc-competitiverules": { topKey: "competitive", secondKey: "rules", leafKey: "msc-rules" },
@@ -185,6 +186,44 @@
     LEADERBOARD_BALL_ICONS.forEach(function (iconFile) {
       preloadImage(prefix + "/assets/nav-buttons/sub/" + iconFile);
     });
+  }
+
+  function upsertHeadLink(selector, relValue, hrefValue, typeValue, sizesValue) {
+    var head = document.head;
+    if (!head) {
+      return;
+    }
+
+    var link = head.querySelector(selector);
+    if (!link) {
+      link = document.createElement("link");
+      head.appendChild(link);
+    }
+
+    link.setAttribute("rel", relValue);
+    link.setAttribute("href", hrefValue);
+
+    if (typeValue) {
+      link.setAttribute("type", typeValue);
+    } else {
+      link.removeAttribute("type");
+    }
+
+    if (sizesValue) {
+      link.setAttribute("sizes", sizesValue);
+    } else {
+      link.removeAttribute("sizes");
+    }
+  }
+
+  function ensureGlobalFavicon(prefix) {
+    var pngPath = prefix + "/assets/favicon/blball.png";
+    var icoPath = prefix + "/assets/favicon/favicon.ico";
+
+    upsertHeadLink('link[rel="icon"][type="image/png"]', "icon", pngPath, "image/png", "32x32");
+    upsertHeadLink('link[rel="icon"][type="image/x-icon"]', "icon", icoPath, "image/x-icon", "");
+    upsertHeadLink('link[rel="shortcut icon"]', "shortcut icon", icoPath, "image/x-icon", "");
+    upsertHeadLink('link[rel="apple-touch-icon"]', "apple-touch-icon", pngPath, "image/png", "");
   }
 
   function isTabsParentView() {
@@ -551,6 +590,7 @@
 
   function mountGlobalShell() {
     var prefix = getPathPrefix();
+    ensureGlobalFavicon(prefix);
     preloadGlobalUiAssets(prefix);
     var pageSlug = getPageSlug();
     var pageState = resolvePageState(pageSlug);

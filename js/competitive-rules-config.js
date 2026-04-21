@@ -339,7 +339,7 @@
     },
 
     msc: {
-      pageTitle: "The Mario Strikers Charged (Football) Competitive Ruleset",
+      pageTitle: "The MARIO STRIKERS CHARGED (Football) Competitive Ruleset",
       revisedText: "Last revised April 17, 2026",
       sourceHref: "https://docs.google.com/document/d/e/2PACX-1vRQgUz-inFiaOJVnVDWLITqM6g3vm89lI_GstwX7cQl3Pj-Tb8QtAk5mH-HDlPbNnqKyqw4PyZaOxwX/pub",
       sourceLabel: "Published MSC Rules",
@@ -352,7 +352,7 @@
               paragraph("Official version: PAL (RQ4P01) on Nintendo Wii or Nintendo Wii U."),
               paragraph("Most current players use PAL. Matchmaking between PAL and NTSC is technically impossible because of region lock."),
               paragraph("Console and Dolphin Emulator are permitted. Players must be able to play via " + link("Wiimmfi", "https://wiimmfi.de/") + ". Netplay is not feasible due to technical limitations."),
-              paragraph("As of Dolphin version 2603a or newer, Dolphin natively supports Wiimmfi matchmaking between Dolphin Emulator and console (Wii/Wii U), without additional mods or Cheat Codes."),
+              paragraph("As of Dolphin version 2603a or newer, Dolphin natively supports Wiimmfi matchmaking between Dolphin Emulator and console (Wii or Wii U), without additional mods or Cheat Codes."),
               paragraph("Players using emulator must use Dolphin 2603a or newer for official cross-platform play.")
             ]
           },
@@ -544,3 +544,4 @@
     gameConfigs: GAME_CONFIGS
   };
 })();
+
