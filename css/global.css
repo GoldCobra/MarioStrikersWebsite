@@ -50,6 +50,9 @@ body {
 html {
   height: 100%;
   background-color: #000;
+  overflow-y: auto;
+  scrollbar-width: auto;
+  scrollbar-color: rgba(186, 186, 186, 0.82) rgba(18, 18, 18, 0.55);
 }
 
 button,
@@ -62,9 +65,30 @@ textarea {
 body {
   min-height: 100vh;
   overflow-y: auto;
+  scrollbar-width: auto;
+  scrollbar-color: rgba(186, 186, 186, 0.82) rgba(18, 18, 18, 0.55);
+  -ms-overflow-style: auto;
   background: transparent;
   position: relative;
   isolation: isolate;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 12px;
+  display: block;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+  background: rgba(18, 18, 18, 0.55);
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: rgba(186, 186, 186, 0.75);
+  border-radius: 8px;
+  border: 0;
 }
 
 body::before {

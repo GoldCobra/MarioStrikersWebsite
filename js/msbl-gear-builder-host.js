@@ -145,6 +145,67 @@
     host.innerHTML = '<p class="msbl-gear-builder-note' + (isError ? ' is-error' : '') + '">' + String(message || "") + "</p>";
   }
 
+  function getActivePane(host) {
+    return host.querySelector(".tab-content .tab-pane:not(.hidden)") || host.querySelector(".tab-content .tab-pane");
+  }
+
+  function syncHostHeight(host) {
+    if (!host) {
+      return;
+    }
+
+    var activePane = getActivePane(host);
+    if (!activePane) {
+      return;
+    }
+
+    var bar = host.querySelector(".bar-area");
+    var barHeight = bar ? bar.offsetHeight : 56;
+    var contentHeight = Math.max(activePane.scrollHeight || 0, activePane.offsetHeight || 0);
+    var nextHeight = Math.max(420, Math.ceil(barHeight + contentHeight + 12));
+    host.style.minHeight = String(nextHeight) + "px";
+  }
+
+  function setupHostHeightSync(host) {
+    var rafToken = 0;
+    function scheduleSync() {
+      if (rafToken) {
+        return;
+      }
+      rafToken = window.requestAnimationFrame(function () {
+        rafToken = 0;
+        syncHostHeight(host);
+      });
+    }
+
+    scheduleSync();
+
+    host.addEventListener("click", function () {
+      window.setTimeout(scheduleSync, 0);
+    }, true);
+
+    host.addEventListener("input", function () {
+      window.setTimeout(scheduleSync, 0);
+    }, true);
+
+    window.addEventListener("resize", scheduleSync);
+
+    var tabContent = host.querySelector(".tab-content");
+    if (!tabContent) {
+      return;
+    }
+
+    var observer = new MutationObserver(function () {
+      scheduleSync();
+    });
+    observer.observe(tabContent, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "aria-selected"]
+    });
+  }
+
   async function initGearBuilderPage() {
     var page = String(document.body && document.body.getAttribute("data-page") || "").toLowerCase();
     if (page !== PAGE_KEY) {
@@ -172,6 +233,7 @@
       await loadScriptsSequentially();
       syncAllStatOverlays(host);
       attachStatOverlayObserver(host);
+      setupHostHeightSync(host);
     } catch (_error) {
       renderStatus(host, "Failed to load Gear Builder.", true);
     }

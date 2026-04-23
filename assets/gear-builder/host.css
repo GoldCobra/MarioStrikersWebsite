@@ -32,10 +32,12 @@
   right: auto;
   width: 100%;
   height: 56px;
+  background: transparent !important;
 }
 
 #msbl-gear-builder-host .scrollbar {
   height: 56px;
+  background: transparent !important;
 }
 
 #msbl-gear-builder-host .tab-list {
@@ -43,6 +45,7 @@
   align-items: center;
   gap: 1px;
   padding: 4px 10px;
+  background: transparent !important;
 }
 
 #msbl-gear-builder-host .tab-item {
@@ -88,7 +91,7 @@
 }
 
 #msbl-gear-builder-host .tab-link-icon[aria-selected="true"] {
-  background-color: #fac402;
+  background-color: transparent;
 }
 
 #msbl-gear-builder-host .tab-link-icon[aria-selected="false"] {
@@ -227,9 +230,9 @@
 #msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .stat-text-overlay {
   --stat-label-x: 70px;
   --stat-value-x: 270px;
-  --stat-text-bottom: 22px;
+  --stat-text-bottom: 26px;
   --stat-label-baseline-adjust: 0px;
-  --stat-value-baseline-adjust: -2px;
+  --stat-value-baseline-adjust: 0px;
   position: absolute;
   left: 0;
   top: 0;
