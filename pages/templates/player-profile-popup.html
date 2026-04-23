@@ -1,0 +1,65 @@
+<div id="player-profile-popup" class="player-popup" hidden aria-hidden="true">
+  <button class="player-popup-backdrop" data-action="popup-close" aria-label="Close profile popup"></button>
+  <section class="player-popup-card" role="dialog" aria-modal="true" aria-labelledby="player-popup-name">
+    <button class="player-popup-close" type="button" data-action="popup-close" aria-label="Close profile popup">×</button>
+
+    <header class="player-popup-header">
+      <div class="player-popup-header-title">
+        <h2 id="player-popup-name" class="player-popup-name" data-slot="player-name">-</h2>
+        <img class="player-popup-flag" data-slot="player-flag" src="" alt="" hidden>
+      </div>
+    </header>
+
+    <div class="player-popup-body">
+      <p class="player-popup-status" data-slot="popup-status">Loading profile...</p>
+
+      <div class="player-popup-content" data-slot="popup-content" hidden>
+        <section class="player-popup-section">
+          <h3 class="player-popup-section-title">Switch Friend Codes</h3>
+          <div class="player-popup-code-list" data-list="fc-switch"></div>
+        </section>
+
+        <section class="player-popup-section">
+          <h3 class="player-popup-section-title">MSC Friend Codes (PAL)</h3>
+          <div class="player-popup-code-list" data-list="fc-msc-pal"></div>
+        </section>
+
+        <section class="player-popup-section">
+          <h3 class="player-popup-section-title">MSC Friend Codes (NTSC)</h3>
+          <div class="player-popup-code-list" data-list="fc-msc-ntsc"></div>
+        </section>
+
+        <section class="player-popup-section">
+          <h3 class="player-popup-section-title">MSC Friend Codes (KOR)</h3>
+          <div class="player-popup-code-list" data-list="fc-msc-kor"></div>
+        </section>
+
+        <section class="player-popup-section">
+          <h3 class="player-popup-section-title">MSC Friend Codes (JPN)</h3>
+          <div class="player-popup-code-list" data-list="fc-msc-jpn"></div>
+        </section>
+
+        <section class="player-popup-section" data-slot="results-section" hidden>
+          <h3 class="player-popup-section-title">Results</h3>
+          <p class="player-popup-results-line">
+            <a data-slot="results-link" class="player-popup-results-link" href="#" target="_blank" rel="noopener noreferrer"></a>
+          </p>
+        </section>
+
+        <section class="player-popup-section">
+          <h3 class="player-popup-section-title">Recent Tourney Accolades</h3>
+          <ul class="player-popup-accolades" data-list="accolades"></ul>
+        </section>
+
+        <section class="player-popup-section">
+          <div class="player-popup-ratings-grid" data-slot="ratings-grid-singles"></div>
+          <div class="player-popup-ratings-grid" data-slot="ratings-grid-doubles"></div>
+        </section>
+
+        <section class="player-popup-section" data-slot="rank-banner-section" hidden>
+          <img class="player-popup-rank-banner" data-slot="rank-banner" src="" alt="Highest rank banner">
+        </section>
+      </div>
+    </div>
+  </section>
+</div>

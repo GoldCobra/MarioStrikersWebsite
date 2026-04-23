@@ -3,6 +3,8 @@ const cors = require("cors");
 const { config } = require("./config");
 const { healthCheck } = require("./db");
 const { getLeaderboardRows, assertGameAndMode, parseLimit } = require("./services/leaderboards-service");
+const { getMsblClubs } = require("./services/clubs-service");
+const { getPlayersList, getPlayerProfile } = require("./services/players-service");
 
 function buildCorsOptions() {
   if (config.corsOrigin === "*") {
@@ -66,6 +68,44 @@ function createApp() {
         rows: rows
       });
     } catch (error) {
+      sendApiError(res, error);
+    }
+  });
+
+  app.get("/api/clubs/msbl", async function (_req, res) {
+    try {
+      const rows = await getMsblClubs();
+      res.json({
+        game: "msbl",
+        count: rows.length,
+        rows: rows
+      });
+    } catch (error) {
+      sendApiError(res, error);
+    }
+  });
+
+  app.get("/api/players", async function (_req, res) {
+    try {
+      const rows = await getPlayersList();
+      res.json({
+        count: rows.length,
+        rows: rows
+      });
+    } catch (error) {
+      sendApiError(res, error);
+    }
+  });
+
+  app.get("/api/players/:playerId/profile", async function (req, res) {
+    try {
+      const profile = await getPlayerProfile(req.params.playerId);
+      res.json(profile);
+    } catch (error) {
+      if (error && /not found/i.test(String(error.message || ""))) {
+        res.status(404).json({ error: "Player not found." });
+        return;
+      }
       sendApiError(res, error);
     }
   });

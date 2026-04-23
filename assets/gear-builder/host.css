@@ -1,0 +1,280 @@
+.gear-builder-page {
+  width: 100%;
+  max-width: none;
+  padding-inline: 0;
+  padding-top: 0;
+}
+
+#msbl-gear-builder-host {
+  width: 100%;
+  min-height: 420px;
+}
+
+.msbl-gear-builder-note {
+  margin: 1.2rem 0;
+  text-align: center;
+  color: #f4f4f4;
+  font-family: "Trade Gothic Next BdCn", sans-serif;
+  font-size: clamp(1rem, 1.15vw, 1.15rem);
+  text-shadow: -2px 2px 0 #000;
+}
+
+.msbl-gear-builder-note.is-error {
+  color: #ffb7b7;
+}
+
+#msbl-gear-builder-host .section {
+  width: 100% !important;
+}
+
+#msbl-gear-builder-host .bar-area {
+  left: 0;
+  right: auto;
+  width: 100%;
+  height: 56px;
+}
+
+#msbl-gear-builder-host .scrollbar {
+  height: 56px;
+}
+
+#msbl-gear-builder-host .tab-list {
+  margin: 0 auto;
+  align-items: center;
+  gap: 1px;
+  padding: 4px 10px;
+}
+
+#msbl-gear-builder-host .tab-item {
+  height: auto;
+}
+
+#msbl-gear-builder-host .builder-tab-item {
+  width: 96px;
+}
+
+#msbl-gear-builder-host .icon-tab-item {
+  width: 52px;
+}
+
+#msbl-gear-builder-host .builder-tab-link {
+  width: 96px;
+  height: 44px;
+  margin-top: 0;
+  padding: 0 10px;
+  font-family: "Trade Gothic Next BdCn", sans-serif;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+#msbl-gear-builder-host .tab-link-icon {
+  width: 52px;
+  height: 52px;
+  margin-top: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+}
+
+#msbl-gear-builder-host .tab-char-icon {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(-1px 1px 0 #ff5400);
+}
+
+#msbl-gear-builder-host .tab-link-icon[aria-selected="true"] {
+  background-color: #fac402;
+}
+
+#msbl-gear-builder-host .tab-link-icon[aria-selected="false"] {
+  background-color: transparent;
+}
+
+#msbl-gear-builder-host .tab-content {
+  height: calc(100% - 56px);
+  top: 56px;
+}
+
+/* Keep Builder tab behavior as-is */
+#msbl-gear-builder-host #tab-b .container {
+  height: 100%;
+}
+
+/* Character tabs use a separate, stable layout contract */
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) {
+  padding-top: 8px;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .container {
+  height: auto;
+  min-height: 280px;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .buildcard {
+  max-height: none;
+  height: 260px;
+  border: none;
+  background-color: transparent;
+}
+
+/* Character stat bars layering:
+   back: dynamic 1..25 png (.bar)
+   front: custom stat overlay png (::before)
+   top: text overlay */
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: auto;
+  height: calc(100% * var(--custom-stat-bar-scale));
+  max-width: none;
+  padding: 0;
+  display: block;
+  visibility: visible;
+  z-index: 0;
+  pointer-events: none;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .baricon {
+  display: none;
+}
+
+/* Use custom designed bars in required order:
+   Strength, Speed, Shooting, Passing, Technique */
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .strengthbar,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .speedbar,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .shotbar,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .passbar,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .techbar {
+  --custom-stat-bar-scale: 1.25;
+  height: auto;
+  min-height: 0;
+  margin-top: 0;
+  position: relative;
+  overflow: visible;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .strengthbar::before,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .speedbar::before,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .shotbar::before,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .passbar::before,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .techbar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: calc(100% * var(--custom-stat-bar-scale));
+  background-image: var(--stat-overlay-image);
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: auto 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .strengthbar {
+  --stat-overlay-image: url("images/stats/stats-strength.png");
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .speedbar {
+  --stat-overlay-image: url("images/stats/stats-speed.png");
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .shotbar {
+  --stat-overlay-image: url("images/stats/stats-shooting.png");
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .passbar {
+  --stat-overlay-image: url("images/stats/stats-passing.png");
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .techbar {
+  --stat-overlay-image: url("images/stats/stats-technique.png");
+}
+
+/* Character tab text path:
+   visible rendering comes only from stat-text-overlay inside each bar row.
+   .cardstat remains as hidden data source for runtime updates. */
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .buildcard {
+  position: relative;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .statbar {
+  display: grid;
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  row-gap: var(--stat-row-gap, 6px);
+  margin-top: -8px;
+  z-index: 1;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .speedbar,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .shotbar,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .passbar,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .techbar {
+  margin-top: 0;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .cardstat {
+  display: none !important;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .stat-text-overlay {
+  --stat-label-x: 70px;
+  --stat-value-x: 270px;
+  --stat-text-bottom: 22px;
+  --stat-label-baseline-adjust: 0px;
+  --stat-value-baseline-adjust: -2px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .stat-text-label,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .stat-text-value {
+  position: absolute;
+  top: auto;
+  bottom: var(--stat-text-bottom);
+  color: #fff;
+  font-family: "ITC Grizzly", sans-serif;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: -2px 1px 0 #000;
+  white-space: nowrap;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .stat-text-label {
+  left: var(--stat-label-x);
+  font-size: calc(clamp(0.74rem, 1vw, 0.88rem) + 2px);
+  letter-spacing: 0.075em;
+  transform: translateY(var(--stat-label-baseline-adjust));
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .stat-text-value {
+  left: var(--stat-value-x);
+  font-size: calc(clamp(0.95rem, 1.2vw, 1.08rem) + 4px);
+  letter-spacing: 0.035em;
+  min-width: 2ch;
+  transform: translateY(var(--stat-value-baseline-adjust));
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .stat-text-value::after {
+  content: "/25";
+  color: #8f8f8f;
+  font-size: 0.68em;
+  letter-spacing: 0;
+}
+
+/* Keep menu logic in code, but hide hamburger UI for now */
+#msbl-gear-builder-host .menu {
+  display: none !important;
+}

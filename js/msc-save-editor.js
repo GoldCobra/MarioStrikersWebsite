@@ -877,18 +877,9 @@
       return { ok: false, error: "XML import failed: root element must be <" + XML_ROOT_TAG + ">." };
     }
 
-    var expectedProfile = getLoadedRegionProfile();
-    var expectedRegion = expectedProfile.code;
     var versionAttr = String(root.getAttribute("version") || "");
-    var regionAttr = String(root.getAttribute("region") || "");
     if (versionAttr !== XML_VERSION) {
       return { ok: false, error: "XML import failed: unsupported XML version." };
-    }
-    if (expectedProfile === REGION_PROFILES.UNKNOWN) {
-      return { ok: false, error: "XML import failed: loaded save region is unknown." };
-    }
-    if (regionAttr !== expectedRegion) {
-      return { ok: false, error: "XML import failed: region mismatch (" + regionAttr + "). Expected " + expectedRegion + "." };
     }
 
     for (var n = 0; n < root.childNodes.length; n += 1) {
