@@ -8,6 +8,7 @@
 #msbl-gear-builder-host {
   width: 100%;
   min-height: 420px;
+  --msbl-tab-content-top-gap: 14px;
 }
 
 .msbl-gear-builder-note {
@@ -27,17 +28,44 @@
   width: 100% !important;
 }
 
+#msbl-gear-builder-host .menu-area {
+  display: none !important;
+  width: 0 !important;
+}
+
 #msbl-gear-builder-host .bar-area {
   left: 0;
-  right: auto;
-  width: 100%;
+  right: 0;
+  width: 100% !important;
   height: 56px;
   background: transparent !important;
 }
 
 #msbl-gear-builder-host .scrollbar {
+  left: 0;
+  right: 0;
+  width: 100%;
   height: 56px;
   background: transparent !important;
+}
+
+#msbl-gear-builder-host #mySelectOptions {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(202, 137, 54, 0.9) #27090b;
+}
+
+#msbl-gear-builder-host #mySelectOptions::-webkit-scrollbar {
+  width: 10px;
+}
+
+#msbl-gear-builder-host #mySelectOptions::-webkit-scrollbar-track {
+  background: #27090b;
+}
+
+#msbl-gear-builder-host #mySelectOptions::-webkit-scrollbar-thumb {
+  background: rgba(202, 137, 54, 0.9);
+  border-radius: 8px;
+  border: 2px solid #27090b;
 }
 
 #msbl-gear-builder-host .tab-list {
@@ -65,9 +93,27 @@
   height: 44px;
   margin-top: 0;
   padding: 0 10px;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
+  font-family: "ITC Grizzly", sans-serif;
   font-size: 1.05rem;
   line-height: 1;
+}
+
+#msbl-gear-builder-host .builder-tab-link,
+#msbl-gear-builder-host .builder-tab-link[aria-selected="true"],
+#msbl-gear-builder-host .builder-tab-link[aria-selected="false"],
+#msbl-gear-builder-host .builder-tab-link:hover {
+  border: 0;
+  background-color: transparent !important;
+  background-image: url("../ui/menu-buttons.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  color: #fef9e7;
+  text-shadow: -2px 2px 0 #000;
+}
+
+#msbl-gear-builder-host .builder-tab-link[aria-selected="true"] {
+  color: #fac402;
 }
 
 #msbl-gear-builder-host .tab-link-icon {
@@ -103,14 +149,90 @@
   top: 56px;
 }
 
+#msbl-gear-builder-host .button,
+#msbl-gear-builder-host .button:hover,
+#msbl-gear-builder-host .activebutton,
+#msbl-gear-builder-host .activebutton:hover {
+  border: 0;
+  border-radius: 0;
+  background-color: transparent !important;
+  background-image: url("../ui/menu-buttons.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  text-shadow: -2px 2px 0 #000;
+}
+
+#msbl-gear-builder-host .button,
+#msbl-gear-builder-host .button:hover {
+  color: #fef9e7;
+}
+
+#msbl-gear-builder-host .activebutton,
+#msbl-gear-builder-host .activebutton:hover {
+  color: #fac402;
+}
+
+#msbl-gear-builder-host .btnname {
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  text-transform: uppercase;
+}
+
 /* Keep Builder tab behavior as-is */
 #msbl-gear-builder-host #tab-b .container {
   height: 100%;
+  width: min(980px, 92vw);
+  margin-inline: auto;
+  text-transform: uppercase;
+}
+
+#msbl-gear-builder-host #tab-b .form-select,
+#msbl-gear-builder-host #tab-b #mySelectOptions,
+#msbl-gear-builder-host #tab-b #mySelectOptions label,
+#msbl-gear-builder-host #tab-b .min input,
+#msbl-gear-builder-host #tab-b .max input {
+  color: #ff8a00;
+}
+
+#msbl-gear-builder-host #tab-b .selectBox::after {
+  border-top-color: #ff8a00;
+}
+
+#msbl-gear-builder-host #tab-b #mySelectOptions label[for="selectall"] {
+  color: #fff !important;
+}
+
+#msbl-gear-builder-host #tab-b .form-select,
+#msbl-gear-builder-host #tab-b #mySelectOptions label,
+#msbl-gear-builder-host #tab-b .submit,
+#msbl-gear-builder-host #tab-b .table th,
+#msbl-gear-builder-host #tab-b .table td,
+#msbl-gear-builder-host #tab-b .results {
+  text-transform: uppercase;
+}
+
+#msbl-gear-builder-host #tab-b .table,
+#msbl-gear-builder-host #tab-b .table th,
+#msbl-gear-builder-host #tab-b .table td,
+#msbl-gear-builder-host #tab-b .buildcell::after,
+#msbl-gear-builder-host #tab-b .buildcells::after,
+#msbl-gear-builder-host #tab-b .results {
+  color: #fff !important;
+  font-family: "Trade Gothic Next BdCn", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+#msbl-gear-builder-host #tab-b {
+  padding-top: var(--msbl-tab-content-top-gap);
 }
 
 /* Character tabs use a separate, stable layout contract */
 #msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) {
-  padding-top: 8px;
+  padding-top: var(--msbl-tab-content-top-gap);
 }
 
 #msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .container {
@@ -123,6 +245,40 @@
   height: 260px;
   border: none;
   background-color: transparent;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .cardpic {
+  overflow: visible;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .cardchar,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .cardbuild {
+  top: auto;
+  bottom: -6px;
+  z-index: 3;
+  line-height: 1;
+  border: 0 !important;
+  background: transparent !important;
+  font-size: calc(1rem + 4px);
+  font-weight: 700;
+  text-shadow: -2px 2px 0 #000 !important;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .cardchar {
+  left: auto;
+  right: -6px;
+  color: #fff !important;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .cardbuild {
+  left: -6px;
+  right: auto;
+  color: #ff8a00 !important;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .cardpic img {
+  transform: translateY(8%) scale(1.2);
+  transform-origin: center bottom;
 }
 
 /* Character stat bars layering:
@@ -257,6 +413,7 @@
 
 #msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .stat-text-label {
   left: var(--stat-label-x);
+  color: #8f8f8f;
   font-size: calc(clamp(0.74rem, 1vw, 0.88rem) + 2px);
   letter-spacing: 0.075em;
   transform: translateY(var(--stat-label-baseline-adjust));
@@ -277,7 +434,88 @@
   letter-spacing: 0;
 }
 
-/* Keep menu logic in code, but hide hamburger UI for now */
-#msbl-gear-builder-host .menu {
+/* Keep Builder-tab helper menu hidden; character tabs get dedicated action buttons */
+#msbl-gear-builder-host #tab-b .menu {
   display: none !important;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu {
+  position: absolute;
+  top: calc(var(--msbl-tab-content-top-gap) + 8px);
+  left: min(calc(50% + clamp(220px, 17vw, 300px)), calc(100% - 198px));
+  right: auto;
+  width: 170px;
+  height: auto;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  background-image: none !important;
+  display: block !important;
+  z-index: 8;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options {
+  position: static;
+  display: flex !important;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 0;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 0;
+  background-color: transparent;
+  background-image: url("../ui/menu-buttons.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  color: #fac402;
+  font-family: "ITC Grizzly", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-shadow: -2px 2px 0 #000;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b:hover,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b:focus-visible {
+  color: #fac402;
+  filter: brightness(1.05);
+}
+
+/* Match MSC Save Editor button typography for all copy/save actions */
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b.copytext,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b.copypic,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b.savepic {
+  color: #f5c300;
+  font-family: "Trade Gothic Next BdCn", sans-serif;
+  font-size: clamp(0.92rem, 1.2vw, 1.05rem);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-shadow: none;
+}
+
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b.copytext:hover,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b.copytext:focus-visible,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b.copypic:hover,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b.copypic:focus-visible,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b.savepic:hover,
+#msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b.savepic:focus-visible {
+  color: #f5c300;
+  filter: none;
 }

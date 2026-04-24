@@ -17,7 +17,8 @@ window.addEventListener("click", function(e) {
   
     for (const item of checkedCheckboxes) {
       var checkboxValue = item.getAttribute('value');
-      values.push(checkboxValue);
+      var dropdownLabel = checkboxValue === "Bowser Jr" ? "Bowser Jr." : checkboxValue;
+      values.push(dropdownLabel);
     }
   
     var dropdownValue = "Select Character";

@@ -71,7 +71,7 @@
           slug: "msl",
           children: [
             { key: "league-rules", label: "League Rules", slug: "msl-league-rules" },
-            { key: "league-site", label: "League Site", slug: "msl-league-site" }
+            { key: "league-site", label: "Schedule", slug: "msl-league-site" }
           ]
         },
         {

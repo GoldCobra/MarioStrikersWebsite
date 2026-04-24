@@ -7,6 +7,30 @@
   <link rel="preload" href="../assets/fonts/Trade%20Gothic%20Next%20LT%20Pro%20BdCn.woff" as="font" type="font/woff" crossorigin>
   <title>SMS Setup Guide | Mario Strikers Community</title>
   <link rel="stylesheet" href="../css/global.css?v=20260418-runtime-cleanup-v8">
+  <style>
+    .setup-guide-page #sms-setup-guide-root {
+      display: block;
+      padding-top: var(--space-3);
+    }
+
+    body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
+      padding-top: 0;
+    }
+
+    .setup-guide-video-frame {
+      width: min(100%, 960px);
+      margin: 0 auto;
+      aspect-ratio: 16 / 9;
+      background: #000;
+    }
+
+    .setup-guide-video-frame iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+  </style>
 </head>
 <body data-page="sms-setup-guide">
   <div id="1">
@@ -14,7 +38,26 @@
     <div id="global-subnav"></div>
   </div>
 
-  <main class="page-content"></main>
+  <main class="page-content competitive-rules-page setup-guide-page">
+    <section id="sms-setup-guide-root" aria-label="SMS setup guide">
+      <article class="competitive-rules setup-guide-article" aria-label="SMS setup guide content">
+        <section class="cr-section setup-guide-section">
+          <h2>SUPER MARIO STRIKERS SETUP GUIDE</h2>
+          <figure class="setup-guide-media setup-guide-video">
+            <div class="setup-guide-video-frame">
+              <iframe
+                src="https://www.youtube.com/embed/T_DNKJ5d0s8"
+                title="Super Mario Strikers Setup Guide"
+                loading="lazy"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
+            </div>
+          </figure>
+        </section>
+      </article>
+    </section>
+  </main>
 
   <script src="../js/global-tabs-engine.js?v=20260418-runtime-cleanup-v8" defer></script>
   <script src="../js/global-nav.js?v=20260418-runtime-cleanup-v8" defer></script>

@@ -28,6 +28,8 @@ body {
 }
 
 :root {
+  --global-landing-bg-image: url("../assets/backgrounds/landing/landing-page-bg.png");
+  --global-nav-bar-bg-image: url("../assets/backgrounds/navigation/nav-bar-bg.png");
   --global-tabs-bg-image: url("../assets/nav-buttons/sub/tabs.png");
   --global-tabs-bg-height: 92px;
   --full-bleed-width: 100vw;
@@ -97,7 +99,7 @@ body::before {
   inset: 0;
   z-index: -1;
   background-color: #000;
-  background-image: url("../assets/backgrounds/landing/landing-page-bg.png");
+  background-image: var(--global-landing-bg-image);
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -122,7 +124,7 @@ body::before {
   justify-content: center;
   align-items: center;
   padding-inline: var(--shell-inline-pad);
-  background-image: url("../assets/backgrounds/navigation/nav-bar-bg.png");
+  background-image: var(--global-nav-bar-bg-image);
   background-repeat: no-repeat;
   background-position: center top;
   background-size: 100% 100%;
@@ -1370,7 +1372,7 @@ body[data-subnav="off"] .setup-guide-page #msc-setup-guide-root {
   width: 100%;
   border: 0;
   background-color: transparent;
-  background-image: url("../assets/msc-saveeditor/menu-buttons.png");
+  background-image: url("../assets/ui/menu-buttons.png");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 100% 100%;
