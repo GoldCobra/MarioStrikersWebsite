@@ -134,12 +134,30 @@
     popupState.slots = readSlotMap(popupRoot);
     popupState.lists = readListMap(popupRoot);
 
+    function requestClose(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      closePopup();
+    }
+
+    popupRoot.querySelectorAll("[data-action='popup-close']").forEach(function (node) {
+      node.addEventListener("pointerdown", requestClose);
+      node.addEventListener("click", requestClose);
+    });
+
     popupRoot.addEventListener("click", function (event) {
-      var closeTrigger = event.target.closest("[data-action='popup-close']");
+      var target = event.target;
+      if (!target || typeof target.closest !== "function") {
+        return;
+      }
+
+      var closeTrigger = target.closest("[data-action='popup-close']");
       if (!closeTrigger) {
         return;
       }
-      closePopup();
+      requestClose(event);
     });
 
     if (!keydownHandlerBound) {
@@ -209,18 +227,42 @@
     popupState.openerElement = null;
   }
 
+  function setSectionHidden(node, isHidden) {
+    var section = node && typeof node.closest === "function"
+      ? node.closest(".player-popup-section")
+      : null;
+    if (section) {
+      section.hidden = !!isHidden;
+    }
+  }
+
+  function hasDisplayText(value) {
+    var text = String(value || "").trim();
+    return text !== "" && text !== "-";
+  }
+
+  function isZeroRecord(value) {
+    return /^0\s*-\s*0$/.test(String(value || "").trim());
+  }
+
   function renderCodeLines(listKey, lines) {
     var mount = popupState.lists[listKey];
     if (!mount) {
-      return;
+      return false;
     }
 
-    var rows = Array.isArray(lines) ? lines : [];
+    var rows = Array.isArray(lines)
+      ? lines.filter(function (lineValue) {
+        return hasDisplayText(lineValue);
+      })
+      : [];
     if (!rows.length) {
-      mount.innerHTML = '<div class="player-popup-code-row is-empty">-</div>';
-      return;
+      mount.innerHTML = "";
+      setSectionHidden(mount, true);
+      return false;
     }
 
+    setSectionHidden(mount, false);
     mount.innerHTML = rows.map(function (lineValue) {
       var parts = parseCodeLine(lineValue);
       var prefixHtml = parts.prefix
@@ -236,15 +278,39 @@
         "</div>"
       ].join("");
     }).join("");
+    return true;
+  }
+
+  function buildRatingLine(label, value, extraHtml) {
+    return [
+      '<p class="player-popup-rating-line">',
+      '<span class="player-popup-rating-label">', escapeHtml(label), ':</span>',
+      '<span class="player-popup-rating-value">', escapeHtml(String(value)), "</span>",
+      extraHtml || "",
+      "</p>"
+    ].join("");
   }
 
   function buildRatingsMarkup(cards) {
     return cards.map(function (card) {
-      var ratingValue = card && card.rating && Number.isFinite(card.rating.rating) ? card.rating.rating : "-";
-      var setsValue = card && card.rating ? String(card.rating.sets || "-") : "-";
-      var gamesValue = card && card.rating ? String(card.rating.games || "-") : "-";
+      var ratingValue = card && card.rating && Number.isFinite(card.rating.rating) ? card.rating.rating : null;
+      var setsValue = card && card.rating ? String(card.rating.sets || "") : "";
+      var gamesValue = card && card.rating ? String(card.rating.games || "") : "";
       var metricKey = card && card.metricKey ? String(card.metricKey) : "";
-      var metricValue = "-";
+      var title = card && card.title ? String(card.title) : "";
+      var titleLower = title.toLowerCase();
+      var cardClass = "player-popup-rating-card";
+      if (titleLower.indexOf("msbl") !== -1) {
+        cardClass += " is-msbl-rating";
+      } else if (titleLower.indexOf("msc") !== -1) {
+        cardClass += " is-msc-rating";
+      } else if (titleLower.indexOf("sms") !== -1) {
+        cardClass += " is-sms-rating";
+      }
+      if (isZeroRecord(setsValue) || isZeroRecord(gamesValue)) {
+        cardClass += " is-inactive-rating";
+      }
+      var metricValue = null;
       if (card && card.rating && metricKey && Number.isFinite(card.rating[metricKey])) {
         metricValue = card.rating[metricKey];
       }
@@ -252,35 +318,50 @@
       var rankIconHtml = card && card.rating && card.rating.rank_icon_url
         ? '<img class="player-popup-rank-icon" src="' + escapeHtml(card.rating.rank_icon_url) + '" alt="" loading="lazy" aria-hidden="true">'
         : "";
+      var lines = [];
+
+      if (ratingValue !== null) {
+        lines.push(buildRatingLine("Rating", ratingValue, rankIconHtml));
+      } else if (rankIconHtml) {
+        lines.push(buildRatingLine("Rank", "", rankIconHtml));
+      }
+      if (hasDisplayText(setsValue)) {
+        lines.push(buildRatingLine("Sets", setsValue));
+      }
+      if (metricValue !== null) {
+        lines.push(buildRatingLine(card.metricLabel, metricValue));
+      }
+      if (hasDisplayText(gamesValue)) {
+        lines.push(buildRatingLine("Games", gamesValue));
+      }
+
+      if (!lines.length) {
+        return "";
+      }
 
       return [
-        '<article class="player-popup-rating-card">',
-        '<h4 class="player-popup-rating-title">', escapeHtml(card.title), "</h4>",
-        '<p class="player-popup-rating-line">',
-        '<span class="player-popup-rating-label">Rating:</span>',
-        '<span class="player-popup-rating-value">', escapeHtml(String(ratingValue)), '</span>',
-        rankIconHtml,
-        "</p>",
-        '<p class="player-popup-rating-line"><span class="player-popup-rating-label">Sets:</span><span class="player-popup-rating-value">', escapeHtml(setsValue), "</span></p>",
-        '<p class="player-popup-rating-line"><span class="player-popup-rating-label">', escapeHtml(card.metricLabel), ':</span><span class="player-popup-rating-value">', escapeHtml(String(metricValue)), "</span></p>",
-        '<p class="player-popup-rating-line"><span class="player-popup-rating-label">Games:</span><span class="player-popup-rating-value">', escapeHtml(gamesValue), "</span></p>",
+        '<article class="' + cardClass + '">',
+        '<h4 class="player-popup-rating-title">', escapeHtml(title), "</h4>",
+        lines.join(""),
         "</article>"
       ].join("");
-    }).join("");
+    }).filter(Boolean).join("");
   }
 
   function renderAccolades(accolades) {
     var mount = popupState.lists.accolades;
     if (!mount) {
-      return;
+      return false;
     }
 
     var rows = Array.isArray(accolades) ? accolades : [];
     if (!rows.length) {
-      mount.innerHTML = '<li class="player-popup-accolade-item is-empty">-</li>';
-      return;
+      mount.innerHTML = "";
+      setSectionHidden(mount, true);
+      return false;
     }
 
+    setSectionHidden(mount, false);
     mount.innerHTML = rows.map(function (entry) {
       var ballIcon = getGameBallIconUrl(entry && entry.game_code);
       var medal = String(entry && entry.place_medal || "•").trim() || "•";
@@ -297,6 +378,7 @@
         "</li>"
       ].join("");
     }).join("");
+    return true;
   }
 
   function setTextSlot(slotKey, value) {
@@ -350,21 +432,31 @@
     renderAccolades(data.accolades || []);
 
     var singlesMount = popupState.slots["ratings-grid-singles"];
+    var singlesMarkup = "";
     if (singlesMount) {
-      singlesMount.innerHTML = buildRatingsMarkup([
+      singlesMarkup = buildRatingsMarkup([
         { title: "MSBL", rating: ratings.msbl || {}, metricKey: "whr", metricLabel: "WHR" },
         { title: "MSC", rating: ratings.msc || {}, metricKey: "whr", metricLabel: "WHR" },
         { title: "SMS", rating: ratings.sms || {}, metricKey: "whr", metricLabel: "WHR" }
       ]);
+      singlesMount.innerHTML = singlesMarkup;
+      singlesMount.hidden = !singlesMarkup;
     }
 
     var doublesMount = popupState.slots["ratings-grid-doubles"];
+    var doublesMarkup = "";
     if (doublesMount) {
-      doublesMount.innerHTML = buildRatingsMarkup([
+      doublesMarkup = buildRatingsMarkup([
         { title: "MSBL 2v2", rating: ratings.msbl2v2 || {}, metricKey: "tst", metricLabel: "TST" },
         { title: "MSC 2v2", rating: ratings.msc2v2 || {}, metricKey: "tst", metricLabel: "TST" },
         { title: "SMS 2v2", rating: ratings.sms2v2 || {}, metricKey: "tst", metricLabel: "TST" }
       ]);
+      doublesMount.innerHTML = doublesMarkup;
+      doublesMount.hidden = !doublesMarkup;
+    }
+
+    if (singlesMount || doublesMount) {
+      setSectionHidden(singlesMount || doublesMount, !singlesMarkup && !doublesMarkup);
     }
 
     var rankBannerSection = popupState.slots["rank-banner-section"];
@@ -456,16 +548,19 @@
         : "";
 
       var nameInnerHtml = playerId
-        ? '<button type="button" class="players-name-trigger" data-player-id="' + playerId + '" aria-haspopup="dialog">' + escapeHtml(name) + "</button>"
+        ? '<button type="button" class="players-name-trigger" data-player-id="' + playerId + '" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for ' + escapeHtml(name) + '">' + escapeHtml(name) + "</button>"
         : '<span class="players-name-static">' + escapeHtml(name) + "</span>";
 
       return [
         '<article class="lb-row players-row" role="listitem">',
         '<div class="lb-inner-frame players-inner-frame">',
+        '<div class="lb-rank-cell players-flag-cell" aria-hidden="true">',
+        '<span class="players-flag-slot">', flagHtml, "</span>",
+        "</div>",
         '<span class="lb-player players-name">',
-        '<span class="players-flag-slot" aria-hidden="true">', flagHtml, "</span>",
         '<span class="players-name-text">', nameInnerHtml, "</span>",
         "</span>",
+        '<div class="lb-points players-points-spacer" aria-hidden="true"></div>',
         "</div>",
         "</article>"
       ].join("");

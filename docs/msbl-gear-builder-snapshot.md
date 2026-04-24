@@ -7,6 +7,7 @@ Source: `https://msbl.pages.dev/`
 - Template: `pages/templates/msbl-gear-builder.html`
 - Host page: `pages/msbl.html`
 - Host bootstrap: `js/msbl-gear-builder-host.js`
+- Original full-page snapshot archive: `docs/archive/gear-builder/index-original.html`
 
 ## Manual re-import steps
 1. Download latest `https://msbl.pages.dev/` snapshot into `assets/gear-builder/`:

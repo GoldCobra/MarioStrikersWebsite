@@ -174,6 +174,8 @@
   }
 
   function preloadGlobalUiAssets(prefix) {
+    preloadImage(prefix + "/assets/logo/logo.png");
+
     TOP_NAV_ITEMS.forEach(function (item) {
       preloadImage(prefix + "/assets/nav-buttons/default/nav-" + item.key + ".png");
       preloadImage(prefix + "/assets/nav-buttons/active/nav-" + item.key + "-active.png");
@@ -482,6 +484,13 @@
       ].join("");
     }).join("");
 
+    var brandHtml = [
+      '<a class="nav-brand" href="', toHref(prefix, "index"), '" aria-label="Mario Strikers Community home">',
+      '<img class="nav-brand-logo" src="', prefix, '/assets/logo/logo.png" alt="Mario Strikers Community">',
+      '<span class="nav-brand-est">EST. 2017</span>',
+      "</a>"
+    ].join("");
+
     var navHtml = TOP_NAV_ITEMS.map(function (item) {
       var isTopActive = pageState.topKey === item.key;
       var isCurrent = pageState.pageSlug === item.slug && (item.key === "home" || item.key === "partners");
@@ -490,6 +499,7 @@
 
     return [
       '<header id="2">',
+      brandHtml,
       '<nav class="ext-nav" aria-label="External links">', extHtml, "</nav>",
       '<nav class="main-nav main-nav-text" aria-label="Main navigation">', navHtml, "</nav>",
       "</header>"
@@ -588,6 +598,14 @@
     }
   }
 
+  var _resizeTimer = null;
+
+  function stabilizeScrollbarLayout() {
+    var sbw = window.innerWidth - document.documentElement.clientWidth;
+    document.documentElement.style.setProperty("--sbw", sbw + "px");
+    document.documentElement.style.paddingRight = "";
+  }
+
   function mountGlobalShell() {
     var prefix = getPathPrefix();
     ensureGlobalFavicon(prefix);
@@ -616,10 +634,21 @@
     renderGlobalShell(prefix, pageState, navRoot, subNavRoot, contentTabsRoot);
   }
 
+  window.addEventListener("resize", function () {
+    if (_resizeTimer) {
+      clearTimeout(_resizeTimer);
+    }
+    _resizeTimer = setTimeout(stabilizeScrollbarLayout, 100);
+  });
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", mountGlobalShell);
+    document.addEventListener("DOMContentLoaded", function () {
+      stabilizeScrollbarLayout();
+      mountGlobalShell();
+    });
     return;
   }
 
+  stabilizeScrollbarLayout();
   mountGlobalShell();
 })();

@@ -11,6 +11,21 @@
   --msbl-tab-content-top-gap: 14px;
 }
 
+.gear-builder-credit-line {
+  width: min(980px, 92vw);
+  margin: 0.55rem auto 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.gear-builder-credits {
+  margin: 0;
+  color: #ffffff;
+  font-family: "Trade Gothic Next BdCn", sans-serif;
+  font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+  text-align: right;
+}
+
 .msbl-gear-builder-note {
   margin: 1.2rem 0;
   text-align: center;

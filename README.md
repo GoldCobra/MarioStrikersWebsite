@@ -4,7 +4,7 @@ Current runtime is intentionally simple:
 - Static frontend (`index.html`, `pages/*`, `css/global.css`, `js/*`)
 - Read-only backend bridge (`backend/*`) that fetches live ratings directly from the Bot MSSQL source
 - No Postgres, no local leaderboard storage
-- One global cache tag for frontend includes: `20260418-runtime-cleanup-v8`
+- One global cache tag for frontend includes: `20260424-final-cleanup-v1`
 
 ## API Contract (unchanged for frontend)
 
@@ -61,6 +61,7 @@ This opens:
 - All leaderboard data is read live from the Bot MSSQL source.
 - No website-side database persistence is used.
 - Existing frontend layout/leaderboard rendering remains unchanged.
+- Source design files live under `docs/source-assets/` and legacy snapshots under `docs/archive/`; active runtime assets stay under `assets/`.
 
 ## Competitive Rules Content Mapping
 
