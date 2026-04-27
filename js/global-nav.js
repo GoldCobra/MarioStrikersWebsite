@@ -91,6 +91,16 @@
             { key: "msc", label: "MSC", slug: "msc-elo1v1", matchSlugs: ["msc-elo1v1", "msc-whr"] },
             { key: "sms", label: "SMS", slug: "sms-elo1v1", matchSlugs: ["sms-elo1v1", "sms-whr"] }
           ]
+        },
+        {
+          key: "tier-lists",
+          label: "Tier Lists",
+          slug: "msbl-tier-lists",
+          children: [
+            { key: "msbl", label: "MSBL", slug: "msbl-tier-lists" },
+            { key: "msc", label: "MSC", slug: "msc-tier-lists" },
+            { key: "sms", label: "SMS", slug: "sms-tier-lists" }
+          ]
         }
       ]
     },
@@ -122,6 +132,9 @@
     "msc-whr": { topKey: "competitive", secondKey: "leaderboards", leafKey: "msc" },
     "sms-elo1v1": { topKey: "competitive", secondKey: "leaderboards", leafKey: "sms" },
     "sms-whr": { topKey: "competitive", secondKey: "leaderboards", leafKey: "sms" },
+    "msbl-tier-lists": { topKey: "competitive", secondKey: "tier-lists", leafKey: "msbl" },
+    "msc-tier-lists": { topKey: "competitive", secondKey: "tier-lists", leafKey: "msc" },
+    "sms-tier-lists": { topKey: "competitive", secondKey: "tier-lists", leafKey: "sms" },
     "community-tournaments": { topKey: "competitive", secondKey: "tournaments", leafKey: "community" }
   };
 

@@ -12,6 +12,7 @@ The frontend is plain HTML, CSS, and browser JavaScript. Dynamic pages call `/ap
 - MSC Save Editor for local `Strikers2` save files and XML preset import/export.
 - Setup guides for MSC and SMS.
 - Competitive rules pages for MSBL, MSC, and SMS.
+- Tier lists for MSBL, MSC, and SMS.
 - Live leaderboards for ELO and WHR.
 - Players list, player profile popup, and MSBL Striker Clubs.
 - Partners and MSL information pages.
@@ -162,6 +163,9 @@ Competitive:
 - `pages/msl-league-rules.html`
 - `pages/msl-league-site.html`
 - `pages/community-tournaments.html`
+- `pages/msbl-tier-lists.html`
+- `pages/msc-tier-lists.html`
+- `pages/sms-tier-lists.html`
 
 Leaderboards:
 

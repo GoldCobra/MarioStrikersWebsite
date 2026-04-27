@@ -1993,6 +1993,24 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
   color: #ffb6b6;
 }
 
+.tier-list-page {
+  padding-bottom: clamp(1.5rem, 4vw, 3rem);
+}
+
+.tier-list-figure {
+  margin: var(--space-3) auto 0;
+  width: 100%;
+}
+
+.tier-list-image {
+  display: block;
+  width: 100%;
+  max-width: min(100%, var(--tier-list-max-width, 784px));
+  height: auto;
+  margin-inline: auto;
+  filter: drop-shadow(-3px 3px 0 rgba(0, 0, 0, 0.7));
+}
+
 body.player-popup-open {
   overflow: hidden;
 }
