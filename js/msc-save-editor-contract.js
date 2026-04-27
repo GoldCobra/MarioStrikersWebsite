@@ -1,9 +1,10 @@
 (function () {
   "use strict";
 
-  window.MscSaveEditorContractPal = {
-    version: "pal-v1-all-captains-read-mapping",
-    region: "R4QP01",
+  window.MscSaveEditorContract = {
+    version: "global-v1-all-captains-online-settings",
+    region: "GLOBAL",
+    supportedRegions: ["R4QP01", "R4QE01", "R4QJ01", "R4QK01"],
     fileName: "Strikers2",
     fileSize: 35616,
     teamPresets: {
@@ -110,6 +111,19 @@
       minutesValueOffset: 55,
       goalsValueOffset: 59,
       seriesLengthOffset: 63,
+      mirroredBlocks: [
+        {
+          label: "online",
+          skillLevelOffset: 87,
+          gameTypeOffset: 91,
+          minutesValueOffset: 95,
+          goalsValueOffset: 99,
+          seriesLengthOffset: 103,
+          environmentCheatOffset: 115,
+          powerUpCheatOffset: 119,
+          playerCheatOffset: 123
+        }
+      ],
       cameraTypeOffset: 36,
       cameraValueOffset: 40,
       cameraValueFormat: "float32_be",

@@ -76,7 +76,7 @@
   };
   var FALLBACK_ICON = "../assets/favicon/blball.png";
 
-  var contract = window.MscSaveEditorContractPal || null;
+  var contract = window.MscSaveEditorContract || null;
 
   var state = {
     loaded: false,
@@ -620,29 +620,85 @@
     };
   }
 
+  function isValidByteOffset(bytes, offset) {
+    return !!(
+      bytes &&
+      offset !== undefined &&
+      offset !== null &&
+      Number.isInteger(Number(offset)) &&
+      Number(offset) >= 0 &&
+      Number(offset) < bytes.length
+    );
+  }
+
+  function writeGameSettingsBlockToBytes(bytes, settingsBlock, parsedSettings) {
+    if (!settingsBlock || !bytes || !parsedSettings) {
+      return false;
+    }
+
+    var minutesOffset = Number(settingsBlock.minutesValueOffset !== undefined ? settingsBlock.minutesValueOffset : settingsBlock.gameValueOffset);
+    var goalsOffset = Number(settingsBlock.goalsValueOffset !== undefined ? settingsBlock.goalsValueOffset : settingsBlock.gameValueOffset);
+    var activeValueOffset = parsedSettings.gameMode === "minutes" ? minutesOffset : goalsOffset;
+    var requiredOffsets = [
+      settingsBlock.skillLevelOffset,
+      settingsBlock.gameTypeOffset,
+      activeValueOffset,
+      settingsBlock.seriesLengthOffset,
+      settingsBlock.powerUpCheatOffset,
+      settingsBlock.playerCheatOffset
+    ];
+    for (var i = 0; i < requiredOffsets.length; i += 1) {
+      if (!isValidByteOffset(bytes, requiredOffsets[i])) {
+        return false;
+      }
+    }
+
+    bytes[Number(settingsBlock.skillLevelOffset)] = parsedSettings.skillLevelRaw;
+    bytes[Number(settingsBlock.gameTypeOffset)] = parsedSettings.gameTypeRaw;
+    if (parsedSettings.gameMode === "minutes") {
+      bytes[minutesOffset] = parsedSettings.gameValueRaw;
+    } else {
+      bytes[goalsOffset] = parsedSettings.gameValueRaw;
+    }
+    bytes[Number(settingsBlock.seriesLengthOffset)] = parsedSettings.seriesLengthRaw;
+
+    if (settingsBlock.environmentCheatOffset !== undefined) {
+      if (!isValidByteOffset(bytes, settingsBlock.environmentCheatOffset)) {
+        return false;
+      }
+      bytes[Number(settingsBlock.environmentCheatOffset)] = parsedSettings.environmentRaw;
+    }
+    bytes[Number(settingsBlock.powerUpCheatOffset)] = parsedSettings.powerUpRaw;
+    bytes[Number(settingsBlock.playerCheatOffset)] = parsedSettings.playerRaw;
+
+    if (hasCalibratedCameraConfig(settingsBlock)) {
+      if (!isValidByteOffset(bytes, settingsBlock.cameraTypeOffset)) {
+        return false;
+      }
+      bytes[Number(settingsBlock.cameraTypeOffset)] = Number(parsedSettings.cameraTypeRaw);
+      if (!writeCameraLevelToBytes(bytes, settingsBlock, parsedSettings.cameraValueRaw)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   function writeGameSettingsToBytes(bytes, parsedSettings) {
     var settings = getGameSettingsConfig();
     if (!settings || !bytes || !parsedSettings) {
       return false;
     }
 
-    bytes[Number(settings.skillLevelOffset)] = parsedSettings.skillLevelRaw;
-    bytes[Number(settings.gameTypeOffset)] = parsedSettings.gameTypeRaw;
-    var minutesOffset = Number(settings.minutesValueOffset !== undefined ? settings.minutesValueOffset : settings.gameValueOffset);
-    var goalsOffset = Number(settings.goalsValueOffset !== undefined ? settings.goalsValueOffset : settings.gameValueOffset);
-    if (parsedSettings.gameMode === "minutes") {
-      bytes[minutesOffset] = parsedSettings.gameValueRaw;
-    } else {
-      bytes[goalsOffset] = parsedSettings.gameValueRaw;
+    if (!writeGameSettingsBlockToBytes(bytes, settings, parsedSettings)) {
+      return false;
     }
-    bytes[Number(settings.seriesLengthOffset)] = parsedSettings.seriesLengthRaw;
-    bytes[Number(settings.environmentCheatOffset)] = parsedSettings.environmentRaw;
-    bytes[Number(settings.powerUpCheatOffset)] = parsedSettings.powerUpRaw;
-    bytes[Number(settings.playerCheatOffset)] = parsedSettings.playerRaw;
 
-    if (hasCalibratedCameraConfig(settings)) {
-      bytes[Number(settings.cameraTypeOffset)] = Number(parsedSettings.cameraTypeRaw);
-      writeCameraLevelToBytes(bytes, settings, parsedSettings.cameraValueRaw);
+    var mirroredBlocks = Array.isArray(settings.mirroredBlocks) ? settings.mirroredBlocks : [];
+    for (var i = 0; i < mirroredBlocks.length; i += 1) {
+      if (!writeGameSettingsBlockToBytes(bytes, mirroredBlocks[i], parsedSettings)) {
+        return false;
+      }
     }
 
     return true;
