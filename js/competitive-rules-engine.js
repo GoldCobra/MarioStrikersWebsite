@@ -48,16 +48,38 @@
     ].join("");
   }
 
+  function renderContentBox(sectionId, innerHtml, extraClassName) {
+    var className = ["content-box", "cr-section"];
+
+    if (extraClassName) {
+      className.push(extraClassName);
+    }
+
+    return [
+      '<section class="', className.join(" "), '" id="', sectionId, '">',
+      '<div class="content-box-top" aria-hidden="true">',
+      '<div class="content-box-top-left"></div>',
+      '<div class="content-box-top-main"></div>',
+      '</div>',
+      '<div class="content-box-center">',
+      '<div class="content-box-texture" aria-hidden="true"></div>',
+      '<div class="content-box-content">',
+      innerHtml,
+      '</div>',
+      '</div>',
+      '<div class="content-box-bottom" aria-hidden="true"></div>',
+      '</section>'
+    ].join("");
+  }
+
   function renderChapter(gameCode, chapterNumber, chapter) {
     var subsections = Array.isArray(chapter.subsections) ? chapter.subsections : [];
-    return [
-      '<section class="cr-section" id="', chapterId(gameCode, chapterNumber), '">',
+    return renderContentBox(chapterId(gameCode, chapterNumber), [
       '<h2>', chapterNumber, '. ', chapter.title, '</h2>',
       subsections.map(function (subsection, index) {
         return renderSubsection(gameCode, chapterNumber, index + 1, subsection);
-      }).join(""),
-      '</section>'
-    ].join("");
+      }).join("")
+    ].join(""));
   }
 
   function buildDisruptionsChapter(shared, gameConfig) {
@@ -111,7 +133,7 @@
       '<h1 class="cr-page-title">', model.pageTitle, '</h1>',
       '<p class="cr-page-revised">', model.revisedText, '</p>',
       '</header>',
-      '<article class="competitive-rules" aria-label="', model.gameCode.toUpperCase(), ' competitive rules">',
+      '<article class="competitive-rules content-box-list" aria-label="', model.gameCode.toUpperCase(), ' competitive rules">',
       model.chapters.map(function (chapter, index) {
         return renderChapter(model.gameCode, index + 1, chapter || { title: "", subsections: [] });
       }).join(""),

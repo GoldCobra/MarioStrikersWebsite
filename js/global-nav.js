@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   "use strict";
 
   var EXTERNAL_LINKS = [
@@ -591,6 +591,42 @@
     });
   }
 
+  function mountGlobalFooter(prefix) {
+    if (!document.body || document.getElementById("global-footer")) {
+      return;
+    }
+    var footer = document.createElement("footer");
+    footer.id = "global-footer";
+
+    var disclaimer = document.createElement("p");
+    disclaimer.className = "global-footer-disclaimer";
+    disclaimer.textContent = "This website is not affiliated with Nintendo. All product names, logos, and brands are property of their respective owners.";
+    footer.appendChild(disclaimer);
+
+    var links = document.createElement("p");
+    links.className = "global-footer-links";
+
+    var aboutLink = document.createElement("a");
+    aboutLink.href = toHref(prefix, "about-us");
+    aboutLink.className = "global-footer-link";
+    aboutLink.textContent = "About Us";
+    links.appendChild(aboutLink);
+
+    var sep = document.createElement("span");
+    sep.className = "global-footer-sep";
+    sep.textContent = "  –  ";
+    links.appendChild(sep);
+
+    var privacyLink = document.createElement("a");
+    privacyLink.href = toHref(prefix, "privacy-policy");
+    privacyLink.className = "global-footer-link";
+    privacyLink.textContent = "Privacy Policy";
+    links.appendChild(privacyLink);
+
+    footer.appendChild(links);
+    document.body.appendChild(footer);
+  }
+
   function renderGlobalShell(prefix, pageState, navRoot, subNavRoot, contentTabsRoot) {
     if (navRoot) {
       navRoot.innerHTML = buildMainNavHtml(prefix, pageState);
@@ -609,6 +645,8 @@
       var hasSubnavContent = !!(subNavRoot && subNavRoot.innerHTML && subNavRoot.innerHTML.trim());
       document.body.setAttribute("data-subnav", hasSubnavContent ? "on" : "off");
     }
+
+    mountGlobalFooter(prefix);
   }
 
   var _resizeTimer = null;

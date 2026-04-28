@@ -477,7 +477,7 @@
     var statusNode = popupState.slots["popup-status"];
     var contentNode = popupState.slots["popup-content"];
     if (statusNode) {
-      statusNode.textContent = String(message || "Loading profile...");
+      statusNode.textContent = String(message || "Loading...");
       statusNode.hidden = false;
       statusNode.classList.remove("is-error");
     }
@@ -568,7 +568,7 @@
   }
 
   function renderLoading(mount) {
-    mount.innerHTML = '<p class="players-note">Loading players...</p>';
+    mount.innerHTML = '<p class="players-note loading-note">Loading...</p>';
   }
 
   function renderEmpty(mount) {
@@ -587,6 +587,13 @@
     await ensurePopup();
     openPopup(openerElement);
 
+    setTextSlot("player-name", "");
+    var staleFlag = popupState.slots["player-flag"];
+    if (staleFlag) {
+      staleFlag.hidden = true;
+      staleFlag.removeAttribute("src");
+    }
+
     var cached = profileCache.get(playerId);
     if (cached) {
       renderProfile(cached);
@@ -594,7 +601,7 @@
       return;
     }
 
-    renderPopupLoading("Loading profile...");
+    renderPopupLoading("Loading...");
 
     var requestToken = Symbol("profile-request");
     popupState.activeRequestToken = requestToken;

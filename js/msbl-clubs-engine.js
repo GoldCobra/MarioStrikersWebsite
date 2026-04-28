@@ -125,7 +125,7 @@
   }
 
   function renderLoading(mount) {
-    mount.innerHTML = '<p class="msbl-clubs-note">Loading clubs...</p>';
+    mount.innerHTML = '<p class="msbl-clubs-note loading-note">Loading...</p>';
   }
 
   function renderEmpty(mount) {

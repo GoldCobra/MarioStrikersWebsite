@@ -9,8 +9,8 @@
 }
 
 @font-face {
-  font-family: "Trade Gothic Next BdCn";
-  src: url("../assets/fonts/Trade%20Gothic%20Next%20LT%20Pro%20BdCn.woff") format("woff");
+  font-family: "Reporter";
+  src: url("../assets/fonts/MLSBY.woff") format("woff");
   font-style: normal;
   font-weight: 700;
   font-display: swap;
@@ -32,6 +32,7 @@ body {
 :root {
   --global-landing-bg-image: url("../assets/backgrounds/landing/landing-page-bg.png");
   --global-nav-bar-bg-image: url("../assets/backgrounds/navigation/nav-bar-bg.png");
+  --global-nav-footer-image: url("../assets/backgrounds/footer/navFooter.png");
   --global-tabs-bg-image: url("../assets/nav-buttons/sub/tabs.png");
   --global-tabs-bg-height: 92px;
   --full-bleed-width: 100vw;
@@ -48,7 +49,21 @@ body {
   --tabs-panel-height-fluid: clamp(44px, 4.2vw, 54px);
   --tabs-tab-width-fluid: clamp(136px, 11.4vw, 152px);
   --tabs-tab-font-size-fluid: clamp(0.84rem, 0.95vw, 1rem);
+  --tab-content-start-gap: 0.56rem;
   --subnav-reserve-height: 48px;
+  --content-box-shell-max-width: 1154px;
+  --rules-header-offset-top: 0px;
+  --rules-header-offset-left: 53px;
+  --rules-header-offset-right: 18px;
+  --rules-header-bottom-gap: -0.18rem;
+  --reporter-font-stack: "Reporter", "ITC Grizzly", sans-serif;
+  --reporter-font-weight: 700;
+  --reporter-font-size: 19px;
+  --reporter-font-size-sm: 17px;
+  --reporter-font-size-xs: 15px;
+  --reporter-line-height: 1.5;
+  --reporter-letter-spacing: 1pt;
+  --reporter-text-shadow: -2px 2px 0 #000;
 }
 
 html {
@@ -73,6 +88,8 @@ body {
   background: transparent;
   position: relative;
   isolation: isolate;
+  display: flex;
+  flex-direction: column;
 }
 
 body::before {
@@ -152,11 +169,6 @@ body::before {
 .nav-brand-est {
   margin-top: -0.08rem;
   color: #ffffff;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: clamp(0.54rem, 0.62vw, 0.68rem);
-  line-height: 1;
-  letter-spacing: 0.08em;
-  text-shadow: -1px 1px 0 #000;
   white-space: nowrap;
 }
 
@@ -287,6 +299,7 @@ body[data-subnav="off"] #global-subnav,
 
 .page-content {
   display: block;
+  flex: 1;
   width: min(1200px, 100%);
   margin-inline: auto;
   padding-inline: var(--content-inline-pad);
@@ -327,7 +340,7 @@ body[data-subnav="off"] .page-content {
   --tabs-tab-height: var(--tabs-head-height-fluid);
   --tabs-tab-font-size: calc(var(--tabs-tab-font-size-fluid) + 2px);
   width: 100%;
-  margin: 0.6rem 0 0.56rem;
+  margin: 0.6rem 0 var(--tab-content-start-gap);
   position: relative;
   min-height: calc(var(--tabs-render-height) + var(--tabs-panel-height));
   overflow: hidden;
@@ -613,6 +626,10 @@ body[data-page="index"] .page-content {
   padding: var(--space-2) var(--space-2) var(--space-4);
 }
 
+#leaderboards-root > .leaderboard-block {
+  padding-top: 0;
+}
+
 .leaderboard-list {
   --lb-row-gap: 2px;
   display: grid;
@@ -751,21 +768,22 @@ body[data-page="index"] .page-content {
 .lb-player {
   display: flex;
   align-items: center;
-  font-family: "Trade Gothic Next BdCn", "ITC Grizzly", sans-serif;
   justify-self: start;
   align-self: center;
   min-height: 0;
   box-sizing: border-box;
   padding-top: 0;
   padding-bottom: 1px;
-  line-height: 1.16;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   padding-left: clamp(1.2rem, 2.6vw, 2.2rem);
   padding-right: 0.4rem;
-  text-shadow: none;
   transform: translateY(var(--lb-player-nudge-y));
+}
+
+#leaderboard-list .lb-player {
+  text-shadow: none;
 }
 
 .lb-points {
@@ -811,6 +829,11 @@ body[data-page="index"] .page-content {
   text-align: center;
 }
 
+.loading-note {
+  color: #fff;
+  text-align: center;
+}
+
 /* Shared content components */
 
 .competitive-rules-page {
@@ -820,7 +843,7 @@ body[data-page="index"] .page-content {
 
 .competitive-rules-page #competitive-rules-root {
   display: block;
-  padding-top: var(--space-3);
+  padding-top: 0;
 }
 
 body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
@@ -828,12 +851,16 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
 }
 
 .competitive-rules-header {
-  max-width: 860px;
-  margin: 0 auto 0.42rem;
+  max-width: var(--content-box-shell-max-width);
+  margin: 0 auto var(--rules-header-bottom-gap);
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 0.9rem;
+  padding-top: var(--rules-header-offset-top);
+  padding-left: var(--rules-header-offset-left);
+  padding-right: var(--rules-header-offset-right);
+  box-sizing: border-box;
 }
 
 .cr-page-title,
@@ -858,7 +885,7 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
 }
 
 .competitive-rules {
-  max-width: 860px;
+  max-width: var(--content-box-shell-max-width);
   margin: 0 auto;
   padding: 0;
   border: 0;
@@ -911,17 +938,12 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
 .competitive-rules a,
 .competitive-rules span,
 .competitive-rules strong,
-.competitive-rules em {
-  font-family: "Trade Gothic Next BdCn", "ITC Grizzly", sans-serif;
-}
+.competitive-rules em {}
 
 .competitive-rules p,
 .competitive-rules li {
   margin: 0.42rem 0;
-  font-size: calc(clamp(0.95rem, 1.05vw, 1.08rem) + 2px);
-  line-height: 1.48;
   color: #f4f4f4;
-  text-shadow: -1px 1px 0 #000;
 }
 
 .competitive-rules ul,
@@ -949,133 +971,297 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
 }
 
 .cr-section {
-  margin-top: 0.25rem;
+  margin: 0;
 }
 
-.partner-card {
-  --partner-logo-size: clamp(122px, 15vw, 168px);
-  --partner-logo-overlap-x: 0.14;
-  --partner-logo-overlap-y: 0.34;
-  --partner-title-shift-x: clamp(100px, 12.8vw, 164px);
-  --partner-description-shift-y: clamp(20px, 2.8vw, 34px);
+.partners-page {
+  width: min(1200px, 100%);
+  margin-inline: auto;
+  margin-top: clamp(-0.6rem, -1vw, -0.35rem);
+  padding-bottom: clamp(1.45rem, 3.8vw, 2.9rem);
+}
+
+.partners-root {
+  width: min(var(--content-box-shell-max-width), 100%);
+  margin: 0 auto;
+}
+
+.content-box-list {
+  display: grid;
+  gap: 5px;
+}
+
+.content-box {
+  --content-box-native-width: 1154px;
+  --content-box-left-shoulder: 53px;
+  --content-box-main-width: 1102px;
+  --content-box-top-height: 42px;
+  --content-box-bottom-height: 41px;
+  --content-box-center-min-height: 200px;
+  --content-box-texture-offset-x: 0px;
+  --content-box-texture-offset-y: -20px;
+  --content-box-texture-width: 308px;
+  --content-box-texture-height: 235px;
+  --content-box-bottom-offset-x: 0px;
+  --content-box-bottom-bg-size: 1154px var(--content-box-bottom-height);
+  --content-box-content-padding-top: clamp(0.95rem, 1.75vw, 1.2rem);
+  --content-box-content-padding-inline: clamp(1.55rem, 2.8vw, 2.35rem);
+  --content-box-content-padding-bottom: clamp(1rem, 1.9vw, 1.28rem);
+  position: relative;
+  width: var(--content-box-native-width);
   overflow: visible;
 }
 
-.partner-card-logo {
-  position: absolute;
-  top: calc(-1 * var(--partner-logo-size) * var(--partner-logo-overlap-y));
-  left: calc(-1 * var(--partner-logo-size) * var(--partner-logo-overlap-x));
-  width: var(--partner-logo-size);
-  height: var(--partner-logo-size);
-  object-fit: contain;
-  z-index: 2;
-  pointer-events: none;
-  filter: none;
-  box-shadow: none;
+.content-box-top {
+  display: flex;
+  align-items: end;
+  width: calc(var(--content-box-left-shoulder) + var(--content-box-main-width));
 }
 
-.competitive-rules > .cr-section {
-  --cr-border-color: #c77603;
-  --cr-pattern-x: clamp(2px, 0.38vw, 4px);
-  --cr-pattern-y: clamp(2px, 0.34vw, 3px);
-  --cr-pattern-size: clamp(240px, 31vw, 300px);
-  --cr-top-cap-width: clamp(156px, 20vw, 208px);
-  --cr-top-cap-height: clamp(8px, 1vw, 10px);
-  --cr-top-cap-left: clamp(88px, 12vw, 120px);
-  --cr-bottom-cap-width: clamp(156px, 20vw, 208px);
-  --cr-bottom-cap-height: clamp(10px, 1.1vw, 12px);
-  --cr-bottom-cap-left: calc(-1 * clamp(20px, 2.8vw, 30px));
+.content-box-top-left {
+  flex: 0 0 var(--content-box-left-shoulder);
+  width: var(--content-box-left-shoulder);
+  height: var(--content-box-top-height);
+}
+
+.content-box-top-main {
+  flex: 0 0 var(--content-box-main-width);
+  width: var(--content-box-main-width);
+  height: var(--content-box-top-height);
+  background-image: url("../assets/text-boxes/BoxBgTop.png");
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: auto;
+}
+
+.content-box-center {
+  position: relative;
+  width: var(--content-box-main-width);
+  min-height: var(--content-box-center-min-height);
+  margin-left: var(--content-box-left-shoulder);
+  padding: 0;
+  overflow: visible;
+  background-image: url("../assets/text-boxes/BoxBgCenter.png");
+  background-repeat: repeat-y;
+  background-position: left top;
+  background-size: auto;
+}
+
+.content-box-texture {
+  position: absolute;
+  left: var(--content-box-texture-offset-x);
+  top: var(--content-box-texture-offset-y);
+  z-index: 0;
+  width: var(--content-box-texture-width);
+  height: var(--content-box-texture-height);
+  background-image: url("../assets/text-boxes/BoxBgTexture.png");
+  background-repeat: no-repeat;
+  background-position: left top;
+  pointer-events: none;
+}
+
+.content-box-content {
+  position: relative;
+  z-index: 1;
+  padding:
+    var(--content-box-content-padding-top)
+    var(--content-box-content-padding-inline)
+    var(--content-box-content-padding-bottom);
+}
+
+.content-box-content > * {
+  position: relative;
+  z-index: 1;
+}
+
+.content-box-content > h2 {
+  margin-top: 0;
+}
+
+.content-box-bottom {
+  width: var(--content-box-native-width);
+  height: var(--content-box-bottom-height);
+  background-image: url("../assets/text-boxes/BoxBgBottom.png");
+  background-repeat: no-repeat;
+  background-position: var(--content-box-bottom-offset-x) bottom;
+  background-size: var(--content-box-bottom-bg-size);
+}
+
+.partner-guide-card {
+  --partner-card-media-width: 220px;
+  --partner-card-media-height: calc(var(--partner-card-media-width) * 147 / 262);
+  --partner-card-media-offset-x: 14px;
+  --partner-card-media-offset-y: -6px;
+  --partner-card-title-indent: 300px;
+  --partner-card-title-top: 8px;
+  --partner-card-copy-top: 92px;
+  --partner-card-copy-left: 100px;
+  --partner-card-copy-max-width: 70ch;
+}
+
+.partner-guide-card-flex {
+  display: flex;
+  position: relative;
+  z-index: 1;
+}
+
+.partner-guide-card-media {
+  position: absolute;
+  left: var(--partner-card-media-offset-x);
+  top: var(--partner-card-media-offset-y);
+  z-index: 2;
+  width: var(--partner-card-media-width);
+  height: var(--partner-card-media-height);
+  margin: 0;
+  background-image: url("../assets/text-boxes/ImageBoxBg.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: left top;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.partner-guide-card-logo {
+  display: block;
   width: 100%;
-  margin-top: clamp(1.45rem, 3.3vw, 2.05rem);
-  position: relative;
-  z-index: 1;
-  isolation: isolate;
-  overflow: visible;
-  padding: clamp(0.95rem, 1.75vw, 1.2rem) clamp(1.55rem, 2.8vw, 2.35rem) clamp(1rem, 1.9vw, 1.28rem);
-  border: 0;
-  border-left: 3px solid var(--cr-border-color);
-  background:
-    linear-gradient(
-      90deg,
-      var(--cr-border-color) 0%,
-      #b33a08 78%,
-      rgba(179, 58, 8, 0) 100%
-    ) top left / 100% 3px no-repeat,
-    linear-gradient(
-      90deg,
-      var(--cr-border-color) 0%,
-      #b33a08 78%,
-      rgba(179, 58, 8, 0) 100%
-    ) bottom left / 100% 3px no-repeat,
-    url("../assets/text-boxes/pattern.png")
-      var(--cr-pattern-x) var(--cr-pattern-y) / var(--cr-pattern-size) auto no-repeat,
-    linear-gradient(
-      90deg,
-      #b06700 0%,
-      #a34a00 7%,
-      #8d2f00 20%,
-      #742007 45%,
-      #581307 54%,
-      rgba(88, 19, 7, 0) 100%
-    );
-  background-origin: border-box, border-box, padding-box, border-box;
-  background-clip: border-box, border-box, padding-box, border-box;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
 }
 
-.competitive-rules > .cr-section > * {
+.partner-guide-card-title-wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 0;
+}
+
+.partner-guide-card-title {
+  position: relative;
+  top: 22%;
+  margin: var(--partner-card-title-top) 0 10px;
+  padding-left: var(--partner-card-title-indent);
+  max-width: calc(100% - var(--partner-card-title-indent));
+  color: #ece8d0;
+  font-family: "ITC Grizzly", sans-serif;
+  font-size: calc(clamp(1.12rem, 1.7vw, 1.52rem) + 2px);
+  line-height: 1.02;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  -webkit-text-stroke: 1.6px #000;
+  text-stroke: 1.6px #000;
+  paint-order: stroke fill;
+  text-shadow: -4px 3px 0 #000;
+}
+
+.partner-guide-card-description-wrap {
+  margin-top: var(--partner-card-copy-top);
   position: relative;
   z-index: 1;
 }
 
-.competitive-rules > .cr-section > .partner-card-logo {
-  position: absolute;
-  z-index: 2;
+.partner-guide-card-description {
+  margin: 0 0 0 var(--partner-card-copy-left);
+  max-width: min(var(--partner-card-copy-max-width), calc(100% - var(--partner-card-copy-left)));
+  color: #ffffff;
 }
 
-.partner-card > h2 {
-  margin-left: var(--partner-title-shift-x);
+@media (max-width: 980px) {
+  .partner-guide-card {
+    --partner-card-title-indent: clamp(190px, 24vw, 252px);
+    --partner-card-copy-top: clamp(58px, 7.4vw, 82px);
+    --partner-card-copy-left: clamp(48px, 7vw, 72px);
+  }
 }
 
-.partner-card > p {
-  margin-top: var(--partner-description-shift-y);
-}
+@media (max-width: 760px) {
+  .partners-root {
+    width: min(780px, 100%);
+  }
 
-#partners-root .partner-card + .partner-card {
-  margin-top: clamp(2.2rem, 4.4vw, 3rem);
-}
+  .content-box {
+    width: 100%;
+    --content-box-top-height: clamp(22px, 5vw, 34px);
+    --content-box-bottom-height: clamp(20px, 4vw, 30px);
+    --content-box-bottom-bg-size: 100% 100%;
+  }
 
-.competitive-rules > .cr-section:first-of-type {
-  margin-top: 0;
-}
+  .content-box-top {
+    display: block;
+    width: 100%;
+  }
 
-.competitive-rules > .cr-section > h2 {
-  margin-top: 0;
-}
+  .content-box-top-left {
+    display: none;
+  }
 
-.competitive-rules > .cr-section::before {
-  content: "";
-  position: absolute;
-  left: var(--cr-top-cap-left);
-  top: calc(-1 * var(--cr-top-cap-height) + 1px);
-  width: var(--cr-top-cap-width);
-  height: var(--cr-top-cap-height);
-  z-index: -1;
-  display: block;
-  background: url("../assets/text-boxes/top.png") left top / 100% 100% no-repeat;
-  pointer-events: none;
-}
+  .content-box-center {
+    width: auto;
+    min-height: 0;
+    margin-left: 0;
+    padding: 0;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
 
-.competitive-rules > .cr-section::after {
-  content: "";
-  position: absolute;
-  left: var(--cr-bottom-cap-left);
-  bottom: calc(-1 * var(--cr-bottom-cap-height) + 1px);
-  width: var(--cr-bottom-cap-width);
-  height: var(--cr-bottom-cap-height);
-  z-index: -1;
-  display: block;
-  background: url("../assets/text-boxes/bottom.png") left bottom / 100% 100% no-repeat;
-  pointer-events: none;
+  .content-box-top-main,
+  .content-box-bottom {
+    width: 100%;
+    background-size: 100% 100%;
+  }
+
+  .content-box-texture {
+    left: 0;
+    top: 0;
+    width: min(140px, 44vw);
+    height: auto;
+    aspect-ratio: 308 / 235;
+  }
+
+  .partner-guide-card {
+    --partner-card-media-width: min(262px, 74vw);
+    --partner-card-media-height: calc(var(--partner-card-media-width) * 147 / 262);
+    --partner-card-media-offset-x: 0px;
+    --partner-card-media-offset-y: 0px;
+  }
+
+  .partner-guide-card > .content-box-center {
+    padding: 0.7rem 0.9rem 0.95rem;
+  }
+
+  .partner-guide-card-flex {
+    display: block;
+  }
+
+  .partner-guide-card-media {
+    position: relative;
+    margin: 0 auto 0.7rem;
+  }
+
+  .partner-guide-card-title-wrap {
+    height: auto;
+  }
+
+  .partner-guide-card-title {
+    top: 0;
+    margin: 0;
+    padding-left: 0;
+    max-width: none;
+    font-size: calc(clamp(1rem, 4.8vw, 1.28rem) + 2px);
+    white-space: normal;
+  }
+
+  .partner-guide-card-description-wrap {
+    margin-top: 0.8rem;
+  }
+
+  .partner-guide-card-description {
+    margin: 0;
+    max-width: none;
+  }
 }
 
 .cr-subsection {
@@ -1108,23 +1294,22 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
   color: #ffdca1;
 }
 
+.content-box-list > .cr-note {
+  margin-top: -0.34rem;
+  padding-left: var(--rules-header-offset-left);
+  padding-right: var(--rules-header-offset-right);
+  transform: none;
+}
+
 .setup-guide-page #msc-setup-guide-root,
 .setup-guide-page #sms-setup-guide-root {
   display: block;
-  padding-top: var(--space-3);
+  padding-top: 0;
 }
 
 body[data-subnav="off"] .setup-guide-page #msc-setup-guide-root,
 body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
   padding-top: 0;
-}
-
-.setup-guide-article > .setup-guide-section {
-  margin-top: clamp(1.45rem, 3.3vw, 2.05rem);
-}
-
-.setup-guide-article > .setup-guide-section:first-of-type {
-  margin-top: 0;
 }
 
 .setup-guide-media {
@@ -1155,6 +1340,12 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
   width: 100%;
   height: 100%;
   border: 0;
+}
+
+body[data-page="sms-setup-guide"] .setup-guide-video-frame {
+  width: min(100%, 640px);
+  margin-left: 0;
+  margin-right: auto;
 }
 
 .setup-guide-code {
@@ -1192,23 +1383,25 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
   align-items: baseline;
   justify-content: space-between;
   gap: 0.8rem;
-  margin-top: 0.55rem;
+  margin-top: -0.34rem;
+  padding-left: var(--rules-header-offset-left);
+  padding-right: var(--rules-header-offset-right);
 }
 
 .setup-guide-meta-line .cr-note {
   margin: 0;
+  transform: none;
 }
 
 .setup-guide-meta-line .setup-guide-credits {
   margin: 0 0 0 auto;
   text-align: right;
   color: #ffffff;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+  transform: translateX(12px);
 }
 
 .msl-league-rules-status {
-  margin: 1rem 0 0;
+  margin: 0;
   color: #fff;
   font-size: 1.45rem;
   text-align: center;
@@ -1222,7 +1415,7 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
   width: 100%;
   max-width: 860px;
   margin: 0 auto;
-  padding-top: var(--space-3);
+  padding-top: 0;
   text-align: center;
 }
 
@@ -1268,11 +1461,7 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
 
 .msl-schedule-meta {
   margin: 0.35rem 0 0;
-  font-family: "Trade Gothic Next BdCn", "ITC Grizzly", sans-serif;
-  font-size: calc(clamp(0.84rem, 0.95vw, 0.96rem) + 1px);
-  line-height: 1.35;
   color: #f4f4f4;
-  text-shadow: -1px 1px 0 #000;
   text-transform: none;
 }
 
@@ -1280,6 +1469,16 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
   color: #ff8a00;
   text-decoration: underline;
   text-underline-offset: 0.14em;
+}
+
+body[data-page="msl-league-site"] .msl-schedule-meta {
+  font-size: 15px !important;
+  line-height: 1.25;
+}
+
+body[data-page="msl-league-site"] .msl-schedule-meta a {
+  font-size: inherit;
+  line-height: inherit;
 }
 
 .save-editor-page {
@@ -1298,9 +1497,6 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
   width: min(700px, 100%);
   margin: 0 auto;
   color: #d6d6d6;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: clamp(0.92rem, 1.06vw, 1.02rem);
-  line-height: 1.32;
   text-align: center;
 }
 
@@ -1478,8 +1674,9 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
 }
 
 .save-editor-btn {
-  min-height: 40px;
+  min-height: 36px;
   width: 100%;
+  padding: 0 8px;
   border: 0;
   background-color: transparent;
   background-image: url("../assets/ui/menu-buttons.png");
@@ -1490,14 +1687,14 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
   align-items: center;
   justify-content: center;
   color: #f5c300;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: clamp(0.92rem, 1.2vw, 1.05rem);
-  letter-spacing: 0.03em;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
   text-transform: uppercase;
 }
 
 .save-editor-btn-label {
-  transform: translateY(-1px);
+  transform: none;
 }
 
 .save-editor-btn:disabled {
@@ -1538,9 +1735,6 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
 
 .save-editor-field > span {
   color: #f5c300;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: clamp(0.78rem, 0.95vw, 0.9rem);
-  letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
@@ -1549,8 +1743,6 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
   border: 1px solid #c77603;
   background: rgba(20, 0, 0, 0.86);
   color: #ffffff;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: clamp(0.95rem, 1.1vw, 1rem);
   padding: 0 0.42rem;
   box-sizing: border-box;
 }
@@ -1558,8 +1750,6 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
 .save-editor-note {
   margin: 0;
   color: #ffffff;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: clamp(0.95rem, 1.1vw, 1.05rem);
   text-align: center;
 }
 
@@ -1760,7 +1950,7 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
   gap: 0;
   min-width: 0;
   padding-left: 4px;
-  min-height: 18px;
+  min-height: 22px;
   transform: translateY(0);
 }
 
@@ -1772,8 +1962,8 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
   min-width: 0;
   width: 100%;
   padding-left: 10px;
-  min-height: 16px;
-  transform: translateY(-1px);
+  min-height: 18px;
+  transform: translateY(-2px);
 }
 
 .msbl-club-meta-item {
@@ -1781,8 +1971,9 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
   align-items: center;
   width: 100%;
   white-space: nowrap;
-  line-height: 1.18;
-  padding-bottom: 1px;
+  min-height: 18px;
+  line-height: 1;
+  padding-bottom: 0;
 }
 
 .msbl-club-name,
@@ -1791,42 +1982,38 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
 .msbl-club-extra,
 .msbl-club-members {
   color: #fff;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: clamp(0.88rem, 0.96vw, 0.98rem);
-  line-height: 1;
-  text-shadow: -2px 2px 0 #000;
 }
 
 .msbl-club-name {
   color: #fff;
+  display: inline-flex;
+  align-items: center;
   min-width: 0;
   overflow: visible;
   text-overflow: clip;
   white-space: nowrap;
   padding-left: 4px;
   font-family: "ITC Grizzly", sans-serif;
-  font-size: calc(clamp(1.24rem, 1.4vw, 1.5rem) - 4px);
-  line-height: 1;
-  padding-bottom: 1px;
+  font-size: calc(clamp(1.24rem, 1.4vw, 1.5rem) - 1px);
+  line-height: 1.02;
+  min-height: 22px;
+  padding-bottom: 0;
+  transform: translateY(0px);
 }
 
 .msbl-club-tag-meta {
   color: #c9c9c9;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
   justify-content: flex-start;
   text-align: left;
-  text-shadow: none;
   padding-left: 4px;
 }
 
 .msbl-club-status {
   color: #c9c9c9;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
   white-space: nowrap;
   justify-content: center;
   text-align: center;
   transform: translateX(-28px);
-  text-shadow: none;
 }
 
 .msbl-club-status-icon,
@@ -1838,7 +2025,7 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
 }
 
 .msbl-club-status-icon {
-  transform: translateY(2px);
+  transform: translateY(0px);
 }
 
 .msbl-club-members-icon {
@@ -1852,17 +2039,14 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
 
 .msbl-club-extra {
   color: #c9c9c9;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
   justify-content: center;
   text-align: center;
   white-space: nowrap;
   transform: translateX(-28px);
-  text-shadow: none;
 }
 
 .msbl-club-members {
   color: #c9c9c9;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
   justify-content: flex-start;
@@ -1870,20 +2054,28 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
   white-space: nowrap;
   padding-left: 14px;
   transform: translateX(48px);
-  text-shadow: none;
 }
 
 .msbl-club-members-text {
   display: inline-block;
 }
 
+.msbl-club-tag-meta,
+.msbl-club-status,
+.msbl-club-extra,
+.msbl-club-members {
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: var(--reporter-letter-spacing);
+  text-shadow: none;
+}
+
 .msbl-clubs-note {
   margin: 0;
   color: #fff;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: clamp(1rem, 1.14vw, 1.12rem);
   text-align: center;
-  text-shadow: -2px 2px 0 #000;
 }
 
 .msbl-clubs-note-error {
@@ -1983,10 +2175,7 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
 .players-note {
   margin: 0;
   color: #fff;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: clamp(1rem, 1.14vw, 1.12rem);
   text-align: center;
-  text-shadow: -2px 2px 0 #000;
 }
 
 .players-note-error {
@@ -1998,7 +2187,7 @@ body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
 }
 
 .tier-list-figure {
-  margin: var(--space-3) auto 0;
+  margin: 0 auto;
   width: 100%;
 }
 
@@ -2041,7 +2230,7 @@ body.player-popup-open {
 .player-popup-card {
   position: relative;
   z-index: 1;
-  width: min(460px, calc(100vw - 1.8rem));
+  width: min(580px, calc(100vw - 1.8rem));
   max-height: min(92vh, 980px);
   overflow: hidden;
   display: grid;
@@ -2061,9 +2250,6 @@ body.player-popup-open {
   padding: 0;
   background: transparent;
   color: #ffffff;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: 1.6rem;
-  line-height: 1;
   cursor: pointer;
 }
 
@@ -2093,7 +2279,7 @@ body.player-popup-open {
   margin: 0;
   color: #fff;
   font-family: "ITC Grizzly", sans-serif;
-  font-size: clamp(1.18rem, 1.55vw, 1.35rem);
+  font-size: clamp(1.08rem, 1.42vw, 1.24rem);
   line-height: 1.1;
   text-shadow: -2px 2px 0 #000;
   transform: translateY(-2px);
@@ -2116,9 +2302,6 @@ body.player-popup-open {
 .player-popup-status {
   margin: 0.2rem 0 0;
   color: #fff;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: 1rem;
-  line-height: 1.35;
 }
 
 .player-popup-status.is-error {
@@ -2147,10 +2330,6 @@ body.player-popup-open {
 .player-popup-section-title {
   margin: 0;
   color: #d7d8de;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: 1.05rem;
-  line-height: 1.2;
-  text-shadow: -1px 1px 0 #000;
 }
 
 .player-popup-code-list {
@@ -2168,9 +2347,6 @@ body.player-popup-open {
   border-radius: 0;
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: 1rem;
-  line-height: 1.15;
 }
 
 .player-popup-code-row.is-empty {
@@ -2196,9 +2372,6 @@ body.player-popup-open {
 
 .player-popup-results-link {
   color: #7ab6ff;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: 1rem;
-  line-height: 1.2;
   text-decoration: none;
 }
 
@@ -2225,9 +2398,6 @@ body.player-popup-open {
   align-items: center;
   gap: 0.3rem;
   color: #f2f2f2;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: 1rem;
-  line-height: 1.2;
 }
 
 .player-popup-accolade-item.is-empty {
@@ -2268,9 +2438,6 @@ body.player-popup-open {
 .player-popup-rating-title {
   margin: 0 0 0.24rem;
   color: #fff;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: 1.04rem;
-  line-height: 1.1;
 }
 
 .player-popup-rating-line {
@@ -2279,9 +2446,33 @@ body.player-popup-open {
   align-items: center;
   gap: 0.2rem;
   color: #f2f2f2;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: 0.98rem;
+}
+
+#player-profile-popup :is(
+  .player-popup-close,
+  .player-popup-status,
+  .player-popup-section-title,
+  .player-popup-code-row,
+  .player-popup-results-link,
+  .player-popup-accolade-item,
+  .player-popup-rating-title,
+  .player-popup-rating-line
+) {
+  font-size: var(--reporter-font-size-sm);
+}
+
+#player-profile-popup :is(
+  .player-popup-status,
+  .player-popup-section-title,
+  .player-popup-code-row,
+  .player-popup-results-link,
+  .player-popup-accolade-item,
+  .player-popup-rating-title,
+  .player-popup-rating-line
+) {
+  font-size: 15px;
   line-height: 1.22;
+  text-shadow: none;
 }
 
 .player-popup-rating-label {
@@ -2379,9 +2570,6 @@ body.player-popup-open {
   border: 1px solid rgba(255, 255, 255, 0.85);
   background: rgba(0, 0, 0, 0.22);
   color: #fff;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: 1rem;
-  letter-spacing: 0.03em;
   text-transform: uppercase;
   text-decoration: none;
   white-space: nowrap;
@@ -2438,10 +2626,7 @@ body.player-popup-open {
     width: clamp(50px, 13vw, 68px);
   }
 
-  .nav-brand-est {
-    font-size: clamp(0.44rem, 1.35vw, 0.53rem);
-    letter-spacing: 0.06em;
-  }
+  .nav-brand-est {}
 
   .ext-icon {
     width: clamp(18px, 1.25rem, 28px);
@@ -2511,14 +2696,17 @@ body.player-popup-open {
   }
 
   .competitive-rules-page #competitive-rules-root {
-    padding-top: 0.62rem;
+    padding-top: 0;
   }
 
   .competitive-rules-header {
-    margin-bottom: 0.36rem;
+    margin-bottom: -0.14rem;
     flex-direction: column;
     align-items: stretch;
     gap: 0.2rem;
+    padding-top: 0;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .cr-page-revised {
@@ -2530,10 +2718,9 @@ body.player-popup-open {
     padding: 0;
   }
 
-  .competitive-rules > .cr-section {
+  .content-box-content {
     padding-left: 1.45rem;
     padding-right: 1.45rem;
-    --cr-pattern-size: 240px;
   }
 }
 
@@ -2542,3 +2729,156 @@ body.player-popup-open {
     --nav-shell-height: 100px;
   }
 }
+
+:is(
+  .nav-brand-est,
+  #msbl-gear-builder-host,
+  .lb-player,
+  .leaderboard-empty,
+  .competitive-rules p,
+  .competitive-rules li,
+  .competitive-rules a,
+  .competitive-rules span,
+  .competitive-rules strong,
+  .competitive-rules em,
+  .partner-guide-card-description,
+  .loading-note,
+  .gear-builder-credits,
+  .msbl-gear-builder-note,
+  .setup-guide-meta-line .setup-guide-credits,
+  .msl-schedule-meta,
+  .save-editor-field > span,
+  .save-editor-field > select,
+  .save-editor-note,
+  .msbl-clubs-note,
+  .players-note,
+  .player-popup-close,
+  .player-popup-status,
+  .player-popup-section-title,
+  .player-popup-code-row,
+  .player-popup-results-link,
+  .player-popup-accolade-item,
+  .player-popup-rating-title,
+  .player-popup-rating-line,
+  .tab-placeholder-switch
+) {
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: var(--reporter-font-size);
+  line-height: var(--reporter-line-height);
+  letter-spacing: var(--reporter-letter-spacing);
+  text-shadow: var(--reporter-text-shadow);
+}
+
+:is(
+  .nav-brand-est,
+  .gear-builder-credits,
+  .setup-guide-meta-line .setup-guide-credits
+) {
+  font-size: var(--reporter-font-size-xs);
+}
+
+:is(
+  .competitive-rules p,
+  .competitive-rules li,
+  .competitive-rules a,
+  .competitive-rules span,
+  .competitive-rules strong,
+  .competitive-rules em,
+  .partner-guide-card-description
+) {
+  font-size: var(--reporter-font-size-sm);
+}
+
+.nav-brand .nav-brand-est {
+  display: block;
+  font-size: 11px !important;
+  line-height: 0.9 !important;
+  letter-spacing: 0.02em !important;
+  text-shadow: -1px 1px 0 #000 !important;
+}
+
+.save-editor-description {
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  line-height: var(--reporter-line-height);
+  letter-spacing: var(--reporter-letter-spacing);
+  text-shadow: var(--reporter-text-shadow);
+  font-size: 14px;
+}
+
+.save-editor-btn {
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  line-height: var(--reporter-line-height);
+  letter-spacing: var(--reporter-letter-spacing);
+  text-shadow: var(--reporter-text-shadow);
+  font-size: var(--reporter-font-size-xs);
+  color: #fac402;
+}
+
+.save-editor-btn:hover,
+.save-editor-btn:focus-visible {
+  color: #fac402;
+  filter: brightness(1.05);
+}
+
+/* Footer */
+
+#global-footer {
+  width: 100%;
+  height: 58px;
+  background-color: #28010c;
+  background-image: var(--global-nav-footer-image);
+  background-repeat: repeat-x;
+  background-position: left top;
+  background-size: 1280px 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.global-footer-disclaimer {
+  margin: 0;
+  padding-inline: 1rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-family: var(--reporter-font-stack);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-shadow: none;
+  line-height: 1.3;
+}
+
+.global-footer-links {
+  margin: 0;
+  display: flex;
+  gap: 0;
+}
+
+.global-footer-link {
+  color: #dc6003;
+  font-family: var(--reporter-font-stack);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  text-shadow: none;
+}
+
+.global-footer-link:hover,
+.global-footer-link:focus-visible {
+  color: #ff7a1a;
+}
+
+.global-footer-sep {
+  color: rgba(255, 255, 255, 0.35);
+  font-family: var(--reporter-font-stack);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Privacy Policy */

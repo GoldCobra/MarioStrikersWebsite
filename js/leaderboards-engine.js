@@ -299,6 +299,13 @@
     ].join("");
   }
 
+  function renderLoadingState(mount) {
+    if (!mount) {
+      return;
+    }
+    mount.innerHTML = '<p class="leaderboard-empty loading-note">Loading...</p>';
+  }
+
   async function fetchLeaderboardRows(tabKey, options) {
     var opts = options || {};
     var allowCache = opts.allowCache !== false;
@@ -361,6 +368,10 @@
     if (!listEl || !emptyEl) {
       return;
     }
+
+    listEl.innerHTML = "";
+    emptyEl.textContent = "Loading...";
+    emptyEl.hidden = false;
 
     var primary = await fetchLeaderboardRows(tabKey, { allowCache: true });
     await (rowAssetsPreloadPromise || Promise.resolve());
@@ -563,6 +574,8 @@
     if (!mount) {
       return;
     }
+
+    renderLoadingState(mount);
 
     var currentFile = getCurrentPageFilename();
     var prefix = getPathPrefix();

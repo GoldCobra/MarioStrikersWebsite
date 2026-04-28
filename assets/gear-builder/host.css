@@ -21,8 +21,6 @@
 .gear-builder-credits {
   margin: 0;
   color: #ffffff;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: clamp(0.95rem, 1.1vw, 1.1rem);
   text-align: right;
 }
 
@@ -30,9 +28,6 @@
   margin: 1.2rem 0;
   text-align: center;
   color: #f4f4f4;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: clamp(1rem, 1.15vw, 1.15rem);
-  text-shadow: -2px 2px 0 #000;
 }
 
 .msbl-gear-builder-note.is-error {
@@ -210,6 +205,8 @@
 #msbl-gear-builder-host #tab-b .min input,
 #msbl-gear-builder-host #tab-b .max input {
   color: #ff8a00;
+  font-family: inherit;
+  font-size: var(--reporter-font-size-sm);
 }
 
 #msbl-gear-builder-host #tab-b .selectBox::after {
@@ -236,9 +233,12 @@
 #msbl-gear-builder-host #tab-b .buildcells::after,
 #msbl-gear-builder-host #tab-b .results {
   color: #fff !important;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+}
+
+#msbl-gear-builder-host #tab-b .table th:nth-child(1),
+#msbl-gear-builder-host #tab-b .table th:nth-child(2) {
+  font-size: 0.9rem;
+  line-height: 1;
 }
 
 #msbl-gear-builder-host #tab-b {
@@ -274,7 +274,8 @@
   line-height: 1;
   border: 0 !important;
   background: transparent !important;
-  font-size: calc(1rem + 4px);
+  font-family: "ITC Grizzly", sans-serif;
+  font-size: calc(var(--reporter-font-size-sm) + 2px);
   font-weight: 700;
   text-shadow: -2px 2px 0 #000 !important;
 }
@@ -497,9 +498,9 @@
   background-position: center;
   background-size: 100% 100%;
   color: #fac402;
-  font-family: "ITC Grizzly", sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-family: inherit;
+  font-size: var(--reporter-font-size-xs);
+  font-weight: inherit;
   text-transform: uppercase;
   text-shadow: -2px 2px 0 #000;
   white-space: nowrap;
@@ -518,11 +519,6 @@
 #msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b.copypic,
 #msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b.savepic {
   color: #f5c300;
-  font-family: "Trade Gothic Next BdCn", sans-serif;
-  font-size: clamp(0.92rem, 1.2vw, 1.05rem);
-  font-weight: 400;
-  letter-spacing: 0.03em;
-  text-shadow: none;
 }
 
 #msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b.copytext:hover,

@@ -217,7 +217,7 @@
       return;
     }
 
-    renderStatus(host, "Loading Gear Builder...", false);
+    renderStatus(host, "Loading...", false);
 
     try {
       var response = await fetch(TEMPLATE_URL, {
