@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var PROFILE_TEMPLATE_URL = "templates/player-profile-popup.html";
+  var PROFILE_TEMPLATE_URL = "templates/player-profile-popup.html?v=20260429-global-popup-v1";
   var POPUP_OPEN_CLASS = "player-popup-open";
 
   var profileCache = new Map();

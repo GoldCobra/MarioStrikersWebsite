@@ -6,7 +6,7 @@
   <link rel="preload" href="../assets/fonts/itc-grizzly.woff" as="font" type="font/woff" crossorigin>
   <link rel="preload" href="../assets/fonts/MLSBY.woff" as="font" type="font/woff" crossorigin>
   <title>MSC Save Editor | Mario Strikers Community</title>
-  <link rel="stylesheet" href="../css/global.css?v=20260428-cleanup-v1">
+  <link rel="stylesheet" href="../css/global.css?v=20260429-delete-codes-v1">
 </head>
 <body data-page="msc-save-editor">
   <div id="1">
@@ -15,62 +15,133 @@
   </div>
 
   <main class="page-content save-editor-page" aria-label="MSC save editor">
-    <section class="save-editor-panel">
-      <p class="save-editor-description">This Save Editor is built primarily for competitive play, letting you quickly create team presets, share them with other players, and apply the default competitive settings (automatically done).</p>
-      <div class="save-editor-actions" role="group" aria-label="Save editor actions">
+    <section class="save-editor-panel" data-editor-mode="save">
+      <p class="save-editor-description">This Save Editor is built primarily for competitive play, letting you quickly create team presets, share them with other players, manage your online friendlist and apply the default competitive settings (automatically done).</p>
+      <div class="save-editor-mode-switch" role="tablist" aria-label="Editor mode">
+        <button id="save-editor-mode-save" class="save-editor-mode-btn is-active" data-editor-mode-target="save" type="button" role="tab" aria-selected="true" aria-controls="save-editor-save-mode">SAVE (<span class="save-editor-mode-accent">Strikers2</span>)</button>
+        <span class="save-editor-mode-separator" aria-hidden="true">|</span>
+        <button id="save-editor-mode-friendlist" class="save-editor-mode-btn" data-editor-mode-target="friendlist" type="button" role="tab" aria-selected="false" aria-controls="save-editor-friendlist-mode">FRIENDLIST (<span class="save-editor-mode-accent">Online</span>)</button>
+      </div>
+      <div id="save-editor-save-actions" class="save-editor-actions is-active" data-editor-actions="save" role="group" aria-label="Save editor actions">
         <button id="save-editor-load" class="save-editor-btn" type="button"><span class="save-editor-btn-label">Load</span></button>
         <button id="save-editor-apply" class="save-editor-btn" type="button" disabled><span class="save-editor-btn-label">Write</span></button>
         <button id="save-editor-xml-import" class="save-editor-btn" type="button" disabled><span class="save-editor-btn-label">XML-Import</span></button>
         <button id="save-editor-xml-export" class="save-editor-btn" type="button" disabled><span class="save-editor-btn-label">XML-Export</span></button>
         <button id="save-editor-save" class="save-editor-btn" type="button" disabled><span class="save-editor-btn-label">Export Save</span></button>
       </div>
+      <div id="save-editor-friendlist-actions" class="save-editor-actions save-editor-friendlist-actions" data-editor-actions="friendlist" role="group" aria-label="Friendlist editor actions" hidden>
+        <button id="online-editor-load" class="save-editor-btn" type="button"><span class="save-editor-btn-label">Load Online</span></button>
+        <button id="online-editor-add" class="save-editor-btn" type="button" disabled><span class="save-editor-btn-label">ADD CODES</span></button>
+        <button id="online-editor-delete" class="save-editor-btn" type="button" disabled><span class="save-editor-btn-label">DELETE CODES</span></button>
+        <button id="online-editor-export" class="save-editor-btn" type="button" disabled><span class="save-editor-btn-label">EXPORT ONLINE</span></button>
+      </div>
       <input id="save-editor-file-input" class="save-editor-file-input" type="file">
       <input id="save-editor-xml-input" class="save-editor-file-input" type="file" accept=".xml,text/xml,application/xml">
+      <input id="online-editor-file-input" class="save-editor-file-input" type="file">
       <a id="save-editor-download" class="save-editor-download-link" download="Strikers2"></a>
       <a id="save-editor-xml-download" class="save-editor-download-link" download="msc-presets-r4qp01.xml"></a>
-      <section class="save-editor-formation-panel" aria-label="Team preset formation">
-        <div class="save-editor-formation">
-          <button id="save-editor-slot-top" class="save-editor-slot save-editor-slot-top" data-slot="top" type="button">
-            <img id="save-editor-slot-top-icon" class="save-editor-slot-icon" alt="Top sidekick">
-          </button>
-          <button id="save-editor-slot-back" class="save-editor-slot save-editor-slot-back" data-slot="back" type="button">
-            <img id="save-editor-slot-back-icon" class="save-editor-slot-icon" alt="Back sidekick">
-          </button>
-          <button id="save-editor-slot-bottom" class="save-editor-slot save-editor-slot-bottom" data-slot="bottom" type="button">
-            <img id="save-editor-slot-bottom-icon" class="save-editor-slot-icon" alt="Bottom sidekick">
-          </button>
-          <button id="save-editor-slot-captain" class="save-editor-slot save-editor-slot-captain" data-slot="captain" type="button">
-            <img id="save-editor-slot-captain-icon" class="save-editor-slot-icon" alt="Captain">
-          </button>
+      <a id="online-editor-download" class="save-editor-download-link" download="Online"></a>
+      <section id="save-editor-save-mode" class="save-editor-mode-panel is-active" data-editor-view="save" role="tabpanel" aria-labelledby="save-editor-mode-save">
+        <section class="save-editor-formation-panel" aria-label="Team preset formation">
+          <div class="save-editor-formation">
+            <button id="save-editor-slot-top" class="save-editor-slot save-editor-slot-top" data-slot="top" type="button">
+              <img id="save-editor-slot-top-icon" class="save-editor-slot-icon" alt="Top sidekick">
+            </button>
+            <button id="save-editor-slot-back" class="save-editor-slot save-editor-slot-back" data-slot="back" type="button">
+              <img id="save-editor-slot-back-icon" class="save-editor-slot-icon" alt="Back sidekick">
+            </button>
+            <button id="save-editor-slot-bottom" class="save-editor-slot save-editor-slot-bottom" data-slot="bottom" type="button">
+              <img id="save-editor-slot-bottom-icon" class="save-editor-slot-icon" alt="Bottom sidekick">
+            </button>
+            <button id="save-editor-slot-captain" class="save-editor-slot save-editor-slot-captain" data-slot="captain" type="button">
+              <img id="save-editor-slot-captain-icon" class="save-editor-slot-icon" alt="Captain">
+            </button>
+          </div>
+        </section>
+        <section class="save-editor-picker" aria-label="Character icon picker">
+          <div id="save-editor-picker-grid" class="save-editor-picker-grid"></div>
+        </section>
+        <section class="save-editor-form save-editor-form-hidden" aria-label="Team preset editor">
+          <label class="save-editor-field">
+            <span>CAPTAIN</span>
+            <select id="save-editor-captain"></select>
+          </label>
+          <label class="save-editor-field">
+            <span>TOP</span>
+            <select id="save-editor-top"></select>
+          </label>
+          <label class="save-editor-field">
+            <span>BOTTOM</span>
+            <select id="save-editor-bottom"></select>
+          </label>
+          <label class="save-editor-field">
+            <span>BACK</span>
+            <select id="save-editor-back"></select>
+          </label>
+        </section>
+        <p id="save-editor-status" class="save-editor-note"></p>
+      </section>
+      <section id="save-editor-friendlist-mode" class="save-editor-mode-panel online-editor-panel" data-editor-view="friendlist" role="tabpanel" aria-labelledby="save-editor-mode-friendlist" hidden>
+        <label class="online-editor-field">
+          <span id="online-editor-profile-label">PROFILE</span>
+          <div class="online-editor-profile-picker">
+            <button id="online-editor-profile-trigger" class="online-editor-profile-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" disabled>
+              <span id="online-editor-profile-trigger-name" class="online-editor-profile-trigger-name">Load an Online file first</span>
+              <span id="online-editor-profile-trigger-meta" class="online-editor-profile-trigger-meta"></span>
+            </button>
+            <div id="online-editor-profile-menu" class="online-editor-profile-menu" role="listbox" hidden></div>
+            <select id="online-editor-profile" disabled hidden>
+              <option value="">Load an Online file first</option>
+            </select>
+          </div>
+        </label>
+        <div id="online-editor-results" class="online-editor-results" aria-live="polite">
+          <p class="online-editor-empty">No Online file loaded.</p>
         </div>
+        <p id="online-editor-status" class="save-editor-note"></p>
       </section>
-      <section class="save-editor-picker" aria-label="Character icon picker">
-        <div id="save-editor-picker-grid" class="save-editor-picker-grid"></div>
-      </section>
-      <section class="save-editor-form save-editor-form-hidden" aria-label="Team preset editor">
-        <label class="save-editor-field">
-          <span>CAPTAIN</span>
-          <select id="save-editor-captain"></select>
-        </label>
-        <label class="save-editor-field">
-          <span>TOP</span>
-          <select id="save-editor-top"></select>
-        </label>
-        <label class="save-editor-field">
-          <span>BOTTOM</span>
-          <select id="save-editor-bottom"></select>
-        </label>
-        <label class="save-editor-field">
-          <span>BACK</span>
-          <select id="save-editor-back"></select>
-        </label>
-      </section>
-      <p id="save-editor-status" class="save-editor-note"></p>
+      <div id="online-editor-add-popup" class="online-editor-popup popup-overlay" hidden aria-hidden="true">
+        <button class="online-editor-popup-backdrop popup-backdrop" id="online-editor-add-backdrop" type="button" aria-label="Close add codes popup"></button>
+        <section class="online-editor-popup-card popup-card" role="dialog" aria-modal="true" aria-labelledby="online-editor-add-title">
+          <button id="online-editor-add-close" class="online-editor-popup-close popup-close" type="button" aria-label="Close add codes popup">×</button>
+          <div class="online-editor-popup-header popup-header">
+            <h2 id="online-editor-add-title" class="online-editor-popup-title popup-title">Add Friendcodes</h2>
+          </div>
+          <form id="online-editor-add-form" class="online-editor-popup-form" novalidate>
+            <label class="online-editor-popup-field" aria-label="Friend codes">
+              <textarea id="online-editor-friend-code" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="1234-5678-9012&#10;123456789012&#10;123456 789012"></textarea>
+            </label>
+            <p id="online-editor-add-error" class="online-editor-popup-error" role="alert"></p>
+            <div class="online-editor-popup-actions">
+              <button id="online-editor-add-cancel" class="save-editor-btn" type="button"><span class="save-editor-btn-label">Cancel</span></button>
+              <button id="online-editor-add-submit" class="save-editor-btn" type="submit"><span class="save-editor-btn-label">Add Codes</span></button>
+            </div>
+          </form>
+        </section>
+      </div>
+      <div id="online-editor-delete-popup" class="online-editor-popup popup-overlay" hidden aria-hidden="true">
+        <button class="online-editor-popup-backdrop popup-backdrop" id="online-editor-delete-backdrop" type="button" aria-label="Close delete codes popup"></button>
+        <section class="online-editor-popup-card popup-card" role="dialog" aria-modal="true" aria-labelledby="online-editor-delete-title">
+          <button id="online-editor-delete-close" class="online-editor-popup-close popup-close" type="button" aria-label="Close delete codes popup">×</button>
+          <div class="online-editor-popup-header popup-header">
+            <h2 id="online-editor-delete-title" class="online-editor-popup-title popup-title">Delete Friendcodes</h2>
+          </div>
+          <form id="online-editor-delete-form" class="online-editor-popup-form online-editor-delete-form" novalidate>
+            <div id="online-editor-delete-list" class="online-editor-delete-list" role="group" aria-label="Friend roster"></div>
+            <p id="online-editor-delete-error" class="online-editor-popup-error" role="alert"></p>
+            <div class="online-editor-popup-actions">
+              <button id="online-editor-delete-cancel" class="save-editor-btn" type="button"><span class="save-editor-btn-label">Cancel</span></button>
+              <button id="online-editor-delete-submit" class="save-editor-btn" type="submit"><span class="save-editor-btn-label">Delete Codes</span></button>
+            </div>
+          </form>
+        </section>
+      </div>
     </section>
   </main>
 
   <script src="../js/msc-save-editor-contract.js?v=20260428-cleanup-v1" defer></script>
-  <script src="../js/msc-save-editor.js?v=20260428-cleanup-v1" defer></script>
+  <script src="../js/msc-save-editor.js?v=20260429-simple-export-v1" defer></script>
+  <script src="../js/msc-online-editor.js?v=20260429-delete-codes-v1" defer></script>
   <script src="../js/global-tabs-engine.js?v=20260428-cleanup-v1" defer></script>
   <script src="../js/global-nav.js?v=20260428-cleanup-v1" defer></script>
 </body>

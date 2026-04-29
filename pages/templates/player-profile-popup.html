@@ -1,11 +1,11 @@
-<div id="player-profile-popup" class="player-popup" hidden aria-hidden="true">
-  <button class="player-popup-backdrop" data-action="popup-close" aria-label="Close profile popup"></button>
-  <section class="player-popup-card" role="dialog" aria-modal="true" aria-labelledby="player-popup-name">
-    <button class="player-popup-close" type="button" data-action="popup-close" aria-label="Close profile popup">×</button>
+<div id="player-profile-popup" class="player-popup popup-overlay" hidden aria-hidden="true">
+  <button class="player-popup-backdrop popup-backdrop" data-action="popup-close" aria-label="Close profile popup"></button>
+  <section class="player-popup-card popup-card" role="dialog" aria-modal="true" aria-labelledby="player-popup-name">
+    <button class="player-popup-close popup-close" type="button" data-action="popup-close" aria-label="Close profile popup">×</button>
 
-    <header class="player-popup-header">
+    <header class="player-popup-header popup-header">
       <div class="player-popup-header-title">
-        <h2 id="player-popup-name" class="player-popup-name" data-slot="player-name">-</h2>
+        <h2 id="player-popup-name" class="player-popup-name popup-title" data-slot="player-name">-</h2>
         <img class="player-popup-flag" data-slot="player-flag" src="" alt="" hidden>
       </div>
     </header>

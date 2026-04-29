@@ -609,7 +609,7 @@
     var aboutLink = document.createElement("a");
     aboutLink.href = toHref(prefix, "about-us");
     aboutLink.className = "global-footer-link";
-    aboutLink.textContent = "About Us";
+    aboutLink.textContent = "ABOUT US";
     links.appendChild(aboutLink);
 
     var sep = document.createElement("span");
@@ -620,7 +620,7 @@
     var privacyLink = document.createElement("a");
     privacyLink.href = toHref(prefix, "privacy-policy");
     privacyLink.className = "global-footer-link";
-    privacyLink.textContent = "Privacy Policy";
+    privacyLink.textContent = "PRIVACY POLICY";
     links.appendChild(privacyLink);
 
     footer.appendChild(links);

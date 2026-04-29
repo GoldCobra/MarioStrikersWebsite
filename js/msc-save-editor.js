@@ -133,6 +133,18 @@
     }
   }
 
+  function downloadBytes(bytes, filename) {
+    var blob = new Blob([bytes], { type: "application/octet-stream" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   function buildCharacterOptions(items) {
     var options = [];
     for (var i = 0; i < items.length; i += 1) {
@@ -1290,6 +1302,34 @@
     }
   }
 
+  function handleLoadedSaveBytes(bytes, filename) {
+    var check = validateLoadedFile(bytes);
+    if (!check.ok) {
+      resetLoadedState();
+      setStatus(check.error, "error");
+      return;
+    }
+
+    state.loaded = true;
+    state.fileName = filename && filename.length ? filename : FALLBACK_FILENAME;
+    state.sourceBytes = bytes;
+    state.workingBytes = new Uint8Array(bytes);
+    state.applied = false;
+    state.draftsByCaptain = {};
+    state.currentCaptainUi = Number(elements.captainInput && elements.captainInput.value ? elements.captainInput.value : DEFAULT_CAPTAIN_UI);
+    state.activeSlot = "captain";
+    state.loadedRegion = check.regionProfile || REGION_PROFILES.UNKNOWN;
+
+    refreshButtons();
+    syncSlotButtonStates();
+
+    var selectedCaptain = state.currentCaptainUi;
+    loadCaptainEditorValues(selectedCaptain, true);
+    updateFormationIcons();
+    renderPickerGrid();
+    setStatus(formatLoadedRegionMessage(state.loadedRegion), check.regionKnown ? "success" : "warning");
+  }
+
   function onFilePicked(event) {
     var file = event && event.target && event.target.files ? event.target.files[0] : null;
     if (!file) {
@@ -1297,33 +1337,7 @@
     }
 
     file.arrayBuffer().then(function (buffer) {
-      var bytes = new Uint8Array(buffer);
-      var check = validateLoadedFile(bytes);
-
-      if (!check.ok) {
-        resetLoadedState();
-        setStatus(check.error, "error");
-        return;
-      }
-
-      state.loaded = true;
-      state.fileName = file.name && file.name.length ? file.name : FALLBACK_FILENAME;
-      state.sourceBytes = bytes;
-      state.workingBytes = new Uint8Array(bytes);
-      state.applied = false;
-      state.draftsByCaptain = {};
-      state.currentCaptainUi = Number(elements.captainInput && elements.captainInput.value ? elements.captainInput.value : DEFAULT_CAPTAIN_UI);
-      state.activeSlot = "captain";
-      state.loadedRegion = check.regionProfile || REGION_PROFILES.UNKNOWN;
-
-      refreshButtons();
-      syncSlotButtonStates();
-
-      var selectedCaptain = state.currentCaptainUi;
-      loadCaptainEditorValues(selectedCaptain, true);
-      updateFormationIcons();
-      renderPickerGrid();
-      setStatus(formatLoadedRegionMessage(state.loadedRegion), check.regionKnown ? "success" : "warning");
+      handleLoadedSaveBytes(new Uint8Array(buffer), file.name);
     }).catch(function () {
       resetLoadedState();
       setStatus("Failed to read file.", "error");
@@ -1461,17 +1475,12 @@
   }
 
   function onSaveClick() {
-    if (!state.applied || !state.workingBytes || !elements.downloadAnchor) {
+    if (!state.applied || !state.workingBytes) {
       setStatus("Write valid draft changes first.", "error");
       return;
     }
 
-    var blob = new Blob([state.workingBytes], { type: "application/octet-stream" });
-    var url = URL.createObjectURL(blob);
-    elements.downloadAnchor.href = url;
-    elements.downloadAnchor.download = state.fileName || FALLBACK_FILENAME;
-    elements.downloadAnchor.click();
-    URL.revokeObjectURL(url);
+    downloadBytes(state.workingBytes, state.fileName || FALLBACK_FILENAME);
     setStatus("Patched save exported.", "success");
   }
 
