@@ -186,7 +186,7 @@ cd /var/www/msc && sudo ./deploy/update.sh
 
 An alternative to the Nginx + PM2 setup above. Requires Docker and Docker Compose on the server.
 
-### 1 — Clone and configure
+### 1. Clone and configure
 
 ```bash
 git clone <your-repo-url> /var/www/msc
@@ -206,7 +206,7 @@ MSSQL_USER=<db-user>
 MSSQL_PASSWORD=<db-password>
 ```
 
-### 2 — Start
+### 2. Start
 
 ```bash
 docker compose up -d
@@ -216,7 +216,7 @@ This starts two containers:
 - `web` — Nginx serving static files on port 80, proxying `/api/*` to the backend
 - `api` — Node.js backend connected to the MSSQL database
 
-### 3 — Verify
+### 3. Verify
 
 ```bash
 docker compose ps                             # both containers should show "running"
