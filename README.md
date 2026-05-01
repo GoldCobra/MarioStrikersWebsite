@@ -44,6 +44,7 @@ Cache busting is handled with `?v=...` query strings in HTML script/style URLs. 
 |   +-- gear-builder/                  # Embedded MSBL Gear Builder source
 |   +-- msc-saveeditor/                # MSC Save/Online Editor visual assets
 +-- backend/                           # Express API bridge to MSSQL
++-- deploy/                            # Production deployment files (Nginx, PM2, scripts)
 +-- docs/                              # Notes, archived snapshots, non-runtime source assets
 +-- start.bat                          # Windows local startup script
 ```
@@ -74,7 +75,7 @@ CORS_ORIGIN=*
 LEADERBOARD_DEFAULT_LIMIT=100
 LEADERBOARD_MAX_LIMIT=500
 MSSQL_HOST=
-MSSQL_PORT=443
+MSSQL_PORT=1433
 MSSQL_DATABASE=
 MSSQL_USER=
 MSSQL_PASSWORD=
@@ -105,6 +106,130 @@ npx --yes http-server . -p 8080 -c-1 --proxy http://127.0.0.1:8787
 ```
 
 Use a local server instead of opening HTML files directly, because templates and API requests use browser `fetch()`.
+
+## Production Deployment
+
+The site runs as two processes behind an Nginx reverse proxy:
+
+```
+Browser → Nginx (80/443)
+           ├── /         → static files  (HTML, CSS, JS, assets)
+           └── /api/*    → Node.js API   (port 8787, managed by PM2)
+```
+
+### Prerequisites
+
+- Linux server (Debian/Ubuntu) with Nginx installed
+- Domain DNS A record pointing to the server's IP
+- SSH root access
+
+### 1 — Upload the project
+
+Copy the project to the server (replace values as needed):
+
+```bash
+rsync -av --exclude='backend/node_modules' --exclude='backend/.env' --exclude='deploy/logs' \
+  ./ user@your-server:/var/www/msc/
+```
+
+Or clone from your Git remote directly on the server:
+
+```bash
+git clone <your-repo-url> /var/www/msc
+```
+
+### 2 — Configure the setup script
+
+Open `deploy/setup.sh` and set the two variables at the top:
+
+```bash
+DOMAIN="your-domain.com"   # e.g. mariostrikerscommunity.com — no www prefix
+SITE_DIR="/var/www/msc"    # must match the upload path above
+```
+
+### 3 — Run setup (once)
+
+```bash
+chmod +x /var/www/msc/deploy/setup.sh
+sudo /var/www/msc/deploy/setup.sh
+```
+
+The script will:
+
+1. Install Node.js 20 and PM2 (if not already present)
+2. Run `npm install --production` in `backend/`
+3. Create `backend/.env` from `.env.example` and pause for you to fill it in
+4. Install and enable the Nginx virtual host
+5. Start the API via PM2 and register it for auto-start on reboot
+
+### 4 — Fill in backend/.env
+
+When the script pauses, edit the file on the server:
+
+```bash
+nano /var/www/msc/backend/.env
+```
+
+Required values:
+
+```env
+PORT=8787
+CORS_ORIGIN=https://your-domain.com   # exact origin, no trailing slash
+MSSQL_HOST=yew.arvixe.com
+MSSQL_PORT=1433
+MSSQL_DATABASE=MarioStrikers
+MSSQL_USER=<db-user>
+MSSQL_PASSWORD=<db-password>
+```
+
+Press Enter in the terminal to let the script continue after saving.
+
+### 5 — Enable HTTPS
+
+```bash
+certbot --nginx -d your-domain.com -d www.your-domain.com
+```
+
+Certbot modifies the Nginx config and sets up automatic renewal.
+
+### 6 — Verify
+
+```bash
+pm2 status                                      # API process should show "online"
+curl https://your-domain.com/api/health         # → {"status":"ok","source":"mssql"}
+```
+
+Open the site in a browser and confirm that leaderboards and player profiles load.
+
+### Updating after code changes
+
+Upload the updated files to the server and run:
+
+```bash
+cd /var/www/msc && sudo ./deploy/update.sh
+```
+
+This syncs files, runs `npm install --production`, and performs a zero-downtime PM2 reload.
+
+### Useful server commands
+
+```bash
+pm2 status                  # process overview
+pm2 logs msc-api --lines 50 # recent API logs
+pm2 reload msc-api          # reload after config or code changes
+systemctl reload nginx       # reload Nginx after config changes
+nginx -t                    # test Nginx config for syntax errors
+```
+
+### Deployment files reference
+
+| File | Purpose |
+|---|---|
+| `deploy/nginx.conf` | Nginx virtual host template |
+| `deploy/ecosystem.config.js` | PM2 process definition |
+| `deploy/setup.sh` | First-time server setup |
+| `deploy/update.sh` | Redeploy after code changes |
+| `backend/.env.example` | Environment variable template |
 
 ## Frontend Architecture
 
