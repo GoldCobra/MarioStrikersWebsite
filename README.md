@@ -182,6 +182,62 @@ Upload the new files and run:
 cd /var/www/msc && sudo ./deploy/update.sh
 ```
 
+## Docker Deployment
+
+An alternative to the Nginx + PM2 setup above. Requires Docker and Docker Compose on the server.
+
+### 1 — Clone and configure
+
+```bash
+git clone <your-repo-url> /var/www/msc
+cd /var/www/msc
+cp backend/.env.example backend/.env
+nano backend/.env
+```
+
+Fill in `backend/.env`:
+
+```env
+CORS_ORIGIN=https://your-domain.com
+MSSQL_HOST=yew.arvixe.com
+MSSQL_PORT=1433
+MSSQL_DATABASE=MarioStrikers
+MSSQL_USER=<db-user>
+MSSQL_PASSWORD=<db-password>
+```
+
+### 2 — Start
+
+```bash
+docker compose up -d
+```
+
+This starts two containers:
+- `web` — Nginx serving static files on port 80, proxying `/api/*` to the backend
+- `api` — Node.js backend connected to the MSSQL database
+
+### 3 — Verify
+
+```bash
+docker compose ps                             # both containers should show "running"
+curl http://localhost/api/health              # → {"status":"ok","source":"mssql"}
+```
+
+### Updating
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+### Logs
+
+```bash
+docker compose logs api        # backend logs
+docker compose logs web        # nginx logs
+docker compose logs -f         # follow all logs live
+```
+
 ## Frontend Architecture
 
 - Every page sets `body data-page="..."`.
