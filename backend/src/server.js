@@ -28,6 +28,9 @@ function createApp() {
   function sendApiError(res, error) {
     const message = error && error.message ? error.message : "Request failed.";
     const isValidationError = /^Invalid /.test(message);
+    if (!isValidationError) {
+      console.error("[api] Error:", error);
+    }
     res.status(isValidationError ? 400 : 500).json({ error: message });
   }
 
