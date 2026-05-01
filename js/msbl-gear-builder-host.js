@@ -18,7 +18,8 @@
     { src: "../assets/gear-builder/scripts/select.js" },
     { src: "../assets/gear-builder/scripts/checklist.js" },
     { src: "../assets/gear-builder/scripts/sliders.js" },
-    { src: "../assets/gear-builder/scripts/menu.js" }
+    { src: "../assets/gear-builder/scripts/menu.js" },
+    { src: "../assets/gear-builder/scripts/presets.js", type: "module" }
   ];
 
   var STAT_ROWS = [

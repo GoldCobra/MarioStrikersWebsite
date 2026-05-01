@@ -2,7 +2,7 @@
 
 Static website for the Mario Strikers Community with a small read-only Node/Express API bridge for live community data.
 
-The frontend is plain HTML, shared CSS, and browser JavaScript. Most pages are static shells that are populated by shared JS modules. Leaderboards, clubs, players, and player profiles call `/api/...`; the MSC Save Editor and MSC Online Friendlist Editor run fully in the browser against files selected locally by the user.
+The frontend is plain HTML, shared CSS, and browser JavaScript. Most pages are static shells that are populated by shared JS modules. Leaderboards, clubs, players, and player profiles call `/api/...`; the MSBL Save Editor, MSC Save Editor, and MSC Online Friendlist Editor run fully in the browser against files selected locally by the user.
 
 ## Features
 
@@ -10,12 +10,14 @@ The frontend is plain HTML, shared CSS, and browser JavaScript. Most pages are s
 - Landing page with community links and countdown/content modules.
 - Game sections for MSBL, MSC, and SMS.
 - MSBL Gear Builder embedded from `assets/gear-builder/`.
+- MSBL Gear Builder gear preset XML export for edited character builds.
 - MSC setup guide and SMS setup guide.
 - Competitive rules pages for MSBL, MSC, SMS, MSL, and community tournaments.
 - Tier list pages for MSBL, MSC, and SMS.
 - Live ELO/WHR leaderboards backed by MSSQL through the local API bridge.
 - Players list, player profile popup, and MSBL Striker Clubs.
 - Partners, About Us, and Privacy Policy pages.
+- MSBL Save Editor for local `strkrs.save` files.
 - MSC Save Editor for local `Strikers2` save files.
 - MSC Online Friendlist Editor for local `Online` friend roster files.
 
@@ -118,6 +120,29 @@ Use a local server instead of opening HTML files directly, because templates and
 - Players and clubs use `js/players-engine.js` and `js/msbl-clubs-engine.js`.
 - The player profile popup is loaded from `pages/templates/player-profile-popup.html`.
 - The MSBL Gear Builder page loads `pages/templates/msbl-gear-builder.html` and scripts from `assets/gear-builder/`.
+- MSBL Gear Builder preset drafts are stored in `sessionStorage` and can be exported as XML for the MSBL Save Editor.
+
+## MSBL Save Editor
+
+Page: `pages/msbl-save-editor.html`
+
+Implemented by:
+
+- `js/msbl-save-editor-contract.js`
+- `js/msbl-save-editor.js`
+
+No save file is uploaded to the backend. Files are read, patched, and exported locally in the browser.
+
+Main behavior:
+
+- Load a local `strkrs.save` file.
+- Read and edit Coins as an unsigned 32-bit value.
+- Import MSBL Gear Builder XML presets and apply edited character loadouts to the loaded save.
+- Complete all Cups and unlock Bushido Gear.
+- Apply Have All Gear for all 16 characters.
+- Export the patched save file with the original byte length and filename.
+
+Gear preset XML uses `<msbl-gear-presets version="1">` with one `<character id="..." name="..." build="1234" />` entry per edited character. Build digits are Head, Arms, Body, Legs using Gear Builder values `0..9`.
 
 ## MSC Save Editor
 
@@ -151,7 +176,7 @@ Main behavior:
 - Pick captain and sidekicks through the visual roster UI.
 - Write default competitive settings automatically through the contract.
 - Import and export XML preset files.
-- Export the patched save file.
+- Export the patched save file; export applies the current in-browser draft before downloading.
 - Recalculate the save header CRC32 at `0x0004-0x0007` over bytes `0x0008..EOF`.
 
 ### FRIENDLIST (Online)
@@ -243,6 +268,7 @@ Top navigation:
 Games:
 
 - `pages/msbl.html` - MSBL Gear Builder
+- `pages/msbl-save-editor.html` - MSBL Save Editor
 - `pages/players-msbl-clubs.html` - MSBL Striker Clubs
 - `pages/msc.html` - MSC overview
 - `pages/msc-setup-guide.html` - MSC Setup Guide
@@ -293,6 +319,10 @@ Frontend syntax checks for edited browser scripts:
 
 ```powershell
 node --check js/global-nav.js
+node --check js/msbl-gear-builder-host.js
+node --check js/msbl-save-editor-contract.js
+node --check js/msbl-save-editor.js
+node --check assets/gear-builder/scripts/presets.js
 node --check js/msc-save-editor.js
 node --check js/msc-online-editor.js
 ```

@@ -1084,7 +1084,7 @@
     }
 
     if (elements.saveButton) {
-      elements.saveButton.disabled = !state.applied;
+      elements.saveButton.disabled = !(state.loaded && contractState.writeReady);
     }
   }
 
@@ -1258,7 +1258,7 @@
       renderPickerGrid();
       syncSlotButtonStates();
 
-      setStatus("XML presets imported successfully. Click WRITE to apply.", "success");
+      setStatus("XML presets imported successfully. Export Save will apply them.", "success");
     }).catch(function () {
       setStatus("XML import failed: unable to read file.", "error");
     }).finally(function () {
@@ -1356,6 +1356,7 @@
     var previousCaptain = Number(state.currentCaptainUi);
     if (Number.isInteger(previousCaptain) && previousCaptain >= 1 && previousCaptain <= 12) {
       writeDraftForCaptain(previousCaptain);
+      state.applied = false;
     }
 
     var chosenCaptain = Number(elements.captainInput.value);
@@ -1364,6 +1365,7 @@
     updateFormationIcons();
     renderPickerGrid();
     syncSlotButtonStates();
+    refreshButtons();
   }
 
   function onSidekickChange() {
@@ -1377,42 +1379,40 @@
     }
 
     writeDraftForCaptain(currentCaptain);
+    state.applied = false;
     updateFormationIcons();
     renderPickerGrid();
     syncSlotButtonStates();
+    refreshButtons();
   }
 
-  function onApplyClick() {
+  function applyCurrentDraftsToWorkingBytes() {
     if (!state.loaded || !state.workingBytes) {
-      setStatus("Load a save first.", "error");
-      return;
+      return { ok: false, error: "Load a save first." };
     }
 
     var contractState = getContractStatus();
     if (!contractState.writeReady) {
-      setStatus("WRITE blocked: " + contractState.message, "error");
-      return;
+      return { ok: false, error: "WRITE blocked: " + contractState.message };
     }
 
     var currentCaptain = parseRangedInput(elements.captainInput, "Captain", 1, 12);
     if (!currentCaptain.ok) {
-      setStatus(currentCaptain.error, "error");
-      return;
+      return { ok: false, error: currentCaptain.error };
     }
 
     // Persist currently visible editor values before applying.
     var draftWrite = writeDraftForCaptain(currentCaptain.value);
     if (!draftWrite.ok) {
-      setStatus(draftWrite.error, "error");
-      return;
+      return { ok: false, error: draftWrite.error };
     }
 
     var defaultSettings = getDefaultCompetitiveSettingsRaw();
     if (!defaultSettings.ok) {
-      setStatus(defaultSettings.error, "error");
-      return;
+      return { ok: false, error: defaultSettings.error };
     }
 
+    var nextBytes = new Uint8Array(state.workingBytes);
     var draftKeys = Object.keys(state.draftsByCaptain || {});
 
     var appliedCaptains = 0;
@@ -1428,58 +1428,70 @@
         continue;
       }
 
-      var offsetsCheck = validateMappingOffsets(mapping, state.workingBytes.length);
+      var offsetsCheck = validateMappingOffsets(mapping, nextBytes.length);
       if (!offsetsCheck.ok) {
-        setStatus(offsetsCheck.error, "error");
-        return;
+        return { ok: false, error: offsetsCheck.error };
       }
 
-      state.workingBytes[Number(mapping.topOffset)] = mapUiSidekickToSaveValue(draft.top);
-      state.workingBytes[Number(mapping.bottomOffset)] = mapUiSidekickToSaveValue(draft.bottom);
-      state.workingBytes[Number(mapping.backOffset)] = mapUiSidekickToSaveValue(draft.back);
+      nextBytes[Number(mapping.topOffset)] = mapUiSidekickToSaveValue(draft.top);
+      nextBytes[Number(mapping.bottomOffset)] = mapUiSidekickToSaveValue(draft.bottom);
+      nextBytes[Number(mapping.backOffset)] = mapUiSidekickToSaveValue(draft.back);
       appliedCaptains += 1;
     }
 
-    var wroteSettings = writeGameSettingsToBytes(state.workingBytes, defaultSettings.value);
-    var wroteCameraDefault = enforceDefaultCameraSettings(state.workingBytes);
+    var wroteSettings = writeGameSettingsToBytes(nextBytes, defaultSettings.value);
+    var wroteCameraDefault = enforceDefaultCameraSettings(nextBytes);
     if (!appliedCaptains && !wroteSettings) {
-      setStatus("No mapped captain drafts or settings to write.", "warning");
-      return;
+      return { ok: false, warning: true, error: "No mapped captain drafts or settings to write." };
     }
     if (!wroteCameraDefault) {
-      setStatus("WRITE blocked: camera default could not be written.", "error");
-      return;
+      return { ok: false, error: "WRITE blocked: camera default could not be written." };
     }
 
     try {
-      var integrityResult = contract.applyIntegrity(state.workingBytes, {
+      var integrityResult = contract.applyIntegrity(nextBytes, {
         captains: appliedCaptains
       });
 
       if (integrityResult === false) {
-        state.applied = false;
-        refreshButtons();
-        setStatus("WRITE blocked: integrity recalculation failed.", "error");
-        return;
+        return { ok: false, error: "WRITE blocked: integrity recalculation failed." };
       }
     } catch (error) {
+      return { ok: false, error: "WRITE blocked: integrity recalculation failed." };
+    }
+
+    state.workingBytes = nextBytes;
+    state.applied = true;
+    return {
+      ok: true,
+      appliedCaptains: appliedCaptains,
+      wroteSettings: wroteSettings
+    };
+  }
+
+  function onApplyClick() {
+    var applyResult = applyCurrentDraftsToWorkingBytes();
+    if (!applyResult.ok) {
       state.applied = false;
       refreshButtons();
-      setStatus("WRITE blocked: integrity recalculation failed.", "error");
+      setStatus(applyResult.error, applyResult.warning ? "warning" : "error");
       return;
     }
 
-    state.applied = true;
     refreshButtons();
     setStatus("Wrote changes to save.", "success");
   }
 
   function onSaveClick() {
-    if (!state.applied || !state.workingBytes) {
-      setStatus("Write valid draft changes first.", "error");
+    var applyResult = applyCurrentDraftsToWorkingBytes();
+    if (!applyResult.ok) {
+      state.applied = false;
+      refreshButtons();
+      setStatus(applyResult.error, applyResult.warning ? "warning" : "error");
       return;
     }
 
+    refreshButtons();
     downloadBytes(state.workingBytes, state.fileName || FALLBACK_FILENAME);
     setStatus("Patched save exported.", "success");
   }

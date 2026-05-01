@@ -450,9 +450,58 @@
   letter-spacing: 0;
 }
 
-/* Keep Builder-tab helper menu hidden; character tabs get dedicated action buttons */
+/* Builder-tab preset actions are visible; character tabs keep dedicated action buttons */
 #msbl-gear-builder-host #tab-b .menu {
-  display: none !important;
+  position: static;
+  width: min(360px, 100%);
+  height: auto;
+  margin: 10px auto 0;
+  background: transparent;
+  border: 0;
+  display: block !important;
+  cursor: default;
+}
+
+#msbl-gear-builder-host #tab-b .menu .menu-options {
+  position: static;
+  display: flex !important;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+#msbl-gear-builder-host #tab-b .menu .menu-options c {
+  display: none;
+}
+
+#msbl-gear-builder-host .gear-preset-menu-button {
+  min-height: 36px;
+  width: 100%;
+  padding: 0 8px;
+  border: 0;
+  background-color: transparent;
+  background-image: url("../ui/menu-buttons.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  color: #fac402;
+  font-family: inherit;
+  font-size: var(--reporter-font-size-xs);
+  font-weight: inherit;
+  text-transform: uppercase;
+  text-shadow: -2px 2px 0 #000;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+#msbl-gear-builder-host .gear-preset-menu-button:hover,
+#msbl-gear-builder-host .gear-preset-menu-button:focus-visible {
+  color: #fac402;
+  filter: brightness(1.05);
 }
 
 #msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu {

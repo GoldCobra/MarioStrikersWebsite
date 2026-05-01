@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preload" href="../assets/fonts/itc-grizzly.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="../assets/fonts/MLSBY.woff" as="font" type="font/woff" crossorigin>
+  <title>MSBL Save Editor | Mario Strikers Community</title>
+  <link rel="stylesheet" href="../css/global.css?v=20260501-msbl-gear-preset-v12">
+</head>
+<body data-page="msbl-save-editor">
+  <div id="1">
+    <div id="global-nav"></div>
+    <div id="global-subnav"></div>
+  </div>
+
+  <main class="page-content save-editor-page msbl-save-editor-page" aria-label="MSBL save editor">
+    <section class="save-editor-panel msbl-save-editor-panel">
+      <p class="save-editor-description">This Save Editor patches Mario Strikers: Battle League <span class="save-editor-mode-accent">strkrs.save</span> files locally in your browser. No save data is uploaded. USE AT YOUR OWN RISK!</p>
+
+      <div id="msbl-save-editor-actions" class="save-editor-actions msbl-save-editor-actions" role="group" aria-label="MSBL save editor actions">
+        <button id="msbl-save-editor-load" class="save-editor-btn" type="button"><span class="save-editor-btn-label">Load Save</span></button>
+        <button id="msbl-save-editor-complete-cups" class="save-editor-btn" type="button" disabled><span class="save-editor-btn-label">Complete Cups</span></button>
+        <button id="msbl-save-editor-have-all" class="save-editor-btn" type="button" disabled><span class="save-editor-btn-label">Have All Gear</span></button>
+        <button id="msbl-save-editor-export" class="save-editor-btn" type="button" disabled><span class="save-editor-btn-label">Export Save</span></button>
+        <button id="msbl-save-editor-gear-import" class="save-editor-btn msbl-save-editor-gear-import-btn" type="button" disabled><span class="save-editor-btn-label">Import Gear Preset</span></button>
+      </div>
+
+      <section class="msbl-save-editor-fields" aria-label="MSBL save fields">
+        <label class="save-editor-field msbl-save-editor-field">
+          <span class="msbl-save-editor-coin-label"><img class="msbl-save-editor-coin-icon" src="../assets/msbl-saveeditor/coin.png" alt="" aria-hidden="true">COINS</span>
+          <input id="msbl-save-editor-coins" type="number" inputmode="numeric" min="0" max="4294967295" step="1" autocomplete="off" disabled>
+          <span class="msbl-save-editor-coin-hint">(2147483647 max coins, will be negative after. Use 999999999 or less to be safe.)</span>
+        </label>
+      </section>
+
+      <input id="msbl-save-editor-file-input" class="save-editor-file-input" type="file" accept=".save,application/octet-stream">
+      <input id="msbl-save-editor-gear-input" class="save-editor-file-input" type="file" accept=".xml,text/xml,application/xml">
+      <a id="msbl-save-editor-download" class="save-editor-download-link" download="strkrs.save"></a>
+      <p id="msbl-save-editor-status" class="save-editor-note"></p>
+    </section>
+  </main>
+
+  <script src="../js/msbl-save-editor-contract.js?v=20260501-msbl-gear-preset-v1" defer></script>
+  <script src="../js/msbl-save-editor.js?v=20260501-msbl-gear-preset-v1" defer></script>
+  <script src="../js/global-tabs-engine.js?v=20260428-cleanup-v1" defer></script>
+  <script src="../js/global-nav.js?v=20260501-msbl-save-editor-v1" defer></script>
+</body>
+</html>

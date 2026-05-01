@@ -29,7 +29,8 @@
           slug: "msbl",
           children: [
             { key: "striker-clubs", label: "Striker Clubs", slug: "players-msbl-clubs" },
-            { key: "gear-builder", label: "Gear Builder", slug: "msbl" }
+            { key: "gear-builder", label: "Gear Builder", slug: "msbl" },
+            { key: "save-editor", label: "Save Editor", slug: "msbl-save-editor" }
           ]
         },
         {
@@ -114,6 +115,7 @@
   var PAGE_CONTEXT_MAP = {
     "players-msbl-clubs": { topKey: "games", secondKey: "msbl", leafKey: "striker-clubs" },
     "msbl": { topKey: "games", secondKey: "msbl", leafKey: "gear-builder" },
+    "msbl-save-editor": { topKey: "games", secondKey: "msbl", leafKey: "save-editor" },
     "msc": { topKey: "games", secondKey: "msc" },
     "sms": { topKey: "games", secondKey: "sms" },
     "msc-setup-guide": { topKey: "games", secondKey: "msc", leafKey: "setup-guide" },

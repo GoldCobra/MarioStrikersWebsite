@@ -1493,6 +1493,10 @@ body[data-page="msl-league-site"] .msl-schedule-meta a {
   justify-items: stretch;
 }
 
+.msbl-save-editor-panel {
+  gap: 1rem;
+}
+
 .save-editor-description {
   width: min(760px, 100%);
   justify-self: center;
@@ -1736,6 +1740,11 @@ body[data-page="msl-league-site"] .msl-schedule-meta a {
   grid-column: auto;
 }
 
+.msbl-save-editor-actions {
+  width: min(700px, 100%);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .save-editor-btn {
   min-height: 36px;
   width: 100%;
@@ -1754,6 +1763,18 @@ body[data-page="msl-league-site"] .msl-schedule-meta a {
   cursor: pointer;
   user-select: none;
   text-transform: uppercase;
+}
+
+.msbl-save-editor-actions .msbl-save-editor-gear-import-btn {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: min(360px, 100%);
+  min-height: 36px;
+  padding: 0 8px;
+  background-image: url("../assets/ui/menu-buttons.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
 }
 
 .save-editor-btn-label {
@@ -1808,6 +1829,51 @@ body[data-page="msl-league-site"] .msl-schedule-meta a {
   color: #ffffff;
   padding: 0 0.42rem;
   box-sizing: border-box;
+}
+
+.msbl-save-editor-fields {
+  width: min(420px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.msbl-save-editor-coin-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.34rem;
+}
+
+.msbl-save-editor-coin-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  filter: drop-shadow(-1px 1px 0 #000);
+}
+
+.msbl-save-editor-coin-hint {
+  color: #777777;
+  font-size: 10px;
+  line-height: 1;
+  text-transform: none;
+  text-align: left;
+  text-shadow: none;
+}
+
+.msbl-save-editor-field > input {
+  min-height: 36px;
+  border: 1px solid #c77603;
+  background: rgba(20, 0, 0, 0.86);
+  color: #ffffff;
+  padding: 0 0.42rem;
+  box-sizing: border-box;
+}
+
+.msbl-save-editor-field > input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .save-editor-note {
@@ -3128,6 +3194,7 @@ body.player-popup-open {
   .msl-schedule-meta,
   .save-editor-field > span,
   .save-editor-field > select,
+  .msbl-save-editor-field > input,
   .save-editor-note,
   .msbl-clubs-note,
   .players-note,
@@ -3162,8 +3229,21 @@ body.player-popup-open {
 }
 
 #save-editor-status,
-#online-editor-status {
+#online-editor-status,
+#msbl-save-editor-status {
   font-size: 13px !important;
+}
+
+.save-editor-field > .msbl-save-editor-coin-hint {
+  display: block;
+  color: #777777 !important;
+  font-family: var(--reporter-font-stack) !important;
+  font-size: 14px !important;
+  font-weight: var(--reporter-font-weight) !important;
+  line-height: 1.1 !important;
+  text-shadow: none !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
 }
 
 :is(
@@ -3201,6 +3281,7 @@ body.player-popup-open {
 .online-editor-field > span,
 .online-editor-profile-trigger,
 .online-editor-profile-option,
+.msbl-save-editor-field > input,
 .online-editor-popup-close,
 .online-editor-popup-field > input,
 .online-editor-popup-field > textarea,
@@ -3223,6 +3304,7 @@ body.player-popup-open {
 .online-editor-field > span,
 .online-editor-profile-trigger,
 .online-editor-profile-option,
+.msbl-save-editor-field > input,
 .online-editor-popup-close,
 .online-editor-popup-field > input,
 .online-editor-popup-field > textarea,
@@ -3233,6 +3315,11 @@ body.player-popup-open {
   line-height: var(--reporter-line-height);
   text-shadow: var(--reporter-text-shadow);
   font-size: var(--reporter-font-size-xs);
+}
+
+.msbl-save-editor-field > #msbl-save-editor-coins {
+  font-family: "ITC Grizzly", sans-serif !important;
+  font-weight: 400 !important;
 }
 
 .save-editor-btn {
