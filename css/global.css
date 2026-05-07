@@ -3971,13 +3971,13 @@ body.player-popup-open {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 0.14rem;
+    bottom: 0.34rem;
     width: auto;
     max-width: none;
     height: 36px;
     justify-content: center;
     gap: 0.04rem;
-    transform: none;
+    transform: translateY(-6px);
   }
 
   .nav-top-link {
@@ -4197,7 +4197,7 @@ body.player-popup-open {
     --partner-card-media-width: min(122px, 32vw);
     --partner-card-media-height: calc(var(--partner-card-media-width) * 147 / 262);
     --partner-card-media-offset-x: -0.18rem;
-    --partner-card-media-offset-y: 0.08rem;
+    --partner-card-media-offset-y: -0.36rem;
     --partner-card-title-indent: clamp(102px, 31vw, 128px);
   }
 
@@ -4314,14 +4314,14 @@ body.player-popup-open {
     display: block;
     min-height: 0;
     font-size: clamp(0.44rem, 2.15vw, 0.58rem);
-    line-height: 1;
+    line-height: 1.08;
     text-align: left;
     overflow: hidden;
     padding-left: 0;
-    padding-bottom: 0;
+    padding-bottom: 1px;
     text-overflow: ellipsis;
     white-space: nowrap;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
   }
 
   .msbl-club-meta {
@@ -4375,7 +4375,7 @@ body.player-popup-open {
   .msbl-club-members-icon {
     width: clamp(2.6px, 0.75vw, 3.4px);
     margin-right: 0.045rem;
-    transform: translateY(-1px);
+    transform: translateY(0);
   }
 }
 
