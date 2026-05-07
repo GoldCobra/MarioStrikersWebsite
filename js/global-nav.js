@@ -1,4 +1,4 @@
-ï»¿(function () {
+(function () {
   "use strict";
 
   var EXTERNAL_LINKS = [
@@ -17,6 +17,7 @@
   ];
   var LEADERBOARD_BALL_ICONS = ["msblball.png", "mscball.png", "smsball.png"];
   var preloadedImageMap = Object.create(null);
+  var prefetchedHrefMap = Object.create(null);
 
   var SECTION_MODELS = {
     games: {
@@ -28,7 +29,7 @@
           label: "Strikers: Battle League",
           slug: "msbl-gear-builder",
           children: [
-            { key: "striker-clubs", label: "Striker Clubs", slug: "players-msbl-clubs" },
+            { key: "striker-clubs", label: "Striker Clubs", slug: "msbl-striker-clubs" },
             { key: "gear-builder", label: "Gear Builder", slug: "msbl-gear-builder" },
             { key: "save-editor", label: "Save Editor", slug: "msbl-save-editor" }
           ]
@@ -97,11 +98,11 @@
         {
           key: "tier-lists",
           label: "Tier Lists",
-          slug: "msbl-tier-lists",
+          slug: "msbl-tierlist",
           children: [
-            { key: "msbl", label: "MSBL", slug: "msbl-tier-lists" },
-            { key: "msc", label: "MSC", slug: "msc-tier-lists" },
-            { key: "sms", label: "SMS", slug: "sms-tier-lists" }
+            { key: "msbl", label: "MSBL", slug: "msbl-tierlist" },
+            { key: "msc", label: "MSC", slug: "msc-tierlist" },
+            { key: "sms", label: "SMS", slug: "sms-tierlist" }
           ]
         }
       ]
@@ -114,7 +115,7 @@
   };
 
   var PAGE_CONTEXT_MAP = {
-    "players-msbl-clubs": { topKey: "games", secondKey: "msbl", leafKey: "striker-clubs" },
+    "msbl-striker-clubs": { topKey: "games", secondKey: "msbl", leafKey: "striker-clubs" },
     "msbl-gear-builder": { topKey: "games", secondKey: "msbl", leafKey: "gear-builder" },
     "msbl-save-editor": { topKey: "games", secondKey: "msbl", leafKey: "save-editor" },
     "msc": { topKey: "games", secondKey: "msc" },
@@ -136,9 +137,9 @@
     "msc-whr": { topKey: "competitive", secondKey: "leaderboards", leafKey: "msc" },
     "sms-elo1v1": { topKey: "competitive", secondKey: "leaderboards", leafKey: "sms" },
     "sms-whr": { topKey: "competitive", secondKey: "leaderboards", leafKey: "sms" },
-    "msbl-tier-lists": { topKey: "competitive", secondKey: "tier-lists", leafKey: "msbl" },
-    "msc-tier-lists": { topKey: "competitive", secondKey: "tier-lists", leafKey: "msc" },
-    "sms-tier-lists": { topKey: "competitive", secondKey: "tier-lists", leafKey: "sms" },
+    "msbl-tierlist": { topKey: "competitive", secondKey: "tier-lists", leafKey: "msbl" },
+    "msc-tierlist": { topKey: "competitive", secondKey: "tier-lists", leafKey: "msc" },
+    "sms-tierlist": { topKey: "competitive", secondKey: "tier-lists", leafKey: "sms" },
     "community-tournaments": { topKey: "competitive", secondKey: "tournaments", leafKey: "community" }
   };
 
@@ -216,6 +217,76 @@
 
     LEADERBOARD_BALL_ICONS.forEach(function (iconFile) {
       preloadImage(prefix + "/assets/nav-buttons/sub/" + iconFile);
+    });
+  }
+
+  function getRequestIdleCallback() {
+    return window.requestIdleCallback || function (callback) {
+      return window.setTimeout(callback, 900);
+    };
+  }
+
+  function getPrefetchUrl(href) {
+    var url;
+    try {
+      url = new URL(href, window.location.href);
+    } catch (error) {
+      return null;
+    }
+
+    if (url.origin !== window.location.origin) {
+      return null;
+    }
+
+    if (url.pathname === window.location.pathname && url.search === window.location.search) {
+      return null;
+    }
+
+    return url;
+  }
+
+  function prefetchHref(href) {
+    var url = getPrefetchUrl(href);
+    if (!url || prefetchedHrefMap[url.href]) {
+      return;
+    }
+
+    prefetchedHrefMap[url.href] = true;
+    var link = document.createElement("link");
+    link.rel = "prefetch";
+    link.as = "document";
+    link.href = url.href;
+    document.head.appendChild(link);
+  }
+
+  function prefetchAnchor(anchor) {
+    if (!anchor || !anchor.getAttribute) {
+      return;
+    }
+    prefetchHref(anchor.getAttribute("href"));
+  }
+
+  function bindLinkPrefetch(root) {
+    if (!root || root.getAttribute("data-prefetch-bound") === "true") {
+      return;
+    }
+
+    root.setAttribute("data-prefetch-bound", "true");
+    root.addEventListener("pointerenter", function (event) {
+      prefetchAnchor(event.target && event.target.closest ? event.target.closest("a[href]") : null);
+    }, true);
+    root.addEventListener("focusin", function (event) {
+      prefetchAnchor(event.target && event.target.closest ? event.target.closest("a[href]") : null);
+    });
+  }
+
+  function scheduleInitialLinkPrefetch() {
+    var runWhenIdle = getRequestIdleCallback();
+    runWhenIdle(function () {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(
+        "#global-subnav a[href], #global-content-tabs a[href]"
+      ));
+      anchors.slice(0, 8).forEach(prefetchAnchor);
     });
   }
 
@@ -448,7 +519,7 @@
       '<a class="nav-top-link', isActive ? " is-active" : "", '" href="', toHref(prefix, targetSlug), '" data-top-key="', item.key, '" aria-label="', item.label, '"',
       isCurrent ? ' aria-current="page"' : "",
       ">",
-      '<img class="nav-top-icon" src="', iconSrc, '" alt="', item.label, '" onerror="this.onerror=null;this.src=\'', defaultIconSrc, '\'">',
+      '<img class="nav-top-icon" src="', iconSrc, '" width="733" height="198" alt="', item.label, '" onerror="this.onerror=null;this.src=\'', defaultIconSrc, '\'">',
       "</a>"
     ].join("");
   }
@@ -508,14 +579,14 @@
     var extHtml = EXTERNAL_LINKS.map(function (link) {
       return [
         '<a class="ext-link" href="', link.href, '" aria-label="', link.label, '" target="_blank" rel="noopener noreferrer">',
-        '<img class="ext-icon" src="', prefix, "/assets/ext-links/", link.key, '.png" alt="', link.label, '">',
+        '<img class="ext-icon" src="', prefix, "/assets/ext-links/", link.key, '.png" width="176" height="115" alt="', link.label, '">',
         "</a>"
       ].join("");
     }).join("");
 
     var brandHtml = [
       '<a class="nav-brand" href="', toHref(prefix, "index"), '" aria-label="Mario Strikers Community home">',
-      '<img class="nav-brand-logo" src="', prefix, '/assets/logo/logo.png" alt="Mario Strikers Community">',
+      '<img class="nav-brand-logo" src="', prefix, '/assets/logo/logo.png" width="2172" height="1454" alt="Mario Strikers Community">',
       '<span class="nav-brand-est">EST. 2017</span>',
       "</a>"
     ].join("");
@@ -683,7 +754,7 @@
 
     var sep = document.createElement("span");
     sep.className = "global-footer-sep";
-    sep.textContent = "Â Â â€“Â Â ";
+    sep.textContent = "  –  ";
     links.appendChild(sep);
 
     var privacyLink = document.createElement("a");
@@ -717,6 +788,10 @@
 
     mountGlobalFooter(prefix);
     syncResponsiveNavAlignment();
+    bindLinkPrefetch(navRoot);
+    bindLinkPrefetch(subNavRoot);
+    bindLinkPrefetch(contentTabsRoot);
+    scheduleInitialLinkPrefetch();
   }
 
   var _resizeTimer = null;
@@ -749,7 +824,12 @@
     if (pageContentRoot) {
       contentTabsRoot = document.createElement("div");
       contentTabsRoot.id = "global-content-tabs";
-      pageContentRoot.insertBefore(contentTabsRoot, pageContentRoot.firstChild);
+      var firstMainElement = pageContentRoot.firstElementChild;
+      if (firstMainElement && firstMainElement.classList.contains("visually-hidden")) {
+        pageContentRoot.insertBefore(contentTabsRoot, firstMainElement.nextSibling);
+      } else {
+        pageContentRoot.insertBefore(contentTabsRoot, pageContentRoot.firstChild);
+      }
     }
 
     renderGlobalShell(prefix, pageState, navRoot, subNavRoot, contentTabsRoot);

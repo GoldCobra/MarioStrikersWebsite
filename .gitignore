@@ -1,4 +1,3 @@
-start.bat
 backend/node_modules/
 backend/.env
 backend/.env.*

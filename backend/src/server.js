@@ -122,6 +122,10 @@ function createApp() {
           redirectToCleanPage(req, res, canonicalPageSlug);
           return;
         }
+        if (pageFileExists(canonicalPageSlug)) {
+          sendStaticPage(res, path.join(STATIC_PAGES_ROOT, `${canonicalPageSlug}.html`), next);
+          return;
+        }
       }
 
       const trailingSlashMatch = req.path.match(CLEAN_PAGE_TRAILING_SLASH_ROUTE);

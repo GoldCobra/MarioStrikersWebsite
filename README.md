@@ -90,10 +90,9 @@ start.bat
 
 This starts:
 
-- Website and API: `http://127.0.0.1:8787`
-- FlareSolverr for the WIIMMFI bridge, if Docker is available to `start.bat`
+- Website and API: `http://localhost:8080`
 
-`start.bat` sets `SERVE_STATIC=true`, starts the Express app, and opens `http://localhost:8787`. Express serves clean URLs directly and keeps legacy `.html` redirects available for local testing.
+`start.bat` sets `SERVE_STATIC=true`, starts the Express app, and opens `http://localhost:8080`. Express serves clean URLs directly and keeps legacy `.html` redirects available for local testing.
 
 Docker Compose start:
 
@@ -274,7 +273,7 @@ Games:
 
 - `/msbl-gear-builder` - MSBL Gear Builder
 - `/msbl-save-editor` - MSBL Save Editor
-- `/players-msbl-clubs` - MSBL Striker Clubs
+- `/msbl-striker-clubs` - MSBL Striker Clubs
 - `/msc` - MSC overview
 - `/msc-setup-guide` - MSC Setup Guide
 - `/msc-save-editor` - MSC Save Editor and Online Friendlist Editor
@@ -290,9 +289,9 @@ Competitive:
 - `/msl-league-rules`
 - `/msl-schedule`
 - `/community-tournaments`
-- `/msbl-tier-lists`
-- `/msc-tier-lists`
-- `/sms-tier-lists`
+- `/msbl-tierlist`
+- `/msc-tierlist`
+- `/sms-tierlist`
 
 Leaderboards:
 

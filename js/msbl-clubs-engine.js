@@ -151,7 +151,7 @@
 
   async function initMsblClubsPage() {
     var page = String(document.body && document.body.getAttribute("data-page") || "").toLowerCase();
-    if (page !== "players-msbl-clubs") {
+    if (page !== "msbl-striker-clubs") {
       return;
     }
 
