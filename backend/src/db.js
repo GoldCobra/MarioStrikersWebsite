@@ -23,14 +23,30 @@ function getConnectionConfig() {
 
 async function getPool() {
   if (!poolPromise) {
-    poolPromise = mssql.connect(getConnectionConfig());
+    poolPromise = mssql.connect(getConnectionConfig()).then(function (pool) {
+      pool.on("error", function (error) {
+        console.error("[mssql] Pool error:", error);
+        poolPromise = null;
+      });
+      return pool;
+    }).catch(function (error) {
+      poolPromise = null;
+      throw error;
+    });
   }
   return poolPromise;
 }
 
 async function withPool(run) {
-  const pool = await getPool();
-  return run(pool);
+  try {
+    const pool = await getPool();
+    return await run(pool);
+  } catch (error) {
+    if (error && /Failed to connect|Connection is closed|ESOCKET|ETIMEOUT|EAI_AGAIN/i.test(String(error.message || ""))) {
+      poolPromise = null;
+    }
+    throw error;
+  }
 }
 
 async function healthCheck() {
