@@ -15,7 +15,7 @@ Source: `https://msbl.pages.dev/`
    - `scripts/*`
    - `images/*`
    - `fonts/*`
-   - `builds.json`
+   - `builds.json` (temporary source only; do not keep the monolith file in the repo after splitting)
 2. Regenerate `pages/templates/msbl-gear-builder.html` from the source HTML section:
    - keep only the `<section class="section">...</section>` block
    - rewrite `src="images/..."` and `href="images/..."` to `../assets/gear-builder/images/...`
@@ -23,8 +23,11 @@ Source: `https://msbl.pages.dev/`
    - explicit event params instead of implicit global `event`
    - checklist assignment bug fix (`===`)
    - remove debug-only logs
-   - `builder.js` loads builds via `new URL("../builds.json", import.meta.url)`
-4. Run syntax checks:
+   - split `builds.json` into per-character chunk files under `assets/gear-builder/builds/`
+   - `builder.js` lazy-loads character chunks via `new URL("../builds/<character>.json", import.meta.url)`
+4. Remove the temporary monolith artifact after chunk generation:
+   - delete `assets/gear-builder/builds.json`
+5. Run syntax checks:
    - `node --check` for all `assets/gear-builder/scripts/*.js`
    - `node --check js/msbl-gear-builder-host.js`
 

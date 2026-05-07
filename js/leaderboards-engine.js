@@ -91,6 +91,10 @@
     });
   }
 
+  function toModernUiAssetPath(src) {
+    return String(src || "").replace(/\.png$/i, ".webp");
+  }
+
   function preloadLeaderboardRowAssets(prefix) {
     if (rowAssetsPreloadPromise) {
       return rowAssetsPreloadPromise;
@@ -138,7 +142,7 @@
           return true;
         })
         .map(function (icon) {
-          return preloadImage(prefix + "/assets/nav-buttons/sub/" + icon);
+          return preloadImage(prefix + "/assets/nav-buttons/sub/" + toModernUiAssetPath(icon));
         })
     )
       .catch(function () {
@@ -299,13 +303,6 @@
     ].join("");
   }
 
-  function renderLoadingState(mount) {
-    if (!mount) {
-      return;
-    }
-    mount.innerHTML = '<p class="leaderboard-empty loading-note">Loading...</p>';
-  }
-
   async function fetchLeaderboardRows(tabKey, options) {
     var opts = options || {};
     var allowCache = opts.allowCache !== false;
@@ -429,15 +426,6 @@
     return path.indexOf("/pages/") !== -1 ? ".." : ".";
   }
 
-  function isTabsParentView() {
-    var search = window.location && window.location.search ? window.location.search : "";
-    if (!search) {
-      return false;
-    }
-    var params = new URLSearchParams(search);
-    return params.get("tabs") === "none";
-  }
-
   function toPageHref(prefix, rawTarget) {
     void prefix;
     var normalized = String(rawTarget || "")
@@ -460,40 +448,42 @@
       return '<span class="leaderboard-tab-label">' + escapeHtml(formatTabLabel(tab.label)) + "</span>";
     }
 
+    var iconFallbackSrc = prefix + "/assets/nav-buttons/sub/" + icon;
+    var iconSrc = prefix + "/assets/nav-buttons/sub/" + toModernUiAssetPath(icon);
+
     return [
       '<span class="leaderboard-tab-inner">',
-      '<img class="leaderboard-tab-ball" src="', prefix, "/assets/nav-buttons/sub/", escapeHtml(icon), '" alt="" aria-hidden="true">',
+      '<img class="leaderboard-tab-ball" src="', escapeHtml(iconSrc), '" alt="" aria-hidden="true" onerror="this.onerror=null;this.src=\'', escapeHtml(iconFallbackSrc), '\'">',
       '<span class="leaderboard-tab-label">', escapeHtml(formatTabLabel(tab.label)), "</span>",
       "</span>"
     ].join("");
   }
 
-  function buildTabsHtml(config, pageKey, currentFile, prefix, suppressAutoActive) {
-    return config.tabs.map(function (tab, index) {
+  function buildTabsHtml(config, pageKey, currentFile, prefix) {
+    return config.tabs.map(function (tab) {
       var tabId = pageKey + "-tab-" + tab.key;
       var tabHref = toPageHref(prefix, tab.href || tab.key);
       var tabRouteKey = String(tab.key || "")
         .trim()
         .toLowerCase()
         .replace(/\.html$/, "");
-      var isActive = !suppressAutoActive && tabRouteKey === currentFile;
-      if (!suppressAutoActive && !currentFile && index === 0) {
-        isActive = true;
-      }
+      var isActive = tabRouteKey === currentFile;
       return [
-        '<button id="', tabId, '" class="global-tab leaderboard-ball-tab', isActive ? " is-active" : "", '" type="button" role="tab" aria-selected="', isActive ? "true" : "false", '" data-lb-tab="', tab.key, '" data-lb-href="', escapeHtml(tabHref), '">',
+        '<a id="', tabId, '" class="global-tab leaderboard-ball-tab', isActive ? " is-active" : "", '" href="', escapeHtml(tabHref), '" data-lb-tab="', tab.key, '" data-lb-href="', escapeHtml(tabHref), '"',
+        isActive ? ' aria-current="page"' : "",
+        ">",
         buildTabInnerMarkup(tab, prefix),
-        "</button>"
+        "</a>"
       ].join("");
     }).join("");
   }
 
-  function buildShellHtml(config, pageKey, currentFile, prefix, suppressAutoActive) {
+  function buildShellHtml(config, pageKey, currentFile, prefix) {
     return [
       '<section class="global-tabs-shell leaderboard-tabs-shell" aria-label="', escapeHtml(config.title || "Leaderboards"), '">',
-      '<div class="global-tabs-list" role="tablist" aria-label="', escapeHtml(config.tabAriaLabel || "Leaderboard modes"), '">',
-      buildTabsHtml(config, pageKey, currentFile, prefix, suppressAutoActive),
-      "</div>",
+      '<nav class="global-tabs-list" aria-label="', escapeHtml(config.tabAriaLabel || "Leaderboard modes"), '">',
+      buildTabsHtml(config, pageKey, currentFile, prefix),
+      "</nav>",
       "</section>",
       buildLeaderboardBlockHtml()
     ].join("");
@@ -522,7 +512,11 @@
       tabButtons.forEach(function (button) {
         var isActive = button.getAttribute("data-lb-tab") === tabKey;
         button.classList.toggle("is-active", isActive);
-        button.setAttribute("aria-selected", isActive ? "true" : "false");
+        if (isActive) {
+          button.setAttribute("aria-current", "page");
+        } else {
+          button.removeAttribute("aria-current");
+        }
         button.tabIndex = isActive ? 0 : -1;
       });
 
@@ -544,11 +538,7 @@
       tabButtons.forEach(function (button, index) {
         button.addEventListener("click", function (event) {
           var tabKey = button.getAttribute("data-lb-tab");
-          var tabHref = String(button.getAttribute("data-lb-href") || "");
-          var suppressAutoActive = isTabsParentView();
-
-          if (tabHref && (tabKey !== currentFile || suppressAutoActive)) {
-            window.location.href = tabHref;
+          if (tabKey !== currentFile) {
             return;
           }
 
@@ -566,7 +556,6 @@
           var nextIndex = (index + direction + tabButtons.length) % tabButtons.length;
           var nextButton = tabButtons[nextIndex];
           nextButton.focus();
-          setActiveTab(nextButton.getAttribute("data-lb-tab"));
         });
       });
     }
@@ -575,29 +564,6 @@
       bindEvents: bindEvents,
       setActiveTab: setActiveTab
     };
-  }
-
-  function prefetchAllLeaderboardTabs(config, activeKey) {
-    if (!config || !Array.isArray(config.tabs) || config.tabs.length === 0) {
-      return;
-    }
-
-    config.tabs.forEach(function (tab) {
-      if (!tab || !tab.key || tab.key === activeKey) {
-        return;
-      }
-
-      fetchLeaderboardRows(tab.key, { allowCache: true })
-        .then(function (result) {
-          if (result && result.source === "cache") {
-            return fetchLeaderboardRows(tab.key, { allowCache: false, forceNetwork: true });
-          }
-          return null;
-        })
-        .catch(function () {
-          // Prefetch darf das UI nie stören.
-        });
-    });
   }
 
   async function initLeaderboardsPage() {
@@ -611,16 +577,13 @@
       return;
     }
 
-    renderLoadingState(mount);
-
     var currentFile = getCurrentPageFilename();
     var prefix = getPathPrefix();
     var pageKey = getPageKey();
-    var suppressAutoActive = isTabsParentView();
     preloadLeaderboardRowAssets(prefix);
     var tabWarmupPromise = preloadLeaderboardTabIcons(prefix, config);
     await waitForWarmup(tabWarmupPromise, 140);
-    mount.innerHTML = buildShellHtml(config, pageKey, currentFile, prefix, suppressAutoActive);
+    mount.innerHTML = buildShellHtml(config, pageKey, currentFile, prefix);
 
     var controller = createController(function (activeKey) {
       renderLeaderboardRows(activeKey);
@@ -630,20 +593,12 @@
     }
 
     controller.bindEvents();
-    var activeTab = null;
-    for (var i = 0; i < config.tabs.length; i += 1) {
-      var href = String(config.tabs[i].key || "").toLowerCase();
-      if (href === currentFile) {
-        activeTab = config.tabs[i];
-        break;
-      }
+    var hasMatchedTab = config.tabs.some(function (tab) {
+      return String(tab && tab.key || "").toLowerCase() === currentFile;
+    });
+    if (hasMatchedTab) {
+      controller.setActiveTab(currentFile);
     }
-    var initialActiveKey = (activeTab && activeTab.key) || config.tabs[0].key;
-    if (!suppressAutoActive) {
-      controller.setActiveTab(initialActiveKey);
-    }
-
-    prefetchAllLeaderboardTabs(config, initialActiveKey);
   }
 
   if (document.readyState === "loading") {

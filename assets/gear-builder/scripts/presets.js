@@ -178,11 +178,15 @@ function applyBuildToPane(characterId, build) {
   }
 
   const buildCell = getBuildCell(pane);
+  const table = pane.querySelector(".gear-table");
+  if (!buildCell || !table) {
+    return false;
+  }
+
   if (buildCell) {
     buildCell.setAttribute("builddata", normalizedBuild);
   }
 
-  const table = pane.querySelector(".gear-table");
   const totals = updateGearTable(table, normalizedBuild);
   updateActiveButtons(pane, normalizedBuild);
   updateCard(pane, normalizedBuild, totals);
@@ -214,6 +218,21 @@ function restoreDrafts() {
       applyBuildToPane(characterId, entry.build);
     }
   });
+}
+
+function restoreDraftForCharacter(characterId) {
+  const normalizedId = Number(characterId);
+  if (!Number.isInteger(normalizedId) || normalizedId < 1 || normalizedId > 16) {
+    return false;
+  }
+
+  const state = readState();
+  const entry = state.characters[String(normalizedId)];
+  if (!entry) {
+    return false;
+  }
+
+  return applyBuildToPane(normalizedId, entry.build);
 }
 
 function escapeXml(value) {
@@ -334,9 +353,12 @@ function attachDraftCapture() {
 }
 
 function boot() {
-  restoreDrafts();
   injectMenuActions();
   attachDraftCapture();
 }
+
+window.MSBL_GEAR_PRESETS = {
+  restoreDraftForCharacter: restoreDraftForCharacter
+};
 
 boot();

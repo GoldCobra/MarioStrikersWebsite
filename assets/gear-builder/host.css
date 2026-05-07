@@ -34,6 +34,22 @@
   color: #ffb7b7;
 }
 
+.msbl-gear-pane-state {
+  width: min(980px, 92vw);
+  margin: 1.8rem auto 0;
+  text-align: center;
+  color: #fef9e7;
+  font-family: var(--reporter-font-stack);
+  font-size: var(--reporter-font-size);
+  font-weight: var(--reporter-font-weight);
+  letter-spacing: var(--reporter-letter-spacing);
+  text-shadow: var(--reporter-text-shadow);
+}
+
+.msbl-gear-pane-state.is-error {
+  color: #ffb7b7;
+}
+
 #msbl-gear-builder-host .section {
   width: 100% !important;
 }
@@ -159,6 +175,12 @@
   top: 56px;
 }
 
+#msbl-gear-builder-host .msbl-gear-pane-placeholder {
+  width: min(980px, 92vw);
+  margin-inline: auto;
+  text-transform: uppercase;
+}
+
 #msbl-gear-builder-host .button,
 #msbl-gear-builder-host .button:hover,
 #msbl-gear-builder-host .activebutton,
@@ -180,6 +202,10 @@
 
 #msbl-gear-builder-host .activebutton,
 #msbl-gear-builder-host .activebutton:hover {
+  color: #fac402;
+}
+
+#msbl-gear-builder-host .equal {
   color: #fac402;
 }
 

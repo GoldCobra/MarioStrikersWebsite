@@ -86,15 +86,19 @@
     return date.toISOString().slice(0, 10);
   }
 
+  function toModernUiAssetPath(src) {
+    return String(src || "").replace(/\.png$/i, ".webp");
+  }
+
   function getGameBallIconUrl(gameCode) {
     var code = String(gameCode || "").trim().toLowerCase();
     if (code === "msbl") {
-      return "../assets/nav-buttons/sub/msblball.png";
+      return toModernUiAssetPath("../assets/nav-buttons/sub/msblball.png");
     }
     if (code === "msc") {
-      return "../assets/nav-buttons/sub/mscball.png";
+      return toModernUiAssetPath("../assets/nav-buttons/sub/mscball.png");
     }
-    return "../assets/nav-buttons/sub/smsball.png";
+    return toModernUiAssetPath("../assets/nav-buttons/sub/smsball.png");
   }
 
   function readSlotMap(root) {
@@ -364,6 +368,7 @@
     setSectionHidden(mount, false);
     mount.innerHTML = rows.map(function (entry) {
       var ballIcon = getGameBallIconUrl(entry && entry.game_code);
+      var ballIconFallback = String(ballIcon || "").replace(/\.webp$/i, ".png");
       var medal = String(entry && entry.place_medal || "•").trim() || "•";
       var name = String(entry && entry.tournament_name || "").trim() || "-";
       var date = normalizeDateText(entry && entry.start_date);
@@ -371,7 +376,7 @@
 
       return [
         '<li class="player-popup-accolade-item">',
-        '<img class="player-popup-accolade-ball" src="', escapeHtml(ballIcon), '" alt="" aria-hidden="true" loading="lazy">',
+        '<img class="player-popup-accolade-ball" src="', escapeHtml(ballIcon), '" alt="" aria-hidden="true" loading="lazy" onerror="this.onerror=null;this.src=\'', escapeHtml(ballIconFallback), '\'">',
         '<span class="player-popup-accolade-medal">', escapeHtml(medal), "</span>",
         '<span class="player-popup-accolade-name">', escapeHtml(name), "</span>",
         dateHtml,

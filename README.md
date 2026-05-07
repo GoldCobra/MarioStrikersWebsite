@@ -31,7 +31,7 @@ The frontend is plain HTML, shared CSS, and browser JavaScript. Most pages are s
 
 Cache busting is handled with `?v=...` query strings in HTML script/style URLs. Update the relevant tag when changing browser-loaded JS/CSS/assets that may be cached.
 
-Public page URLs are canonicalized to `/slug`, with `/` for the landing page. The physical `index.html` and `pages/*.html` files are implementation details; legacy URLs such as `/index.html` and `/pages/msc-save-editor.html` redirect permanently to their clean equivalents. Retired route aliases such as `/msbl` and `/msl-league-site` also redirect permanently to their current canonical routes.
+Public page URLs are canonicalized to `/slug`, with `/` for the landing page. The physical `index.html` and `pages/*.html` files are implementation details; legacy URLs such as `/index.html` and `/pages/msc-save-editor.html` redirect permanently to their clean equivalents. Legacy route aliases such as `/msl-league-site` and old query-state URLs such as `/games?submenu=msc` redirect permanently to their current canonical routes.
 
 ## Project Structure
 
@@ -271,6 +271,7 @@ Top navigation:
 
 Games:
 
+- `/msbl` - MSBL overview shell
 - `/msbl-gear-builder` - MSBL Gear Builder
 - `/msbl-save-editor` - MSBL Save Editor
 - `/msbl-striker-clubs` - MSBL Striker Clubs
@@ -308,7 +309,7 @@ Utility/footer pages:
 - `/about-us`
 - `/privacy-policy`
 
-Reserve/helper pages exist but are not central navigation targets, for example `/players-profiles`, `/msl-leaderboards`, and `/tab-placeholder`.
+Reserve/helper pages exist but are not central navigation targets and are excluded from sitemap indexing, for example `/games`, `/competitive`, `/players`, `/msbl`, `/msc`, `/sms`, `/msl`, `/community-tournaments`, `/players-profiles`, `/msl-leaderboards`, and `/tab-placeholder`.
 
 ## Useful Commands
 

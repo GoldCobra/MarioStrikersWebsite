@@ -15,9 +15,41 @@
     { key: "players", label: "Players", slug: "players" },
     { key: "partners", label: "Partners", slug: "partners" }
   ];
-  var LEADERBOARD_BALL_ICONS = ["msblball.png", "mscball.png", "smsball.png"];
   var preloadedImageMap = Object.create(null);
   var prefetchedHrefMap = Object.create(null);
+  var SITE_ORIGIN = "https://mariostrikers.gg";
+  var BREADCRUMB_SCRIPT_ID = "global-breadcrumb-jsonld";
+  var NOINDEX_PAGE_SLUGS = {
+    "competitive-leaderboards": true,
+    "competitive-rules": true,
+    "competitive-tier-lists": true,
+    "competitive-tournaments": true,
+    "community-tournaments": true,
+    "competitive": true,
+    "games": true,
+    "msbl": true,
+    "msc": true,
+    "msl": true,
+    "msl-leaderboards": true,
+    "players": true,
+    "players-profiles": true,
+    "sms": true,
+    "tab-placeholder": true
+  };
+  var LEGACY_SUBMENU_ROUTE_MAP = {
+    games: {
+      msbl: "msbl",
+      msc: "msc",
+      sms: "sms"
+    },
+    competitive: {
+      rules: "competitive-rules",
+      leaderboards: "competitive-leaderboards",
+      "tier-lists": "competitive-tier-lists",
+      msl: "msl",
+      tournaments: "competitive-tournaments"
+    }
+  };
 
   var SECTION_MODELS = {
     games: {
@@ -26,8 +58,9 @@
       items: [
         {
           key: "msbl",
-          label: "Strikers: Battle League",
-          slug: "msbl-gear-builder",
+          label: "MSBL",
+          subnavLabel: "STRIKERS: BATTLE LEAGUE",
+          slug: "msbl",
           children: [
             { key: "striker-clubs", label: "Striker Clubs", slug: "msbl-striker-clubs" },
             { key: "gear-builder", label: "Gear Builder", slug: "msbl-gear-builder" },
@@ -36,7 +69,8 @@
         },
         {
           key: "msc",
-          label: "Strikers Charged",
+          label: "MSC",
+          subnavLabel: "STRIKERS CHARGED",
           slug: "msc",
           children: [
             { key: "setup-guide", label: "Setup Guide", slug: "msc-setup-guide" },
@@ -46,7 +80,8 @@
         },
         {
           key: "sms",
-          label: "Super Mario Strikers",
+          label: "SMS",
+          subnavLabel: "SUPER MARIO STRIKERS",
           slug: "sms",
           children: [
             { key: "setup-guide", label: "Setup Guide", slug: "sms-setup-guide" }
@@ -61,7 +96,7 @@
         {
           key: "rules",
           label: "Rules",
-          slug: "msbl-competitiverules",
+          slug: "competitive-rules",
           children: [
             { key: "msbl-rules", label: "MSBL", slug: "msbl-competitiverules" },
             { key: "msc-rules", label: "MSC", slug: "msc-competitiverules" },
@@ -80,7 +115,7 @@
         {
           key: "tournaments",
           label: "Tournaments",
-          slug: "community-tournaments",
+          slug: "competitive-tournaments",
           children: [
             { key: "community", label: "Community Tournaments", slug: "community-tournaments" }
           ]
@@ -88,7 +123,7 @@
         {
           key: "leaderboards",
           label: "Leaderboards",
-          slug: "msbl-elo1v1",
+          slug: "competitive-leaderboards",
           children: [
             { key: "msbl", label: "MSBL", slug: "msbl-elo1v1", matchSlugs: ["msbl-elo1v1", "msbl-elo2v2", "msbl-whr"] },
             { key: "msc", label: "MSC", slug: "msc-elo1v1", matchSlugs: ["msc-elo1v1", "msc-whr"] },
@@ -98,7 +133,7 @@
         {
           key: "tier-lists",
           label: "Tier Lists",
-          slug: "msbl-tierlist",
+          slug: "competitive-tier-lists",
           children: [
             { key: "msbl", label: "MSBL", slug: "msbl-tierlist" },
             { key: "msc", label: "MSC", slug: "msc-tierlist" },
@@ -115,6 +150,7 @@
   };
 
   var PAGE_CONTEXT_MAP = {
+    msbl: { topKey: "games", secondKey: "msbl" },
     "msbl-striker-clubs": { topKey: "games", secondKey: "msbl", leafKey: "striker-clubs" },
     "msbl-gear-builder": { topKey: "games", secondKey: "msbl", leafKey: "gear-builder" },
     "msbl-save-editor": { topKey: "games", secondKey: "msbl", leafKey: "save-editor" },
@@ -124,12 +160,14 @@
     "msc-save-editor": { topKey: "games", secondKey: "msc", leafKey: "save-editor" },
     "msc-wiimmfi": { topKey: "games", secondKey: "msc", leafKey: "wiimmfi" },
     "sms-setup-guide": { topKey: "games", secondKey: "sms", leafKey: "setup-guide" },
+    "competitive-rules": { topKey: "competitive", secondKey: "rules" },
     "msbl-competitiverules": { topKey: "competitive", secondKey: "rules", leafKey: "msbl-rules" },
     "msc-competitiverules": { topKey: "competitive", secondKey: "rules", leafKey: "msc-rules" },
     "sms-competitiverules": { topKey: "competitive", secondKey: "rules", leafKey: "sms-rules" },
     "msl": { topKey: "competitive", secondKey: "msl" },
     "msl-league-rules": { topKey: "competitive", secondKey: "msl", leafKey: "league-rules" },
     "msl-schedule": { topKey: "competitive", secondKey: "msl", leafKey: "league-site" },
+    "competitive-leaderboards": { topKey: "competitive", secondKey: "leaderboards" },
     "msbl-elo1v1": { topKey: "competitive", secondKey: "leaderboards", leafKey: "msbl" },
     "msbl-elo2v2": { topKey: "competitive", secondKey: "leaderboards", leafKey: "msbl" },
     "msbl-whr": { topKey: "competitive", secondKey: "leaderboards", leafKey: "msbl" },
@@ -137,9 +175,11 @@
     "msc-whr": { topKey: "competitive", secondKey: "leaderboards", leafKey: "msc" },
     "sms-elo1v1": { topKey: "competitive", secondKey: "leaderboards", leafKey: "sms" },
     "sms-whr": { topKey: "competitive", secondKey: "leaderboards", leafKey: "sms" },
+    "competitive-tier-lists": { topKey: "competitive", secondKey: "tier-lists" },
     "msbl-tierlist": { topKey: "competitive", secondKey: "tier-lists", leafKey: "msbl" },
     "msc-tierlist": { topKey: "competitive", secondKey: "tier-lists", leafKey: "msc" },
     "sms-tierlist": { topKey: "competitive", secondKey: "tier-lists", leafKey: "sms" },
+    "competitive-tournaments": { topKey: "competitive", secondKey: "tournaments" },
     "community-tournaments": { topKey: "competitive", secondKey: "tournaments", leafKey: "community" }
   };
 
@@ -177,11 +217,6 @@
     return new URLSearchParams(search);
   }
 
-  function getForcedSecondKey() {
-    var params = getQueryParams();
-    return String(params.get("submenu") || "").trim().toLowerCase();
-  }
-
   function toHref(prefix, slug, query) {
     void prefix;
     var pageSlug = toPageSlug(slug);
@@ -203,21 +238,37 @@
     image.src = src;
   }
 
-  function preloadGlobalUiAssets(prefix) {
-    preloadImage(prefix + "/assets/logo/logo.png");
+  function toModernUiAssetPath(src) {
+    return String(src || "").replace(/\.png$/i, ".webp");
+  }
 
-    TOP_NAV_ITEMS.forEach(function (item) {
-      preloadImage(prefix + "/assets/nav-buttons/default/nav-" + item.key + ".png");
-      preloadImage(prefix + "/assets/nav-buttons/active/nav-" + item.key + "-active.png");
-    });
+  function getTopNavIconPngSrc(prefix, itemKey, isActive) {
+    return prefix + "/assets/nav-buttons/" + (isActive ? "active" : "default") + "/nav-" + itemKey + (isActive ? "-active" : "") + ".png";
+  }
 
-    EXTERNAL_LINKS.forEach(function (link) {
-      preloadImage(prefix + "/assets/ext-links/" + link.key + ".png");
-    });
+  function getTopNavIconWebpSrc(prefix, itemKey, isActive) {
+    return toModernUiAssetPath(getTopNavIconPngSrc(prefix, itemKey, isActive));
+  }
 
-    LEADERBOARD_BALL_ICONS.forEach(function (iconFile) {
-      preloadImage(prefix + "/assets/nav-buttons/sub/" + iconFile);
-    });
+  function getExternalIconPngSrc(prefix, itemKey) {
+    return prefix + "/assets/ext-links/" + itemKey + ".png";
+  }
+
+  function getExternalIconWebpSrc(prefix, itemKey) {
+    return toModernUiAssetPath(getExternalIconPngSrc(prefix, itemKey));
+  }
+
+  function preloadCriticalUiAssets(prefix, pageState) {
+    preloadImage(prefix + "/assets/logo/logo.webp");
+
+    if (!pageState || !pageState.topKey || pageState.topKey === "home" || pageState.topKey === "partners") {
+      if (pageState && pageState.topKey) {
+        preloadImage(getTopNavIconWebpSrc(prefix, pageState.topKey, true));
+      }
+      return;
+    }
+
+    preloadImage(getTopNavIconWebpSrc(prefix, pageState.topKey, true));
   }
 
   function getRequestIdleCallback() {
@@ -243,6 +294,51 @@
     }
 
     return url;
+  }
+
+  function buildNormalizedSearch(params) {
+    var nextParams = new URLSearchParams();
+    params.forEach(function (value, key) {
+      if (key === "submenu" || key === "tabs") {
+        return;
+      }
+      nextParams.append(key, value);
+    });
+
+    var query = nextParams.toString();
+    return query ? "?" + query : "";
+  }
+
+  function normalizeLegacyTabUrl(pageSlug) {
+    var params = getQueryParams();
+    if (!params.toString()) {
+      return false;
+    }
+
+    var submenu = String(params.get("submenu") || "").trim().toLowerCase();
+    var tabs = String(params.get("tabs") || "").trim().toLowerCase();
+    var targetSlug = "";
+    var routeMap = LEGACY_SUBMENU_ROUTE_MAP[pageSlug];
+
+    if (submenu && routeMap && routeMap[submenu]) {
+      targetSlug = routeMap[submenu];
+    } else if (submenu || tabs === "none") {
+      targetSlug = pageSlug;
+    }
+
+    if (!targetSlug) {
+      return false;
+    }
+
+    var nextUrl = toHref(".", targetSlug, "") + buildNormalizedSearch(params) + String(window.location.hash || "");
+    var currentUrl = String(window.location.pathname || "") + String(window.location.search || "") + String(window.location.hash || "");
+
+    if (nextUrl === currentUrl) {
+      return false;
+    }
+
+    window.location.replace(nextUrl);
+    return true;
   }
 
   function prefetchHref(href) {
@@ -318,6 +414,35 @@
     }
   }
 
+  function removeHeadNodeById(nodeId) {
+    var head = document.head;
+    if (!head) {
+      return;
+    }
+
+    var node = head.querySelector("#" + nodeId);
+    if (node) {
+      head.removeChild(node);
+    }
+  }
+
+  function upsertJsonLdScript(nodeId, payload) {
+    var head = document.head;
+    if (!head || !payload) {
+      return;
+    }
+
+    var node = head.querySelector("#" + nodeId);
+    if (!node) {
+      node = document.createElement("script");
+      node.id = nodeId;
+      node.type = "application/ld+json";
+      head.appendChild(node);
+    }
+
+    node.textContent = JSON.stringify(payload, null, 2);
+  }
+
   function ensureGlobalFavicon(prefix) {
     var pngPath = prefix + "/assets/favicon/blball.png";
     var icoPath = prefix + "/assets/favicon/favicon.ico";
@@ -328,9 +453,8 @@
     upsertHeadLink('link[rel="apple-touch-icon"]', "apple-touch-icon", pngPath, "image/png", "");
   }
 
-  function isTabsParentView() {
-    var params = getQueryParams();
-    return params.get("tabs") === "none";
+  function isNoindexPageSlug(pageSlug) {
+    return !!NOINDEX_PAGE_SLUGS[String(pageSlug || "").toLowerCase()];
   }
 
   function hasChildren(item) {
@@ -500,6 +624,93 @@
     return state;
   }
 
+  function getCurrentPageLabel() {
+    var title = String(document.title || "").trim();
+    if (!title) {
+      return "Home";
+    }
+    return title.split("|")[0].trim() || "Home";
+  }
+
+  function toAbsolutePageUrl(slug) {
+    var pageSlug = toPageSlug(slug);
+    if (!pageSlug || pageSlug === "index") {
+      return SITE_ORIGIN + "/";
+    }
+    return SITE_ORIGIN + "/" + pageSlug;
+  }
+
+  function pushBreadcrumb(items, name, slug) {
+    if (!name || !slug) {
+      return;
+    }
+
+    var url = toAbsolutePageUrl(slug);
+    if (items.length && items[items.length - 1].item === url) {
+      return;
+    }
+
+    items.push({
+      "@type": "ListItem",
+      position: items.length + 1,
+      name: String(name),
+      item: url
+    });
+  }
+
+  function buildBreadcrumbItems(pageState) {
+    if (!pageState || isNoindexPageSlug(pageState.pageSlug)) {
+      return null;
+    }
+
+    var items = [];
+    pushBreadcrumb(items, "Home", "index");
+
+    if (pageState.pageSlug === "index") {
+      return items;
+    }
+
+    if (pageState.topKey === "partners") {
+      pushBreadcrumb(items, "Partners", "partners");
+      return items;
+    }
+
+    if (!pageState.section) {
+      pushBreadcrumb(items, getCurrentPageLabel(), pageState.pageSlug);
+      return items;
+    }
+
+    pushBreadcrumb(items, pageState.section.label, pageState.section.overviewSlug);
+
+    if (pageState.secondItem) {
+      pushBreadcrumb(items, pageState.secondItem.label, pageState.secondItem.slug);
+    }
+
+    if (pageState.leafItem) {
+      pushBreadcrumb(items, pageState.leafItem.label, pageState.leafItem.slug);
+    }
+
+    if (!items.length || items[items.length - 1].item !== toAbsolutePageUrl(pageState.pageSlug)) {
+      pushBreadcrumb(items, getCurrentPageLabel(), pageState.pageSlug);
+    }
+
+    return items;
+  }
+
+  function ensureBreadcrumbJsonLd(pageState) {
+    var breadcrumbItems = buildBreadcrumbItems(pageState);
+    if (!breadcrumbItems || breadcrumbItems.length === 0) {
+      removeHeadNodeById(BREADCRUMB_SCRIPT_ID);
+      return;
+    }
+
+    upsertJsonLdScript(BREADCRUMB_SCRIPT_ID, {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: breadcrumbItems
+    });
+  }
+
   function sectionForTopKey(topKey) {
     return SECTION_MODELS[topKey] || null;
   }
@@ -511,50 +722,21 @@
 
   function buildTopNavAnchor(prefix, item, pageState, isActive, isCurrent) {
     var targetSlug = resolveTopNavTargetSlug(item, pageState);
-    var defaultIconSrc = prefix + "/assets/nav-buttons/default/nav-" + item.key + ".png";
-    var iconSrc = isActive
-      ? prefix + "/assets/nav-buttons/active/nav-" + item.key + "-active.png"
-      : defaultIconSrc;
+    var fallbackIconSrc = getTopNavIconPngSrc(prefix, item.key, isActive);
+    var iconSrc = getTopNavIconWebpSrc(prefix, item.key, isActive);
     return [
       '<a class="nav-top-link', isActive ? " is-active" : "", '" href="', toHref(prefix, targetSlug), '" data-top-key="', item.key, '" aria-label="', item.label, '"',
       isCurrent ? ' aria-current="page"' : "",
       ">",
-      '<img class="nav-top-icon" src="', iconSrc, '" width="733" height="198" alt="', item.label, '" onerror="this.onerror=null;this.src=\'', defaultIconSrc, '\'">',
+      '<img class="nav-top-icon" src="', iconSrc, '" width="733" height="198" alt="', item.label, '" onerror="this.onerror=null;this.src=\'', fallbackIconSrc, '\'">',
       "</a>"
     ].join("");
   }
 
   function buildSubNavAnchor(prefix, section, item, isActive, isCurrent) {
-    var label = item.label;
-    var slug = item.slug;
-    var hasChildTabs = hasChildren(item);
-    var href = toHref(prefix, slug, "");
-
-    if (
-      hasChildTabs &&
-      section &&
-      section.overviewSlug &&
-      section.overviewSlug === "competitive" &&
-      item.key === "leaderboards"
-    ) {
-      var leaderboardEntrySlug = "";
-      for (var i = 0; i < item.children.length; i += 1) {
-        var child = item.children[i];
-        if (child.slug) {
-          leaderboardEntrySlug = child.slug;
-          break;
-        }
-      }
-      if (leaderboardEntrySlug) {
-        href = toHref(prefix, leaderboardEntrySlug, "tabs=none");
-      }
-    } else if (hasChildTabs && section && section.overviewSlug) {
-      href = toHref(
-        prefix,
-        section.overviewSlug,
-        "submenu=" + encodeURIComponent(item.key) + "&tabs=none"
-      );
-    }
+    var label = item.subnavLabel || item.label;
+    void section;
+    var href = toHref(prefix, item.slug, "");
 
     return [
       '<a class="sub-link sub-link-text', isActive ? " is-active" : "", '" href="', href, '" aria-label="', label, '"',
@@ -577,16 +759,18 @@
 
   function buildMainNavHtml(prefix, pageState) {
     var extHtml = EXTERNAL_LINKS.map(function (link) {
+      var externalIconSrc = getExternalIconWebpSrc(prefix, link.key);
+      var externalFallbackIconSrc = getExternalIconPngSrc(prefix, link.key);
       return [
         '<a class="ext-link" href="', link.href, '" aria-label="', link.label, '" target="_blank" rel="noopener noreferrer">',
-        '<img class="ext-icon" src="', prefix, "/assets/ext-links/", link.key, '.png" width="176" height="115" alt="', link.label, '">',
+        '<img class="ext-icon" src="', externalIconSrc, '" width="176" height="115" alt="', link.label, '" onerror="this.onerror=null;this.src=\'', externalFallbackIconSrc, '\'">',
         "</a>"
       ].join("");
     }).join("");
 
     var brandHtml = [
       '<a class="nav-brand" href="', toHref(prefix, "index"), '" aria-label="Mario Strikers Community home">',
-      '<img class="nav-brand-logo" src="', prefix, '/assets/logo/logo.png" width="2172" height="1454" alt="Mario Strikers Community">',
+      '<img class="nav-brand-logo" src="', prefix, '/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src=\'', prefix, '/assets/logo/logo.png\'">',
       '<span class="nav-brand-est">EST. 2017</span>',
       "</a>"
     ].join("");
@@ -639,12 +823,10 @@
       return "";
     }
 
-    var suppressAutoActive = isTabsParentView() && pageState.secondItem && pageState.secondItem.key === parent.key;
     var tabs = parent.children.filter(function (child) {
       return !child.hidden;
     }).map(function (child) {
-      var isCurrent = !suppressAutoActive && childMatchesPage(child, pageState.pageSlug);
-      return buildGlobalTab(prefix, child, isCurrent);
+      return buildGlobalTab(prefix, child, childMatchesPage(child, pageState.pageSlug));
     }).join("");
 
     return [
@@ -754,7 +936,7 @@
 
     var sep = document.createElement("span");
     sep.className = "global-footer-sep";
-    sep.textContent = "  –  ";
+    sep.textContent = "Â Â â€“Â Â ";
     links.appendChild(sep);
 
     var privacyLink = document.createElement("a");
@@ -803,19 +985,16 @@
   }
 
   function mountGlobalShell() {
-    var prefix = getPathPrefix();
-    ensureGlobalFavicon(prefix);
-    preloadGlobalUiAssets(prefix);
     var pageSlug = getPageSlug();
-    var pageState = resolvePageState(pageSlug);
-    var forcedSecondKey = getForcedSecondKey();
-    if (forcedSecondKey && pageState.section) {
-      var forcedSecondItem = findItemByKey(pageState.section, forcedSecondKey);
-      if (forcedSecondItem && hasChildren(forcedSecondItem)) {
-        pageState.secondItem = forcedSecondItem;
-        pageState.leafItem = null;
-      }
+    if (normalizeLegacyTabUrl(pageSlug)) {
+      return;
     }
+
+    var prefix = getPathPrefix();
+    var pageState = resolvePageState(pageSlug);
+    ensureGlobalFavicon(prefix);
+    preloadCriticalUiAssets(prefix, pageState);
+    ensureBreadcrumbJsonLd(pageState);
     var navRoot = document.getElementById("global-nav");
     var subNavRoot = document.getElementById("global-subnav");
     var pageContentRoot = document.querySelector("main.page-content");

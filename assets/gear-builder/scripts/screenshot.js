@@ -8,8 +8,8 @@ const CAPTURE_ADJUST = Object.freeze({
 });
 const CAPTURE_BACKGROUND = "transparent";
 
-function getCaptureContext(event) {
-    var $tabPane = $(event.target).closest("div.tab-pane");
+function getCaptureContext(source) {
+    var $tabPane = $(source).closest("div.tab-pane");
     var tabPaneEl = $tabPane.get(0);
     var cardEl = $tabPane.find(".buildcard").get(0);
 
@@ -120,8 +120,8 @@ function renderCardCanvas(event) {
 }
 
 $(document).ready(function() {
-    $('.copypic').click(function(e) {
-    renderCardCanvas(e).then(({ canvas }) => {
+    $(document).on("click", "#msbl-gear-builder-host .copypic", function() {
+    renderCardCanvas(this).then(({ canvas }) => {
         canvas.toBlob(blob => {
             if (!blob) return;
             navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
@@ -131,8 +131,8 @@ $(document).ready(function() {
 
 
 $(document).ready(function() {
-    $('.savepic').click(function(e) {
-    renderCardCanvas(e).then(({ canvas, context }) => {
+    $(document).on("click", "#msbl-gear-builder-host .savepic", function() {
+    renderCardCanvas(this).then(({ canvas, context }) => {
         var cardname = Slots.find(k=>k.num==context.cardNum)?.char;
         canvas.toBlob(blob => {
             if (!blob) return;
@@ -143,14 +143,15 @@ $(document).ready(function() {
 
 
 $(document).ready(function() {
-    $('.copytext').click(function(e) {
-        var str = $(e.target).closest('div.tab-pane').find('div.str').html();
-        var spd = $(e.target).closest('div.tab-pane').find('div.spe').html();
-        var sho = $(e.target).closest('div.tab-pane').find('div.sho').html();
-        var pas = $(e.target).closest('div.tab-pane').find('div.pas').html();
-        var tec = $(e.target).closest('div.tab-pane').find('div.tec').html();
-        var build = $(e.target).closest('div.tab-pane').find('div.cardbuild').html();
-        var capchar = $(e.target).closest('div.tab-pane').find('div.cardchar').html();
+    $(document).on("click", "#msbl-gear-builder-host .copytext", function() {
+        var $pane = $(this).closest('div.tab-pane');
+        var str = $pane.find('div.str').html();
+        var spd = $pane.find('div.spe').html();
+        var sho = $pane.find('div.sho').html();
+        var pas = $pane.find('div.pas').html();
+        var tec = $pane.find('div.tec').html();
+        var build = $pane.find('div.cardbuild').html();
+        var capchar = $pane.find('div.cardchar').html();
         var char = capchar.slice(0,1)+capchar.slice(1).toLowerCase()
         var text = char+' ('+build+') '+str+' | '+spd+' | '+sho+' | '+pas+' | '+tec;
         var dummy = document.createElement("input");

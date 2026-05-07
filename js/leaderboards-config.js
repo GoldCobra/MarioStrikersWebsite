@@ -21,6 +21,7 @@
   }
 
   window.LEADERBOARDS_CONFIG = {
+    "competitive-leaderboards": createGlobalConfig("competitive-leaderboards"),
     "msbl-elo1v1": createGlobalConfig("msbl-elo1v1"),
     "msbl-elo2v2": createGlobalConfig("msbl-elo2v2"),
     "msbl-whr": createGlobalConfig("msbl-whr"),

@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs");
+const compression = require("compression");
 const express = require("express");
 const cors = require("cors");
 const { config } = require("./config");
@@ -14,8 +15,21 @@ const LEGACY_PAGE_ROUTE = /^\/pages\/([a-z0-9-]+)\.html$/i;
 const CLEAN_PAGE_ROUTE = /^\/([a-z0-9-]+)$/i;
 const CLEAN_PAGE_TRAILING_SLASH_ROUTE = /^\/([a-z0-9-]+)\/$/i;
 const PAGE_ROUTE_ALIASES = {
-  msbl: "msbl-gear-builder",
   "msl-league-site": "msl-schedule"
+};
+const LEGACY_SUBMENU_ROUTE_MAP = {
+  games: {
+    msbl: "msbl",
+    msc: "msc",
+    sms: "sms"
+  },
+  competitive: {
+    rules: "competitive-rules",
+    leaderboards: "competitive-leaderboards",
+    "tier-lists": "competitive-tier-lists",
+    msl: "msl",
+    tournaments: "competitive-tournaments"
+  }
 };
 
 function buildCorsOptions() {
@@ -41,6 +55,33 @@ function redirectToCleanPage(req, res, pageSlug) {
   res.redirect(301, `/${pageSlug}${getOriginalQuery(req)}`);
 }
 
+function buildFilteredQuery(req) {
+  const params = new URLSearchParams();
+  const query = req.query || {};
+  Object.keys(query).forEach(function (key) {
+    if (key === "submenu" || key === "tabs") {
+      return;
+    }
+
+    const rawValue = query[key];
+    if (Array.isArray(rawValue)) {
+      rawValue.forEach(function (entry) {
+        if (entry !== undefined && entry !== null) {
+          params.append(key, String(entry));
+        }
+      });
+      return;
+    }
+
+    if (rawValue !== undefined && rawValue !== null) {
+      params.append(key, String(rawValue));
+    }
+  });
+
+  const serialized = params.toString();
+  return serialized ? `?${serialized}` : "";
+}
+
 function toCanonicalPageSlug(pageSlug) {
   const normalizedSlug = String(pageSlug || "").toLowerCase();
   return PAGE_ROUTE_ALIASES[normalizedSlug] || normalizedSlug;
@@ -53,6 +94,34 @@ function pageFileExists(pageSlug) {
 function resolveExistingPageSlug(pageSlug) {
   const canonicalPageSlug = toCanonicalPageSlug(pageSlug);
   return pageFileExists(canonicalPageSlug) ? canonicalPageSlug : "";
+}
+
+function redirectLegacyQueryRoute(req, res, pageSlug) {
+  const normalizedPageSlug = String(pageSlug || "").toLowerCase();
+  const submenuRaw = req.query && req.query.submenu;
+  const tabsRaw = req.query && req.query.tabs;
+  const submenu = Array.isArray(submenuRaw) ? String(submenuRaw[0] || "").trim().toLowerCase() : String(submenuRaw || "").trim().toLowerCase();
+  const tabs = Array.isArray(tabsRaw) ? String(tabsRaw[0] || "").trim().toLowerCase() : String(tabsRaw || "").trim().toLowerCase();
+  const routeMap = LEGACY_SUBMENU_ROUTE_MAP[normalizedPageSlug];
+
+  let targetPageSlug = "";
+  if (submenu && routeMap && routeMap[submenu]) {
+    targetPageSlug = routeMap[submenu];
+  } else if (submenu || tabs === "none") {
+    targetPageSlug = normalizedPageSlug;
+  }
+
+  if (!targetPageSlug) {
+    return false;
+  }
+
+  const resolvedTargetPageSlug = resolveExistingPageSlug(targetPageSlug);
+  if (!resolvedTargetPageSlug) {
+    return false;
+  }
+
+  res.redirect(301, `/${resolvedTargetPageSlug}${buildFilteredQuery(req)}`);
+  return true;
 }
 
 function redirectToResolvedPage(req, res, pageSlug) {
@@ -84,6 +153,7 @@ function sendStaticPage(res, absolutePath, next) {
 
 function createApp() {
   const app = express();
+  app.use(compression());
   app.use(cors(buildCorsOptions()));
   app.use(express.json({ limit: "1mb" }));
 
@@ -117,6 +187,9 @@ function createApp() {
       const cleanPageMatch = req.path.match(CLEAN_PAGE_ROUTE);
       if (cleanPageMatch) {
         const pageSlug = cleanPageMatch[1].toLowerCase();
+        if (redirectLegacyQueryRoute(req, res, pageSlug)) {
+          return;
+        }
         const canonicalPageSlug = toCanonicalPageSlug(pageSlug);
         if (canonicalPageSlug !== pageSlug && pageFileExists(canonicalPageSlug)) {
           redirectToCleanPage(req, res, canonicalPageSlug);

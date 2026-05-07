@@ -1,87 +1,201 @@
-let Builds = [];
+const BUILD_CHUNK_FILES = {
+  Mario: "mario.json",
+  Luigi: "luigi.json",
+  Bowser: "bowser.json",
+  Peach: "peach.json",
+  Rosalina: "rosalina.json",
+  Toad: "toad.json",
+  Yoshi: "yoshi.json",
+  DK: "dk.json",
+  Wario: "wario.json",
+  Waluigi: "waluigi.json",
+  "Shy Guy": "shy-guy.json",
+  Daisy: "daisy.json",
+  Pauline: "pauline.json",
+  "Diddy Kong": "diddy-kong.json",
+  "Bowser Jr": "bowser-jr.json",
+  Birdo: "birdo.json"
+};
 
-async function loadBuilds() {
-  try {
-    const buildsUrl = new URL("../builds.json", import.meta.url).href;
-    const res = await fetch(buildsUrl);
-    Builds = await res.json();
-    document.querySelector(".submit").disabled = false;
-  } catch (err) {
-    // silently fail or re-enable the button anyway
-    console.error("Failed to load builds:", err);
+const buildChunkCache = new Map();
+const buildChunkRequests = new Map();
+
+function getSubmitButton() {
+  return document.querySelector(".submit");
+}
+
+function setSubmitBusy(isBusy) {
+  const submitButton = getSubmitButton();
+  if (!submitButton) {
+    return;
+  }
+
+  submitButton.disabled = Boolean(isBusy);
+  submitButton.setAttribute("aria-busy", isBusy ? "true" : "false");
+}
+
+function setResultsMessage(message) {
+  const resultsNode = document.getElementById("results");
+  if (resultsNode) {
+    resultsNode.textContent = message || "";
   }
 }
 
-loadBuilds();
+function clearResultsTable() {
+  $("#table-b tbody tr").remove();
+}
+
+function getSelectedCharacters() {
+  const checkedBoxes = document.querySelectorAll("#mySelectOptions input.checkbox:checked");
+  return Array.from(
+    new Set(
+      Array.from(checkedBoxes)
+        .map((checkbox) => String(checkbox.value || "").trim())
+        .filter((value) => Boolean(BUILD_CHUNK_FILES[value]))
+    )
+  );
+}
+
+function readFilters() {
+  return {
+    strMin: Number(document.getElementById("range1").value),
+    strMax: Number(document.getElementById("range2").value),
+    spdMin: Number(document.getElementById("range3").value),
+    spdMax: Number(document.getElementById("range4").value),
+    shotMin: Number(document.getElementById("range5").value),
+    shotMax: Number(document.getElementById("range6").value),
+    passMin: Number(document.getElementById("range7").value),
+    passMax: Number(document.getElementById("range8").value),
+    techMin: Number(document.getElementById("range9").value),
+    techMax: Number(document.getElementById("range10").value)
+  };
+}
+
+function buildMatchesFilters(build, filters) {
+  return (
+    Number(build.Str) >= filters.strMin &&
+    Number(build.Str) <= filters.strMax &&
+    Number(build.Spd) >= filters.spdMin &&
+    Number(build.Spd) <= filters.spdMax &&
+    Number(build.Shot) >= filters.shotMin &&
+    Number(build.Shot) <= filters.shotMax &&
+    Number(build.Pass) >= filters.passMin &&
+    Number(build.Pass) <= filters.passMax &&
+    Number(build.Tech) >= filters.techMin &&
+    Number(build.Tech) <= filters.techMax
+  );
+}
+
+async function loadBuildChunk(character) {
+  if (buildChunkCache.has(character)) {
+    return buildChunkCache.get(character);
+  }
+
+  if (buildChunkRequests.has(character)) {
+    return buildChunkRequests.get(character);
+  }
+
+  const chunkFile = BUILD_CHUNK_FILES[character];
+  if (!chunkFile) {
+    throw new Error(`Unknown build chunk requested for character: ${character}`);
+  }
+
+  const chunkRequest = fetch(new URL(`../builds/${chunkFile}`, import.meta.url).href)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to load build data for ${character}.`);
+      }
+      return response.json();
+    })
+    .then((rows) => {
+      buildChunkCache.set(character, rows);
+      buildChunkRequests.delete(character);
+      return rows;
+    })
+    .catch((error) => {
+      buildChunkRequests.delete(character);
+      throw error;
+    });
+
+  buildChunkRequests.set(character, chunkRequest);
+  return chunkRequest;
+}
+
+async function loadSelectedBuilds(selectedCharacters) {
+  const uniqueCharacters = Array.from(new Set(selectedCharacters));
+  await Promise.all(uniqueCharacters.map(loadBuildChunk));
+  return uniqueCharacters.flatMap((character) => buildChunkCache.get(character) || []);
+}
+
+function renderBuildRows(rows) {
+  const tableBody = document.getElementById("table-b").getElementsByTagName("tbody")[0];
+  const MAX_ROWS = 50;
+  const visibleRows = rows.slice(0, MAX_ROWS);
+
+  setResultsMessage(
+    rows.length === 0
+      ? "No results found."
+      : `Showing ${visibleRows.length} of ${rows.length} results`
+  );
+
+  visibleRows.forEach((build) => {
+    const tr = tableBody.insertRow(-1);
+
+    let td = tr.insertCell();
+    td.className = "addcell";
+    td.textContent = build.Char;
+
+    td = tr.insertCell();
+    td.className = "addcell";
+    td.textContent = build.Gear;
+
+    td = tr.insertCell();
+    td.className = "copycell";
+    td.textContent = build.Str;
+
+    td = tr.insertCell();
+    td.className = "copycell";
+    td.textContent = build.Spd;
+
+    td = tr.insertCell();
+    td.className = "copycell";
+    td.textContent = build.Shot;
+
+    td = tr.insertCell();
+    td.className = "copycell";
+    td.textContent = build.Pass;
+
+    td = tr.insertCell();
+    td.className = "copycell";
+    td.textContent = build.Tech;
+  });
+}
 
 $(document).ready(function () {
-    $(".submit").on('pointerup', function (e) {
-        e.preventDefault(); // prevent default form behavior (especially on mobile)
+  $(".submit").on("pointerup", async function (event) {
+    event.preventDefault();
 
-        const btable = document.getElementById("table-b").getElementsByTagName("tbody")[0];
-        $("#table-b tbody tr").remove();
+    clearResultsTable();
 
-        const checks = document.querySelectorAll('input[type=checkbox]:checked');
-        const checked = Array.from(checks).map(checkbox => checkbox.value);
-        const resultinput = document.getElementById("results");
+    const selectedCharacters = getSelectedCharacters();
+    if (!selectedCharacters.length) {
+      setResultsMessage("Select at least one character.");
+      return;
+    }
 
-        const strmin = document.getElementById("range1").value;
-        const strmax = document.getElementById("range2").value;
-        const spdmin = document.getElementById("range3").value;
-        const spdmax = document.getElementById("range4").value;
-        const shotmin = document.getElementById("range5").value;
-        const shotmax = document.getElementById("range6").value;
-        const passmin = document.getElementById("range7").value;
-        const passmax = document.getElementById("range8").value;
-        const techmin = document.getElementById("range9").value;
-        const techmax = document.getElementById("range10").value;
+    setSubmitBusy(true);
+    setResultsMessage("Loading builds...");
 
-        const tabledata = Builds.filter(a =>
-            checked.includes(a.Char) &&
-            Number(a.Str) >= strmin && Number(a.Str) <= strmax &&
-            Number(a.Spd) >= spdmin && Number(a.Spd) <= spdmax &&
-            Number(a.Shot) >= shotmin && Number(a.Shot) <= shotmax &&
-            Number(a.Pass) >= passmin && Number(a.Pass) <= passmax &&
-            Number(a.Tech) >= techmin && Number(a.Tech) <= techmax
-        );
-
-        const MAX_ROWS = 50;
-        const shownData = tabledata.slice(0, MAX_ROWS);
-
-        resultinput.innerText = tabledata.length === 0
-            ? "No results found."
-            : `Showing ${shownData.length} of ${tabledata.length} results`;
-
-        shownData.forEach(build => {
-            const tr = btable.insertRow(-1);
-
-            let td = tr.insertCell();
-            td.className = "addcell";
-            td.innerHTML = build.Char;
-
-            td = tr.insertCell();
-            td.className = "addcell";
-            td.innerHTML = build.Gear;
-
-            td = tr.insertCell();
-            td.className = "copycell";
-            td.innerHTML = build.Str;
-
-            td = tr.insertCell();
-            td.className = "copycell";
-            td.innerHTML = build.Spd;
-
-            td = tr.insertCell();
-            td.className = "copycell";
-            td.innerHTML = build.Shot;
-
-            td = tr.insertCell();
-            td.className = "copycell";
-            td.innerHTML = build.Pass;
-
-            td = tr.insertCell();
-            td.className = "copycell";
-            td.innerHTML = build.Tech;
-        });
-    });
-})
+    try {
+      const builds = await loadSelectedBuilds(selectedCharacters);
+      const filters = readFilters();
+      const rows = builds.filter((build) => buildMatchesFilters(build, filters));
+      renderBuildRows(rows);
+    } catch (error) {
+      console.error("Failed to load build chunks:", error);
+      setResultsMessage("Failed to load build data.");
+    } finally {
+      setSubmitBusy(false);
+    }
+  });
+});

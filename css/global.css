@@ -42,10 +42,17 @@ body {
 }
 
 :root {
-  --global-landing-bg-image: url("../assets/backgrounds/landing/landing-page-bg.png");
+  --global-landing-bg-image: image-set(
+    url("../assets/backgrounds/landing/landing-page-bg-hq.webp") type("image/webp"),
+    url("../assets/backgrounds/landing/landing-page-bg.png") type("image/png")
+  );
   --global-nav-bar-bg-image: url("../assets/backgrounds/navigation/nav-bar-bg.png");
   --global-nav-footer-image: url("../assets/backgrounds/footer/navFooter.png");
   --global-tabs-bg-image: url("../assets/nav-buttons/sub/tabs.png");
+  --global-tabs-bg-image: image-set(
+    url("../assets/nav-buttons/sub/tabs.webp") type("image/webp"),
+    url("../assets/nav-buttons/sub/tabs.png") type("image/png")
+  );
   --global-tabs-bg-height: 92px;
   --full-bleed-width: 100vw;
   --shell-inline-pad: clamp(0.35rem, 1.3vw, 0.8rem);
@@ -1340,6 +1347,18 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
 body[data-subnav="off"] .setup-guide-page #msc-setup-guide-root,
 body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
   padding-top: 0;
+}
+
+@supports (content-visibility: auto) {
+  .setup-guide-page .setup-guide-section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 1080px;
+  }
+
+  .partners-page .partner-guide-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 420px;
+  }
 }
 
 .setup-guide-media {
