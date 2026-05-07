@@ -4197,7 +4197,7 @@ body.player-popup-open {
     --partner-card-media-width: min(122px, 32vw);
     --partner-card-media-height: calc(var(--partner-card-media-width) * 147 / 262);
     --partner-card-media-offset-x: -0.18rem;
-    --partner-card-media-offset-y: -0.78rem;
+    --partner-card-media-offset-y: -0.24rem;
     --partner-card-title-indent: clamp(102px, 31vw, 128px);
   }
 
