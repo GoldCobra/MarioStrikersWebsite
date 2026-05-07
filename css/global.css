@@ -4140,6 +4140,56 @@ body.player-popup-open {
       var(--content-box-content-padding-bottom);
   }
 
+  .setup-guide-page .content-box {
+    --content-box-left-shoulder: 0px;
+    --content-box-main-width: 100%;
+    --content-box-bottom-offset-x: calc(-100% * 53 / 1102);
+    --content-box-bottom-bg-size: calc(100% * 1154 / 1102) 100%;
+    --setup-guide-mobile-text-width: calc(100vw - var(--content-inline-pad) - var(--content-inline-pad) - var(--content-box-content-padding-inline) - var(--content-box-content-padding-inline) - 1rem);
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .setup-guide-page .content-box-top {
+    display: block;
+  }
+
+  .setup-guide-page .content-box-top-left {
+    display: none;
+  }
+
+  .setup-guide-page .content-box-top-main,
+  .setup-guide-page .content-box-center,
+  .setup-guide-page .content-box-bottom {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+  }
+
+  .setup-guide-page .content-box-center {
+    overflow: hidden;
+  }
+
+  .setup-guide-page .content-box-content {
+    min-width: 0;
+    width: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .setup-guide-page .content-box-content > * {
+    min-width: 0;
+    max-width: min(100%, var(--setup-guide-mobile-text-width));
+  }
+
+  .setup-guide-page .competitive-rules :is(h1, h2, h3, h4, p, li, a, span, strong, em),
+  .setup-guide-page .cr-link {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
   .partner-guide-card {
     --partner-card-media-width: min(122px, 32vw);
     --partner-card-media-height: calc(var(--partner-card-media-width) * 147 / 262);
