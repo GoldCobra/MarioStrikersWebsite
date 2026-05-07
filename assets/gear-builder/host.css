@@ -94,6 +94,14 @@
   border: 2px solid #27090b;
 }
 
+#msbl-gear-builder-host #tab-b .slider {
+  background: #27090b;
+}
+
+#msbl-gear-builder-host #tab-b .slider .progress {
+  background: #27090b;
+}
+
 #msbl-gear-builder-host .tab-list {
   margin: 0 auto;
   align-items: center;
