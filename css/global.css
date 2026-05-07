@@ -4143,8 +4143,6 @@ body.player-popup-open {
   .setup-guide-page .content-box {
     --content-box-left-shoulder: 0px;
     --content-box-main-width: 100%;
-    --content-box-bottom-offset-x: calc(-100% * 53 / 1102);
-    --content-box-bottom-bg-size: calc(100% * 1154 / 1102) 100%;
     --setup-guide-mobile-text-width: calc(100vw - var(--content-inline-pad) - var(--content-inline-pad) - var(--content-box-content-padding-inline) - var(--content-box-content-padding-inline) - 1rem);
     width: 100%;
     max-width: 100%;
@@ -4173,14 +4171,19 @@ body.player-popup-open {
 
   .setup-guide-page .content-box-content {
     min-width: 0;
-    width: auto;
-    max-width: 100%;
     box-sizing: border-box;
   }
 
   .setup-guide-page .content-box-content > * {
     min-width: 0;
     max-width: min(100%, var(--setup-guide-mobile-text-width));
+  }
+
+  .setup-guide-page .content-box-bottom {
+    background:
+      linear-gradient(90deg, rgba(250, 196, 2, 0.98) 0%, rgba(250, 196, 2, 0.98) 50%, rgba(250, 196, 2, 0) 58%) left top / 58% 6px no-repeat,
+      linear-gradient(90deg, #fac402 0%, #c77603 48%, #7e1d06 100%) left top / 100% 2px no-repeat,
+      linear-gradient(#050505, #050505) left 7px / 100% calc(100% - 7px) no-repeat;
   }
 
   .setup-guide-page .competitive-rules :is(h1, h2, h3, h4, p, li, a, span, strong, em),
