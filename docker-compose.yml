@@ -13,6 +13,9 @@ services:
       context: .
       dockerfile: Dockerfile.backend
     container_name: msc-website-backend
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     ports:
       - "8787:8787"
     environment:

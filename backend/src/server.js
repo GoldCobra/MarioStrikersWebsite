@@ -262,7 +262,7 @@ function createApp() {
     }
   });
 
-  app.get("/api/clubs/msbl", async function (_req, res) {
+  app.get(["/api/clubs", "/api/clubs/msbl"], async function (_req, res) {
     try {
       const rows = await getMsblClubs();
       res.json({
