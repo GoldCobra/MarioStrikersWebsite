@@ -14,6 +14,12 @@ const MODE_TO_FLAGS = {
   whr: { doubles: 0, isWhr: 2 }
 };
 
+const ACTIVITY_FILTER_DAYS_BY_GAME = {
+  msbl: 90,
+  sms: null,
+  msc: null
+};
+
 function parseLimit(value, fallback) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -74,12 +80,17 @@ function parseRatingLine(lineValue) {
   };
 }
 
-async function fetchRawRatings(pool, gameType, flags) {
+async function fetchRawRatings(pool, gameType, flags, playedGameWithinDate) {
   const request = pool.request();
   request.input("gametype", mssql.Int, gameType);
   request.input("doubles", mssql.Int, flags.doubles);
   request.input("isWhr", mssql.Int, flags.isWhr);
-  const result = await request.query("exec GetRatingsForDiscord @gametype, @doubles, @isWhr");
+  let query = "exec GetRatingsForDiscord @gametype, @doubles, @isWhr";
+  if (playedGameWithinDate) {
+    request.input("playedGameWithinDate", mssql.DateTime, playedGameWithinDate);
+    query += ", @playedGameWithinDate";
+  }
+  const result = await request.query(query);
   return Array.isArray(result && result.recordset) ? result.recordset : [];
 }
 
@@ -169,7 +180,11 @@ async function getLeaderboardRows(options) {
   const flags = MODE_TO_FLAGS[normalized.mode];
 
   return withPool(async function (pool) {
-    const rawRows = await fetchRawRatings(pool, gameType, flags);
+    const activityDays = ACTIVITY_FILTER_DAYS_BY_GAME[normalized.game];
+    const playedGameWithinDate = activityDays
+      ? (() => { const d = new Date(); d.setDate(d.getDate() - activityDays); return d; })()
+      : null;
+    const rawRows = await fetchRawRatings(pool, gameType, flags, playedGameWithinDate);
 
     const parsed = rawRows
       .map(function (row) {
