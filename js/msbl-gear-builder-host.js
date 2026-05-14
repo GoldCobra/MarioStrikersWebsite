@@ -33,7 +33,7 @@
   var SCRIPT_ORDER = [
     { src: "../assets/gear-builder/scripts/jquery.min.js" },
     { src: "../assets/gear-builder/scripts/data.js", type: "module" },
-    { src: "../assets/gear-builder/scripts/gear.js?v=20260508-lazy-v1", type: "module" },
+    { src: "../assets/gear-builder/scripts/gear.js?v=20260514-buttons-v1", type: "module" },
     { src: "../assets/gear-builder/scripts/builder.js?v=20260507-perf-v1", type: "module" },
     { src: "../assets/gear-builder/scripts/screenshot.js?v=20260508-lazy-v1", type: "module" },
     { src: "../assets/gear-builder/scripts/html2canvas.min.js" },
