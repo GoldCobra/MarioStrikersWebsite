@@ -5,9 +5,17 @@ const express = require("express");
 const cors = require("cors");
 const { config } = require("./config");
 const { healthCheck } = require("./db");
-const { getLeaderboardRows, assertGameAndMode, parseLimit } = require("./services/leaderboards-service");
-const { getMsblClubs } = require("./services/clubs-service");
-const { getPlayersList, getPlayerProfile } = require("./services/players-service");
+const { getLeaderboardRows, assertGameAndMode, parseLimit, parseOffset } = require("./services/leaderboards-service");
+const { getPlayerProfile } = require("./services/players-service");
+const {
+  COMPETITIVE_SEASON_KEY,
+  PLAYERS_LIST_KEY,
+  MSBL_CLUBS_KEY,
+  PUBLIC_LEADERBOARD_LIMIT,
+  isPublicLeaderboardVariant,
+  leaderboardCacheKey,
+  publicDataCache
+} = require("./services/public-data-cache");
 
 const STATIC_ROOT = path.join(__dirname, "../../");
 const STATIC_PAGES_ROOT = path.join(STATIC_ROOT, "pages");
@@ -17,6 +25,7 @@ const CLEAN_PAGE_TRAILING_SLASH_ROUTE = /^\/([a-z0-9-]+)\/$/i;
 const PAGE_ROUTE_ALIASES = {
   "msl-league-site": "msl-schedule"
 };
+const PUBLIC_DATA_CACHE_CONTROL = "public, max-age=30, stale-while-revalidate=60";
 const LEGACY_SUBMENU_ROUTE_MAP = {
   games: {
     msbl: "msbl",
@@ -221,9 +230,36 @@ function createApp() {
     res.status(isValidationError ? 400 : 500).json({ error: message });
   }
 
+  function sendPublicDataJson(res, cacheResult, payload) {
+    res.set("X-Data-Cache", cacheResult.cacheStatus);
+    res.set("X-Data-Generated-At", cacheResult.generatedAt);
+    res.set("Cache-Control", PUBLIC_DATA_CACHE_CONTROL);
+    res.json(payload);
+  }
+
+  function sliceLeaderboardPayload(payload, limit) {
+    const rows = Array.isArray(payload && payload.rows)
+      ? payload.rows.slice(0, limit)
+      : [];
+    return {
+      game: payload && payload.game,
+      mode: payload && payload.mode,
+      count: rows.length,
+      rows: rows
+    };
+  }
+
   app.get("/api/leaderboards/:game/:mode", async function (req, res) {
     try {
       const params = assertGameAndMode(req.params.game, req.params.mode);
+      const limit = parseLimit(req.query.limit, config.leaderboardDefaultLimit);
+      const offset = parseOffset(req.query.offset);
+      if (offset === 0 && limit <= PUBLIC_LEADERBOARD_LIMIT && isPublicLeaderboardVariant(params.game, params.mode)) {
+        const cached = await publicDataCache.get(leaderboardCacheKey(params.game, params.mode));
+        sendPublicDataJson(res, cached, sliceLeaderboardPayload(cached.payload, limit));
+        return;
+      }
+
       const rows = await getLeaderboardRows({
         gameCode: params.game,
         modeCode: params.mode,
@@ -245,6 +281,13 @@ function createApp() {
     try {
       const params = assertGameAndMode(req.params.game, req.params.mode);
       const limit = parseLimit(req.query.limit, 25);
+      if (isPublicLeaderboardVariant(params.game, params.mode)) {
+        const cappedLimit = Math.min(limit, PUBLIC_LEADERBOARD_LIMIT);
+        const cached = await publicDataCache.get(leaderboardCacheKey(params.game, params.mode));
+        sendPublicDataJson(res, cached, sliceLeaderboardPayload(cached.payload, cappedLimit));
+        return;
+      }
+
       const rows = await getLeaderboardRows({
         gameCode: params.game,
         modeCode: params.mode,
@@ -264,12 +307,8 @@ function createApp() {
 
   app.get(["/api/clubs", "/api/clubs/msbl"], async function (_req, res) {
     try {
-      const rows = await getMsblClubs();
-      res.json({
-        game: "msbl",
-        count: rows.length,
-        rows: rows
-      });
+      const cached = await publicDataCache.get(MSBL_CLUBS_KEY);
+      sendPublicDataJson(res, cached, cached.payload);
     } catch (error) {
       sendApiError(res, error);
     }
@@ -277,11 +316,17 @@ function createApp() {
 
   app.get("/api/players", async function (_req, res) {
     try {
-      const rows = await getPlayersList();
-      res.json({
-        count: rows.length,
-        rows: rows
-      });
+      const cached = await publicDataCache.get(PLAYERS_LIST_KEY);
+      sendPublicDataJson(res, cached, cached.payload);
+    } catch (error) {
+      sendApiError(res, error);
+    }
+  });
+
+  app.get("/api/competitive-season/current", async function (_req, res) {
+    try {
+      const cached = await publicDataCache.get(COMPETITIVE_SEASON_KEY);
+      sendPublicDataJson(res, cached, cached.payload);
     } catch (error) {
       sendApiError(res, error);
     }

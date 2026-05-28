@@ -55,6 +55,21 @@
     return base.replace(/\/+$/, "");
   }
 
+  function fetchJson(url) {
+    if (window.PublicDataPreload && typeof window.PublicDataPreload.fetchJson === "function") {
+      return window.PublicDataPreload.fetchJson(url);
+    }
+
+    return fetch(url, {
+      headers: { Accept: "application/json" }
+    }).then(function (response) {
+      if (!response.ok) {
+        throw new Error("Leaderboard request failed.");
+      }
+      return response.json();
+    });
+  }
+
   function parseGameAndMode(tabKey) {
     var key = String(tabKey || "").toLowerCase();
     var firstDash = key.indexOf("-");
@@ -328,11 +343,7 @@
     var apiUrl = (base || "") + "/api/leaderboards/" + gameAndMode.game + "/" + gameAndMode.mode + "?limit=100&offset=0";
 
     try {
-      var response = await fetch(apiUrl, { headers: { Accept: "application/json" } });
-      if (!response.ok) {
-        throw new Error("Leaderboard request failed.");
-      }
-      var payload = await response.json();
+      var payload = await fetchJson(apiUrl);
       var normalized = normalizeRows(payload && payload.rows);
       if (normalized.length > 0) {
         writeCachedRows(tabKey, normalized);

@@ -8,7 +8,8 @@
     "start": "node src/index.js",
     "start:api": "node src/index.js",
     "sync:mssql:once": "node src/scripts/mssql-sync-once.js",
-    "check": "node --check src/index.js && node --check src/server.js && node --check src/config.js && node --check src/db.js && node --check src/services/leaderboards-service.js && node --check src/services/clubs-service.js && node --check src/services/players-service.js && node --check src/services/competitive-ranks.js && node --check src/scripts/mssql-sync-once.js"
+    "check": "node --check src/index.js && node --check src/server.js && node --check src/config.js && node --check src/db.js && node --check src/services/leaderboards-service.js && node --check src/services/clubs-service.js && node --check src/services/players-service.js && node --check src/services/competitive-ranks.js && node --check src/services/competitive-season-service.js && node --check src/services/public-data-cache.js && node --check src/services/public-data-cache.test.js && node --check src/scripts/mssql-sync-once.js",
+    "test": "node --test src/services/public-data-cache.test.js"
   },
   "engines": {
     "node": ">=20"

@@ -35,6 +35,21 @@
     return base.replace(/\/+$/, "");
   }
 
+  function fetchJson(url) {
+    if (window.PublicDataPreload && typeof window.PublicDataPreload.fetchJson === "function") {
+      return window.PublicDataPreload.fetchJson(url);
+    }
+
+    return fetch(url, {
+      headers: { Accept: "application/json" }
+    }).then(function (response) {
+      if (!response.ok) {
+        throw new Error("Request failed.");
+      }
+      return response.json();
+    });
+  }
+
   function normalizeCountryCode(countryCode) {
     var code = String(countryCode || "").trim().toLowerCase();
     if (!/^[a-z]{2}$/.test(code)) {
@@ -519,13 +534,7 @@
   async function fetchPlayers() {
     var base = getApiBase();
     var url = (base || "") + "/api/players";
-    var response = await fetch(url, {
-      headers: { Accept: "application/json" }
-    });
-    if (!response.ok) {
-      throw new Error("Players request failed.");
-    }
-    var payload = await response.json();
+    var payload = await fetchJson(url);
     return Array.isArray(payload && payload.rows) ? payload.rows : [];
   }
 

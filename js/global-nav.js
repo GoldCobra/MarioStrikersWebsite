@@ -2,10 +2,10 @@
   "use strict";
 
   var EXTERNAL_LINKS = [
-    { key: "dsc", label: "Discord", href: "https://discord.gg/de2YaWg" },
-    { key: "x", label: "X", href: "https://x.com/MarioStrikersGG" },
-    { key: "yt", label: "YouTube", href: "https://www.youtube.com/@MarioStrikersGG" },
-    { key: "ttv", label: "Twitch", href: "https://twitch.tv/MarioStrikersGG" }
+    { label: "Discord", href: "https://discord.gg/de2YaWg" },
+    { label: "X", href: "https://x.com/MarioStrikersGG" },
+    { label: "YouTube", href: "https://www.youtube.com/@MarioStrikersGG" },
+    { label: "Twitch", href: "https://twitch.tv/MarioStrikersGG" }
   ];
 
   var TOP_NAV_ITEMS = [
@@ -248,14 +248,6 @@
 
   function getTopNavIconWebpSrc(prefix, itemKey, isActive) {
     return toModernUiAssetPath(getTopNavIconPngSrc(prefix, itemKey, isActive));
-  }
-
-  function getExternalIconPngSrc(prefix, itemKey) {
-    return prefix + "/assets/ext-links/" + itemKey + ".png";
-  }
-
-  function getExternalIconWebpSrc(prefix, itemKey) {
-    return toModernUiAssetPath(getExternalIconPngSrc(prefix, itemKey));
   }
 
   function preloadCriticalUiAssets(prefix, pageState) {
@@ -758,16 +750,6 @@
   }
 
   function buildMainNavHtml(prefix, pageState) {
-    var extHtml = EXTERNAL_LINKS.map(function (link) {
-      var externalIconSrc = getExternalIconWebpSrc(prefix, link.key);
-      var externalFallbackIconSrc = getExternalIconPngSrc(prefix, link.key);
-      return [
-        '<a class="ext-link" href="', link.href, '" aria-label="', link.label, '" target="_blank" rel="noopener noreferrer">',
-        '<img class="ext-icon" src="', externalIconSrc, '" width="176" height="115" alt="', link.label, '" onerror="this.onerror=null;this.src=\'', externalFallbackIconSrc, '\'">',
-        "</a>"
-      ].join("");
-    }).join("");
-
     var brandHtml = [
       '<a class="nav-brand" href="', toHref(prefix, "index"), '" aria-label="Mario Strikers Community home">',
       '<img class="nav-brand-logo" src="', prefix, '/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src=\'', prefix, '/assets/logo/logo.png\'">',
@@ -784,7 +766,6 @@
     return [
       '<header id="2">',
       brandHtml,
-      '<nav class="ext-nav" aria-label="External links">', extHtml, "</nav>",
       '<nav class="main-nav main-nav-text" aria-label="Main navigation">', navHtml, "</nav>",
       "</header>"
     ].join("");
@@ -928,22 +909,34 @@
     var links = document.createElement("p");
     links.className = "global-footer-links";
 
-    var aboutLink = document.createElement("a");
-    aboutLink.href = toHref(prefix, "about-us");
-    aboutLink.className = "global-footer-link";
-    aboutLink.textContent = "ABOUT US";
-    links.appendChild(aboutLink);
+    function appendSeparator() {
+      if (!links.firstChild) {
+        return;
+      }
+      var sep = document.createElement("span");
+      sep.className = "global-footer-sep";
+      sep.textContent = "–";
+      links.appendChild(sep);
+    }
 
-    var sep = document.createElement("span");
-    sep.className = "global-footer-sep";
-    sep.textContent = "  –  ";
-    links.appendChild(sep);
+    function appendFooterLink(label, href, isExternal) {
+      appendSeparator();
+      var anchor = document.createElement("a");
+      anchor.href = href;
+      anchor.className = "global-footer-link";
+      anchor.textContent = label;
+      if (isExternal) {
+        anchor.target = "_blank";
+        anchor.rel = "noopener noreferrer";
+      }
+      links.appendChild(anchor);
+    }
 
-    var privacyLink = document.createElement("a");
-    privacyLink.href = toHref(prefix, "privacy-policy");
-    privacyLink.className = "global-footer-link";
-    privacyLink.textContent = "PRIVACY POLICY";
-    links.appendChild(privacyLink);
+    EXTERNAL_LINKS.forEach(function (link) {
+      appendFooterLink(String(link.label || "").toUpperCase(), link.href, true);
+    });
+    appendFooterLink("ABOUT US", toHref(prefix, "about-us"), false);
+    appendFooterLink("PRIVACY POLICY", toHref(prefix, "privacy-policy"), false);
 
     footer.appendChild(links);
     document.body.appendChild(footer);

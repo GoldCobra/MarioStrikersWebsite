@@ -1,0 +1,49 @@
+services:
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+    restart: unless-stopped
+    networks:
+      - strikers-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: msc-website-backend
+    environment:
+      - NODE_ENV=production
+      - FLARESOLVERR_URL=http://flaresolverr:8191
+    env_file:
+      - ./backend/.env
+    volumes:
+      - backend-cache:/app/.cache
+    expose:
+      - "8787"
+    restart: unless-stopped
+    networks:
+      - strikers-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: msc-website-frontend
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "80:8080"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - strikers-network
+
+networks:
+  strikers-network:
+    driver: bridge
+
+volumes:
+  backend-cache:

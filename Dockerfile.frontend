@@ -6,7 +6,11 @@ RUN apk add --no-cache nginx nginx-mod-http-brotli \
 
 WORKDIR /usr/share/nginx/html
 
-COPY . .
+COPY index.html robots.txt sitemap.xml ./
+COPY assets ./assets
+COPY css ./css
+COPY js ./js
+COPY pages ./pages
 COPY nginx/frontend.conf /etc/nginx/http.d/default.conf
 
 EXPOSE 8080

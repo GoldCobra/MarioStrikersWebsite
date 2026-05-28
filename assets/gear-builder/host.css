@@ -43,7 +43,8 @@
   font-size: var(--reporter-font-size);
   font-weight: var(--reporter-font-weight);
   letter-spacing: var(--reporter-letter-spacing);
-  text-shadow: var(--reporter-text-shadow);
+  text-shadow: none;
+  filter: var(--reporter-text-drop-shadow);
 }
 
 .msbl-gear-pane-state.is-error {
@@ -143,7 +144,8 @@
   background-position: center;
   background-size: 100% 100%;
   color: #fef9e7;
-  text-shadow: -2px 2px 0 #000;
+  text-shadow: none;
+  filter: var(--reporter-text-drop-shadow);
 }
 
 #msbl-gear-builder-host .builder-tab-link[aria-selected="true"] {
@@ -200,7 +202,8 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: 100% 100%;
-  text-shadow: -2px 2px 0 #000;
+  text-shadow: none;
+  filter: var(--reporter-text-drop-shadow);
 }
 
 #msbl-gear-builder-host .button,
@@ -311,7 +314,8 @@
   font-family: "ITC Grizzly", sans-serif;
   font-size: calc(var(--reporter-font-size-sm) + 2px);
   font-weight: 700;
-  text-shadow: -2px 2px 0 #000 !important;
+  text-shadow: none !important;
+  filter: var(--reporter-text-drop-shadow);
 }
 
 #msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) .cardchar {
@@ -457,7 +461,8 @@
   font-family: "ITC Grizzly", sans-serif;
   font-weight: 700;
   line-height: 1;
-  text-shadow: -2px 1px 0 #000;
+  text-shadow: none;
+  filter: drop-shadow(-2px 1px 0 #000);
   white-space: nowrap;
 }
 
@@ -526,7 +531,8 @@
   font-size: var(--reporter-font-size-xs);
   font-weight: inherit;
   text-transform: uppercase;
-  text-shadow: -2px 2px 0 #000;
+  text-shadow: none;
+  filter: var(--reporter-text-drop-shadow);
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
@@ -535,7 +541,7 @@
 #msbl-gear-builder-host .gear-preset-menu-button:hover,
 #msbl-gear-builder-host .gear-preset-menu-button:focus-visible {
   color: #fac402;
-  filter: brightness(1.05);
+  filter: var(--reporter-text-drop-shadow) brightness(1.05);
 }
 
 #msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu {
@@ -585,7 +591,8 @@
   font-size: var(--reporter-font-size-xs);
   font-weight: inherit;
   text-transform: uppercase;
-  text-shadow: -2px 2px 0 #000;
+  text-shadow: none;
+  filter: var(--reporter-text-drop-shadow);
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
@@ -594,7 +601,7 @@
 #msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b:hover,
 #msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b:focus-visible {
   color: #fac402;
-  filter: brightness(1.05);
+  filter: var(--reporter-text-drop-shadow) brightness(1.05);
 }
 
 /* Match MSC Save Editor button typography for all copy/save actions */
@@ -611,7 +618,7 @@
 #msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b.savepic:hover,
 #msbl-gear-builder-host .tab-pane[id^="tab-"]:not(#tab-b) > .menu .menu-options b.savepic:focus-visible {
   color: #f5c300;
-  filter: none;
+  filter: var(--reporter-text-drop-shadow);
 }
 
 @media (max-width: 760px) {

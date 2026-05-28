@@ -7,12 +7,19 @@
   var OFFSEASON_DURATION_MS = 3 * 24 * 60 * 60 * 1000;
   var CYCLE_DURATION_MS = SEASON_DURATION_MS + OFFSEASON_DURATION_MS;
   var SECOND_MS = 1000;
+  var COMPETITIVE_SEASON_API_PATH = "/api/competitive-season/current";
 
   var anchorUtcMs = new Date(ANCHOR_ISO).getTime();
-  var countdownNode = document.getElementById("landing-season-countdown");
-  var headlineNode = document.querySelector(".landing-club-headline");
+  var localCountdownNodes = Array.prototype.slice.call(document.querySelectorAll("[data-local-season-countdown]"));
+  var competitiveCountdownNodes = Array.prototype.slice.call(document.querySelectorAll("[data-competitive-season-countdown]"));
+  var competitiveSeasonState = {
+    payload: null,
+    serverOffsetMs: 0,
+    requestInFlight: false,
+    refreshAfterTarget: false
+  };
 
-  if (!countdownNode) {
+  if (!localCountdownNodes.length && !competitiveCountdownNodes.length) {
     return;
   }
 
@@ -73,6 +80,11 @@
     };
   }
 
+  function parseTimeMs(value) {
+    var time = new Date(value || "").getTime();
+    return Number.isFinite(time) ? time : 0;
+  }
+
   function formatCountdownParts(totalMs) {
     var safeMs = totalMs > 0 ? totalMs : 0;
     var totalSeconds = Math.floor(safeMs / 1000);
@@ -105,47 +117,160 @@
     return segments.join("");
   }
 
-  function renderCountdownLayout(prefixText, segmentsHtml) {
-    countdownNode.innerHTML = "<span class=\"landing-countdown-prefix\">" + prefixText + "</span>"
-      + "<span class=\"landing-countdown-group\">" + segmentsHtml + "</span>";
-  }
-
-  function renderCountdown() {
-    var nowTime = Date.now();
-    var cycleState = getCycleState(nowTime);
-    var parts = formatCountdownParts(cycleState.remainingMs);
-    var prefixText = cycleState.isOffseason ? "SEASON BEGINS:" : "SEASON ENDS IN";
-
-    if (headlineNode) {
-      headlineNode.textContent = cycleState.isOffseason
-        ? "OFF-SEASON"
-        : "THE SEASON IS UNDERWAY!";
-    }
+  function buildSegmentsForRemaining(totalMs) {
+    var parts = formatCountdownParts(totalMs);
 
     if (parts.totalSeconds < 86400) {
       var totalHours = Math.floor(parts.totalSeconds / 3600);
       var hoursLabel = String(totalHours).padStart(2, "0");
-      renderCountdownLayout(
-        prefixText,
-        joinSegments([
-          buildSegment(hoursLabel, "H"),
-          buildSegment(parts.m, "M"),
-          buildSegment(parts.s, "S")
-        ])
-      );
+      return joinSegments([
+        buildSegment(hoursLabel, "H"),
+        buildSegment(parts.m, "M"),
+        buildSegment(parts.s, "S")
+      ]);
+    }
+
+    return joinSegments([
+      buildSegment(parts.d, "D"),
+      buildSegment(parts.h, "H"),
+      buildSegment(parts.m, "M")
+    ]);
+  }
+
+  function renderCountdownLayout(countdownNode, prefixText, segmentsHtml) {
+    countdownNode.innerHTML = "<span class=\"landing-countdown-prefix\">" + prefixText + "</span>"
+      + "<span class=\"landing-countdown-group\">" + segmentsHtml + "</span>";
+  }
+
+  function updateCountdownNode(countdownNode, headlineText, prefixText, segmentsHtml) {
+    var clubNode = countdownNode.closest(".landing-club");
+    var headlineNode = clubNode ? clubNode.querySelector(".landing-club-headline") : null;
+
+    if (headlineNode) {
+      headlineNode.textContent = headlineText;
+    }
+
+    renderCountdownLayout(countdownNode, prefixText, segmentsHtml);
+  }
+
+  function getCountdownNowMs() {
+    return Date.now() - competitiveSeasonState.serverOffsetMs;
+  }
+
+  function renderLocalCountdown(nowUtcMs) {
+    if (!localCountdownNodes.length) {
       return;
     }
 
-    renderCountdownLayout(
-      prefixText,
-      joinSegments([
-        buildSegment(parts.d, "D"),
-        buildSegment(parts.h, "H"),
-        buildSegment(parts.m, "M")
-      ])
-    );
+    var cycleState = getCycleState(nowUtcMs);
+    var prefixText = cycleState.isOffseason ? "SEASON BEGINS:" : "SEASON ENDS IN";
+    var headlineText = cycleState.isOffseason
+      ? "OFF-SEASON"
+      : "THE SEASON IS UNDERWAY!";
+    var segmentsHtml = buildSegmentsForRemaining(cycleState.remainingMs);
+
+    localCountdownNodes.forEach(function (countdownNode) {
+      updateCountdownNode(countdownNode, headlineText, prefixText, segmentsHtml);
+    });
   }
 
-  renderCountdown();
-  window.setInterval(renderCountdown, 1000);
+  function getApiBase() {
+    var runtime = window.APP_RUNTIME_CONFIG || {};
+    return String(runtime.leaderboardsApiBase || "").trim().replace(/\/+$/, "");
+  }
+
+  function getCompetitiveSeasonPhase(season, nowUtcMs) {
+    var startMs = parseTimeMs(season && season.startDateUtc);
+    var endMs = parseTimeMs(season && season.endDateUtc);
+    var headlineText = String(season && season.displayName ? season.displayName : "COMPETITIVE SEASON").trim();
+
+    if (startMs && nowUtcMs < startMs) {
+      return {
+        headlineText: headlineText,
+        prefixText: "SEASON BEGINS:",
+        remainingMs: startMs - nowUtcMs,
+        targetMs: startMs
+      };
+    }
+
+    if (endMs && nowUtcMs < endMs) {
+      return {
+        headlineText: headlineText,
+        prefixText: "SEASON ENDS IN",
+        remainingMs: endMs - nowUtcMs,
+        targetMs: endMs
+      };
+    }
+
+    return {
+      headlineText: headlineText,
+      prefixText: "SEASON ENDED:",
+      remainingMs: 0,
+      targetMs: endMs || startMs || 0
+    };
+  }
+
+  function renderCompetitiveSeasonCountdown(nowUtcMs) {
+    if (!competitiveCountdownNodes.length || !competitiveSeasonState.payload) {
+      return;
+    }
+
+    var season = competitiveSeasonState.payload.season;
+    if (!season) {
+      return;
+    }
+
+    var phase = getCompetitiveSeasonPhase(season, nowUtcMs);
+    var segmentsHtml = buildSegmentsForRemaining(phase.remainingMs);
+
+    competitiveCountdownNodes.forEach(function (countdownNode) {
+      updateCountdownNode(countdownNode, phase.headlineText, phase.prefixText, segmentsHtml);
+    });
+
+    if (phase.targetMs && phase.remainingMs <= 0 && !competitiveSeasonState.refreshAfterTarget) {
+      competitiveSeasonState.refreshAfterTarget = true;
+      window.setTimeout(fetchCompetitiveSeasonStatus, 5000);
+    }
+  }
+
+  function renderAllCountdowns() {
+    var nowUtcMs = getCountdownNowMs();
+    renderLocalCountdown(nowUtcMs);
+    renderCompetitiveSeasonCountdown(nowUtcMs);
+  }
+
+  async function fetchCompetitiveSeasonStatus() {
+    if (!competitiveCountdownNodes.length || competitiveSeasonState.requestInFlight) {
+      return;
+    }
+
+    competitiveSeasonState.requestInFlight = true;
+    try {
+      var response = await fetch(getApiBase() + COMPETITIVE_SEASON_API_PATH, {
+        headers: { Accept: "application/json" },
+        cache: "no-store"
+      });
+      if (!response.ok) {
+        throw new Error("Competitive season API failed with " + response.status);
+      }
+
+      var payload = await response.json();
+      var serverNowMs = parseTimeMs(payload && payload.serverNowUtc);
+      competitiveSeasonState.payload = payload;
+      competitiveSeasonState.serverOffsetMs = serverNowMs ? Date.now() - serverNowMs : 0;
+      competitiveSeasonState.refreshAfterTarget = false;
+      renderAllCountdowns();
+    } catch (error) {
+      if (window.console && typeof window.console.warn === "function") {
+        window.console.warn("[landing-countdown] Competitive season status failed:", error);
+      }
+    } finally {
+      competitiveSeasonState.requestInFlight = false;
+    }
+  }
+
+  renderAllCountdowns();
+  fetchCompetitiveSeasonStatus();
+  window.setInterval(renderAllCountdowns, 1000);
+  window.setInterval(fetchCompetitiveSeasonStatus, 60000);
 })();

@@ -20,6 +20,21 @@
     return base.replace(/\/+$/, "");
   }
 
+  function fetchJson(url) {
+    if (window.PublicDataPreload && typeof window.PublicDataPreload.fetchJson === "function") {
+      return window.PublicDataPreload.fetchJson(url);
+    }
+
+    return fetch(url, {
+      headers: { Accept: "application/json" }
+    }).then(function (response) {
+      if (!response.ok) {
+        throw new Error("Club request failed.");
+      }
+      return response.json();
+    });
+  }
+
   function toDisplayStatus(status) {
     return String(status || "").trim() || "-";
   }
@@ -139,14 +154,29 @@
   async function fetchClubs() {
     var base = getApiBase();
     var url = (base || "") + "/api/clubs/msbl";
-    var response = await fetch(url, {
-      headers: { Accept: "application/json" }
-    });
-    if (!response.ok) {
-      throw new Error("Club request failed.");
-    }
-    var payload = await response.json();
-    return Array.isArray(payload && payload.rows) ? payload.rows : [];
+    var payload = await fetchJson(url);
+    var rows = Array.isArray(payload && payload.rows) ? payload.rows : [];
+    return rows
+      .filter(function (row) {
+        return Number(row && row.member_count || 0) > 0;
+      })
+      .sort(function (a, b) {
+        var memberDiff = Number(b && b.member_count || 0) - Number(a && a.member_count || 0);
+        if (memberDiff !== 0) {
+          return memberDiff;
+        }
+        var nameA = String(a && a.name || "").trim().toLowerCase();
+        var nameB = String(b && b.name || "").trim().toLowerCase();
+        if (nameA !== nameB) {
+          return nameA < nameB ? -1 : 1;
+        }
+        var tagA = String(a && a.tag || "").trim().toLowerCase();
+        var tagB = String(b && b.tag || "").trim().toLowerCase();
+        if (tagA === tagB) {
+          return 0;
+        }
+        return tagA < tagB ? -1 : 1;
+      });
   }
 
   async function initMsblClubsPage() {

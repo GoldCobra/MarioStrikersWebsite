@@ -115,7 +115,7 @@ async function getMsblClubs() {
         "LEFT JOIN ClubRoster cr ON cr.Club = c.ID",
         "GROUP BY c.ID, c.ClanTag, c.ClubName, c.JoinConditions, c.IsOpen, c.Region, c.ClubCode, c.Logo",
         "HAVING COUNT(cr.Player) > 0",
-        "ORDER BY LTRIM(RTRIM(ISNULL(c.ClubName, ''))) ASC, LTRIM(RTRIM(ISNULL(c.ClanTag, ''))) ASC"
+        "ORDER BY COUNT(cr.Player) DESC, LTRIM(RTRIM(ISNULL(c.ClubName, ''))) ASC, LTRIM(RTRIM(ISNULL(c.ClanTag, ''))) ASC"
       ].join(" ")
     );
 
