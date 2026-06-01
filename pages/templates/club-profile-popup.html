@@ -1,0 +1,39 @@
+<div id="club-profile-popup" class="club-popup popup-overlay" hidden aria-hidden="true">
+  <button class="club-popup-backdrop popup-backdrop" data-action="popup-close" aria-label="Close club profile popup"></button>
+  <section class="club-popup-card popup-card" role="dialog" aria-modal="true" aria-labelledby="club-popup-name">
+    <button class="club-popup-close popup-close" type="button" data-action="popup-close" aria-label="Close club profile popup">×</button>
+
+    <header class="club-popup-header popup-header">
+      <div class="club-popup-header-title">
+        <h2 id="club-popup-name" class="club-popup-name popup-title" data-slot="club-name">-</h2>
+      </div>
+    </header>
+
+    <div class="club-popup-body player-popup-body">
+      <p class="club-popup-status player-popup-status loading-note" data-slot="popup-status">Loading...</p>
+
+      <div class="club-popup-content player-popup-content" data-slot="popup-content" hidden>
+        <img class="club-popup-bg-logo" data-slot="club-logo-bg" src="" alt="" aria-hidden="true" hidden onerror="this.hidden=true;this.removeAttribute('src');">
+
+        <section class="club-popup-section club-popup-meta-section player-popup-section">
+          <div class="club-popup-meta-row">
+            <div class="club-popup-meta-col">
+              <h3 class="player-popup-section-title">Join Conditions</h3>
+              <p class="club-popup-line player-popup-results-line" data-slot="join-conditions">-</p>
+            </div>
+          </div>
+        </section>
+
+        <aside class="club-popup-date-panel" aria-label="Club profile details">
+          <h3 class="player-popup-section-title">Created Date</h3>
+          <p class="club-popup-line player-popup-results-line" data-slot="created-date">-</p>
+        </aside>
+
+        <section class="club-popup-section club-popup-roster-section player-popup-section">
+          <h3 class="player-popup-section-title">Roster</h3>
+          <ul class="club-popup-roster" data-list="roster"></ul>
+        </section>
+      </div>
+    </div>
+  </section>
+</div>

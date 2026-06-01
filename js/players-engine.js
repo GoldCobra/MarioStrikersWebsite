@@ -1,6 +1,10 @@
 (function () {
   "use strict";
 
+  var PROFILE_CACHE_TTL_MS = 30000;
+  var POPUP_CLOSE_BLOCK_MS = 500;
+  var lastPopupCloseAt = 0;
+
   var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260429-global-popup-v1";
   var POPUP_OPEN_CLASS = "player-popup-open";
 
@@ -68,6 +72,31 @@
       return null;
     }
     return parsed;
+  }
+
+  function isPlayerActive(row) {
+    return row && row.is_active === true;
+  }
+
+  function normalizePlayerSortName(row) {
+    return String(row && (row.display_name || row.name) || "").trim().toLowerCase();
+  }
+
+  function comparePlayerRows(a, b) {
+    var activeDiff = Number(isPlayerActive(b)) - Number(isPlayerActive(a));
+    if (activeDiff !== 0) {
+      return activeDiff;
+    }
+
+    var nameA = normalizePlayerSortName(a);
+    var nameB = normalizePlayerSortName(b);
+    if (nameA !== nameB) {
+      return nameA < nameB ? -1 : 1;
+    }
+
+    var idA = toPositiveInt(a && a.player_id) || 0;
+    var idB = toPositiveInt(b && b.player_id) || 0;
+    return idA - idB;
   }
 
   function parseCodeLine(lineValue) {
@@ -157,12 +186,14 @@
       if (event) {
         event.preventDefault();
         event.stopPropagation();
+        if (typeof event.stopImmediatePropagation === "function") {
+          event.stopImmediatePropagation();
+        }
       }
       closePopup();
     }
 
     popupRoot.querySelectorAll("[data-action='popup-close']").forEach(function (node) {
-      node.addEventListener("pointerdown", requestClose);
       node.addEventListener("click", requestClose);
     });
 
@@ -229,7 +260,32 @@
     }
   }
 
+  function blockPostCloseInteraction() {
+    var timer;
+    var blockEvent = function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (typeof event.stopImmediatePropagation === "function") {
+        event.stopImmediatePropagation();
+      }
+    };
+    var cleanup = function () {
+      document.removeEventListener("click", blockEvent, true);
+      document.removeEventListener("pointerup", blockEvent, true);
+      document.removeEventListener("touchend", blockEvent, true);
+      clearTimeout(timer);
+    };
+
+    document.addEventListener("click", blockEvent, true);
+    document.addEventListener("pointerup", blockEvent, true);
+    document.addEventListener("touchend", blockEvent, true);
+    timer = setTimeout(cleanup, POPUP_CLOSE_BLOCK_MS);
+  }
+
   function closePopup() {
+    lastPopupCloseAt = Date.now();
+    blockPostCloseInteraction();
+
     if (!popupState.root) {
       return;
     }
@@ -535,7 +591,8 @@
     var base = getApiBase();
     var url = (base || "") + "/api/players";
     var payload = await fetchJson(url);
-    return Array.isArray(payload && payload.rows) ? payload.rows : [];
+    var rows = Array.isArray(payload && payload.rows) ? payload.rows : [];
+    return rows.slice().sort(comparePlayerRows);
   }
 
   async function fetchPlayerProfile(playerId) {
@@ -555,18 +612,20 @@
   function buildRowsHtml(rows) {
     return rows.map(function (row) {
       var name = String(row && row.name || "").trim() || "-";
+      var displayName = String(row && (row.display_name || row.name) || "").trim() || "-";
       var playerId = toPositiveInt(row && row.player_id);
       var countryCode = normalizeCountryCode(row && row.country);
+      var rowClass = isPlayerActive(row) ? "lb-row players-row" : "lb-row players-row is-inactive";
       var flagHtml = countryCode
         ? '<img class="players-flag" src="' + escapeHtml(getFlagAssetUrl(countryCode)) + '" alt="" aria-hidden="true" loading="lazy" onerror="this.onerror=null;this.remove();">'
         : "";
 
       var nameInnerHtml = playerId
-        ? '<button type="button" class="players-name-trigger" data-player-id="' + playerId + '" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for ' + escapeHtml(name) + '">' + escapeHtml(name) + "</button>"
-        : '<span class="players-name-static">' + escapeHtml(name) + "</span>";
+        ? '<button type="button" class="players-name-trigger" data-player-id="' + playerId + '" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for ' + escapeHtml(name) + '">' + escapeHtml(displayName) + "</button>"
+        : '<span class="players-name-static">' + escapeHtml(displayName) + "</span>";
 
       return [
-        '<article class="lb-row players-row" role="listitem">',
+        '<article class="', rowClass, '" role="listitem">',
         '<div class="lb-inner-frame players-inner-frame">',
         '<div class="lb-rank-cell players-flag-cell" aria-hidden="true">',
         '<span class="players-flag-slot">', flagHtml, "</span>",
@@ -609,10 +668,12 @@
     }
 
     var cached = profileCache.get(playerId);
-    if (cached) {
-      renderProfile(cached);
+    if (cached && Date.now() - cached.ts < PROFILE_CACHE_TTL_MS) {
+      renderProfile(cached.data);
       renderPopupContent();
       return;
+    } else if (cached) {
+      profileCache.delete(playerId);
     }
 
     renderPopupLoading("Loading...");
@@ -626,7 +687,7 @@
         return;
       }
 
-      profileCache.set(playerId, profile);
+      profileCache.set(playerId, { data: profile, ts: Date.now() });
       renderProfile(profile);
       renderPopupContent();
     } catch (_error) {
@@ -666,6 +727,7 @@
       ].join("");
 
       mount.addEventListener("click", function (event) {
+        if (Date.now() - lastPopupCloseAt < POPUP_CLOSE_BLOCK_MS) { return; }
         var trigger = event.target.closest(".players-name-trigger");
         if (!trigger) {
           return;

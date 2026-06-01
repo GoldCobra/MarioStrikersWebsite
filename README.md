@@ -1,6 +1,6 @@
 # Mario Strikers Community Website
 
-Static website for the Mario Strikers Community with a small read-only Node/Express API bridge for live community data.
+Static website for the Mario Strikers Community with a small Node/Express API bridge for live community data and Discord-backed account login.
 
 The frontend is plain HTML, shared CSS, and browser JavaScript. Most pages are static shells that are populated by shared JS modules. Leaderboards, clubs, players, and player profiles call `/api/...`; the MSBL Save Editor, MSC Save Editor, and MSC Online Friendlist Editor run fully in the browser against files selected locally by the user.
 
@@ -15,7 +15,7 @@ The frontend is plain HTML, shared CSS, and browser JavaScript. Most pages are s
 - Competitive rules pages for MSBL, MSC, SMS, MSL, and community tournaments.
 - Tier list pages for MSBL, MSC, and SMS.
 - Live ELO/WHR leaderboards backed by MSSQL through the local API bridge.
-- Players list, player profile popup, and MSBL Striker Clubs.
+- Players list, player profile popup, Discord login, own profile page, and MSBL Striker Clubs.
 - Partners, About Us, and Privacy Policy pages.
 - MSBL Save Editor for local `strkrs.save` files.
 - MSC Save Editor for local `Strikers2` save files.
@@ -26,7 +26,7 @@ The frontend is plain HTML, shared CSS, and browser JavaScript. Most pages are s
 - Frontend: static HTML in `index.html` and `pages/`, served publicly through clean URLs such as `/games`.
 - Styling: shared site CSS in `css/global.css`; Gear Builder CSS under `assets/gear-builder/`.
 - Browser logic: vanilla JavaScript in `js/`.
-- Backend: Node.js `>=20`, Express, MSSQL, read-only API endpoints.
+- Backend: Node.js `>=20`, Express, MSSQL, Discord OAuth, signed session cookies, and API endpoints.
 - Data source: live MSSQL database. The backend does not store leaderboard, player, profile, or club data locally.
 
 Cache busting is handled with `?v=...` query strings in HTML script/style URLs. Update the relevant tag when changing browser-loaded JS/CSS/assets that may be cached.
@@ -80,6 +80,11 @@ MSSQL_PORT=443
 MSSQL_DATABASE=
 MSSQL_USER=
 MSSQL_PASSWORD=
+DISCORD_CLIENT_ID=
+DISCORD_CLIENT_SECRET=
+DISCORD_REDIRECT_URI=http://localhost:8787/api/auth/discord/callback
+DISCORD_GUILD_ID=
+SESSION_SECRET=
 ```
 
 Start the combined local environment from the project root:
@@ -116,6 +121,7 @@ Use one of the local servers instead of opening HTML files directly, because tem
 - Leaderboard pages use `js/leaderboards-config.js` and `js/leaderboards-engine.js`.
 - Competitive rules pages use `js/competitive-rules-config.js` and `js/competitive-rules-engine.js`.
 - Players and clubs use `js/players-engine.js` and `js/msbl-clubs-engine.js`.
+- Discord login is surfaced by `js/global-nav.js`; the own profile page uses `js/profile-page.js` and `/api/profile/me`.
 - The player profile popup is loaded from `/pages/templates/player-profile-popup.html`.
 - The MSBL Gear Builder page loads `/pages/templates/msbl-gear-builder.html` and scripts from `assets/gear-builder/`.
 - MSBL Gear Builder preset drafts are stored in `sessionStorage` and can be exported as XML for the MSBL Save Editor.
@@ -243,8 +249,15 @@ GET /api/leaderboards/:game/:mode/top?limit=25
 GET /api/clubs/msbl
 GET /api/players
 GET /api/players/:playerId/profile
+GET /api/auth/discord/start?returnTo=/profile
+GET /api/auth/discord/callback
+GET /api/auth/me
+POST /api/auth/logout
+GET /api/profile/me
 GET /api/health
 ```
+
+Discord login requires the `identify` and `guilds.members.read` OAuth scopes. The backend checks membership in `DISCORD_GUILD_ID` before setting the signed HTTP-only session cookie, then maps the Discord user to `Player.DiscordID` for `/api/profile/me`.
 
 Supported leaderboard values:
 
@@ -307,6 +320,7 @@ Leaderboards:
 Utility/footer pages:
 
 - `/about-us`
+- `/profile` - private/noindex own profile page for logged-in Discord users
 - `/privacy-policy`
 
 Reserve/helper pages exist but are not central navigation targets and are excluded from sitemap indexing, for example `/games`, `/competitive`, `/players`, `/msbl`, `/msc`, `/sms`, `/msl`, `/community-tournaments`, `/players-profiles`, `/msl-leaderboards`, and `/tab-placeholder`.

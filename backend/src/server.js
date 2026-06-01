@@ -6,7 +6,19 @@ const cors = require("cors");
 const { config } = require("./config");
 const { healthCheck } = require("./db");
 const { getLeaderboardRows, assertGameAndMode, parseLimit, parseOffset } = require("./services/leaderboards-service");
-const { getPlayerProfile } = require("./services/players-service");
+const { getPlayerProfile, getPlayerProfileByDiscordId } = require("./services/players-service");
+const { getMsblClubProfile } = require("./services/clubs-service");
+const { defaultClubLogoCache } = require("./services/club-logo-cache");
+const {
+  appendQuery,
+  buildDiscordAuthorizeUrl,
+  completeDiscordLogin,
+  createClearSessionCookie,
+  createSessionCookie,
+  readSessionFromRequest,
+  toAuthMeResponse,
+  verifyOAuthState
+} = require("./services/auth-service");
 const {
   COMPETITIVE_SEASON_KEY,
   PLAYERS_LIST_KEY,
@@ -230,6 +242,15 @@ function createApp() {
     res.status(isValidationError ? 400 : 500).json({ error: message });
   }
 
+  function sendNoStoreJson(res, payload, statusCode) {
+    res.set("Cache-Control", "no-store");
+    res.status(statusCode || 200).json(payload);
+  }
+
+  function getAuthSession(req) {
+    return readSessionFromRequest(req);
+  }
+
   function sendPublicDataJson(res, cacheResult, payload) {
     res.set("X-Data-Cache", cacheResult.cacheStatus);
     res.set("X-Data-Generated-At", cacheResult.generatedAt);
@@ -248,6 +269,90 @@ function createApp() {
       rows: rows
     };
   }
+
+  app.get("/api/auth/discord/start", function (req, res) {
+    try {
+      const redirectUrl = buildDiscordAuthorizeUrl(req.query && req.query.returnTo);
+      res.redirect(302, redirectUrl);
+    } catch (error) {
+      sendApiError(res, error);
+    }
+  });
+
+  app.get("/api/auth/discord/callback", async function (req, res) {
+    let state;
+    try {
+      state = verifyOAuthState(req.query && req.query.state);
+    } catch (_error) {
+      res.status(400).send("Invalid OAuth state.");
+      return;
+    }
+
+    const code = String(req.query && req.query.code || "").trim();
+    if (!code) {
+      res.redirect(302, appendQuery(state.returnTo, { auth: "failed" }));
+      return;
+    }
+
+    try {
+      const login = await completeDiscordLogin(code);
+      res.set("Set-Cookie", createSessionCookie(login.user));
+      res.redirect(302, appendQuery(state.returnTo, { auth: "success" }));
+    } catch (error) {
+      const authStatus = error && error.statusCode === 403 ? "not_member" : "failed";
+      if (authStatus !== "not_member") {
+        console.error("[auth] Discord login failed:", error);
+      }
+      res.redirect(302, appendQuery(state.returnTo, { auth: authStatus }));
+    }
+  });
+
+  app.get("/api/auth/me", function (req, res) {
+    sendNoStoreJson(res, toAuthMeResponse(getAuthSession(req)));
+  });
+
+  app.post("/api/auth/logout", function (_req, res) {
+    res.set("Set-Cookie", createClearSessionCookie());
+    sendNoStoreJson(res, { ok: true });
+  });
+
+  app.get("/api/profile/me", async function (req, res) {
+    const session = getAuthSession(req);
+    if (!session) {
+      sendNoStoreJson(res, {
+        error: "Authentication required.",
+        code: "AUTH_REQUIRED"
+      }, 401);
+      return;
+    }
+
+    try {
+      const profile = await getPlayerProfileByDiscordId(session.discord_user_id);
+      if (!profile) {
+        sendNoStoreJson(res, {
+          error: "No linked player profile.",
+          code: "PLAYER_PROFILE_NOT_LINKED",
+          account: toAuthMeResponse(session).user
+        }, 404);
+        return;
+      }
+
+      sendNoStoreJson(res, {
+        account: toAuthMeResponse(session).user,
+        profile: profile
+      });
+    } catch (error) {
+      if (error && error.code === "PLAYER_PROFILE_CONFLICT") {
+        sendNoStoreJson(res, {
+          error: "Multiple player profiles match this Discord account.",
+          code: "PLAYER_PROFILE_CONFLICT",
+          account: toAuthMeResponse(session).user
+        }, 409);
+        return;
+      }
+      sendApiError(res, error);
+    }
+  });
 
   app.get("/api/leaderboards/:game/:mode", async function (req, res) {
     try {
@@ -314,6 +419,37 @@ function createApp() {
     }
   });
 
+  app.get("/api/clubs/msbl/:clubId/logo", async function (req, res) {
+    try {
+      const logoFile = await defaultClubLogoCache.getLogoFile(req.params.clubId);
+      if (!logoFile) {
+        res.status(404).json({ error: "Club logo not found." });
+        return;
+      }
+
+      res.set("Content-Type", logoFile.contentType);
+      res.set("Cache-Control", "public, max-age=2592000, immutable");
+      res.set("ETag", '"' + logoFile.hash + '"');
+      res.sendFile(logoFile.absolutePath);
+    } catch (error) {
+      sendApiError(res, error);
+    }
+  });
+
+  app.get("/api/clubs/msbl/:clubId/profile", async function (req, res) {
+    try {
+      const profile = await getMsblClubProfile(req.params.clubId);
+      res.set("Cache-Control", "no-store");
+      res.json(profile);
+    } catch (error) {
+      if (error && /not found/i.test(String(error.message || ""))) {
+        res.status(404).json({ error: "Club not found." });
+        return;
+      }
+      sendApiError(res, error);
+    }
+  });
+
   app.get("/api/players", async function (_req, res) {
     try {
       const cached = await publicDataCache.get(PLAYERS_LIST_KEY);
@@ -335,6 +471,7 @@ function createApp() {
   app.get("/api/players/:playerId/profile", async function (req, res) {
     try {
       const profile = await getPlayerProfile(req.params.playerId);
+      res.set("Cache-Control", "no-store");
       res.json(profile);
     } catch (error) {
       if (error && /not found/i.test(String(error.message || ""))) {
@@ -392,6 +529,7 @@ function createApp() {
   app.get("/api/wiimmfi/msc-charged", async function (_req, res) {
     try {
       const players = await fetchWiimmfiPlayers();
+      res.set("Cache-Control", PUBLIC_DATA_CACHE_CONTROL);
       res.json({ count: players.length, players: players });
     } catch (error) {
       sendApiError(res, error);

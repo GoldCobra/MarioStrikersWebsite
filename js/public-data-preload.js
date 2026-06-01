@@ -48,6 +48,9 @@
           throw new Error("Public data request failed.");
         }
         return response.json();
+      }).then(function (data) {
+        delete requests[requestUrl];
+        return data;
       }).catch(function (error) {
         delete requests[requestUrl];
         throw error;

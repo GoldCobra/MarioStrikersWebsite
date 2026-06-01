@@ -1,4 +1,5 @@
 const { withPool, mssql } = require("../db");
+const DEFAULT_ACTIVITY_WINDOW_DAYS = 90;
 
 function normalizeText(value) {
   return String(value || "").trim();
@@ -10,6 +11,20 @@ function normalizeCountry(value) {
     return "";
   }
   return country;
+}
+
+function normalizeDiscordId(value) {
+  const text = normalizeText(value);
+  if (!text) {
+    return "";
+  }
+
+  const mentionMatch = text.match(/<@!?(\d+)>/);
+  if (mentionMatch) {
+    return mentionMatch[1];
+  }
+
+  return /^\d+$/.test(text) ? text : "";
 }
 
 function toPositiveInt(value) {
@@ -26,6 +41,36 @@ function roundOrNull(value) {
     return null;
   }
   return Math.round(parsed);
+}
+
+function normalizeActivityDate(value) {
+  if (!value) {
+    return null;
+  }
+  const date = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(date.getTime())) {
+    return null;
+  }
+  return date;
+}
+
+function toActivityIso(value) {
+  const date = normalizeActivityDate(value);
+  return date ? date.toISOString() : null;
+}
+
+function isActivityActive(value, now, activityWindowDays) {
+  const activity = normalizeActivityDate(value);
+  const reference = normalizeActivityDate(now) || new Date();
+  const windowDays = Number.isFinite(Number(activityWindowDays))
+    ? Number(activityWindowDays)
+    : DEFAULT_ACTIVITY_WINDOW_DAYS;
+
+  if (!activity || windowDays <= 0) {
+    return false;
+  }
+
+  return reference.getTime() - activity.getTime() <= windowDays * 24 * 60 * 60 * 1000;
 }
 
 function normalizeRecordPair(value) {
@@ -162,6 +207,41 @@ function buildFriendCodes(rows) {
   return grouped;
 }
 
+function buildPlayerDisplayName(row, name) {
+  const playerName = normalizeText(name);
+  if (!row || row.duplicate_name !== true && Number(row.duplicate_name) !== 1) {
+    return playerName;
+  }
+
+  const clubTag = normalizeText(row.club_tag);
+  if (clubTag) {
+    return playerName + " [" + clubTag + "]";
+  }
+
+  const playerId = toPositiveInt(row.player_id);
+  return playerId ? playerName + " [#" + playerId + "]" : playerName;
+}
+
+function toPlayerListDTO(row, opts) {
+  const options = opts || {};
+  const name = normalizeText(row && row.name);
+  if (!name) {
+    return null;
+  }
+
+  return {
+    player_id: Number(row && row.player_id) || null,
+    name: name,
+    display_name: buildPlayerDisplayName(row, name),
+    country: normalizeCountry(row && row.country),
+    club_id: Number(row && row.club_id) || null,
+    club_name: normalizeText(row && row.club_name),
+    club_tag: normalizeText(row && row.club_tag),
+    activity: toActivityIso(row && row.activity),
+    is_active: isActivityActive(row && row.activity, options.now, options.activityWindowDays)
+  };
+}
+
 function buildRatingBlock(options) {
   const rawRankEmoji = normalizeText(options && options.rankEmoji);
   const metricName = String(options && options.metricName || "").trim();
@@ -256,8 +336,19 @@ async function getPlayerBaseById(pool, playerId) {
       "  p.ID AS player_id,",
       "  p.Name AS name,",
       "  p.Country AS country,",
-      "  p.IdStartGG AS id_start_gg",
+      "  p.IdStartGG AS id_start_gg,",
+      "  p.Activity AS activity,",
+      "  club.club_id AS club_id,",
+      "  club.ClubName AS club_name,",
+      "  club.ClanTag AS club_tag",
       "FROM Player p",
+      "OUTER APPLY (",
+      "  SELECT TOP 1 c.ID AS club_id, c.ClubName, c.ClanTag",
+      "  FROM ClubRoster cr",
+      "  INNER JOIN Club c ON c.ID = cr.Club",
+      "  WHERE cr.Player = p.ID",
+      "  ORDER BY ISNULL(cr.Rank, 9999), c.ClubName",
+      ") club",
       "WHERE p.ID = @playerId"
     ].join(" ")
   );
@@ -272,7 +363,81 @@ async function getPlayerBaseById(pool, playerId) {
     player_id: Number(row.player_id) || null,
     name: name,
     country: normalizeCountry(row.country),
-    id_start_gg: normalizeText(row.id_start_gg)
+    id_start_gg: normalizeText(row.id_start_gg),
+    club_id: Number(row.club_id) || null,
+    club_name: normalizeText(row.club_name),
+    club_tag: normalizeText(row.club_tag),
+    activity: row.activity || null
+  };
+}
+
+async function getPlayerBaseByDiscordId(pool, discordIdRaw) {
+  const discordId = normalizeDiscordId(discordIdRaw);
+  if (!discordId) {
+    throw new Error("Invalid Discord user id.");
+  }
+
+  const request = pool.request();
+  request.input("discordId", mssql.NVarChar(256), discordId);
+  request.input("discordMention", mssql.NVarChar(256), "<@" + discordId + ">");
+  request.input("discordMentionBang", mssql.NVarChar(256), "<@!" + discordId + ">");
+  request.input("discordMentionPrefix", mssql.NVarChar(256), "<@" + discordId + ">%");
+  request.input("discordMentionBangPrefix", mssql.NVarChar(256), "<@!" + discordId + ">%");
+  const result = await request.query(
+    [
+      "SELECT",
+      "  p.ID AS player_id,",
+      "  p.Name AS name,",
+      "  p.Country AS country,",
+      "  p.IdStartGG AS id_start_gg,",
+      "  p.Activity AS activity,",
+      "  p.DiscordID AS discord_id,",
+      "  club.club_id AS club_id,",
+      "  club.ClubName AS club_name,",
+      "  club.ClanTag AS club_tag",
+      "FROM Player p",
+      "OUTER APPLY (",
+      "  SELECT TOP 1 c.ID AS club_id, c.ClubName, c.ClanTag",
+      "  FROM ClubRoster cr",
+      "  INNER JOIN Club c ON c.ID = cr.Club",
+      "  WHERE cr.Player = p.ID",
+      "  ORDER BY ISNULL(cr.Rank, 9999), c.ClubName",
+      ") club",
+      "WHERE",
+      "  LTRIM(RTRIM(ISNULL(p.DiscordID, ''))) = @discordId",
+      "  OR LTRIM(RTRIM(ISNULL(p.DiscordID, ''))) = @discordMention",
+      "  OR LTRIM(RTRIM(ISNULL(p.DiscordID, ''))) = @discordMentionBang",
+      "  OR LTRIM(RTRIM(ISNULL(p.DiscordID, ''))) LIKE @discordMentionPrefix",
+      "  OR LTRIM(RTRIM(ISNULL(p.DiscordID, ''))) LIKE @discordMentionBangPrefix",
+      "ORDER BY p.ID ASC"
+    ].join(" ")
+  );
+
+  const rows = Array.isArray(result && result.recordset) ? result.recordset : [];
+  const exactRows = rows.filter(function (row) {
+    return normalizeDiscordId(row && row.discord_id) === discordId && normalizeText(row && row.name);
+  });
+
+  if (exactRows.length === 0) {
+    return null;
+  }
+
+  if (exactRows.length > 1) {
+    const error = new Error("Multiple player profiles match this Discord account.");
+    error.code = "PLAYER_PROFILE_CONFLICT";
+    throw error;
+  }
+
+  const row = exactRows[0];
+  return {
+    player_id: Number(row.player_id) || null,
+    name: normalizeText(row.name),
+    country: normalizeCountry(row.country),
+    id_start_gg: normalizeText(row.id_start_gg),
+    club_id: Number(row.club_id) || null,
+    club_name: normalizeText(row.club_name),
+    club_tag: normalizeText(row.club_tag),
+    activity: row.activity || null
   };
 }
 
@@ -297,18 +462,92 @@ async function getPlayerFriendCodes(pool, playerId) {
   return buildFriendCodes(rows);
 }
 
-async function getPlayerProfileSummary(pool, playerName) {
+async function getPlayerProfileSummary(pool, playerId) {
   const request = pool.request();
-  request.input("searchTerm", mssql.NVarChar, playerName);
-  const result = await request.execute("GetProfile");
+  request.input("playerId", mssql.Int, playerId);
+  const result = await request.query(
+    [
+      "SELECT TOP 1",
+      "  p.Name,",
+      "  c.ClubName AS Club,",
+      "  ISNULL(CAST(sms.Wins AS NVARCHAR(5)) + '-' + CAST(sms.Losses AS NVARCHAR(5)), '0-0') AS SmsRecord,",
+      "  ISNULL(CAST(sms.MatchWins AS NVARCHAR(5)) + '-' + CAST(sms.MatchLosses AS NVARCHAR(5)), '0-0') AS SmsMatchRecord,",
+      "  CAST(ROUND(sms.RatingWHR + 1000, 0) AS INT) AS SmsRating,",
+      "  CAST(ROUND(sms.Elo, 0) AS INT) AS SmsElo,",
+      "  smsRank.Value AS SmsRank,",
+      "  ISNULL(CAST(msc.Wins AS NVARCHAR(5)) + '-' + CAST(msc.Losses AS NVARCHAR(5)), '0-0') AS MscRecord,",
+      "  ISNULL(CAST(msc.MatchWins AS NVARCHAR(5)) + '-' + CAST(msc.MatchLosses AS NVARCHAR(5)), '0-0') AS MscMatchRecord,",
+      "  CAST(ROUND(msc.RatingWHR + 1000, 0) AS INT) AS MscRating,",
+      "  CAST(ROUND(msc.Elo, 0) AS INT) AS MscElo,",
+      "  mscRank.Value AS MscRank,",
+      "  ISNULL(CAST(bl.Wins AS NVARCHAR(5)) + '-' + CAST(bl.Losses AS NVARCHAR(5)), '0-0') AS BlRecord,",
+      "  ISNULL(CAST(bl.MatchWins AS NVARCHAR(5)) + '-' + CAST(bl.MatchLosses AS NVARCHAR(5)), '0-0') AS BlMatchRecord,",
+      "  CAST(ROUND(bl.RatingWHR + 1000, 0) AS INT) AS BlRating,",
+      "  CAST(ROUND(bl.Elo, 0) AS INT) AS BlElo,",
+      "  blRank.Value AS BlRank,",
+      "  ISNULL(CAST(sms.Wins2v2 AS NVARCHAR(5)) + '-' + CAST(sms.Losses2v2 AS NVARCHAR(5)), '0-0') AS SmsRecord2v2,",
+      "  ISNULL(CAST(sms.MatchWins2v2 AS NVARCHAR(5)) + '-' + CAST(sms.MatchLosses2v2 AS NVARCHAR(5)), '0-0') AS SmsMatchRecord2v2,",
+      "  CAST(ROUND(sms.RatingTS + 1000, 0) AS INT) AS SmsRating2v2,",
+      "  CAST(ROUND(sms.Elo2, 0) AS INT) AS SmsElo2v2,",
+      "  smsRank2v2.Value AS SmsRank2v2,",
+      "  ISNULL(CAST(msc.Wins2v2 AS NVARCHAR(5)) + '-' + CAST(msc.Losses2v2 AS NVARCHAR(5)), '0-0') AS MscRecord2v2,",
+      "  ISNULL(CAST(msc.MatchWins2v2 AS NVARCHAR(5)) + '-' + CAST(msc.MatchLosses2v2 AS NVARCHAR(5)), '0-0') AS MscMatchRecord2v2,",
+      "  CAST(ROUND(msc.RatingTS + 1000, 0) AS INT) AS MscRating2v2,",
+      "  CAST(ROUND(msc.Elo2, 0) AS INT) AS MscElo2v2,",
+      "  mscRank2v2.Value AS MscRank2v2,",
+      "  ISNULL(CAST(bl.Wins2v2 AS NVARCHAR(5)) + '-' + CAST(bl.Losses2v2 AS NVARCHAR(5)), '0-0') AS BlRecord2v2,",
+      "  ISNULL(CAST(bl.MatchWins2v2 AS NVARCHAR(5)) + '-' + CAST(bl.MatchLosses2v2 AS NVARCHAR(5)), '0-0') AS BlMatchRecord2v2,",
+      "  CAST(ROUND(bl.RatingTS + 1000, 0) AS INT) AS BlRating2v2,",
+      "  CAST(ROUND(bl.Elo2, 0) AS INT) AS BlElo2v2,",
+      "  blRank2v2.Value AS BlRank2v2,",
+      "  ISNULL(zest.Description, '') AS RankImage",
+      "FROM Player p",
+      "LEFT JOIN PlayerStats sms ON p.ID = sms.Player AND sms.GameType = 2 AND ISNULL(p.HideStats, 0) = 0",
+      "LEFT JOIN Enumeration smsRank ON sms.Rank = smsRank.Code AND smsRank.Type = 'emoji'",
+      "LEFT JOIN Enumeration smsRank2v2 ON sms.Rank2v2 = smsRank2v2.Code AND smsRank2v2.Type = 'emoji'",
+      "LEFT JOIN PlayerStats msc ON p.ID = msc.Player AND msc.GameType = 1 AND ISNULL(p.HideStats, 0) = 0",
+      "LEFT JOIN Enumeration mscRank ON msc.Rank = mscRank.Code AND mscRank.Type = 'emoji'",
+      "LEFT JOIN Enumeration mscRank2v2 ON msc.Rank2v2 = mscRank2v2.Code AND mscRank2v2.Type = 'emoji'",
+      "LEFT JOIN PlayerStats bl ON p.ID = bl.Player AND bl.GameType = 3 AND ISNULL(p.HideStats, 0) = 0",
+      "LEFT JOIN Enumeration blRank ON bl.Rank = blRank.Code AND blRank.Type = 'emoji'",
+      "LEFT JOIN Enumeration blRank2v2 ON bl.Rank2v2 = blRank2v2.Code AND blRank2v2.Type = 'emoji'",
+      "LEFT JOIN ClubRoster roster ON p.ID = roster.Player",
+      "LEFT JOIN Club c ON roster.Club = c.ID",
+      "LEFT JOIN (",
+      "  SELECT Player, ((MAX(CASE WHEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) > ISNULL(IsActive, 0) * ISNULL(Rank, 0) THEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) ELSE ISNULL(IsActive, 0) * ISNULL(Rank, 0) END) - 1) / 3) + 1 AS rankrole",
+      "  FROM PlayerStats",
+      "  GROUP BY Player",
+      "  HAVING MAX(CASE WHEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) > ISNULL(IsActive, 0) * ISNULL(Rank, 0) THEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) ELSE ISNULL(IsActive, 0) * ISNULL(Rank, 0) END) > 0",
+      ") maxRank ON p.ID = maxRank.Player",
+      "LEFT JOIN Enumeration zest ON zest.Type = 'ProfileZest' AND maxRank.rankrole = zest.Code",
+      "WHERE p.ID = @playerId",
+      "ORDER BY ISNULL(roster.Rank, 9999), c.ClubName"
+    ].join(" ")
+  );
   const rows = Array.isArray(result && result.recordset) ? result.recordset : [];
   return rows[0] || null;
 }
 
-async function getPlayerAccolades(pool, playerName) {
+async function getPlayerAccolades(pool, playerId) {
   const request = pool.request();
-  request.input("SearchTerm", mssql.NVarChar, playerName);
-  const result = await request.execute("getTournamentAccoladeListing");
+  request.input("playerId", mssql.Int, playerId);
+  const result = await request.query(
+    [
+      "DECLARE @playerIdText NVARCHAR(20) = CONVERT(NVARCHAR(20), @playerId);",
+      "SELECT t.Name, ':first_place: ' AS Place, CASE WHEN t.GameType = 1 THEN 'MSC' WHEN t.GameType = 2 THEN 'SMS' WHEN t.GameType = 3 THEN 'MSBL' ELSE '?' END AS Game, t.TournamentStartDate",
+      "FROM Tournament t",
+      "WHERE (',' + REPLACE(CONVERT(NVARCHAR(MAX), ISNULL(t.Winner, '')), ' ', '') + ',') LIKE '%,' + @playerIdText + ',%'",
+      "UNION ALL",
+      "SELECT t.Name, ':second_place: ' AS Place, CASE WHEN t.GameType = 1 THEN 'MSC' WHEN t.GameType = 2 THEN 'SMS' WHEN t.GameType = 3 THEN 'MSBL' ELSE '?' END AS Game, t.TournamentStartDate",
+      "FROM Tournament t",
+      "WHERE (',' + REPLACE(CONVERT(NVARCHAR(MAX), ISNULL(t.RunnerUp, '')), ' ', '') + ',') LIKE '%,' + @playerIdText + ',%'",
+      "UNION ALL",
+      "SELECT t.Name, ':third_place: ' AS Place, CASE WHEN t.GameType = 1 THEN 'MSC' WHEN t.GameType = 2 THEN 'SMS' WHEN t.GameType = 3 THEN 'MSBL' ELSE '?' END AS Game, t.TournamentStartDate",
+      "FROM Tournament t",
+      "WHERE (',' + REPLACE(CONVERT(NVARCHAR(MAX), ISNULL(t.Bronze, '')), ' ', '') + ',') LIKE '%,' + @playerIdText + ',%'",
+      "ORDER BY TournamentStartDate DESC"
+    ].join(" ")
+  );
   const rows = Array.isArray(result && result.recordset) ? result.recordset : [];
 
   return rows.map(function (row) {
@@ -337,8 +576,27 @@ async function getPlayersList() {
         "SELECT",
         "  p.ID AS player_id,",
         "  p.Name AS name,",
-        "  p.Country AS country",
+        "  p.Country AS country,",
+        "  p.Activity AS activity,",
+        "  club.club_id AS club_id,",
+        "  club.ClubName AS club_name,",
+        "  club.ClanTag AS club_tag,",
+        "  CASE WHEN duplicates.normalized_name IS NULL THEN 0 ELSE 1 END AS duplicate_name",
         "FROM Player p",
+        "LEFT JOIN (",
+        "  SELECT LOWER(LTRIM(RTRIM(ISNULL(Name, '')))) AS normalized_name",
+        "  FROM Player",
+        "  WHERE LTRIM(RTRIM(ISNULL(Name, ''))) <> ''",
+        "  GROUP BY LOWER(LTRIM(RTRIM(ISNULL(Name, ''))))",
+        "  HAVING COUNT(*) > 1",
+        ") duplicates ON duplicates.normalized_name = LOWER(LTRIM(RTRIM(ISNULL(p.Name, ''))))",
+        "OUTER APPLY (",
+        "  SELECT TOP 1 c.ID AS club_id, c.ClubName, c.ClanTag",
+        "  FROM ClubRoster cr",
+        "  INNER JOIN Club c ON c.ID = cr.Club",
+        "  WHERE cr.Player = p.ID",
+        "  ORDER BY ISNULL(cr.Rank, 9999), c.ClubName",
+        ") club",
         "WHERE LTRIM(RTRIM(ISNULL(p.Name, ''))) <> ''",
         "  AND EXISTS (",
         "    SELECT 1",
@@ -360,19 +618,43 @@ async function getPlayersList() {
 
     return rows
       .map(function (row) {
-        const name = normalizeText(row && row.name);
-        if (!name) {
-          return null;
-        }
-
-        return {
-          player_id: Number(row && row.player_id) || null,
-          name: name,
-          country: normalizeCountry(row && row.country)
-        };
+        return toPlayerListDTO(row);
       })
       .filter(Boolean);
   });
+}
+
+async function buildPlayerProfile(pool, player) {
+  const playerId = toPositiveInt(player && player.player_id);
+  if (!playerId) {
+    throw new Error("Player not found.");
+  }
+
+  const [friendCodes, profile, accolades] = await Promise.all([
+    getPlayerFriendCodes(pool, playerId),
+    getPlayerProfileSummary(pool, playerId),
+    getPlayerAccolades(pool, playerId)
+  ]);
+
+  const profileData = profile || {};
+
+  return {
+    player: {
+      id: player.player_id,
+      name: player.name,
+      country: player.country,
+      club_id: player.club_id,
+      club_name: player.club_name,
+      club_tag: player.club_tag,
+      results_url: normalizeResultsUrl(profileData.ResultsStartGG, player.id_start_gg),
+      activity: toActivityIso(player.activity),
+      is_active: isActivityActive(player.activity)
+    },
+    friend_codes: friendCodes,
+    accolades: accolades,
+    ratings: buildRatings(profileData),
+    highest_rank_banner_url: normalizeText(profileData.RankImage)
+  };
 }
 
 async function getPlayerProfile(playerIdRaw) {
@@ -387,30 +669,29 @@ async function getPlayerProfile(playerIdRaw) {
       throw new Error("Player not found.");
     }
 
-    const [friendCodes, profile, accolades] = await Promise.all([
-      getPlayerFriendCodes(pool, playerId),
-      getPlayerProfileSummary(pool, player.name),
-      getPlayerAccolades(pool, player.name)
-    ]);
+    return buildPlayerProfile(pool, player);
+  });
+}
 
-    const profileData = profile || {};
+async function getPlayerProfileByDiscordId(discordIdRaw) {
+  return withPool(async function (pool) {
+    const player = await getPlayerBaseByDiscordId(pool, discordIdRaw);
+    if (!player) {
+      return null;
+    }
 
-    return {
-      player: {
-        id: player.player_id,
-        name: player.name,
-        country: player.country,
-        results_url: normalizeResultsUrl(profileData.ResultsStartGG, player.id_start_gg)
-      },
-      friend_codes: friendCodes,
-      accolades: accolades,
-      ratings: buildRatings(profileData),
-      highest_rank_banner_url: normalizeText(profileData.RankImage)
-    };
+    return buildPlayerProfile(pool, player);
   });
 }
 
 module.exports = {
+  DEFAULT_ACTIVITY_WINDOW_DAYS,
+  buildPlayerDisplayName,
   getPlayersList,
-  getPlayerProfile
+  getPlayerProfile,
+  getPlayerProfileByDiscordId,
+  isActivityActive,
+  normalizeDiscordId,
+  toActivityIso,
+  toPlayerListDTO
 };

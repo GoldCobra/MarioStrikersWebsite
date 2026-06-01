@@ -1,0 +1,11 @@
+mariostrikers.gg, www.mariostrikers.gg {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "SAMEORIGIN"
+		-Server
+	}
+	reverse_proxy frontend:8080
+}

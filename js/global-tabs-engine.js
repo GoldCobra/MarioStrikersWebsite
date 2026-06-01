@@ -251,7 +251,9 @@
         shell.style.setProperty("--tabs-head-top", tabsHeadTop + "px");
         shell.style.setProperty("--tabs-head-height", tabsHeadHeight + "px");
         shell.style.setProperty("--tabs-panel-top", tabsPanelTop + "px");
-        shell.style.setProperty("--tabs-panel-height", tabsPanelHeight + "px");
+        var suppressPanel = typeof getComputedStyle === "function" &&
+          getComputedStyle(shell).getPropertyValue("--tabs-suppress-panel").trim() === "1";
+        shell.style.setProperty("--tabs-panel-height", suppressPanel ? "0" : tabsPanelHeight + "px");
         shell.style.setProperty("--tabs-render-height", tabsHeight + "px");
       }
 

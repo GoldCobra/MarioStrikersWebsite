@@ -33,6 +33,7 @@
     "msl-leaderboards": true,
     "players": true,
     "players-profiles": true,
+    "profile": true,
     "sms": true,
     "tab-placeholder": true
   };
@@ -180,7 +181,8 @@
     "msc-tierlist": { topKey: "competitive", secondKey: "tier-lists", leafKey: "msc" },
     "sms-tierlist": { topKey: "competitive", secondKey: "tier-lists", leafKey: "sms" },
     "competitive-tournaments": { topKey: "competitive", secondKey: "tournaments" },
-    "community-tournaments": { topKey: "competitive", secondKey: "tournaments", leafKey: "community" }
+    "community-tournaments": { topKey: "competitive", secondKey: "tournaments", leafKey: "community" },
+    profile: { topKey: "players" }
   };
 
   function getPathPrefix() {
@@ -225,6 +227,30 @@
       return "/" + suffix;
     }
     return "/" + pageSlug + suffix;
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function getCurrentReturnTo() {
+    return String(window.location.pathname || "/") +
+      String(window.location.search || "") +
+      String(window.location.hash || "");
+  }
+
+  function getDiscordAvatarUrl(user) {
+    var userId = String(user && user.id || "").trim();
+    var avatar = String(user && user.avatar || "").trim();
+    if (!userId || !avatar) {
+      return "";
+    }
+    return "https://cdn.discordapp.com/avatars/" + encodeURIComponent(userId) + "/" + encodeURIComponent(avatar) + ".png?size=64";
   }
 
   function preloadImage(src) {
@@ -749,6 +775,17 @@
     ].join("");
   }
 
+  function buildAccountShellHtml() {
+    return [
+      '<div id="global-account" class="global-account" data-auth-state="loading">',
+      '<a class="global-account-button global-account-login" href="/api/auth/discord/start?returnTo=', encodeURIComponent(getCurrentReturnTo()), '" aria-label="Login with Discord">',
+      '<span class="global-account-icon" aria-hidden="true">D</span>',
+      '<span class="global-account-label">Login</span>',
+      "</a>",
+      "</div>"
+    ].join("");
+  }
+
   function buildMainNavHtml(prefix, pageState) {
     var brandHtml = [
       '<a class="nav-brand" href="', toHref(prefix, "index"), '" aria-label="Mario Strikers Community home">',
@@ -767,8 +804,149 @@
       '<header id="2">',
       brandHtml,
       '<nav class="main-nav main-nav-text" aria-label="Main navigation">', navHtml, "</nav>",
+      buildAccountShellHtml(),
       "</header>"
     ].join("");
+  }
+
+  function getAccountLoginHref() {
+    return "/api/auth/discord/start?returnTo=" + encodeURIComponent(getCurrentReturnTo());
+  }
+
+  function renderAccountLoggedOut(root) {
+    if (!root) {
+      return;
+    }
+    root.setAttribute("data-auth-state", "logged-out");
+    root.innerHTML = [
+      '<a class="global-account-button global-account-login" href="', getAccountLoginHref(), '" aria-label="Login with Discord">',
+      '<span class="global-account-icon" aria-hidden="true">D</span>',
+      '<span class="global-account-label">Login</span>',
+      "</a>"
+    ].join("");
+  }
+
+  function renderAccountLoggedIn(root, user) {
+    if (!root) {
+      return;
+    }
+    var displayName = String(user && (user.global_name || user.username || user.id) || "Account").trim();
+    var avatarUrl = getDiscordAvatarUrl(user);
+    var avatarHtml = avatarUrl
+      ? '<img class="global-account-avatar" src="' + escapeHtml(avatarUrl) + '" alt="" aria-hidden="true" referrerpolicy="no-referrer" onerror="this.hidden=true;">'
+      : '<span class="global-account-icon" aria-hidden="true">D</span>';
+
+    root.setAttribute("data-auth-state", "logged-in");
+    root.innerHTML = [
+      '<button class="global-account-button global-account-trigger" type="button" aria-haspopup="menu" aria-expanded="false" data-account-action="toggle">',
+      avatarHtml,
+      '<span class="global-account-name">', escapeHtml(displayName), "</span>",
+      "</button>",
+      '<div class="global-account-menu" role="menu" hidden>',
+      '<a class="global-account-menu-item" role="menuitem" href="/profile">My Profile</a>',
+      '<button class="global-account-menu-item" role="menuitem" type="button" disabled>Modify Profile</button>',
+      '<button class="global-account-menu-item" role="menuitem" type="button" data-account-action="logout">Logout</button>',
+      "</div>"
+    ].join("");
+  }
+
+  function closeAccountMenu(root) {
+    if (!root) {
+      return;
+    }
+    var menu = root.querySelector(".global-account-menu");
+    var trigger = root.querySelector(".global-account-trigger");
+    if (menu) {
+      menu.hidden = true;
+    }
+    if (trigger) {
+      trigger.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  function toggleAccountMenu(root) {
+    var menu = root && root.querySelector(".global-account-menu");
+    var trigger = root && root.querySelector(".global-account-trigger");
+    if (!menu || !trigger) {
+      return;
+    }
+    var nextOpen = !!menu.hidden;
+    menu.hidden = !nextOpen;
+    trigger.setAttribute("aria-expanded", nextOpen ? "true" : "false");
+  }
+
+  function bindAccountInteractions(root) {
+    if (!root || root.getAttribute("data-account-bound") === "true") {
+      return;
+    }
+    root.setAttribute("data-account-bound", "true");
+
+    root.addEventListener("click", function (event) {
+      var actionNode = event.target && event.target.closest
+        ? event.target.closest("[data-account-action]")
+        : null;
+      if (!actionNode || !root.contains(actionNode)) {
+        return;
+      }
+
+      var action = actionNode.getAttribute("data-account-action");
+      if (action === "toggle") {
+        event.preventDefault();
+        toggleAccountMenu(root);
+        return;
+      }
+
+      if (action === "logout") {
+        event.preventDefault();
+        fetch("/api/auth/logout", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { Accept: "application/json" }
+        }).finally(function () {
+          if (getPageSlug() === "profile") {
+            window.location.reload();
+            return;
+          }
+          renderAccountLoggedOut(root);
+        });
+      }
+    });
+
+    document.addEventListener("click", function (event) {
+      if (!root.contains(event.target)) {
+        closeAccountMenu(root);
+      }
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeAccountMenu(root);
+      }
+    });
+  }
+
+  function initGlobalAccount(root) {
+    if (!root) {
+      return;
+    }
+    bindAccountInteractions(root);
+    fetch("/api/auth/me", {
+      credentials: "same-origin",
+      headers: { Accept: "application/json" }
+    }).then(function (response) {
+      if (!response.ok) {
+        throw new Error("Auth status failed.");
+      }
+      return response.json();
+    }).then(function (payload) {
+      if (payload && payload.authenticated) {
+        renderAccountLoggedIn(root, payload.user || {});
+        return;
+      }
+      renderAccountLoggedOut(root);
+    }).catch(function () {
+      renderAccountLoggedOut(root);
+    });
   }
 
   function renderSecondLevel(prefix, pageState) {
@@ -962,6 +1140,7 @@
     }
 
     mountGlobalFooter(prefix);
+    initGlobalAccount(document.getElementById("global-account"));
     syncResponsiveNavAlignment();
     bindLinkPrefetch(navRoot);
     bindLinkPrefetch(subNavRoot);
