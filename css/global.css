@@ -2429,7 +2429,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 .msbl-clubs-root {
   --msbl-club-row-base-width: 1076px;
   --msbl-club-list-scale: 0.88;
-  --msbl-club-name-shift-y: 0px;
+  --msbl-club-name-shift-y: -1px;
   --msbl-club-tag-shift-x: 0px;
   width: min(1180px, 100%);
   padding-top: 0;
