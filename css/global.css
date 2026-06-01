@@ -2549,7 +2549,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 0.38rem;
+  gap: 0.14rem;
   transform: translateY(-50%);
 }
 
@@ -2559,7 +2559,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   gap: 0;
   min-width: 0;
   padding-left: 4px;
-  min-height: 1.34em;
+  min-height: 1.2em;
   transform: translateY(0);
 }
 
@@ -2594,6 +2594,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 }
 
 .msbl-club-name {
+  box-sizing: border-box;
   color: #fff;
   display: block;
   min-width: 0;
@@ -2603,9 +2604,9 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   padding-left: 4px;
   font-family: "ITC Grizzly", sans-serif;
   font-size: calc(clamp(1.24rem, 1.4vw, 1.5rem) - 1px);
-  line-height: 1.18;
-  min-height: 1.34em;
-  padding-bottom: 0.12em;
+  line-height: 1.15;
+  min-height: 1.2em;
+  padding-bottom: 0.05em;
   transform: translateY(var(--msbl-club-name-shift-y));
 }
 
@@ -3727,10 +3728,10 @@ body.player-popup-open {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: rgba(215, 216, 222, 0.72);
+  color: rgba(188, 190, 198, 0.64);
   font-family: var(--reporter-font-stack);
   font-weight: 400;
-  font-size: calc(var(--reporter-font-size-sm) - 2px);
+  font-size: calc(var(--reporter-font-size-sm) - 3px);
   line-height: var(--reporter-line-height);
   letter-spacing: 0;
   text-transform: none;
@@ -4806,9 +4807,9 @@ body.player-popup-open {
     overflow: hidden;
     padding-left: 0;
     font-size: clamp(1rem, 5vw, 1.28rem);
-    line-height: 1.18;
-    min-height: 1.34em;
-    padding-bottom: 0.12em;
+    line-height: 1.15;
+    min-height: 1.2em;
+    padding-bottom: 0.05em;
     white-space: nowrap;
   }
 
@@ -5294,7 +5295,7 @@ body.player-popup-open {
     right: 1.6%;
     top: 50%;
     display: flex;
-    gap: 0.05rem;
+    gap: 0.02rem;
     transform: translateY(-50%);
   }
 
@@ -5307,13 +5308,13 @@ body.player-popup-open {
 
   .msbl-club-name {
     display: block;
-    min-height: 1.34em;
+    min-height: 1.2em;
     font-size: clamp(0.44rem, 2.15vw, 0.58rem);
-    line-height: 1.2;
+    line-height: 1.15;
     text-align: left;
     overflow: hidden;
     padding-left: 0;
-    padding-bottom: 0.12em;
+    padding-bottom: 0.05em;
     text-overflow: clip;
     white-space: nowrap;
     transform: none;
