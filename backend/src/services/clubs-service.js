@@ -1,5 +1,6 @@
 const { withPool } = require("../db");
 const { defaultClubLogoCache, normalizeSourceUrl } = require("./club-logo-cache");
+const { resolveDiscordNamesForRoster } = require("./discord-users-service");
 const { normalizeCountryCode } = require("./flag-codes");
 
 const CLUB_LOGO_EXCLUSION_RULES = [
@@ -347,6 +348,7 @@ async function getMsblClubProfile(clubIdRaw) {
       ownerInRoster = true;
     }
 
+    await resolveDiscordNamesForRoster(rosterRows);
     rosterRows.sort(compareRosterRows);
 
     const ownerRow = rosterRows.find(function (row) { return row.is_owner; }) || null;

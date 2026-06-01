@@ -84,6 +84,10 @@ DISCORD_CLIENT_ID=
 DISCORD_CLIENT_SECRET=
 DISCORD_REDIRECT_URI=http://localhost:8787/api/auth/discord/callback
 DISCORD_GUILD_ID=
+DISCORD_BOT_TOKEN=
+DISCORD_MEMBER_CACHE_TTL_MS=3600000
+DISCORD_MEMBER_FETCH_TIMEOUT_MS=5000
+DISCORD_MEMBER_FETCH_PARALLELISM=4
 SESSION_SECRET=
 ```
 
@@ -257,7 +261,7 @@ GET /api/profile/me
 GET /api/health
 ```
 
-Discord login requires the `identify` and `guilds.members.read` OAuth scopes. The backend checks membership in `DISCORD_GUILD_ID` before setting the signed HTTP-only session cookie, then maps the Discord user to `Player.DiscordID` for `/api/profile/me`.
+Discord login requires the `identify` and `guilds.members.read` OAuth scopes. The backend checks membership in `DISCORD_GUILD_ID` before setting the signed HTTP-only session cookie, then maps the Discord user to `Player.DiscordID` for `/api/profile/me`. Club profile rosters can also resolve raw `Player.DiscordID` values to Discord usernames when `DISCORD_BOT_TOKEN` is configured.
 
 Supported leaderboard values:
 
