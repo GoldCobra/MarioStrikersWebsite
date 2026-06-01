@@ -777,12 +777,7 @@
 
   function buildAccountShellHtml() {
     return [
-      '<div id="global-account" class="global-account" data-auth-state="loading">',
-      '<a class="global-account-button global-account-login" href="/api/auth/discord/start?returnTo=', encodeURIComponent(getCurrentReturnTo()), '" aria-label="Login with Discord">',
-      '<span class="global-account-icon" aria-hidden="true">D</span>',
-      '<span class="global-account-label">Login</span>',
-      "</a>",
-      "</div>"
+      '<div id="global-account" class="global-account" data-auth-state="loading"></div>'
     ].join("");
   }
 
@@ -809,21 +804,12 @@
     ].join("");
   }
 
-  function getAccountLoginHref() {
-    return "/api/auth/discord/start?returnTo=" + encodeURIComponent(getCurrentReturnTo());
-  }
-
   function renderAccountLoggedOut(root) {
     if (!root) {
       return;
     }
     root.setAttribute("data-auth-state", "logged-out");
-    root.innerHTML = [
-      '<a class="global-account-button global-account-login" href="', getAccountLoginHref(), '" aria-label="Login with Discord">',
-      '<span class="global-account-icon" aria-hidden="true">D</span>',
-      '<span class="global-account-label">Login</span>',
-      "</a>"
-    ].join("");
+    root.innerHTML = "";
   }
 
   function renderAccountLoggedIn(root, user) {
