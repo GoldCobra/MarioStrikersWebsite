@@ -3613,7 +3613,7 @@ body.player-popup-open {
   width: 22px;
   height: 22px;
   display: block;
-  background: #a42412;
+  background: #b65a00;
   -webkit-mask-image: url("../assets/clubs/discord.png");
   mask-image: url("../assets/clubs/discord.png");
   -webkit-mask-repeat: no-repeat;
