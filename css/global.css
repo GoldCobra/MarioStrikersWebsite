@@ -2432,7 +2432,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   --msbl-club-tag-shift-x: 0px;
   --msbl-club-content-left: 132px;
   --msbl-club-content-right: 14px;
-  --msbl-club-name-slot-top: calc(50% - 25px);
+  --msbl-club-name-slot-top: calc(50% - 28px);
   --msbl-club-name-slot-height: 28px;
   --msbl-club-name-line-height: 28px;
   --msbl-club-meta-slot-top: calc(50% + 2px);
