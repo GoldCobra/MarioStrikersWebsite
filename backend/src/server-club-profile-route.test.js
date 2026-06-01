@@ -33,6 +33,7 @@ test("serves club profile payload from /api/clubs/msbl/:clubId/profile", async f
           join_conditions: "Invite Only",
           region: "EU",
           club_code: "785XF50",
+          discord_server: "https://discord.gg/msbl",
           created_at: "2026-01-01T00:00:00.000Z",
           logo: "/api/clubs/msbl/12/logo?v=abc",
           owner_name: "SaMuRaI7",
@@ -66,6 +67,7 @@ test("serves club profile payload from /api/clubs/msbl/:clubId/profile", async f
       assert.equal(body.club.name, "Kickass FC");
       assert.equal(body.club.region, "EU");
       assert.equal(body.club.club_code, "785XF50");
+      assert.equal(body.club.discord_server, "https://discord.gg/msbl");
       assert.equal(body.roster[0].role, "owner");
     } finally {
       server.close();

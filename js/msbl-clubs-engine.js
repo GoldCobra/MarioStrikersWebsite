@@ -5,7 +5,7 @@
   var POPUP_CLOSE_BLOCK_MS = 500;
   var lastPopupCloseAt = 0;
 
-  var PROFILE_TEMPLATE_URL = "/pages/templates/club-profile-popup.html?v=20260530-club-profile-marker-v4";
+  var PROFILE_TEMPLATE_URL = "/pages/templates/club-profile-popup.html?v=20260601-club-profile-discord-v1";
   var POPUP_OPEN_CLASS = "popup-open";
   var NO_CLUB_LOGO_URL = "../assets/clubs/no-club-logo.png";
   var ACTIVE_MEMBERS_ICON_URL = "../assets/clubs/members.png";
@@ -184,6 +184,34 @@
       return "";
     }
     return raw;
+  }
+
+  function getDiscordInviteUrl(row) {
+    var raw = String(row && row.discord_server || "").trim();
+    if (!raw) {
+      return "";
+    }
+
+    try {
+      var candidate = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : "https://" + raw;
+      var parsed = new URL(candidate);
+      var host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+      var pathParts = parsed.pathname.split("/").filter(Boolean);
+      var isHttp = parsed.protocol === "http:" || parsed.protocol === "https:";
+      if (!isHttp || pathParts.length === 0) {
+        return "";
+      }
+      if (host === "discord.gg") {
+        return parsed.href;
+      }
+      if ((host === "discord.com" || host === "discordapp.com") && pathParts[0].toLowerCase() === "invite" && pathParts[1]) {
+        return parsed.href;
+      }
+    } catch (_error) {
+      return "";
+    }
+
+    return "";
   }
 
   function buildLogoHtml(row, fallbackText) {
@@ -459,6 +487,23 @@
     node.innerHTML = buildClubProfileMetaHtml(club);
   }
 
+  function setClubDiscordLink(club) {
+    var node = popupState.slots["club-discord-link"];
+    if (!node) {
+      return;
+    }
+
+    var url = getDiscordInviteUrl(club);
+    if (!url) {
+      node.hidden = true;
+      node.removeAttribute("href");
+      return;
+    }
+
+    node.href = url;
+    node.hidden = false;
+  }
+
   function formatDate(value) {
     var raw = String(value || "").trim();
     if (!raw) {
@@ -539,6 +584,7 @@
     }
     setClubProfileMetaSlot("join-conditions", club);
     setTextSlot("created-date", formatDate(club.created_at));
+    setClubDiscordLink(club);
 
     var logoBgNode = popupState.slots["club-logo-bg"];
     var logoUrl = getLogoUrl(club);
@@ -624,6 +670,7 @@
     setTextSlot("club-name", "");
     setTextSlot("join-conditions", "");
     setTextSlot("created-date", "");
+    setClubDiscordLink(null);
     var staleLogoBg = popupState.slots["club-logo-bg"];
     if (staleLogoBg) {
       staleLogoBg.hidden = true;
