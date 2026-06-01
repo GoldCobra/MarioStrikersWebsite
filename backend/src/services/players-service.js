@@ -1,4 +1,5 @@
 const { withPool, mssql } = require("../db");
+const { normalizeCountryCode } = require("./flag-codes");
 const DEFAULT_ACTIVITY_WINDOW_DAYS = 90;
 
 function normalizeText(value) {
@@ -6,11 +7,7 @@ function normalizeText(value) {
 }
 
 function normalizeCountry(value) {
-  const country = normalizeText(value).toLowerCase();
-  if (!/^[a-z]{2}$/.test(country)) {
-    return "";
-  }
-  return country;
+  return normalizeCountryCode(value);
 }
 
 function normalizeDiscordId(value) {
@@ -691,6 +688,7 @@ module.exports = {
   getPlayerProfile,
   getPlayerProfileByDiscordId,
   isActivityActive,
+  normalizeCountry,
   normalizeDiscordId,
   toActivityIso,
   toPlayerListDTO

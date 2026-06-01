@@ -45,6 +45,7 @@ test("serves club profile payload from /api/clubs/msbl/:clubId/profile", async f
             name: "SaMuRaI7",
             country: "ca",
             discord_id: "703837067322458112",
+            discord_name: "samurai7",
             is_owner: true,
             is_officer: false,
             role: "owner"
@@ -68,6 +69,7 @@ test("serves club profile payload from /api/clubs/msbl/:clubId/profile", async f
       assert.equal(body.club.region, "EU");
       assert.equal(body.club.club_code, "785XF50");
       assert.equal(body.club.discord_server, "https://discord.gg/msbl");
+      assert.equal(body.roster[0].discord_name, "samurai7");
       assert.equal(body.roster[0].role, "owner");
     } finally {
       server.close();

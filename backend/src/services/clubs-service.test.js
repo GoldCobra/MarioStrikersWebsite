@@ -2,8 +2,10 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 const {
   compareRosterRows,
+  extractDiscordName,
   extractDiscordId,
   isActivityActive,
+  normalizeCountryCode,
   toActivityIso,
   toRosterRole,
   toMsblClubDTO
@@ -63,6 +65,23 @@ test("extractDiscordId supports raw IDs and mention formats", function () {
   assert.equal(extractDiscordId("<@709777875686916210>"), "709777875686916210");
   assert.equal(extractDiscordId("<@!709777875686916210>xshadow39"), "709777875686916210");
   assert.equal(extractDiscordId("not-a-discord-id"), "");
+});
+
+test("extractDiscordName reads the Discord username suffix from mention storage", function () {
+  assert.equal(extractDiscordName("<@!709777875686916210>goldcobra111"), "goldcobra111");
+  assert.equal(extractDiscordName("<@709777875686916210> GoldCobra"), "GoldCobra");
+  assert.equal(extractDiscordName("709777875686916210"), "");
+});
+
+test("country flags normalize UK subdivision aliases", function () {
+  assert.equal(normalizeCountryCode("GB-ENG"), "gb-eng");
+  assert.equal(normalizeCountryCode("england"), "gb-eng");
+  assert.equal(normalizeCountryCode("Scotland"), "gb-sct");
+  assert.equal(normalizeCountryCode("Wales"), "gb-wls");
+  assert.equal(normalizeCountryCode("NIR"), "gb-nir");
+  assert.equal(normalizeCountryCode("UK"), "gb");
+  assert.equal(normalizeCountryCode("US"), "us");
+  assert.equal(normalizeCountryCode("not-a-flag"), "");
 });
 
 test("toRosterRole maps owner/officer/member correctly", function () {

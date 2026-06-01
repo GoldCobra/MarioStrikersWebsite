@@ -3,6 +3,7 @@ const test = require("node:test");
 const {
   buildPlayerDisplayName,
   isActivityActive,
+  normalizeCountry,
   normalizeDiscordId,
   toActivityIso,
   toPlayerListDTO
@@ -56,6 +57,14 @@ test("player activity helpers normalize invalid values safely", function () {
   assert.equal(toActivityIso(""), null);
   assert.equal(toActivityIso("not a date"), null);
   assert.equal(isActivityActive("not a date", NOW, 90), false);
+});
+
+test("player country flags normalize UK subdivision aliases", function () {
+  assert.equal(normalizeCountry("GB-WLS"), "gb-wls");
+  assert.equal(normalizeCountry("England"), "gb-eng");
+  assert.equal(normalizeCountry("UK"), "gb");
+  assert.equal(normalizeCountry("CA"), "ca");
+  assert.equal(toPlayerListDTO(Object.assign(createPlayerRow(null), { country: "GB-SCT" })).country, "gb-sct");
 });
 
 test("duplicate player names get a club tag display suffix", function () {

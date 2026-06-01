@@ -5,11 +5,46 @@
   var POPUP_CLOSE_BLOCK_MS = 500;
   var lastPopupCloseAt = 0;
 
-  var PROFILE_TEMPLATE_URL = "/pages/templates/club-profile-popup.html?v=20260601-club-profile-discord-v1";
+  var PROFILE_TEMPLATE_URL = "/pages/templates/club-profile-popup.html?v=20260601-roster-discord-flags-v1";
   var POPUP_OPEN_CLASS = "popup-open";
   var NO_CLUB_LOGO_URL = "../assets/clubs/no-club-logo.png";
   var ACTIVE_MEMBERS_ICON_URL = "../assets/clubs/members.png";
   var INACTIVE_MEMBERS_ICON_URL = "../assets/clubs/inactive-members.png";
+  var FLAG_CODE_ALIASES = Object.freeze({
+    "uk": "gb",
+    "great britain": "gb",
+    "greatbritain": "gb",
+    "united kingdom": "gb",
+    "unitedkingdom": "gb",
+    "england": "gb-eng",
+    "eng": "gb-eng",
+    "en": "gb-eng",
+    "gb-eng": "gb-eng",
+    "gbeng": "gb-eng",
+    "gb-en": "gb-eng",
+    "gben": "gb-eng",
+    "scotland": "gb-sct",
+    "sct": "gb-sct",
+    "sco": "gb-sct",
+    "gb-sct": "gb-sct",
+    "gbsct": "gb-sct",
+    "gb-sco": "gb-sct",
+    "gbsco": "gb-sct",
+    "wales": "gb-wls",
+    "wls": "gb-wls",
+    "wal": "gb-wls",
+    "gb-wls": "gb-wls",
+    "gbwls": "gb-wls",
+    "gb-wal": "gb-wls",
+    "gbwal": "gb-wls",
+    "northern ireland": "gb-nir",
+    "northernireland": "gb-nir",
+    "nir": "gb-nir",
+    "gb-nir": "gb-nir",
+    "gbnir": "gb-nir",
+    "gb-ni": "gb-nir",
+    "gbni": "gb-nir"
+  });
 
   var profileCache = new Map();
   var templateLoadPromise = null;
@@ -517,11 +552,25 @@
   }
 
   function normalizeCountryCode(countryCode) {
-    var code = String(countryCode || "").trim().toLowerCase();
-    if (!/^[a-z]{2}$/.test(code)) {
+    var raw = String(countryCode || "").trim().toLowerCase().replace(/[_\u2013\u2014]/g, "-");
+    if (!raw) {
       return "";
     }
-    return code;
+
+    var spaced = raw.replace(/[-\s]+/g, " ").trim();
+    var dashed = spaced.replace(/\s+/g, "-");
+    var compact = spaced.replace(/\s+/g, "");
+    var alias = FLAG_CODE_ALIASES[raw] || FLAG_CODE_ALIASES[spaced] || FLAG_CODE_ALIASES[dashed] || FLAG_CODE_ALIASES[compact];
+    if (alias) {
+      return alias;
+    }
+    if (/^[a-z]{2}$/.test(dashed)) {
+      return dashed;
+    }
+    if (/^gb-(eng|wls|sct|nir)$/.test(dashed)) {
+      return dashed;
+    }
+    return "";
   }
 
   function getFlagAssetUrl(countryCode) {
@@ -557,12 +606,19 @@
         ? '<img class="club-popup-roster-flag" src="' + escapeHtml(getFlagAssetUrl(countryCode)) + '" alt="" aria-hidden="true" loading="lazy" onerror="this.onerror=null;this.remove();">'
         : '<span class="club-popup-roster-flag club-popup-roster-flag-empty" aria-hidden="true"></span>';
       var name = String(row && row.name || "").trim() || "Unknown";
+      var discordName = String(row && row.discord_name || "").trim();
       var badgeHtml = buildRoleBadgeHtml(row && row.role);
+      var discordNameHtml = discordName
+        ? '<span class="club-popup-roster-discord-name">' + escapeHtml(discordName) + "</span>"
+        : "";
 
       return [
         '<li class="club-popup-roster-item">',
         flagHtml,
+        '<span class="club-popup-roster-player">',
         '<span class="club-popup-roster-name">', escapeHtml(name), "</span>",
+        discordNameHtml,
+        "</span>",
         badgeHtml,
         "</li>"
       ].join("");

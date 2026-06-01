@@ -1,5 +1,6 @@
 const { withPool } = require("../db");
 const { defaultClubLogoCache, normalizeSourceUrl } = require("./club-logo-cache");
+const { normalizeCountryCode } = require("./flag-codes");
 
 const CLUB_LOGO_EXCLUSION_RULES = [
   { tags: ["strk"], names: ["i be strikin", "i be stirkin"] },
@@ -65,14 +66,6 @@ function normalizeLogoSource(value) {
   return normalizeSourceUrl(value);
 }
 
-function normalizeCountryCode(value) {
-  const code = normalizeText(value).toLowerCase();
-  if (!/^[a-z]{2}$/.test(code)) {
-    return "";
-  }
-  return code;
-}
-
 function extractDiscordId(value) {
   const text = normalizeText(value);
   if (!text) {
@@ -97,6 +90,10 @@ function extractMentionSuffixName(value) {
     return "";
   }
   return normalizeText(text.slice(closeIndex + 1));
+}
+
+function extractDiscordName(value) {
+  return extractMentionSuffixName(value);
 }
 
 function normalizeActivityDate(value) {
@@ -228,6 +225,7 @@ function buildRosterRow(row, ownerDiscordId) {
     name: name,
     country: normalizeCountryCode(row && row.country),
     discord_id: discordId || normalizeText(row && row.discord_id),
+    discord_name: extractDiscordName(row && row.discord_id),
     is_owner: isOwner,
     is_officer: isOwner ? false : !!isOfficer,
     role: toRosterRole(isOwner, isOwner ? false : !!isOfficer)
@@ -341,6 +339,7 @@ async function getMsblClubProfile(clubIdRaw) {
         name: normalizeText(ownerLookup && ownerLookup.name) || extractMentionSuffixName(ownerRaw) || "Unknown Owner",
         country: normalizeCountryCode(ownerLookup && ownerLookup.country),
         discord_id: ownerDiscordId,
+        discord_name: extractDiscordName(ownerLookup && ownerLookup.discord_id) || extractDiscordName(ownerRaw),
         is_owner: true,
         is_officer: false,
         role: "owner"
@@ -380,6 +379,7 @@ async function getMsblClubProfile(clubIdRaw) {
           name: row.name,
           country: row.country,
           discord_id: rowDiscordId(row),
+          discord_name: row.discord_name,
           is_owner: row.is_owner,
           is_officer: row.is_officer,
           role: row.role
@@ -444,10 +444,12 @@ module.exports = {
   DEFAULT_ACTIVITY_WINDOW_DAYS,
   attachClubLogos,
   compareRosterRows,
+  extractDiscordName,
   extractDiscordId,
   getMsblClubProfile,
   getMsblClubs,
   isActivityActive,
+  normalizeCountryCode,
   toActivityIso,
   toRosterRole,
   toMsblClubDTO,

@@ -3608,6 +3608,22 @@ body.player-popup-open {
   transition: opacity 140ms ease, transform 140ms ease;
 }
 
+.club-popup-discord-link::before {
+  content: "";
+  width: 22px;
+  height: 22px;
+  display: block;
+  background: #a42412;
+  -webkit-mask-image: url("../assets/clubs/discord.png");
+  mask-image: url("../assets/clubs/discord.png");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
 .club-popup-discord-link[hidden] {
   display: none !important;
 }
@@ -3616,13 +3632,6 @@ body.player-popup-open {
 .club-popup-discord-link:focus-visible {
   opacity: 1;
   transform: translateY(-1px);
-}
-
-.club-popup-discord-link img {
-  width: 22px;
-  height: 22px;
-  display: block;
-  object-fit: contain;
 }
 
 .club-popup-date-panel {
@@ -3700,9 +3709,33 @@ body.player-popup-open {
 
 .club-popup-roster-name {
   min-width: 0;
+  flex: 0 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.club-popup-roster-player {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.38rem;
+}
+
+.club-popup-roster-discord-name {
+  min-width: 0;
+  flex: 0 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(215, 216, 222, 0.72);
+  font-family: var(--reporter-font-stack);
+  font-weight: 400;
+  font-size: calc(var(--reporter-font-size-sm) - 2px);
+  line-height: var(--reporter-line-height);
+  letter-spacing: 0;
+  text-transform: none;
+  text-shadow: none;
 }
 
 .club-popup-role-badge {
