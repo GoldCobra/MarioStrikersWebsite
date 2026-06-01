@@ -2429,7 +2429,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 .msbl-clubs-root {
   --msbl-club-row-base-width: 1076px;
   --msbl-club-list-scale: 0.88;
-  --msbl-club-name-shift-y: -2px;
+  --msbl-club-name-shift-y: 0px;
   --msbl-club-tag-shift-x: 0px;
   width: min(1180px, 100%);
   padding-top: 0;
@@ -2555,11 +2555,11 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 
 .msbl-club-primary {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0;
   min-width: 0;
   padding-left: 4px;
-  min-height: 22px;
+  min-height: 1.34em;
   transform: translateY(0);
 }
 
@@ -2595,8 +2595,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 
 .msbl-club-name {
   color: #fff;
-  display: inline-flex;
-  align-items: center;
+  display: block;
   min-width: 0;
   overflow: hidden;
   text-overflow: clip;
@@ -2604,9 +2603,9 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   padding-left: 4px;
   font-family: "ITC Grizzly", sans-serif;
   font-size: calc(clamp(1.24rem, 1.4vw, 1.5rem) - 1px);
-  line-height: 1.02;
-  min-height: 22px;
-  padding-bottom: 0;
+  line-height: 1.18;
+  min-height: 1.34em;
+  padding-bottom: 0.12em;
   transform: translateY(var(--msbl-club-name-shift-y));
 }
 
@@ -4807,7 +4806,9 @@ body.player-popup-open {
     overflow: hidden;
     padding-left: 0;
     font-size: clamp(1rem, 5vw, 1.28rem);
-    line-height: 1;
+    line-height: 1.18;
+    min-height: 1.34em;
+    padding-bottom: 0.12em;
     white-space: nowrap;
   }
 
@@ -5306,16 +5307,16 @@ body.player-popup-open {
 
   .msbl-club-name {
     display: block;
-    min-height: 0;
+    min-height: 1.34em;
     font-size: clamp(0.44rem, 2.15vw, 0.58rem);
-    line-height: 1.08;
+    line-height: 1.2;
     text-align: left;
     overflow: hidden;
     padding-left: 0;
-    padding-bottom: 1px;
+    padding-bottom: 0.12em;
     text-overflow: clip;
     white-space: nowrap;
-    transform: translateY(-2px);
+    transform: none;
   }
 
   .msbl-club-meta {
