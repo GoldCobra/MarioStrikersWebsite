@@ -32,7 +32,7 @@ test("toDiscordUsername prefers the unique Discord username", function () {
   }), "goldcobra111");
 });
 
-test("getDiscordUsernameById fetches a guild member with bot auth", async function () {
+test("getDiscordUsernameById fetches a Discord user with bot auth", async function () {
   clearDiscordUserCache();
   const seen = [];
   const username = await getDiscordUsernameById("195905866527014912", {
@@ -55,7 +55,7 @@ test("getDiscordUsernameById fetches a guild member with bot auth", async functi
 
   assert.equal(username, "goldcobra111");
   assert.equal(seen.length, 1);
-  assert.equal(seen[0].url, "https://discord.test/api/guilds/guild-id/members/195905866527014912");
+  assert.equal(seen[0].url, "https://discord.test/api/users/195905866527014912");
   assert.equal(seen[0].init.headers.Authorization, "Bot bot-token");
 });
 

@@ -31,6 +31,7 @@ function readLookupConfig(opts) {
     botToken: options.botToken || config.discordBotToken,
     guildId: options.guildId || config.discordGuildId,
     cacheTtlMs: Number.isFinite(Number(options.cacheTtlMs)) ? Number(options.cacheTtlMs) : config.discordMemberCacheTtlMs,
+    failureCacheTtlMs: Number.isFinite(Number(options.failureCacheTtlMs)) ? Number(options.failureCacheTtlMs) : config.discordMemberFailureCacheTtlMs,
     fetchTimeoutMs: Number.isFinite(Number(options.fetchTimeoutMs)) ? Number(options.fetchTimeoutMs) : config.discordMemberFetchTimeoutMs,
     parallelism: Number.isFinite(Number(options.parallelism)) ? Number(options.parallelism) : config.discordMemberFetchParallelism,
     fetchFn: options.fetchFn || fetch
@@ -44,12 +45,13 @@ function toDiscordUsername(member) {
     || normalizeText(user && user.global_name);
 }
 
-async function fetchDiscordGuildMember(discordId, opts) {
-  const lookup = readLookupConfig(opts);
-  if (!discordId || !lookup.botToken || !lookup.guildId || typeof lookup.fetchFn !== "function") {
-    return "";
-  }
+function delay(ms) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, ms);
+  });
+}
 
+async function fetchDiscordJson(pathname, lookup, attempt) {
   const controller = typeof AbortController === "function" ? new AbortController() : null;
   const timeout = controller && lookup.fetchTimeoutMs > 0
     ? setTimeout(function () { controller.abort(); }, lookup.fetchTimeoutMs)
@@ -57,10 +59,7 @@ async function fetchDiscordGuildMember(discordId, opts) {
 
   try {
     const response = await lookup.fetchFn(
-      getDiscordApiUrl(
-        "/guilds/" + encodeURIComponent(lookup.guildId) + "/members/" + encodeURIComponent(discordId),
-        lookup.apiBase
-      ),
+      getDiscordApiUrl(pathname, lookup.apiBase),
       {
         headers: {
           Accept: "application/json",
@@ -69,17 +68,28 @@ async function fetchDiscordGuildMember(discordId, opts) {
         signal: controller ? controller.signal : undefined
       }
     );
-
-    if (!response || response.status === 403 || response.status === 404) {
-      return "";
+    let payload = null;
+    if (response && typeof response.json === "function") {
+      try {
+        payload = await response.json();
+      } catch (_error) {
+        payload = null;
+      }
     }
-    if (!response.ok || typeof response.json !== "function") {
-      return "";
+
+    if (response && response.status === 429 && !attempt) {
+      const retryAfterMs = Math.min(Math.max(Number(payload && payload.retry_after || 0) * 1000, 250), 2000);
+      await delay(retryAfterMs);
+      return fetchDiscordJson(pathname, lookup, 1);
     }
 
-    return toDiscordUsername(await response.json());
+    return {
+      ok: !!(response && response.ok),
+      status: response ? response.status : 0,
+      payload: payload
+    };
   } catch (_error) {
-    return "";
+    return { ok: false, status: 0, payload: null };
   } finally {
     if (timeout) {
       clearTimeout(timeout);
@@ -87,14 +97,44 @@ async function fetchDiscordGuildMember(discordId, opts) {
   }
 }
 
-async function getDiscordUsernameById(discordIdRaw, opts) {
-  const discordId = normalizeDiscordId(discordIdRaw);
+async function fetchDiscordGuildMember(discordId, opts) {
   const lookup = readLookupConfig(opts);
-  if (!discordId || !lookup.botToken || !lookup.guildId) {
+  if (!discordId || !lookup.botToken || typeof lookup.fetchFn !== "function") {
     return "";
   }
 
-  const cacheKey = [lookup.apiBase, lookup.guildId, discordId].join(":");
+  const userResponse = await fetchDiscordJson("/users/" + encodeURIComponent(discordId), lookup, 0);
+  if (userResponse.ok) {
+    const username = toDiscordUsername(userResponse.payload);
+    if (username) {
+      return username;
+    }
+  }
+
+  if (!lookup.guildId) {
+    return "";
+  }
+
+  const memberResponse = await fetchDiscordJson(
+    "/guilds/" + encodeURIComponent(lookup.guildId) + "/members/" + encodeURIComponent(discordId),
+    lookup,
+    0
+  );
+
+  if (memberResponse.status === 403 || memberResponse.status === 404 || !memberResponse.ok) {
+      return "";
+  }
+  return toDiscordUsername(memberResponse.payload);
+}
+
+async function getDiscordUsernameById(discordIdRaw, opts) {
+  const discordId = normalizeDiscordId(discordIdRaw);
+  const lookup = readLookupConfig(opts);
+  if (!discordId || !lookup.botToken) {
+    return "";
+  }
+
+  const cacheKey = [lookup.apiBase, lookup.guildId || "-", discordId].join(":");
   const now = Date.now();
   const cached = userCache.get(cacheKey);
   if (cached && cached.expiresAt > now) {
@@ -107,9 +147,10 @@ async function getDiscordUsernameById(discordIdRaw, opts) {
   const ttl = Math.max(0, lookup.cacheTtlMs);
   const pending = fetchDiscordGuildMember(discordId, lookup).then(function (value) {
     const username = normalizeText(value);
+    const cacheTtl = username ? ttl : Math.max(0, Math.min(ttl, Number(lookup.failureCacheTtlMs) || 0));
     userCache.set(cacheKey, {
       value: username,
-      expiresAt: Date.now() + ttl
+      expiresAt: Date.now() + cacheTtl
     });
     return username;
   });
@@ -125,7 +166,7 @@ async function getDiscordUsernameById(discordIdRaw, opts) {
 async function resolveDiscordNamesForRoster(rosterRows, opts) {
   const rows = Array.isArray(rosterRows) ? rosterRows : [];
   const lookup = readLookupConfig(opts);
-  if (!lookup.botToken || !lookup.guildId) {
+  if (!lookup.botToken) {
     return rows;
   }
 
