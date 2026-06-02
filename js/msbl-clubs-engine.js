@@ -5,11 +5,25 @@
   var POPUP_CLOSE_BLOCK_MS = 500;
   var lastPopupCloseAt = 0;
 
-  var PROFILE_TEMPLATE_URL = "/pages/templates/club-profile-popup.html?v=20260602-club-popup-grid-v1";
+  var PROFILE_TEMPLATE_URL = "/pages/templates/club-profile-popup.html?v=20260602-club-popup-grid-v2";
   var POPUP_OPEN_CLASS = "popup-open";
   var NO_CLUB_LOGO_URL = "../assets/clubs/no-club-logo.png";
   var ACTIVE_MEMBERS_ICON_URL = "../assets/clubs/members.png";
   var INACTIVE_MEMBERS_ICON_URL = "../assets/clubs/inactive-members.png";
+  var CLUB_UNIFORM_COLORS = Object.freeze({
+    "red": "#dc2626",
+    "pink": "#ec4899",
+    "orange": "#f97316",
+    "yellow": "#facc15",
+    "lime": "#84cc16",
+    "green": "#16a34a",
+    "black": "#111111",
+    "grey": "#6b7280",
+    "blue": "#2563eb",
+    "violet": "#7c3aed",
+    "lavender": "#a78bfa",
+    "turquoise": "#14b8a6"
+  });
   var FLAG_CODE_ALIASES = Object.freeze({
     "uk": "gb",
     "great britain": "gb",
@@ -630,6 +644,11 @@
     return clubCodes.length ? clubCodes : toTextList(club && club.club_code);
   }
 
+  function getUniformColor(uniformName) {
+    var key = String(uniformName || "").trim().toLowerCase();
+    return key ? CLUB_UNIFORM_COLORS[key] || "" : "";
+  }
+
   function getRegionBadgeClass(regionCode) {
     var normalized = String(regionCode || "").trim().toUpperCase();
     if (normalized === "EU") return "is-eu";
@@ -687,20 +706,37 @@
     setClubRegionBadgesLine("club-line-regions", getClubRegions(club));
   }
 
-  function setClubDiscordLink(club) {
-    var node = popupState.slots["club-discord-link"];
+  function buildUniformIconHtml(slotName, uniformName) {
+    var color = getUniformColor(uniformName);
+    var label = String(uniformName || "").trim();
+    if (!color || !label) {
+      return "";
+    }
+
+    return '<span class="club-popup-action-icon club-popup-uniform-icon" data-uniform-slot="' + escapeHtml(slotName) + '" style="--club-uniform-color: ' + escapeHtml(color) + ';" title="' + escapeHtml(label) + '" aria-label="' + escapeHtml(label) + '"></span>';
+  }
+
+  function setClubActions(club) {
+    var node = popupState.slots["club-actions"];
     if (!node) {
       return;
     }
 
     var url = getDiscordInviteUrl(club);
-    if (!url) {
+    var firstUniformHtml = buildUniformIconHtml("first", club && club.first_uniform);
+    var secondUniformHtml = buildUniformIconHtml("second", club && club.second_uniform);
+    var discordHtml = url
+      ? '<a class="club-popup-discord-link" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer" aria-label="Open club Discord"></a>'
+      : "";
+
+    var content = firstUniformHtml + secondUniformHtml + discordHtml;
+    if (!content) {
       node.hidden = true;
-      node.removeAttribute("href");
+      node.innerHTML = "";
       return;
     }
 
-    node.href = url;
+    node.innerHTML = content;
     node.hidden = false;
   }
 
@@ -818,7 +854,7 @@
     }
     renderClubInfo(club);
     setTextSlot("created-date", formatDate(club.created_at));
-    setClubDiscordLink(club);
+    setClubActions(club);
 
     var logoBgNode = popupState.slots["club-logo-bg"];
     var logoUrl = getLogoUrl(club);

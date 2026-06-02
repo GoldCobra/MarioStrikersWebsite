@@ -3673,6 +3673,19 @@ body.player-popup-open {
   margin-top: 0;
 }
 
+.club-popup-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.42rem;
+  min-height: 24px;
+}
+
+.club-popup-actions[hidden] {
+  display: none !important;
+}
+
+.club-popup-action-icon,
 .club-popup-discord-link {
   flex: 0 0 auto;
   width: 24px;
@@ -3684,14 +3697,12 @@ body.player-popup-open {
   transition: opacity 140ms ease, transform 140ms ease;
 }
 
+.club-popup-action-icon::before,
 .club-popup-discord-link::before {
   content: "";
   width: 22px;
   height: 22px;
   display: block;
-  background: #b65a00;
-  -webkit-mask-image: url("../assets/clubs/discord.png");
-  mask-image: url("../assets/clubs/discord.png");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: center;
@@ -3700,10 +3711,24 @@ body.player-popup-open {
   mask-size: contain;
 }
 
+.club-popup-uniform-icon::before {
+  background: var(--club-uniform-color, #f2f2f2);
+  -webkit-mask-image: url("../assets/clubs/uniform.png");
+  mask-image: url("../assets/clubs/uniform.png");
+}
+
+.club-popup-discord-link::before {
+  background: #b65a00;
+  -webkit-mask-image: url("../assets/clubs/discord.png");
+  mask-image: url("../assets/clubs/discord.png");
+}
+
 .club-popup-discord-link[hidden] {
   display: none !important;
 }
 
+.club-popup-action-icon:hover,
+.club-popup-action-icon:focus-visible,
 .club-popup-discord-link:hover,
 .club-popup-discord-link:focus-visible {
   opacity: 1;

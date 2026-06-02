@@ -192,6 +192,8 @@ test("club profile does not synthesize stale owner rows outside ClubRoster", asy
                 club_code: "",
                 club_code2: "",
                 club_code3: "",
+                color1: "Red",
+                color2: "Blue",
                 discord_server: "",
                 logo: "",
                 owner_raw: "84806729719615488",
@@ -230,6 +232,8 @@ test("club profile does not synthesize stale owner rows outside ClubRoster", asy
     assert.equal(profile.roster[0].role, "member");
     assert.equal(profile.club.owner_name, "");
     assert.equal(profile.club.owner_discord_id, "");
+    assert.equal(profile.club.first_uniform, "Red");
+    assert.equal(profile.club.second_uniform, "Blue");
   });
 });
 
@@ -255,6 +259,8 @@ test("invite-only club profiles keep stored club codes hidden", async function (
                 club_code: "A1B2C3D",
                 club_code2: "B1C2D3E",
                 club_code3: "",
+                color1: "",
+                color2: "",
                 discord_server: "",
                 logo: "",
                 owner_raw: "703837067322458112",
@@ -283,5 +289,7 @@ test("invite-only club profiles keep stored club codes hidden", async function (
     assert.equal(profile.club.club_code, "");
     assert.deepEqual(profile.club.club_codes, []);
     assert.deepEqual(profile.club.regions, ["EU", "NA"]);
+    assert.equal(profile.club.first_uniform, "");
+    assert.equal(profile.club.second_uniform, "");
   });
 });
