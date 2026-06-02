@@ -30,9 +30,11 @@ test("serves club profile payload from /api/clubs/msbl/:clubId/profile", async f
           club_id: Number(clubId),
           name: "Kickass FC",
           tag: "KFC",
-          join_conditions: "Invite Only",
+          join_conditions: "Open to Anyone",
           region: "EU",
           club_code: "785XF50",
+          regions: ["EU", "NA", "APAC"],
+          club_codes: ["785XF50", "1G9MXHW", "7XM8WL2"],
           discord_server: "https://discord.gg/msbl",
           created_at: "2026-01-01T00:00:00.000Z",
           logo: "/api/clubs/msbl/12/logo?v=abc",
@@ -68,6 +70,8 @@ test("serves club profile payload from /api/clubs/msbl/:clubId/profile", async f
       assert.equal(body.club.name, "Kickass FC");
       assert.equal(body.club.region, "EU");
       assert.equal(body.club.club_code, "785XF50");
+      assert.deepEqual(body.club.regions, ["EU", "NA", "APAC"]);
+      assert.deepEqual(body.club.club_codes, ["785XF50", "1G9MXHW", "7XM8WL2"]);
       assert.equal(body.club.discord_server, "https://discord.gg/msbl");
       assert.equal(body.roster[0].discord_name, "samurai7");
       assert.equal(body.roster[0].role, "owner");

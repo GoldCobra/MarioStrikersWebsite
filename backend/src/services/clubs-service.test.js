@@ -21,7 +21,11 @@ function createClubRow(activity) {
     join_conditions: "Invite Only",
     is_open: false,
     region: "EU",
+    region2: "NA",
+    region3: "APAC",
     club_code: "123ABC",
+    club_code2: "456DEF",
+    club_code3: "789GHI",
     logo: "https://example.com/logo.webp",
     activity: activity,
     member_count: 9
@@ -35,7 +39,18 @@ test("Club.Activity NULL is exposed as inactive", function () {
   assert.equal(row.is_active, false);
   assert.equal(row.member_count, 9);
   assert.equal(row.region, "EU");
+  assert.deepEqual(row.regions, ["EU", "NA", "APAC"]);
+  assert.equal(row.club_code, "");
+  assert.deepEqual(row.club_codes, []);
+});
+
+test("open clubs expose visible club codes", function () {
+  const source = createClubRow(null);
+  source.is_open = true;
+  const row = toMsblClubDTO(source, { now: NOW });
+
   assert.equal(row.club_code, "123ABC");
+  assert.deepEqual(row.club_codes, ["123ABC", "456DEF", "789GHI"]);
 });
 
 test("Club.Activity within 90 days is active", function () {
@@ -105,4 +120,168 @@ test("compareRosterRows sorts owner first, then officers A-Z, then members A-Z",
     rows.map(function (row) { return row.name; }),
     ["Alpha", "Bravo", "Charlie", "Able", "Zulu"]
   );
+});
+
+async function withMockedClubProfileService(pool, run) {
+  const servicePath = require.resolve("./clubs-service");
+  const dbPath = require.resolve("../db");
+  const discordUsersPath = require.resolve("./discord-users-service");
+  const previousService = require.cache[servicePath];
+  const previousDb = require.cache[dbPath];
+  const previousDiscordUsers = require.cache[discordUsersPath];
+
+  delete require.cache[servicePath];
+  require.cache[dbPath] = {
+    id: dbPath,
+    filename: dbPath,
+    loaded: true,
+    exports: {
+      withPool: async function (callback) {
+        return callback(pool);
+      }
+    }
+  };
+  require.cache[discordUsersPath] = {
+    id: discordUsersPath,
+    filename: discordUsersPath,
+    loaded: true,
+    exports: {
+      resolveDiscordNamesForRoster: async function () {}
+    }
+  };
+
+  try {
+    return await run(require(servicePath));
+  } finally {
+    delete require.cache[servicePath];
+    if (previousService) {
+      require.cache[servicePath] = previousService;
+    }
+    if (previousDb) {
+      require.cache[dbPath] = previousDb;
+    } else {
+      delete require.cache[dbPath];
+    }
+    if (previousDiscordUsers) {
+      require.cache[discordUsersPath] = previousDiscordUsers;
+    } else {
+      delete require.cache[discordUsersPath];
+    }
+  }
+}
+
+test("club profile does not synthesize stale owner rows outside ClubRoster", async function () {
+  const pool = {
+    request: function () {
+      return {
+        input: function () {
+          return this;
+        },
+        query: async function (sql) {
+          if (sql.includes("FROM Club c")) {
+            return {
+              recordset: [{
+                club_id: 32,
+                tag: "W8",
+                name: "World 8",
+                join_conditions: "Invite Only",
+                is_open: false,
+                region: "",
+                region2: "",
+                region3: "",
+                club_code: "",
+                club_code2: "",
+                club_code3: "",
+                discord_server: "",
+                logo: "",
+                owner_raw: "84806729719615488",
+                created_at: null
+              }]
+            };
+          }
+          if (sql.includes("FROM ClubRoster cr")) {
+            return {
+              recordset: [{
+                player_id: 398,
+                name: "DelphinusVyse",
+                country: "",
+                discord_id: "136351840534003713",
+                is_officer: false
+              }]
+            };
+          }
+          throw new Error("Unexpected query: " + sql);
+        }
+      };
+    }
+  };
+
+  await withMockedClubProfileService(pool, async function (service) {
+    const profile = await service.getMsblClubProfile(32, {
+      logoCache: {
+        ensureClubLogo: async function () {
+          return "";
+        }
+      }
+    });
+
+    assert.equal(profile.roster.length, 1);
+    assert.equal(profile.roster[0].name, "DelphinusVyse");
+    assert.equal(profile.roster[0].role, "member");
+    assert.equal(profile.club.owner_name, "");
+    assert.equal(profile.club.owner_discord_id, "");
+  });
+});
+
+test("invite-only club profiles keep stored club codes hidden", async function () {
+  const pool = {
+    request: function () {
+      return {
+        input: function () {
+          return this;
+        },
+        query: async function (sql) {
+          if (sql.includes("FROM Club c")) {
+            return {
+              recordset: [{
+                club_id: 12,
+                tag: "KFC",
+                name: "Kickass FC",
+                join_conditions: "Invite Only",
+                is_open: false,
+                region: "EU",
+                region2: "NA",
+                region3: "",
+                club_code: "A1B2C3D",
+                club_code2: "B1C2D3E",
+                club_code3: "",
+                discord_server: "",
+                logo: "",
+                owner_raw: "703837067322458112",
+                created_at: null
+              }]
+            };
+          }
+          if (sql.includes("FROM ClubRoster cr")) {
+            return { recordset: [] };
+          }
+          throw new Error("Unexpected query: " + sql);
+        }
+      };
+    }
+  };
+
+  await withMockedClubProfileService(pool, async function (service) {
+    const profile = await service.getMsblClubProfile(12, {
+      logoCache: {
+        ensureClubLogo: async function () {
+          return "";
+        }
+      }
+    });
+
+    assert.equal(profile.club.club_code, "");
+    assert.deepEqual(profile.club.club_codes, []);
+    assert.deepEqual(profile.club.regions, ["EU", "NA"]);
+  });
 });

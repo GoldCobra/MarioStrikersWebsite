@@ -13,6 +13,12 @@ function normalizeText(value) {
   return String(value || "").trim();
 }
 
+function compactTextList(values) {
+  return (Array.isArray(values) ? values : [])
+    .map(normalizeText)
+    .filter(Boolean);
+}
+
 function toPositiveInt(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -141,6 +147,16 @@ function resolveStatus(joinConditions, isOpen) {
   return "";
 }
 
+function resolveOpenStatus(isOpen) {
+  if (isOpen === true || isOpen === 1) {
+    return "Open to Anyone";
+  }
+  if (isOpen === false || isOpen === 0) {
+    return "Invite Only";
+  }
+  return "";
+}
+
 async function getMsblClubs() {
   const opts = arguments[0] || {};
   const logoCache = opts.logoCache ? opts.logoCache : defaultClubLogoCache;
@@ -156,13 +172,17 @@ async function getMsblClubs() {
         "  c.JoinConditions AS join_conditions,",
         "  c.IsOpen AS is_open,",
         "  c.Region AS region,",
+        "  c.Region2 AS region2,",
+        "  c.Region3 AS region3,",
         "  c.ClubCode AS club_code,",
+        "  c.ClubCode2 AS club_code2,",
+        "  c.ClubCode3 AS club_code3,",
         "  c.Logo AS logo,",
         "  c.Activity AS activity,",
         "  COUNT(cr.Player) AS member_count",
         "FROM Club c",
         "LEFT JOIN ClubRoster cr ON cr.Club = c.ID",
-        "GROUP BY c.ID, c.ClanTag, c.ClubName, c.JoinConditions, c.IsOpen, c.Region, c.ClubCode, c.Logo, c.Activity",
+        "GROUP BY c.ID, c.ClanTag, c.ClubName, c.JoinConditions, c.IsOpen, c.Region, c.Region2, c.Region3, c.ClubCode, c.ClubCode2, c.ClubCode3, c.Logo, c.Activity",
         "HAVING COUNT(cr.Player) > 0",
         "ORDER BY COUNT(cr.Player) DESC, LTRIM(RTRIM(ISNULL(c.ClubName, ''))) ASC, LTRIM(RTRIM(ISNULL(c.ClanTag, ''))) ASC"
       ].join(" ")
@@ -233,41 +253,6 @@ function buildRosterRow(row, ownerDiscordId) {
   };
 }
 
-async function findOwnerPlayer(pool, ownerDiscordId) {
-  if (!ownerDiscordId) {
-    return null;
-  }
-
-  const request = pool.request();
-  request.input("ownerDid", ownerDiscordId);
-  request.input("ownerMention", "<@" + ownerDiscordId + ">");
-  request.input("ownerMentionBang", "<@!" + ownerDiscordId + ">");
-
-  const result = await request.query(
-    [
-      "SELECT TOP 1",
-      "  p.ID AS player_id,",
-      "  p.Name AS name,",
-      "  p.Country AS country,",
-      "  p.DiscordID AS discord_id",
-      "FROM Player p",
-      "WHERE p.DiscordID = @ownerDid",
-      "   OR p.DiscordID = @ownerMention",
-      "   OR p.DiscordID = @ownerMentionBang",
-      "ORDER BY",
-      "  CASE",
-      "    WHEN p.DiscordID = @ownerDid THEN 0",
-      "    WHEN p.DiscordID = @ownerMentionBang THEN 1",
-      "    ELSE 2",
-      "  END,",
-      "  p.ID DESC"
-    ].join(" ")
-  );
-
-  const rows = Array.isArray(result && result.recordset) ? result.recordset : [];
-  return rows[0] || null;
-}
-
 async function getMsblClubProfile(clubIdRaw) {
   const clubId = toPositiveInt(clubIdRaw);
   if (!clubId) {
@@ -289,7 +274,11 @@ async function getMsblClubProfile(clubIdRaw) {
         "  c.JoinConditions AS join_conditions,",
         "  c.IsOpen AS is_open,",
         "  c.Region AS region,",
+        "  c.Region2 AS region2,",
+        "  c.Region3 AS region3,",
         "  c.ClubCode AS club_code,",
+        "  c.ClubCode2 AS club_code2,",
+        "  c.ClubCode3 AS club_code3,",
         "  c.DiscordServer AS discord_server,",
         "  c.Logo AS logo,",
         "  c.Owner AS owner_raw,",
@@ -331,44 +320,30 @@ async function getMsblClubProfile(clubIdRaw) {
       return buildRosterRow(row, ownerDiscordId);
     });
 
-    let ownerInRoster = rosterRows.some(function (row) { return row.is_owner; });
-    const ownerLookup = ownerInRoster ? null : await findOwnerPlayer(pool, ownerDiscordId);
-
-    if (!ownerInRoster && ownerDiscordId) {
-      rosterRows.push({
-        player_id: Number(ownerLookup && ownerLookup.player_id) || null,
-        name: normalizeText(ownerLookup && ownerLookup.name) || extractMentionSuffixName(ownerRaw) || "Unknown Owner",
-        country: normalizeCountryCode(ownerLookup && ownerLookup.country),
-        discord_id: ownerDiscordId,
-        discord_name: extractDiscordName(ownerLookup && ownerLookup.discord_id) || extractDiscordName(ownerRaw),
-        is_owner: true,
-        is_officer: false,
-        role: "owner"
-      });
-      ownerInRoster = true;
-    }
-
     await resolveDiscordNamesForRoster(rosterRows);
     rosterRows.sort(compareRosterRows);
 
     const ownerRow = rosterRows.find(function (row) { return row.is_owner; }) || null;
-    const ownerName = normalizeText(ownerRow && ownerRow.name)
-      || normalizeText(ownerLookup && ownerLookup.name)
-      || extractMentionSuffixName(ownerRaw)
-      || "";
-    const ownerDid = normalizeText(ownerRow && rowDiscordId(ownerRow)) || ownerDiscordId || "";
+    const ownerName = normalizeText(ownerRow && ownerRow.name);
+    const ownerDid = normalizeText(ownerRow && rowDiscordId(ownerRow));
 
     const clubDto = toMsblClubDTO(clubRow, {});
     await attachClubLogos([clubDto], logoCache);
+    const regions = compactTextList([clubDto.region, clubRow.region2, clubRow.region3]);
+    const clubCodes = clubDto.is_open
+      ? compactTextList([clubDto.club_code, clubRow.club_code2, clubRow.club_code3])
+      : [];
 
     return {
       club: {
         club_id: clubDto.club_id,
         name: clubDto.name,
         tag: clubDto.tag,
-        join_conditions: clubDto.status,
+        join_conditions: resolveOpenStatus(clubRow.is_open),
         region: clubDto.region,
         club_code: clubDto.club_code,
+        regions: regions,
+        club_codes: clubCodes,
         discord_server: normalizeText(clubRow.discord_server),
         created_at: toActivityIso(clubRow.created_at),
         logo: clubDto.logo,
@@ -415,7 +390,11 @@ function toMsblClubDTO(row, opts) {
     status: resolveStatus(row && row.join_conditions, isOpen),
     is_open: isOpen === true || isOpen === 1,
     region: normalizeText(row && row.region),
-    club_code: normalizeText(row && row.club_code),
+    club_code: isOpen === true || isOpen === 1 ? normalizeText(row && row.club_code) : "",
+    club_codes: isOpen === true || isOpen === 1
+      ? compactTextList([row && row.club_code, row && row.club_code2, row && row.club_code3])
+      : [],
+    regions: compactTextList([row && row.region, row && row.region2, row && row.region3]),
     logo_source: isExcludedClubLogo(tag, name) ? "" : logoSource,
     logo: "",
     activity: activity,

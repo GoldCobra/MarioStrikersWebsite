@@ -5,7 +5,7 @@
   var POPUP_CLOSE_BLOCK_MS = 500;
   var lastPopupCloseAt = 0;
 
-  var PROFILE_TEMPLATE_URL = "/pages/templates/club-profile-popup.html?v=20260601-roster-discord-flags-v1";
+  var PROFILE_TEMPLATE_URL = "/pages/templates/club-profile-popup.html?v=20260602-club-popup-grid-v1";
   var POPUP_OPEN_CLASS = "popup-open";
   var NO_CLUB_LOGO_URL = "../assets/clubs/no-club-logo.png";
   var ACTIVE_MEMBERS_ICON_URL = "../assets/clubs/members.png";
@@ -66,6 +66,134 @@
     var baseSize = parseFloat(window.getComputedStyle(el).fontSize);
     var ratio = el.clientWidth / el.scrollWidth;
     el.style.fontSize = Math.max(minPx || 7, Math.floor(baseSize * ratio * 10) / 10) + 'px';
+  }
+
+  var CLUB_LIST_GEOMETRY_VARS = [
+    "--msbl-club-row-pixel-height",
+    "--msbl-club-name-slot-top",
+    "--msbl-club-name-slot-height",
+    "--msbl-club-name-line-height",
+    "--msbl-club-meta-slot-top",
+    "--msbl-club-meta-slot-height"
+  ];
+
+  function clampNumber(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function roundToEvenPixel(value) {
+    return Math.max(2, Math.round(value / 2) * 2);
+  }
+
+  function setStyleVar(node, name, value) {
+    if (!node || node.style.getPropertyValue(name) === value) return;
+    node.style.setProperty(name, value);
+  }
+
+  function clearClubListGeometryVars(list) {
+    if (!list) return;
+    for (var i = 0; i < CLUB_LIST_GEOMETRY_VARS.length; i++) {
+      list.style.removeProperty(CLUB_LIST_GEOMETRY_VARS[i]);
+    }
+  }
+
+  function getViewportWidth() {
+    return Math.max(
+      0,
+      document.documentElement && document.documentElement.clientWidth || 0,
+      window.innerWidth || 0
+    );
+  }
+
+  function getClubListSlotMetrics(rowHeight) {
+    var isCompactImage = window.matchMedia && window.matchMedia("(max-width: 430px)").matches;
+    if (!isCompactImage) {
+      return {
+        nameTop: Math.round(rowHeight / 2 - 28),
+        nameHeight: 28,
+        nameLineHeight: 28,
+        metaTop: Math.round(rowHeight / 2 + 3),
+        metaHeight: 18
+      };
+    }
+
+    var viewportWidth = getViewportWidth();
+    var nameOffset = Math.round(clampNumber(viewportWidth * 0.027, 10, 12));
+    var nameHeight = Math.round(clampNumber(viewportWidth * 0.03, 10, 13));
+    var metaOffset = Math.round(clampNumber(viewportWidth * 0.0055, 2, 3));
+    var metaHeight = Math.round(clampNumber(viewportWidth * 0.02, 7, 9));
+    var nameShiftY = 1;
+    var metaShiftY = 2;
+
+    return {
+      nameTop: Math.round(rowHeight / 2 - nameOffset - nameShiftY),
+      nameHeight: nameHeight,
+      nameLineHeight: nameHeight,
+      metaTop: Math.round(rowHeight / 2 + metaOffset + 1 - metaShiftY),
+      metaHeight: metaHeight
+    };
+  }
+
+  function stabilizeClubListGeometry(mount) {
+    var list = mount && mount.querySelector(".msbl-clubs-list");
+    var firstRow = list && list.querySelector(".msbl-club-row");
+    if (!list || !firstRow) return false;
+
+    var rowStyle = window.getComputedStyle(firstRow);
+    if (rowStyle.display !== "block") {
+      clearClubListGeometryVars(list);
+      return false;
+    }
+
+    var rowWidth = firstRow.getBoundingClientRect().width;
+    if (!rowWidth || !Number.isFinite(rowWidth)) return false;
+
+    var rowHeight = roundToEvenPixel(rowWidth * 110 / 1600);
+    var slots = getClubListSlotMetrics(rowHeight);
+
+    setStyleVar(list, "--msbl-club-row-pixel-height", rowHeight + "px");
+    setStyleVar(list, "--msbl-club-name-slot-top", slots.nameTop + "px");
+    setStyleVar(list, "--msbl-club-name-slot-height", slots.nameHeight + "px");
+    setStyleVar(list, "--msbl-club-name-line-height", slots.nameLineHeight + "px");
+    setStyleVar(list, "--msbl-club-meta-slot-top", slots.metaTop + "px");
+    setStyleVar(list, "--msbl-club-meta-slot-height", slots.metaHeight + "px");
+    return true;
+  }
+
+  function createClubListLayoutController(mount, afterLayout) {
+    var frameId = null;
+
+    function run() {
+      frameId = null;
+      stabilizeClubListGeometry(mount);
+      if (typeof afterLayout === "function") {
+        afterLayout();
+      }
+    }
+
+    function schedule() {
+      if (frameId !== null) return;
+      frameId = window.requestAnimationFrame(run);
+    }
+
+    run();
+    schedule();
+
+    if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === "function") {
+      document.fonts.ready.then(schedule);
+    }
+
+    if (window.ResizeObserver) {
+      var observer = new ResizeObserver(schedule);
+      mount.__msblClubListResizeObserver = observer;
+      observer.observe(mount);
+      var list = mount.querySelector(".msbl-clubs-list");
+      if (list) {
+        observer.observe(list);
+      }
+    } else {
+      window.addEventListener("resize", schedule);
+    }
   }
 
   function escapeHtml(value) {
@@ -144,29 +272,6 @@
     return '<span class="msbl-club-status-text">' + escapeHtml(text) + "</span>";
   }
 
-  function buildClubProfileMetaHtml(club) {
-    var condition = String(club && club.join_conditions || "").trim();
-    var region = String(club && club.region || "").trim();
-    var code = String(club && club.club_code || "").trim();
-    var parts = [];
-
-    if (condition) {
-      parts.push(
-        '<span class="' + getStatusClass("club-popup-meta-condition", condition) + '">' +
-          buildStatusHtml(condition) +
-        "</span>"
-      );
-    }
-    if (region) {
-      parts.push('<span class="club-popup-meta-extra">' + escapeHtml(region) + "</span>");
-    }
-    if (code) {
-      parts.push('<span class="club-popup-meta-extra">' + escapeHtml(code) + "</span>");
-    }
-
-    return parts.join('<span class="club-popup-meta-separator" aria-hidden="true">|</span>');
-  }
-
   function isClubActive(row) {
     return !!(row && row.is_active === true);
   }
@@ -180,18 +285,11 @@
   }
 
   function buildExtrasText(row) {
-    var region = String(row && row.region || "").trim();
-    var code = String(row && row.club_code || "").trim();
-    if (region && code) {
-      return region + " / " + code;
+    var regions = toTextList(row && row.regions);
+    if (!regions.length) {
+      regions = toTextList(row && row.region);
     }
-    if (region) {
-      return region;
-    }
-    if (code) {
-      return code;
-    }
-    return "-";
+    return regions.length ? regions.join(" | ") : "-";
   }
 
   function buildMetaLineHtml(tag, status, memberCount, extras, isActive) {
@@ -512,14 +610,81 @@
     node.textContent = String(value || "");
   }
 
-  function setClubProfileMetaSlot(slotKey, club) {
+  function toTextList(value) {
+    if (Array.isArray(value)) {
+      return value.map(function (entry) {
+        return String(entry || "").trim();
+      }).filter(Boolean);
+    }
+    var text = String(value || "").trim();
+    return text ? [text] : [];
+  }
+
+  function getClubRegions(club) {
+    var regions = toTextList(club && club.regions);
+    return regions.length ? regions : toTextList(club && club.region);
+  }
+
+  function getClubCodes(club) {
+    var clubCodes = toTextList(club && club.club_codes);
+    return clubCodes.length ? clubCodes : toTextList(club && club.club_code);
+  }
+
+  function getRegionBadgeClass(regionCode) {
+    var normalized = String(regionCode || "").trim().toUpperCase();
+    if (normalized === "EU") return "is-eu";
+    if (normalized === "NA") return "is-na";
+    if (normalized === "SA") return "is-sa";
+    if (normalized === "SSA") return "is-ssa";
+    if (normalized === "APAC") return "is-apac";
+    if (normalized === "OCE") return "is-oce";
+    if (normalized === "MENA") return "is-mena";
+    if (normalized === "OTHER") return "is-other";
+    return "is-unknown";
+  }
+
+  function buildRegionBadgesHtml(regions) {
+    return toTextList(regions).map(function (region) {
+      return '<span class="club-popup-region-badge ' + getRegionBadgeClass(region) + '">' + escapeHtml(region) + "</span>";
+    }).join("");
+  }
+
+  function setClubRegionBadgesLine(slotKey, regions) {
     var node = popupState.slots[slotKey];
     if (!node) {
       return;
     }
 
-    node.classList.remove("is-invite-only", "is-open-to-anyone");
-    node.innerHTML = buildClubProfileMetaHtml(club);
+    node.hidden = false;
+    var regionValues = toTextList(regions);
+    if (!regionValues.length) {
+      node.innerHTML = "";
+      return;
+    }
+
+    node.innerHTML = buildRegionBadgesHtml(regionValues);
+  }
+
+  function renderClubInfo(club) {
+    var statusNode = popupState.slots["club-line-primary"];
+    var status = String(club && club.join_conditions || "").trim();
+    if (statusNode) {
+      statusNode.hidden = false;
+      if (getStatusVariant(status) === "open-to-anyone") {
+        var codes = getClubCodes(club);
+        if (codes.length) {
+          statusNode.textContent = codes.join(" | ");
+        } else {
+          statusNode.innerHTML = '<span class="' + getStatusClass("club-popup-meta-condition", status) + '">' + buildStatusHtml(status) + "</span>";
+        }
+      } else {
+        statusNode.innerHTML = status
+          ? '<span class="' + getStatusClass("club-popup-meta-condition", status) + '">' + buildStatusHtml(status) + "</span>"
+          : "-";
+      }
+    }
+
+    setClubRegionBadgesLine("club-line-regions", getClubRegions(club));
   }
 
   function setClubDiscordLink(club) {
@@ -542,11 +707,11 @@
   function formatDate(value) {
     var raw = String(value || "").trim();
     if (!raw) {
-      return "-";
+      return "";
     }
     var date = new Date(raw);
     if (Number.isNaN(date.getTime())) {
-      return "-";
+      return "";
     }
     return date.toISOString().slice(0, 10);
   }
@@ -577,6 +742,19 @@
     return "../assets/flags/" + countryCode + ".png";
   }
 
+  function getCountryDisplayName(countryCode) {
+    var helper = window.MSCCountryDisplayNames;
+    if (helper && typeof helper.getCountryDisplayName === "function") {
+      return helper.getCountryDisplayName(countryCode);
+    }
+    return "";
+  }
+
+  function buildFlagTitleAttr(countryCode) {
+    var countryName = getCountryDisplayName(countryCode);
+    return countryName ? ' title="' + escapeHtml(countryName) + '"' : "";
+  }
+
   function buildRoleBadgeHtml(role) {
     var normalized = String(role || "").trim().toLowerCase();
     if (normalized === "owner") {
@@ -603,7 +781,7 @@
     mount.innerHTML = rows.map(function (row) {
       var countryCode = normalizeCountryCode(row && row.country);
       var flagHtml = countryCode
-        ? '<img class="club-popup-roster-flag" src="' + escapeHtml(getFlagAssetUrl(countryCode)) + '" alt="" aria-hidden="true" loading="lazy" onerror="this.onerror=null;this.remove();">'
+        ? '<img class="club-popup-roster-flag" src="' + escapeHtml(getFlagAssetUrl(countryCode)) + '" alt="" aria-hidden="true"' + buildFlagTitleAttr(countryCode) + ' loading="lazy" onerror="this.onerror=null;this.remove();">'
         : '<span class="club-popup-roster-flag club-popup-roster-flag-empty" aria-hidden="true"></span>';
       var name = String(row && row.name || "").trim() || "Unknown";
       var discordName = String(row && row.discord_name || "").trim();
@@ -638,7 +816,7 @@
         ? escapeHtml(name) + ' <span class="club-popup-tag-label">[' + escapeHtml(tag) + ']</span>'
         : escapeHtml(name);
     }
-    setClubProfileMetaSlot("join-conditions", club);
+    renderClubInfo(club);
     setTextSlot("created-date", formatDate(club.created_at));
     setClubDiscordLink(club);
 
@@ -724,7 +902,7 @@
     openPopup(openerElement);
 
     setTextSlot("club-name", "");
-    setTextSlot("join-conditions", "");
+    renderClubInfo(null);
     setTextSlot("created-date", "");
     setClubDiscordLink(null);
     var staleLogoBg = popupState.slots["club-logo-bg"];
@@ -796,10 +974,7 @@
           scaleFitText(nameEls[i], 6);
         }
       }
-      window.requestAnimationFrame(scaleAllClubNames);
-      if (document.fonts && typeof document.fonts.ready === 'object') {
-        document.fonts.ready.then(scaleAllClubNames);
-      }
+      createClubListLayoutController(mount, scaleAllClubNames);
 
       mount.addEventListener("click", function (event) {
         if (Date.now() - lastPopupCloseAt < POPUP_CLOSE_BLOCK_MS) { return; }

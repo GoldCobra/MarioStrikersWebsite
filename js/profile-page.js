@@ -72,6 +72,19 @@
     return "../assets/flags/" + countryCode + ".png";
   }
 
+  function getCountryDisplayName(countryCode) {
+    var helper = window.MSCCountryDisplayNames;
+    if (helper && typeof helper.getCountryDisplayName === "function") {
+      return helper.getCountryDisplayName(countryCode);
+    }
+    return "";
+  }
+
+  function buildFlagTitleAttr(countryCode) {
+    var countryName = getCountryDisplayName(countryCode);
+    return countryName ? ' title="' + escapeHtml(countryName) + '"' : "";
+  }
+
   function getGameBallIconUrl(gameCode) {
     var code = String(gameCode || "").trim().toLowerCase();
     if (code === "msbl") {
@@ -300,7 +313,7 @@
     var player = data.player || {};
     var countryCode = normalizeCountryCode(player.country);
     var flagHtml = countryCode
-      ? '<img class="profile-header-flag" src="' + escapeHtml(getFlagAssetUrl(countryCode)) + '" alt="" aria-hidden="true" onerror="this.remove();">'
+      ? '<img class="profile-header-flag" src="' + escapeHtml(getFlagAssetUrl(countryCode)) + '" alt="" aria-hidden="true"' + buildFlagTitleAttr(countryCode) + ' onerror="this.remove();">'
       : "";
     var clubText = String(player.club_name || "").trim()
       ? String(player.club_name || "").trim() + (player.club_tag ? " [" + player.club_tag + "]" : "")

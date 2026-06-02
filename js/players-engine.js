@@ -115,6 +115,19 @@
     return "../assets/flags/" + countryCode + ".png";
   }
 
+  function getCountryDisplayName(countryCode) {
+    var helper = window.MSCCountryDisplayNames;
+    if (helper && typeof helper.getCountryDisplayName === "function") {
+      return helper.getCountryDisplayName(countryCode);
+    }
+    return "";
+  }
+
+  function buildFlagTitleAttr(countryCode) {
+    var countryName = getCountryDisplayName(countryCode);
+    return countryName ? ' title="' + escapeHtml(countryName) + '"' : "";
+  }
+
   function toPositiveInt(value) {
     var parsed = Number(value);
     if (!Number.isInteger(parsed) || parsed <= 0) {
@@ -525,11 +538,18 @@
     var countryCode = normalizeCountryCode(player.country);
     if (flagNode) {
       if (countryCode) {
+        var countryName = getCountryDisplayName(countryCode);
         flagNode.src = getFlagAssetUrl(countryCode);
+        if (countryName) {
+          flagNode.title = countryName;
+        } else {
+          flagNode.removeAttribute("title");
+        }
         flagNode.hidden = false;
       } else {
         flagNode.hidden = true;
         flagNode.removeAttribute("src");
+        flagNode.removeAttribute("title");
       }
     }
 
@@ -666,7 +686,7 @@
       var countryCode = normalizeCountryCode(row && row.country);
       var rowClass = isPlayerActive(row) ? "lb-row players-row" : "lb-row players-row is-inactive";
       var flagHtml = countryCode
-        ? '<img class="players-flag" src="' + escapeHtml(getFlagAssetUrl(countryCode)) + '" alt="" aria-hidden="true" loading="lazy" onerror="this.onerror=null;this.remove();">'
+        ? '<img class="players-flag" src="' + escapeHtml(getFlagAssetUrl(countryCode)) + '" alt="" aria-hidden="true"' + buildFlagTitleAttr(countryCode) + ' loading="lazy" onerror="this.onerror=null;this.remove();">'
         : "";
 
       var nameInnerHtml = playerId

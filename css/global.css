@@ -2435,7 +2435,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   --msbl-club-name-slot-top: calc(50% - 28px);
   --msbl-club-name-slot-height: 28px;
   --msbl-club-name-line-height: 28px;
-  --msbl-club-meta-slot-top: calc(50% + 2px);
+  --msbl-club-meta-slot-top: calc(50% + 3px);
   --msbl-club-meta-slot-height: 18px;
   width: min(1180px, 100%);
   padding-top: 0;
@@ -2457,7 +2457,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   overflow: hidden;
   width: min(calc(var(--msbl-club-row-base-width) * var(--msbl-club-list-scale)), 96vw);
   aspect-ratio: 1600 / 110;
-  height: auto;
+  height: var(--msbl-club-row-pixel-height, auto);
   margin: 0 auto;
   position: relative;
   padding: clamp(0.55rem, 0.9vw, 0.7rem) clamp(1.1rem, 2vw, 1.35rem) clamp(0.4rem, 0.8vw, 0.55rem);
@@ -3493,9 +3493,9 @@ body.player-popup-open {
   gap: 0.45rem;
   width: calc(100% - 1.8rem);
   max-width: calc(100% - 1.8rem);
-  height: 1.36rem;
+  min-height: 1.62rem;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 #club-profile-popup .popup-title {
@@ -3507,7 +3507,9 @@ body.player-popup-open {
   flex: 0 1 auto;
   min-width: 0;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: visible;
+  line-height: 1.24;
+  padding-bottom: 0.08em;
 }
 
 .club-popup-tag-label {
@@ -3539,6 +3541,84 @@ body.player-popup-open {
   white-space: nowrap;
 }
 
+.club-popup-meta-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  grid-template-rows: repeat(3, minmax(1.35rem, auto));
+  align-items: center;
+  column-gap: 1rem;
+  row-gap: 0.24rem;
+  min-width: 0;
+}
+
+.club-popup-meta-left,
+.club-popup-meta-right {
+  min-width: 0;
+  margin: 0;
+}
+
+.club-popup-meta-left {
+  justify-self: start;
+}
+
+.club-popup-meta-right {
+  justify-self: end;
+  text-align: right;
+}
+
+.club-popup-region-line {
+  min-height: 1.35rem;
+}
+
+.club-popup-region-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.9em;
+  min-height: 1.15em;
+  margin-right: 0.32rem;
+  padding: 0.08em 0.34em 0.06em;
+  border-radius: 0;
+  color: #fff;
+  font-size: 0.78em;
+  line-height: 1;
+  text-shadow: none;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.22);
+}
+
+.club-popup-region-badge.is-eu {
+  background: #2563eb;
+}
+
+.club-popup-region-badge.is-na {
+  background: #dc2626;
+}
+
+.club-popup-region-badge.is-sa {
+  background: #16a34a;
+}
+
+.club-popup-region-badge.is-ssa {
+  background: #d97706;
+}
+
+.club-popup-region-badge.is-apac {
+  background: #7c3aed;
+}
+
+.club-popup-region-badge.is-oce {
+  background: #0891b2;
+}
+
+.club-popup-region-badge.is-mena {
+  background: #db2777;
+}
+
+.club-popup-region-badge.is-other,
+.club-popup-region-badge.is-unknown {
+  background: #64748b;
+}
+
 .club-popup-line .msbl-club-status-icon {
   width: 13px;
   margin-right: 0.35rem;
@@ -3561,26 +3641,17 @@ body.player-popup-open {
   color: #f2f2f2;
 }
 
-.club-popup-meta-row {
-  display: block;
-}
-
-.club-popup-meta-col {
-  position: relative;
-  min-width: 0;
-}
-
 .club-popup-content {
   --club-popup-bg-logo-size: clamp(168px, 54vw, 330px);
   --club-popup-bg-logo-offset: 0.9rem;
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(142px, 50vw, 286px);
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "meta date"
-    "roster roster";
-  column-gap: 1rem;
+    "meta"
+    "roster";
+  row-gap: 0;
   align-items: start;
   min-height: calc(var(--club-popup-bg-logo-offset) + var(--club-popup-bg-logo-size));
   align-content: start;
@@ -3599,18 +3670,7 @@ body.player-popup-open {
 .club-popup-roster-section {
   grid-area: roster;
   min-width: 0;
-}
-
-.club-popup-roster-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  min-width: 0;
-}
-
-.club-popup-roster-heading .player-popup-section-title {
-  min-width: 0;
+  margin-top: 0;
 }
 
 .club-popup-discord-link {
@@ -3648,20 +3708,6 @@ body.player-popup-open {
 .club-popup-discord-link:focus-visible {
   opacity: 1;
   transform: translateY(-1px);
-}
-
-.club-popup-date-panel {
-  grid-area: date;
-  width: clamp(142px, 50vw, 286px);
-  justify-self: end;
-  margin-top: 0.7rem;
-  padding: 0 0.6rem 0.45rem;
-  overflow: hidden;
-  text-align: right;
-}
-
-.club-popup-date-panel .club-popup-line {
-  justify-content: flex-end;
 }
 
 .club-popup-bg-logo {
@@ -4770,15 +4816,12 @@ body.player-popup-open {
     justify-self: end;
   }
 
-  .club-popup-meta-row {
-    column-gap: 0.45rem;
-  }
-
   .msbl-club-row {
     display: grid;
     grid-template-columns: 64px minmax(0, 1fr);
     gap: 0.6rem;
     width: min(100%, calc(100vw - 1rem));
+    height: auto;
     min-height: 96px;
     aspect-ratio: auto;
     padding: 0.65rem 0.75rem;
@@ -4925,10 +4968,10 @@ body.player-popup-open {
   .msbl-clubs-root {
     --msbl-club-content-left: 13.2%;
     --msbl-club-content-right: 1.6%;
-    --msbl-club-name-slot-top: calc(50% - clamp(10px, 2.7vw, 12px));
+    --msbl-club-name-slot-top: calc(50% - clamp(10px, 2.7vw, 12px) - 1px);
     --msbl-club-name-slot-height: clamp(10px, 3vw, 13px);
     --msbl-club-name-line-height: clamp(10px, 3vw, 13px);
-    --msbl-club-meta-slot-top: calc(50% + clamp(2px, 0.55vw, 3px));
+    --msbl-club-meta-slot-top: calc(50% + clamp(2px, 0.55vw, 3px) + 1px - 2px);
     --msbl-club-meta-slot-height: clamp(7px, 2vw, 9px);
   }
 
@@ -5276,7 +5319,7 @@ body.player-popup-open {
   }
 
   .msbl-clubs-list {
-    gap: 0.22rem;
+    gap: 4px;
     padding-inline: 0;
   }
 
@@ -5284,7 +5327,7 @@ body.player-popup-open {
     display: block;
     width: min(100%, calc(100vw - 0.55rem));
     aspect-ratio: 1600 / 110;
-    height: auto;
+    height: var(--msbl-club-row-pixel-height, auto);
     min-height: 0;
     padding: 0;
     border: 0;
