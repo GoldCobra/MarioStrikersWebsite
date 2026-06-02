@@ -3575,7 +3575,7 @@ body.player-popup-open {
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 0.42rem;
+  gap: 0;
   min-height: 24px;
   text-align: left;
 }
@@ -3583,6 +3583,14 @@ body.player-popup-open {
 .club-popup-stadium-label {
   color: #f2f2f2;
   line-height: 1;
+}
+
+.club-popup-uniform-icon + .club-popup-uniform-icon {
+  margin-left: 0.16rem;
+}
+
+.club-popup-uniform-icon + .club-popup-stadium-label {
+  margin-left: 0.42rem;
 }
 
 .club-popup-region-badge {
@@ -3729,12 +3737,33 @@ body.player-popup-open {
 .club-popup-uniform-icon::before {
   width: 28.4px;
   height: 22px;
+  background: url("../assets/clubs/uniform.png") center / contain no-repeat;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.club-popup-uniform-icon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 28.4px;
+  height: 22px;
+  display: block;
   background: var(--club-uniform-color, #f2f2f2);
-  -webkit-mask-image: url("../assets/clubs/uniform.png");
-  mask-image: url("../assets/clubs/uniform.png");
+  transform: translate(-50%, -50%);
+  -webkit-mask-image: url("../assets/clubs/uniform-fill-mask.png");
+  mask-image: url("../assets/clubs/uniform-fill-mask.png");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 .club-popup-uniform-icon {
+  position: relative;
   width: 30px;
 }
 
