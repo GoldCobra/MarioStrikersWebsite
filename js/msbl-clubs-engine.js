@@ -940,7 +940,7 @@
     setTextSlot("club-name", "");
     renderClubInfo(null);
     setTextSlot("created-date", "");
-    setClubDiscordLink(null);
+    setClubActions(null);
     var staleLogoBg = popupState.slots["club-logo-bg"];
     if (staleLogoBg) {
       staleLogoBg.hidden = true;
