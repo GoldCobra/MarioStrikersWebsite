@@ -3694,7 +3694,7 @@ body.player-popup-open {
   align-items: center;
   justify-content: center;
   opacity: 0.9;
-  transition: opacity 140ms ease, transform 140ms ease;
+  transition: opacity 140ms ease;
 }
 
 .club-popup-action-icon::before,
@@ -3712,9 +3712,15 @@ body.player-popup-open {
 }
 
 .club-popup-uniform-icon::before {
+  width: 28.4px;
+  height: 22px;
   background: var(--club-uniform-color, #f2f2f2);
   -webkit-mask-image: url("../assets/clubs/uniform.png");
   mask-image: url("../assets/clubs/uniform.png");
+}
+
+.club-popup-uniform-icon {
+  width: 30px;
 }
 
 .club-popup-discord-link::before {
@@ -3732,7 +3738,6 @@ body.player-popup-open {
 .club-popup-discord-link:hover,
 .club-popup-discord-link:focus-visible {
   opacity: 1;
-  transform: translateY(-1px);
 }
 
 .club-popup-bg-logo {
