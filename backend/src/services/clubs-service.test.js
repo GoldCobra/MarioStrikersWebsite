@@ -194,6 +194,7 @@ test("club profile does not synthesize stale owner rows outside ClubRoster", asy
                 club_code3: "",
                 color1: "Red",
                 color2: "Blue",
+                stadium: "Lava Castle",
                 discord_server: "",
                 logo: "",
                 owner_raw: "84806729719615488",
@@ -234,6 +235,7 @@ test("club profile does not synthesize stale owner rows outside ClubRoster", asy
     assert.equal(profile.club.owner_discord_id, "");
     assert.equal(profile.club.first_uniform, "Red");
     assert.equal(profile.club.second_uniform, "Blue");
+    assert.equal(profile.club.stadium, "Lava Castle");
   });
 });
 
@@ -261,6 +263,7 @@ test("invite-only club profiles keep stored club codes hidden", async function (
                 club_code3: "",
                 color1: "",
                 color2: "",
+                stadium: "",
                 discord_server: "",
                 logo: "",
                 owner_raw: "703837067322458112",
@@ -291,5 +294,6 @@ test("invite-only club profiles keep stored club codes hidden", async function (
     assert.deepEqual(profile.club.regions, ["EU", "NA"]);
     assert.equal(profile.club.first_uniform, "");
     assert.equal(profile.club.second_uniform, "");
+    assert.equal(profile.club.stadium, "");
   });
 });

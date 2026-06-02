@@ -37,6 +37,7 @@ test("serves club profile payload from /api/clubs/msbl/:clubId/profile", async f
           club_codes: ["785XF50", "1G9MXHW", "7XM8WL2"],
           first_uniform: "Red",
           second_uniform: "Blue",
+          stadium: "Lava Castle",
           discord_server: "https://discord.gg/msbl",
           created_at: "2026-01-01T00:00:00.000Z",
           logo: "/api/clubs/msbl/12/logo?v=abc",
@@ -76,6 +77,7 @@ test("serves club profile payload from /api/clubs/msbl/:clubId/profile", async f
       assert.deepEqual(body.club.club_codes, ["785XF50", "1G9MXHW", "7XM8WL2"]);
       assert.equal(body.club.first_uniform, "Red");
       assert.equal(body.club.second_uniform, "Blue");
+      assert.equal(body.club.stadium, "Lava Castle");
       assert.equal(body.club.discord_server, "https://discord.gg/msbl");
       assert.equal(body.roster[0].discord_name, "samurai7");
       assert.equal(body.roster[0].role, "owner");

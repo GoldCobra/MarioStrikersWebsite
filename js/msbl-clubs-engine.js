@@ -5,7 +5,7 @@
   var POPUP_CLOSE_BLOCK_MS = 500;
   var lastPopupCloseAt = 0;
 
-  var PROFILE_TEMPLATE_URL = "/pages/templates/club-profile-popup.html?v=20260602-club-popup-grid-v2";
+  var PROFILE_TEMPLATE_URL = "/pages/templates/club-profile-popup.html?v=20260602-equipment-row-v1";
   var POPUP_OPEN_CLASS = "popup-open";
   var NO_CLUB_LOGO_URL = "../assets/clubs/no-club-logo.png";
   var ACTIVE_MEMBERS_ICON_URL = "../assets/clubs/members.png";
@@ -716,6 +716,23 @@
     return '<span class="club-popup-action-icon club-popup-uniform-icon" data-uniform-slot="' + escapeHtml(slotName) + '" style="--club-uniform-color: ' + escapeHtml(color) + ';" title="' + escapeHtml(label) + '" aria-label="' + escapeHtml(label) + '"></span>';
   }
 
+  function setClubEquipmentLine(club) {
+    var node = popupState.slots["club-equipment-line"];
+    if (!node) {
+      return;
+    }
+
+    var firstUniformHtml = buildUniformIconHtml("first", club && club.first_uniform);
+    var secondUniformHtml = buildUniformIconHtml("second", club && club.second_uniform);
+    var stadium = String(club && club.stadium || "").trim();
+    var stadiumHtml = stadium
+      ? '<span class="club-popup-stadium-label">' + escapeHtml(stadium) + "</span>"
+      : "";
+
+    node.hidden = false;
+    node.innerHTML = firstUniformHtml + secondUniformHtml + stadiumHtml;
+  }
+
   function setClubActions(club) {
     var node = popupState.slots["club-actions"];
     if (!node) {
@@ -723,20 +740,13 @@
     }
 
     var url = getDiscordInviteUrl(club);
-    var firstUniformHtml = buildUniformIconHtml("first", club && club.first_uniform);
-    var secondUniformHtml = buildUniformIconHtml("second", club && club.second_uniform);
-    var discordHtml = url
-      ? '<a class="club-popup-discord-link" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer" aria-label="Open club Discord"></a>'
-      : "";
-
-    var content = firstUniformHtml + secondUniformHtml + discordHtml;
-    if (!content) {
+    if (!url) {
       node.hidden = true;
       node.innerHTML = "";
       return;
     }
 
-    node.innerHTML = content;
+    node.innerHTML = '<a class="club-popup-discord-link" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer" aria-label="Open club Discord"></a>';
     node.hidden = false;
   }
 
@@ -854,6 +864,7 @@
     }
     renderClubInfo(club);
     setTextSlot("created-date", formatDate(club.created_at));
+    setClubEquipmentLine(club);
     setClubActions(club);
 
     var logoBgNode = popupState.slots["club-logo-bg"];
@@ -940,6 +951,7 @@
     setTextSlot("club-name", "");
     renderClubInfo(null);
     setTextSlot("created-date", "");
+    setClubEquipmentLine(null);
     setClubActions(null);
     var staleLogoBg = popupState.slots["club-logo-bg"];
     if (staleLogoBg) {
