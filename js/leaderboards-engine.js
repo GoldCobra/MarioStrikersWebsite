@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var SESSION_CACHE_PREFIX = "leaderboardRows::";
+  var SESSION_CACHE_PREFIX = "leaderboardRows:v2::";
   var SESSION_CACHE_TTL_MS = 5 * 60 * 1000;
   var ROW_ASSET_FILES = ["normal-rank.png", "rank1.png", "rank2.png", "rank3.png"];
   var activeRenderRequestId = 0;
@@ -347,11 +347,11 @@
       var normalized = normalizeRows(payload && payload.rows);
       if (normalized.length > 0) {
         writeCachedRows(tabKey, normalized);
-        return {
-          rows: normalized,
-          source: "network"
-        };
       }
+      return {
+        rows: normalized,
+        source: "network"
+      };
     } catch (_error) {
       // Falls Backend/API nicht erreichbar ist, zeigen wir stabile Fallback-Daten.
     }

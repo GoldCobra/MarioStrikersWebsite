@@ -87,6 +87,16 @@ function toDisplayCompetitiveRank(value) {
   return rank;
 }
 
+function isVisibleCompetitiveRank(rankName, rankNumber) {
+  const parsedRankNumber = Number(rankNumber);
+  if (Number.isFinite(parsedRankNumber)) {
+    return parsedRankNumber > 0;
+  }
+
+  const rank = String(rankName || "").trim();
+  return !!rank && rank.toLowerCase() !== "unranked";
+}
+
 function parseRatingLine(lineValue) {
   const text = String(lineValue || "");
   const rankEmoji = text.match(/<:([^:>]+):\d+>/i);
@@ -147,6 +157,7 @@ async function fetchCompetitiveLeaderboardRows(pool, gameType, mode, limit, offs
     "  lb.MatchWins AS total_wins,",
     "  lb.MatchLosses AS total_losses,",
     "  lb.Elo AS rating,",
+    "  lb.RankNumber AS rank_number,",
     "  lb.RankName AS competitive_rank,",
     "  lb.UpdatedAtUtc AS updated_at",
     "FROM CompetitiveLeaderboard lb",
@@ -155,6 +166,7 @@ async function fetchCompetitiveLeaderboardRows(pool, gameType, mode, limit, offs
     "  AND season.LifecycleStatus = 'active'",
     "  AND lb.GameType = @gametype",
     "  AND lb.Mode = @mode",
+    "  AND ISNULL(lb.RankNumber, 0) > 0",
     "ORDER BY lb.Position ASC, lb.Elo DESC, lb.PlayerName ASC",
     "OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY"
   ].join(" ");
@@ -162,13 +174,14 @@ async function fetchCompetitiveLeaderboardRows(pool, gameType, mode, limit, offs
   const result = await request.query(query);
   const rows = Array.isArray(result && result.recordset) ? result.recordset : [];
 
-  return rows.map(function (row, index) {
-    const rank = Number(row.rank);
+  return rows.filter(function (row) {
+    return isVisibleCompetitiveRank(row && row.competitive_rank, row && row.rank_number);
+  }).map(function (row, index) {
     const wins = toSafeInteger(row.total_wins);
     const losses = toSafeInteger(row.total_losses);
     const totalMatches = toSafeInteger(row.total_matches);
     return {
-      rank: Number.isFinite(rank) && rank > 0 ? Math.floor(rank) : offset + index + 1,
+      rank: offset + index + 1,
       discord_user_id: row.discord_user_id ? String(row.discord_user_id).trim() : null,
       display_name: String(row.display_name || "").trim(),
       total_matches: totalMatches || wins + losses,

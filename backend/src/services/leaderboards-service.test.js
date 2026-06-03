@@ -73,6 +73,7 @@ test("elo1v1 reads the active CompetitiveLeaderboard instead of the legacy ratin
           total_wins: 1,
           total_losses: 0,
           rating: 598.9957,
+          rank_number: 0,
           competitive_rank: "Unranked",
           updated_at: new Date("2026-06-03T22:00:00.000Z")
         },
@@ -84,6 +85,7 @@ test("elo1v1 reads the active CompetitiveLeaderboard instead of the legacy ratin
           total_wins: 3,
           total_losses: 1,
           rating: 712,
+          rank_number: 1,
           competitive_rank: "Bronze I",
           updated_at: new Date("2026-06-03T22:01:00.000Z")
         }
@@ -105,25 +107,10 @@ test("elo1v1 reads the active CompetitiveLeaderboard instead of the legacy ratin
     assert.equal(harness.queries[0].inputs.limit, 10);
     assert.equal(harness.queries[0].inputs.offset, 0);
     assert.match(harness.queries[0].sql, /season\.LifecycleStatus = 'active'/);
+    assert.match(harness.queries[0].sql, /ISNULL\(lb\.RankNumber, 0\) > 0/);
     assert.deepEqual(rows, [
       {
         rank: 1,
-        discord_user_id: "650333745232216077",
-        display_name: "BKXO",
-        total_matches: 1,
-        total_wins: 1,
-        total_losses: 0,
-        total_draws: 0,
-        total_game_diff: 0,
-        total_goals_for: 0,
-        total_goals_against: 0,
-        total_goal_diff: 0,
-        rating: 599,
-        competitive_rank: "",
-        updated_at: "2026-06-03T22:00:00.000Z"
-      },
-      {
-        rank: 2,
         discord_user_id: "709777875686916210",
         display_name: "Ranked Player",
         total_matches: 4,
