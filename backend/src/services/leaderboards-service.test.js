@@ -75,6 +75,17 @@ test("elo1v1 reads the active CompetitiveLeaderboard instead of the legacy ratin
           rating: 598.9957,
           competitive_rank: "Unranked",
           updated_at: new Date("2026-06-03T22:00:00.000Z")
+        },
+        {
+          rank: 2,
+          discord_user_id: "709777875686916210",
+          display_name: "Ranked Player",
+          total_matches: 4,
+          total_wins: 3,
+          total_losses: 1,
+          rating: 712,
+          competitive_rank: "Bronze I",
+          updated_at: new Date("2026-06-03T22:01:00.000Z")
         }
       ]
     };
@@ -108,8 +119,24 @@ test("elo1v1 reads the active CompetitiveLeaderboard instead of the legacy ratin
         total_goals_against: 0,
         total_goal_diff: 0,
         rating: 599,
-        competitive_rank: "Unranked",
+        competitive_rank: "",
         updated_at: "2026-06-03T22:00:00.000Z"
+      },
+      {
+        rank: 2,
+        discord_user_id: "709777875686916210",
+        display_name: "Ranked Player",
+        total_matches: 4,
+        total_wins: 3,
+        total_losses: 1,
+        total_draws: 0,
+        total_game_diff: 0,
+        total_goals_for: 0,
+        total_goals_against: 0,
+        total_goal_diff: 0,
+        rating: 712,
+        competitive_rank: "Bronze I",
+        updated_at: "2026-06-03T22:01:00.000Z"
       }
     ]);
   } finally {

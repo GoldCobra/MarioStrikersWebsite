@@ -79,6 +79,14 @@ function toIsoString(value) {
   return Number.isFinite(time) ? date.toISOString() : new Date().toISOString();
 }
 
+function toDisplayCompetitiveRank(value) {
+  const rank = String(value || "").trim();
+  if (rank.toLowerCase() === "unranked") {
+    return "";
+  }
+  return rank;
+}
+
 function parseRatingLine(lineValue) {
   const text = String(lineValue || "");
   const rankEmoji = text.match(/<:([^:>]+):\d+>/i);
@@ -172,7 +180,7 @@ async function fetchCompetitiveLeaderboardRows(pool, gameType, mode, limit, offs
       total_goals_against: 0,
       total_goal_diff: 0,
       rating: toRating(row.rating),
-      competitive_rank: String(row.competitive_rank || "").trim(),
+      competitive_rank: toDisplayCompetitiveRank(row.competitive_rank),
       updated_at: toIsoString(row.updated_at)
     };
   }).filter(function (row) {
