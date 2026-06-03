@@ -2,12 +2,12 @@
   "use strict";
 
   var GLOBAL_LEADERBOARD_TABS = [
-    { key: "msbl-elo1v1", label: "ELO 1v1", icon: "msblball.png" },
-    { key: "msbl-elo2v2", label: "ELO 2v2", icon: "msblball.png" },
+    { key: "msbl-elo1v1", label: "Rated 1v1", icon: "msblball.png" },
+    { key: "msbl-elo2v2", label: "Rated 2v2", icon: "msblball.png" },
     { key: "msbl-whr", label: "WHR", icon: "msblball.png" },
-    { key: "msc-elo1v1", label: "ELO 1v1", icon: "mscball.png" },
+    { key: "msc-elo1v1", label: "Rated 1v1", icon: "mscball.png" },
     { key: "msc-whr", label: "WHR", icon: "mscball.png" },
-    { key: "sms-elo1v1", label: "ELO 1v1", icon: "smsball.png" },
+    { key: "sms-elo1v1", label: "Rated 1v1", icon: "smsball.png" },
     { key: "sms-whr", label: "WHR", icon: "smsball.png" }
   ];
 

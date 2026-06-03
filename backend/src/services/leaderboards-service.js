@@ -8,9 +8,12 @@ const GAME_TYPE_BY_CODE = {
   msbl: 3
 };
 
-const MODE_TO_FLAGS = {
-  elo1v1: { doubles: 0, isWhr: 0 },
-  elo2v2: { doubles: 1, isWhr: 0 },
+const COMPETITIVE_MODE_BY_CODE = {
+  elo1v1: "1v1",
+  elo2v2: "2v2"
+};
+
+const LEGACY_MODE_TO_FLAGS = {
   whr: { doubles: 0, isWhr: 2 }
 };
 
@@ -43,11 +46,37 @@ function assertGameAndMode(gameCode, modeCode) {
   if (!GAME_TYPE_BY_CODE[game]) {
     throw new Error("Invalid game code.");
   }
-  if (!MODE_TO_FLAGS[mode]) {
+  if (!COMPETITIVE_MODE_BY_CODE[mode] && !LEGACY_MODE_TO_FLAGS[mode]) {
     throw new Error("Invalid leaderboard mode.");
   }
 
   return { game: game, mode: mode };
+}
+
+function toSafeInteger(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return 0;
+  }
+  return Math.max(0, Math.floor(parsed));
+}
+
+function toRating(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return 0;
+  }
+  return Math.round(parsed);
+}
+
+function toIsoString(value) {
+  if (!value) {
+    return new Date().toISOString();
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+  const time = date.getTime();
+  return Number.isFinite(time) ? date.toISOString() : new Date().toISOString();
 }
 
 function parseRatingLine(lineValue) {
@@ -92,6 +121,63 @@ async function fetchRawRatings(pool, gameType, flags, playedGameWithinDate) {
   }
   const result = await request.query(query);
   return Array.isArray(result && result.recordset) ? result.recordset : [];
+}
+
+async function fetchCompetitiveLeaderboardRows(pool, gameType, mode, limit, offset) {
+  const request = pool.request();
+  request.input("gametype", mssql.Int, gameType);
+  request.input("mode", mssql.VarChar, mode);
+  request.input("offset", mssql.Int, offset);
+  request.input("limit", mssql.Int, limit);
+
+  const query = [
+    "SELECT",
+    "  lb.Position AS rank,",
+    "  lb.DiscordId AS discord_user_id,",
+    "  lb.PlayerName AS display_name,",
+    "  lb.TotalMatches AS total_matches,",
+    "  lb.MatchWins AS total_wins,",
+    "  lb.MatchLosses AS total_losses,",
+    "  lb.Elo AS rating,",
+    "  lb.RankName AS competitive_rank,",
+    "  lb.UpdatedAtUtc AS updated_at",
+    "FROM CompetitiveLeaderboard lb",
+    "INNER JOIN CompetitiveSeason season ON season.Id = lb.SeasonId",
+    "WHERE season.IsActive = 1",
+    "  AND season.LifecycleStatus = 'active'",
+    "  AND lb.GameType = @gametype",
+    "  AND lb.Mode = @mode",
+    "ORDER BY lb.Position ASC, lb.Elo DESC, lb.PlayerName ASC",
+    "OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY"
+  ].join(" ");
+
+  const result = await request.query(query);
+  const rows = Array.isArray(result && result.recordset) ? result.recordset : [];
+
+  return rows.map(function (row, index) {
+    const rank = Number(row.rank);
+    const wins = toSafeInteger(row.total_wins);
+    const losses = toSafeInteger(row.total_losses);
+    const totalMatches = toSafeInteger(row.total_matches);
+    return {
+      rank: Number.isFinite(rank) && rank > 0 ? Math.floor(rank) : offset + index + 1,
+      discord_user_id: row.discord_user_id ? String(row.discord_user_id).trim() : null,
+      display_name: String(row.display_name || "").trim(),
+      total_matches: totalMatches || wins + losses,
+      total_wins: wins,
+      total_losses: losses,
+      total_draws: 0,
+      total_game_diff: 0,
+      total_goals_for: 0,
+      total_goals_against: 0,
+      total_goal_diff: 0,
+      rating: toRating(row.rating),
+      competitive_rank: String(row.competitive_rank || "").trim(),
+      updated_at: toIsoString(row.updated_at)
+    };
+  }).filter(function (row) {
+    return !!row.display_name;
+  });
 }
 
 async function fetchWinsLosses(pool, gameType, names) {
@@ -177,9 +263,14 @@ async function getLeaderboardRows(options) {
   const limit = parseLimit(options.limit, config.leaderboardDefaultLimit);
   const offset = parseOffset(options.offset);
   const gameType = GAME_TYPE_BY_CODE[normalized.game];
-  const flags = MODE_TO_FLAGS[normalized.mode];
 
   return withPool(async function (pool) {
+    const competitiveMode = COMPETITIVE_MODE_BY_CODE[normalized.mode];
+    if (competitiveMode) {
+      return fetchCompetitiveLeaderboardRows(pool, gameType, competitiveMode, limit, offset);
+    }
+
+    const flags = LEGACY_MODE_TO_FLAGS[normalized.mode];
     const activityDays = ACTIVITY_FILTER_DAYS_BY_GAME[normalized.game];
     const playedGameWithinDate = activityDays
       ? (() => { const d = new Date(); d.setDate(d.getDate() - activityDays); return d; })()
