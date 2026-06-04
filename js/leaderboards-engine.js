@@ -390,6 +390,7 @@
     var rows = primary.rows;
     if (!rows.length) {
       listEl.innerHTML = "";
+      emptyEl.textContent = "No ratings available.";
       emptyEl.hidden = false;
       return;
     }
