@@ -3104,8 +3104,8 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.55rem;
+  justify-content: flex-start;
+  gap: 0.36rem;
   list-style: none;
   user-select: none;
 }
@@ -3128,20 +3128,17 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 
 .profile-accolades-details > summary::after,
 .player-popup-accolades-details > summary::after {
-  content: "";
-  width: 0.44rem;
-  height: 0.44rem;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  color: rgba(255, 255, 255, 0.78);
-  transform: translateY(-0.08rem) rotate(45deg);
-  transition: transform 150ms ease;
+  content: "▶";
+  color: #ff8a00;
+  font-size: 0.78em;
+  line-height: 1;
+  order: -1;
   flex: 0 0 auto;
 }
 
 .profile-accolades-details[open] > summary::after,
 .player-popup-accolades-details[open] > summary::after {
-  transform: translateY(0.12rem) rotate(225deg);
+  content: "▼";
 }
 
 .profile-accolades {
