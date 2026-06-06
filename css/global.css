@@ -3106,7 +3106,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   color: #f2f2f2;
   font-family: var(--reporter-font-stack);
   font-weight: var(--reporter-font-weight);
-  font-size: var(--reporter-font-size-sm);
+  font-size: calc(var(--reporter-font-size-sm) + 2px);
   letter-spacing: var(--reporter-letter-spacing);
   line-height: var(--reporter-line-height);
 }
@@ -3118,7 +3118,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 
 .profile-season-reward-icon {
   width: auto;
-  height: 24px;
+  height: 26px;
   object-fit: contain;
 }
 
@@ -3584,6 +3584,10 @@ body.player-popup-open {
   letter-spacing: var(--reporter-letter-spacing);
 }
 
+#player-profile-popup .player-popup-season-reward-line {
+  font-size: 17px;
+}
+
 .player-popup-season-reward-label {
   color: rgba(255, 255, 255, 0.92);
   font-weight: 400;
@@ -3591,7 +3595,7 @@ body.player-popup-open {
 
 .player-popup-season-reward-icon {
   width: auto;
-  height: 24px;
+  height: 26px;
   object-fit: contain;
 }
 
