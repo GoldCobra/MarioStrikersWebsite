@@ -3092,8 +3092,8 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 }
 
 .profile-rank-icon {
-  width: 18px;
-  height: 18px;
+  width: 21px;
+  height: 21px;
   object-fit: contain;
   margin-right: 0.1rem;
 }
@@ -3104,6 +3104,11 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   align-items: center;
   gap: 0.46rem;
   color: #f2f2f2;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: var(--reporter-font-size-sm);
+  letter-spacing: var(--reporter-letter-spacing);
+  line-height: var(--reporter-line-height);
 }
 
 .profile-season-reward-label {
@@ -3113,7 +3118,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 
 .profile-season-reward-icon {
   width: auto;
-  height: 32px;
+  height: 24px;
   object-fit: contain;
 }
 
@@ -3562,8 +3567,8 @@ body.player-popup-open {
 }
 
 .player-popup-rank-icon {
-  width: 18px;
-  height: 18px;
+  width: 21px;
+  height: 21px;
   object-fit: contain;
   margin-right: 0.1rem;
 }
@@ -3574,6 +3579,9 @@ body.player-popup-open {
   align-items: center;
   gap: 0.46rem;
   color: #f2f2f2;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  letter-spacing: var(--reporter-letter-spacing);
 }
 
 .player-popup-season-reward-label {
@@ -3583,7 +3591,7 @@ body.player-popup-open {
 
 .player-popup-season-reward-icon {
   width: auto;
-  height: 32px;
+  height: 24px;
   object-fit: contain;
 }
 
