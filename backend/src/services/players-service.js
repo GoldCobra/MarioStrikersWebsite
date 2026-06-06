@@ -649,50 +649,66 @@ async function getPlayerAccolades(pool, playerId) {
   });
 }
 
+function buildPlayersListQuery() {
+  return [
+    "SELECT",
+    "  p.ID AS player_id,",
+    "  p.Name AS name,",
+    "  p.Country AS country,",
+    "  p.Activity AS activity,",
+    "  club.club_id AS club_id,",
+    "  club.ClubName AS club_name,",
+    "  club.ClanTag AS club_tag,",
+    "  CASE WHEN duplicates.normalized_name IS NULL THEN 0 ELSE 1 END AS duplicate_name",
+    "FROM Player p",
+    "LEFT JOIN (",
+    "  SELECT LOWER(LTRIM(RTRIM(ISNULL(Name, '')))) AS normalized_name",
+    "  FROM Player",
+    "  WHERE LTRIM(RTRIM(ISNULL(Name, ''))) <> ''",
+    "  GROUP BY LOWER(LTRIM(RTRIM(ISNULL(Name, ''))))",
+    "  HAVING COUNT(*) > 1",
+    ") duplicates ON duplicates.normalized_name = LOWER(LTRIM(RTRIM(ISNULL(p.Name, ''))))",
+    "OUTER APPLY (",
+    "  SELECT TOP 1 c.ID AS club_id, c.ClubName, c.ClanTag",
+    "  FROM ClubRoster cr",
+    "  INNER JOIN Club c ON c.ID = cr.Club",
+    "  WHERE cr.Player = p.ID",
+    "  ORDER BY ISNULL(cr.Rank, 9999), c.ClubName",
+    ") club",
+    "WHERE LTRIM(RTRIM(ISNULL(p.Name, ''))) <> ''",
+    "  AND (",
+    "    LTRIM(RTRIM(ISNULL(p.IdStartGG, ''))) <> ''",
+    "    OR EXISTS (",
+    "      SELECT 1",
+    "      FROM FriendCodes fc",
+    "      WHERE fc.Player = p.ID",
+    "        AND LTRIM(RTRIM(ISNULL(fc.Code, ''))) <> ''",
+    "    )",
+    "    OR EXISTS (",
+    "      SELECT 1",
+    "      FROM CompetitiveLeaderboard lb",
+    "      INNER JOIN CompetitiveSeason season ON season.Id = lb.SeasonId",
+    "      WHERE season.IsActive = 1",
+    "        AND season.LifecycleStatus = 'active'",
+    "        AND lb.PlayerId = p.ID",
+    "    )",
+    "    OR EXISTS (",
+    "      SELECT 1",
+    "      FROM Tournament t",
+    "      WHERE (',' + REPLACE(CONVERT(NVARCHAR(MAX), ISNULL(t.Winner, '')), ' ', '') + ',') LIKE '%,' + CONVERT(NVARCHAR(20), p.ID) + ',%'",
+    "         OR (',' + REPLACE(CONVERT(NVARCHAR(MAX), ISNULL(t.RunnerUp, '')), ' ', '') + ',') LIKE '%,' + CONVERT(NVARCHAR(20), p.ID) + ',%'",
+    "         OR (',' + REPLACE(CONVERT(NVARCHAR(MAX), ISNULL(t.Bronze, '')), ' ', '') + ',') LIKE '%,' + CONVERT(NVARCHAR(20), p.ID) + ',%'",
+    "    )",
+    "  )",
+    "ORDER BY",
+    "  LOWER(LTRIM(RTRIM(ISNULL(p.Name, '')))) ASC,",
+    "  LTRIM(RTRIM(ISNULL(p.Name, ''))) ASC"
+  ].join(" ");
+}
+
 async function getPlayersList() {
   return withPool(async function (pool) {
-    const result = await pool.request().query(
-      [
-        "SELECT",
-        "  p.ID AS player_id,",
-        "  p.Name AS name,",
-        "  p.Country AS country,",
-        "  p.Activity AS activity,",
-        "  club.club_id AS club_id,",
-        "  club.ClubName AS club_name,",
-        "  club.ClanTag AS club_tag,",
-        "  CASE WHEN duplicates.normalized_name IS NULL THEN 0 ELSE 1 END AS duplicate_name",
-        "FROM Player p",
-        "LEFT JOIN (",
-        "  SELECT LOWER(LTRIM(RTRIM(ISNULL(Name, '')))) AS normalized_name",
-        "  FROM Player",
-        "  WHERE LTRIM(RTRIM(ISNULL(Name, ''))) <> ''",
-        "  GROUP BY LOWER(LTRIM(RTRIM(ISNULL(Name, ''))))",
-        "  HAVING COUNT(*) > 1",
-        ") duplicates ON duplicates.normalized_name = LOWER(LTRIM(RTRIM(ISNULL(p.Name, ''))))",
-        "OUTER APPLY (",
-        "  SELECT TOP 1 c.ID AS club_id, c.ClubName, c.ClanTag",
-        "  FROM ClubRoster cr",
-        "  INNER JOIN Club c ON c.ID = cr.Club",
-        "  WHERE cr.Player = p.ID",
-        "  ORDER BY ISNULL(cr.Rank, 9999), c.ClubName",
-        ") club",
-        "WHERE LTRIM(RTRIM(ISNULL(p.Name, ''))) <> ''",
-        "  AND EXISTS (",
-        "    SELECT 1",
-        "    FROM PlayerStats ps",
-        "    WHERE ps.Player = p.ID",
-        "      AND (",
-        "        ISNULL(ps.Wins, 0) > 0",
-        "        OR ISNULL(ps.Losses, 0) > 0",
-        "        OR ISNULL(ps.MatchDraws, 0) > 0",
-        "      )",
-        "  )",
-        "ORDER BY",
-        "  LOWER(LTRIM(RTRIM(ISNULL(p.Name, '')))) ASC,",
-        "  LTRIM(RTRIM(ISNULL(p.Name, ''))) ASC"
-      ].join(" ")
-    );
+    const result = await pool.request().query(buildPlayersListQuery());
 
     const rows = Array.isArray(result && result.recordset) ? result.recordset : [];
 
@@ -768,6 +784,7 @@ async function getPlayerProfileByDiscordId(discordIdRaw) {
 module.exports = {
   DEFAULT_ACTIVITY_WINDOW_DAYS,
   buildCompetitiveRatingsByKey,
+  buildPlayersListQuery,
   buildRatingBlock,
   buildRatings,
   buildPlayerDisplayName,

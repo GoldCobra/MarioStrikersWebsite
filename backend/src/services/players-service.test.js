@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 const {
   buildRatings,
+  buildPlayersListQuery,
   buildPlayerDisplayName,
   isActivityActive,
   normalizeCountry,
@@ -137,4 +138,14 @@ test("profile rating cards use Competitive ELO, sets and rank icons", function (
   assert.equal(ratings.msbl2v2.tst, 983);
   assert.equal(ratings.msbl2v2.rank_icon_url, "/assets/leaderboards/rankicons/3-gold-II.png");
   assert.deepEqual(ratings.msc, {});
+});
+
+test("players list only includes rows with visible profile content", function () {
+  const sql = buildPlayersListQuery();
+
+  assert.match(sql, /FriendCodes/);
+  assert.match(sql, /CompetitiveLeaderboard/);
+  assert.match(sql, /Tournament/);
+  assert.match(sql, /IdStartGG/);
+  assert.doesNotMatch(sql, /FROM PlayerStats ps/);
 });
