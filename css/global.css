@@ -772,7 +772,7 @@ body[data-page="index"] .page-content {
 
 .lb-row {
   --lb-bar-height: 46px;
-  --lb-rank-icon-height: calc(var(--lb-bar-height) * 0.82);
+  --lb-rank-icon-height: calc(var(--lb-bar-height) * 0.78);
   --lb-text-zone-left: 1px;
   --lb-text-zone-right: 1px;
   --lb-text-zone-top: 2px;
