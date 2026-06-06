@@ -2,6 +2,8 @@ const { withPool, mssql } = require("../db");
 const { normalizeCountryCode } = require("./flag-codes");
 const DEFAULT_ACTIVITY_WINDOW_DAYS = 90;
 const COMPETITIVE_RANK_ICON_BASE_URL = "/assets/leaderboards/rankicons/";
+const SEASON_REWARD_LEVEL_BASE_URL = "/assets/players/rewardlevel/";
+const COMPETITIVE_UNRANKED_RANK_ICON_URL = SEASON_REWARD_LEVEL_BASE_URL + "0-unranked.png";
 const COMPETITIVE_RANK_ICON_BY_NUMBER = {
   1: "1-bronze-I.png",
   2: "1-bronze-II.png",
@@ -22,6 +24,16 @@ const COMPETITIVE_RANK_ICON_BY_NUMBER = {
   17: "6-master-II.png",
   18: "6-master-III.png",
   19: "7-strikerstitan-b.png"
+};
+const SEASON_REWARD_LEVEL_BY_ORDER = {
+  0: { name: "Unranked", image: "0-unranked.png" },
+  1: { name: "Bronze", image: "1-bronze.png" },
+  2: { name: "Silver", image: "2-silver.png" },
+  3: { name: "Gold", image: "3-gold.png" },
+  4: { name: "Platinum", image: "4-platinum.png" },
+  5: { name: "Diamond", image: "5-diamond.png" },
+  6: { name: "Master", image: "6-master.png" },
+  7: { name: "Strikers Titan", image: "7-strikerstitan-b.png" }
 };
 
 function normalizeText(value) {
@@ -275,8 +287,25 @@ function hasCompetitiveMatches(row) {
 
 function getCompetitiveRankIconUrl(rankNumberValue) {
   const rankNumber = Number(rankNumberValue);
+  if (rankNumber === 0) {
+    return COMPETITIVE_UNRANKED_RANK_ICON_URL;
+  }
   const fileName = Number.isFinite(rankNumber) ? COMPETITIVE_RANK_ICON_BY_NUMBER[rankNumber] : "";
   return fileName ? COMPETITIVE_RANK_ICON_BASE_URL + fileName : "";
+}
+
+function buildSeasonRewardLevel(orderValue) {
+  const parsedOrder = Number(orderValue);
+  const order = Number.isInteger(parsedOrder) && SEASON_REWARD_LEVEL_BY_ORDER[parsedOrder]
+    ? parsedOrder
+    : 0;
+  const level = SEASON_REWARD_LEVEL_BY_ORDER[order] || SEASON_REWARD_LEVEL_BY_ORDER[0];
+
+  return {
+    order: order,
+    name: level.name,
+    image_url: SEASON_REWARD_LEVEL_BASE_URL + level.image
+  };
 }
 
 function buildCompetitiveRatingsByKey(rows) {
@@ -608,6 +637,27 @@ async function getPlayerCompetitiveRatings(pool, playerId) {
   return Array.isArray(result && result.recordset) ? result.recordset : [];
 }
 
+function buildSeasonRewardLevelQuery() {
+  return [
+    "SELECT TOP 1",
+    "  ISNULL(MAX(ISNULL(progress.HighestEarnedTierOrder, 0)), 0) AS RewardLevelOrder",
+    "FROM CompetitiveSeason season",
+    "LEFT JOIN CompetitiveSeasonRewardProgress progress ON progress.SeasonId = season.Id AND progress.PlayerId = @playerId",
+    "WHERE season.IsActive = 1",
+    "  AND season.LifecycleStatus = 'active'",
+    "GROUP BY season.Id",
+    "ORDER BY season.Id DESC"
+  ].join(" ");
+}
+
+async function getPlayerSeasonRewardLevel(pool, playerId) {
+  const request = pool.request();
+  request.input("playerId", mssql.Int, playerId);
+  const result = await request.query(buildSeasonRewardLevelQuery());
+  const row = Array.isArray(result && result.recordset) ? result.recordset[0] : null;
+  return buildSeasonRewardLevel(row && row.RewardLevelOrder);
+}
+
 async function getPlayerAccolades(pool, playerId) {
   const request = pool.request();
   request.input("playerId", mssql.Int, playerId);
@@ -726,11 +776,12 @@ async function buildPlayerProfile(pool, player) {
     throw new Error("Player not found.");
   }
 
-  const [friendCodes, profile, accolades, competitiveRatings] = await Promise.all([
+  const [friendCodes, profile, accolades, competitiveRatings, seasonRewardLevel] = await Promise.all([
     getPlayerFriendCodes(pool, playerId),
     getPlayerProfileSummary(pool, playerId),
     getPlayerAccolades(pool, playerId),
-    getPlayerCompetitiveRatings(pool, playerId)
+    getPlayerCompetitiveRatings(pool, playerId),
+    getPlayerSeasonRewardLevel(pool, playerId)
   ]);
 
   const profileData = profile || {};
@@ -750,6 +801,7 @@ async function buildPlayerProfile(pool, player) {
     friend_codes: friendCodes,
     accolades: accolades,
     ratings: buildRatings(profileData, competitiveRatings),
+    season_reward_level: seasonRewardLevel,
     highest_rank_banner_url: ""
   };
 }
@@ -787,6 +839,8 @@ module.exports = {
   buildPlayersListQuery,
   buildRatingBlock,
   buildRatings,
+  buildSeasonRewardLevel,
+  buildSeasonRewardLevelQuery,
   buildPlayerDisplayName,
   getPlayersList,
   getPlayerProfile,

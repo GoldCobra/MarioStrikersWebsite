@@ -200,12 +200,13 @@
     return sections.join("");
   }
 
-  function buildRatingLine(label, value, leadingHtml, trailingHtml) {
+  function buildRatingLine(label, value, leadingHtml, trailingHtml, valueClassName) {
+    var valueClass = "profile-rating-value" + (valueClassName ? " " + valueClassName : "");
     return [
       '<p class="profile-rating-line">',
       '<span class="profile-rating-label">', escapeHtml(label), ':</span>',
       leadingHtml || "",
-      '<span class="profile-rating-value">', escapeHtml(String(value)), "</span>",
+      '<span class="' + valueClass + '">', escapeHtml(String(value)), "</span>",
       trailingHtml || "",
       "</p>"
     ].join("");
@@ -237,10 +238,10 @@
         lines.push(buildRatingLine("Sets", setsValue));
       }
       if (metricValue !== null) {
-        lines.push(buildRatingLine(card.metricLabel, metricValue));
+        lines.push(buildRatingLine(card.metricLabel, metricValue, "", "", "is-muted-stat-value"));
       }
       if (hasDisplayText(gamesValue)) {
-        lines.push(buildRatingLine("Games", gamesValue));
+        lines.push(buildRatingLine("Games", gamesValue, "", "", "is-muted-stat-value"));
       }
       if (!lines.length) {
         return "";
@@ -277,6 +278,24 @@
       '<h3 class="profile-panel-title">Ratings</h3>',
       singles ? '<div class="profile-ratings-grid">' + singles + "</div>" : "",
       doubles ? '<div class="profile-ratings-grid">' + doubles + "</div>" : "",
+      "</section>"
+    ].join("");
+  }
+
+  function buildSeasonRewardLevel(rewardLevel, hasRatings) {
+    var reward = rewardLevel || {};
+    var imageUrl = String(reward.image_url || "").trim();
+    var name = String(reward.name || "Unranked").trim() || "Unranked";
+    if (!hasRatings || !imageUrl) {
+      return "";
+    }
+
+    return [
+      '<section class="profile-panel profile-season-reward-panel">',
+      '<p class="profile-season-reward-line">',
+      '<span class="profile-season-reward-label">Season Reward Level</span>',
+      '<img class="profile-season-reward-icon" src="', escapeHtml(imageUrl), '" alt="', escapeHtml(name), '" title="', escapeHtml(name), '" loading="lazy">',
+      "</p>",
       "</section>"
     ].join("");
   }
@@ -323,6 +342,7 @@
       : "No club membership listed.";
     var resultsUrl = String(player.results_url || "").trim();
     var ratingsHtml = buildRatings(data.ratings || {});
+    var rewardHtml = buildSeasonRewardLevel(data.season_reward_level, !!ratingsHtml);
     var resultsHtml = resultsUrl
       ? '<section class="profile-panel profile-results-panel"><h3 class="profile-panel-title">Results</h3><p class="profile-meta-line"><span>Results</span><a href="' + escapeHtml(resultsUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(resultsUrl) + "</a></p></section>"
       : "";
@@ -346,6 +366,7 @@
       "</div>",
       '<div class="profile-grid-side">',
       ratingsHtml,
+      rewardHtml,
       "</div>",
       "</div>",
       "</section>"

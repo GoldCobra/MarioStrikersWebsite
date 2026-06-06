@@ -5,7 +5,7 @@
   var POPUP_CLOSE_BLOCK_MS = 500;
   var lastPopupCloseAt = 0;
 
-  var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260606-profile-accolades-toggle-v1";
+  var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260606-profile-reward-level-v1";
   var POPUP_OPEN_CLASS = "player-popup-open";
   var FLAG_CODE_ALIASES = Object.freeze({
     "uk": "gb",
@@ -418,12 +418,13 @@
     return true;
   }
 
-  function buildRatingLine(label, value, leadingHtml, trailingHtml) {
+  function buildRatingLine(label, value, leadingHtml, trailingHtml, valueClassName) {
+    var valueClass = "player-popup-rating-value" + (valueClassName ? " " + valueClassName : "");
     return [
       '<p class="player-popup-rating-line">',
       '<span class="player-popup-rating-label">', escapeHtml(label), ':</span>',
       leadingHtml || "",
-      '<span class="player-popup-rating-value">', escapeHtml(String(value)), "</span>",
+      '<span class="' + valueClass + '">', escapeHtml(String(value)), "</span>",
       trailingHtml || "",
       "</p>"
     ].join("");
@@ -467,10 +468,10 @@
         lines.push(buildRatingLine("Sets", setsValue));
       }
       if (metricValue !== null) {
-        lines.push(buildRatingLine(card.metricLabel, metricValue));
+        lines.push(buildRatingLine(card.metricLabel, metricValue, "", "", "is-muted-stat-value"));
       }
       if (hasDisplayText(gamesValue)) {
-        lines.push(buildRatingLine("Games", gamesValue));
+        lines.push(buildRatingLine("Games", gamesValue, "", "", "is-muted-stat-value"));
       }
 
       if (!lines.length) {
@@ -484,6 +485,30 @@
         "</article>"
       ].join("");
     }).filter(Boolean).join("");
+  }
+
+  function renderSeasonRewardLevel(rewardLevel, hasRatings) {
+    var section = popupState.slots["season-reward-section"];
+    var icon = popupState.slots["season-reward-icon"];
+    if (!section || !icon) {
+      return;
+    }
+
+    var reward = rewardLevel || {};
+    var imageUrl = String(reward.image_url || "").trim();
+    var name = String(reward.name || "Unranked").trim() || "Unranked";
+    if (!hasRatings || !imageUrl) {
+      section.hidden = true;
+      icon.removeAttribute("src");
+      icon.removeAttribute("title");
+      icon.alt = "";
+      return;
+    }
+
+    icon.src = imageUrl;
+    icon.alt = name;
+    icon.title = name;
+    section.hidden = false;
   }
 
   function renderAccolades(accolades) {
@@ -608,6 +633,7 @@
     if (singlesMount || doublesMount) {
       setSectionHidden(singlesMount || doublesMount, !singlesMarkup && !doublesMarkup);
     }
+    renderSeasonRewardLevel(data.season_reward_level, !!(singlesMarkup || doublesMarkup));
 
     var rankBannerSection = popupState.slots["rank-banner-section"];
     var rankBanner = popupState.slots["rank-banner"];

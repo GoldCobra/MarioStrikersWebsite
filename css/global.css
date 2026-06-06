@@ -3087,11 +3087,34 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   font-weight: 700;
 }
 
+.profile-rating-value.is-muted-stat-value {
+  color: rgba(255, 255, 255, 0.66);
+}
+
 .profile-rank-icon {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   object-fit: contain;
   margin-right: 0.1rem;
+}
+
+.profile-season-reward-line {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.46rem;
+  color: #f2f2f2;
+}
+
+.profile-season-reward-label {
+  color: #d7d8de;
+  font-weight: 400;
+}
+
+.profile-season-reward-icon {
+  width: auto;
+  height: 32px;
+  object-fit: contain;
 }
 
 .profile-accolades-details,
@@ -3481,7 +3504,8 @@ body.player-popup-open {
   .player-popup-results-link,
   .player-popup-accolade-item,
   .player-popup-rating-title,
-  .player-popup-rating-line
+  .player-popup-rating-line,
+  .player-popup-season-reward-line
 ) {
   font-size: var(--reporter-font-size-sm);
 }
@@ -3493,7 +3517,8 @@ body.player-popup-open {
   .player-popup-results-link,
   .player-popup-accolade-item,
   .player-popup-rating-title,
-  .player-popup-rating-line
+  .player-popup-rating-line,
+  .player-popup-season-reward-line
 ) {
   font-size: 15px;
   line-height: 1.22;
@@ -3525,6 +3550,10 @@ body.player-popup-open {
   color: #b4e9ff;
 }
 
+.player-popup-rating-card .player-popup-rating-value.is-muted-stat-value {
+  color: rgba(255, 255, 255, 0.66);
+}
+
 .player-popup-rating-card.is-inactive-rating .player-popup-rating-title,
 .player-popup-rating-card.is-inactive-rating .player-popup-rating-line,
 .player-popup-rating-card.is-inactive-rating .player-popup-rating-label,
@@ -3533,10 +3562,29 @@ body.player-popup-open {
 }
 
 .player-popup-rank-icon {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   object-fit: contain;
   margin-right: 0.1rem;
+}
+
+.player-popup-season-reward-line {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.46rem;
+  color: #f2f2f2;
+}
+
+.player-popup-season-reward-label {
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 400;
+}
+
+.player-popup-season-reward-icon {
+  width: auto;
+  height: 32px;
+  object-fit: contain;
 }
 
 .player-popup-rank-banner {

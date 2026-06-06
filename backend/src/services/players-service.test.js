@@ -4,6 +4,8 @@ const {
   buildRatings,
   buildPlayersListQuery,
   buildPlayerDisplayName,
+  buildSeasonRewardLevel,
+  buildSeasonRewardLevelQuery,
   isActivityActive,
   normalizeCountry,
   normalizeDiscordId,
@@ -138,6 +140,50 @@ test("profile rating cards use Competitive ELO, sets and rank icons", function (
   assert.equal(ratings.msbl2v2.tst, 983);
   assert.equal(ratings.msbl2v2.rank_icon_url, "/assets/leaderboards/rankicons/3-gold-II.png");
   assert.deepEqual(ratings.msc, {});
+});
+
+test("profile rating cards show an unranked icon for competitive rank zero", function () {
+  const ratings = buildRatings({
+    BlRating: 2112,
+    BlRecord: "454-117"
+  }, [
+    {
+      GameType: 3,
+      Mode: "1v1",
+      Elo: 500,
+      RankNumber: 0,
+      RankName: "Unranked",
+      MatchWins: 1,
+      MatchLosses: 0
+    }
+  ]);
+
+  assert.equal(ratings.msbl.rating, 500);
+  assert.equal(ratings.msbl.rank_icon_url, "/assets/players/rewardlevel/0-unranked.png");
+  assert.equal(ratings.msbl.competitive_rank, "Unranked");
+});
+
+test("season reward level falls back to unranked and maps earned tiers", function () {
+  assert.deepEqual(buildSeasonRewardLevel(null), {
+    order: 0,
+    name: "Unranked",
+    image_url: "/assets/players/rewardlevel/0-unranked.png"
+  });
+  assert.deepEqual(buildSeasonRewardLevel(7), {
+    order: 7,
+    name: "Strikers Titan",
+    image_url: "/assets/players/rewardlevel/7-strikerstitan-b.png"
+  });
+});
+
+test("season reward level query reads highest earned progress from the active season", function () {
+  const sql = buildSeasonRewardLevelQuery();
+
+  assert.match(sql, /CompetitiveSeasonRewardProgress/);
+  assert.match(sql, /MAX\(ISNULL\(progress\.HighestEarnedTierOrder, 0\)\)/);
+  assert.match(sql, /progress\.PlayerId = @playerId/);
+  assert.match(sql, /season\.IsActive = 1/);
+  assert.match(sql, /season\.LifecycleStatus = 'active'/);
 });
 
 test("players list only includes rows with visible profile content", function () {
