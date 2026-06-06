@@ -755,7 +755,7 @@ body[data-page="index"] .page-content {
 }
 
 .leaderboard-block {
-  max-width: 900px;
+  max-width: 780px;
   margin: 0 auto;
   padding: var(--space-2) var(--space-2) var(--space-4);
 }
@@ -772,7 +772,7 @@ body[data-page="index"] .page-content {
 
 .lb-row {
   --lb-bar-height: 46px;
-  --lb-rank-icon-height: 100px;
+  --lb-rank-icon-height: calc(var(--lb-bar-height) * 1.12);
   --lb-text-zone-left: 1px;
   --lb-text-zone-right: 1px;
   --lb-text-zone-top: 2px;
@@ -795,10 +795,10 @@ body[data-page="index"] .page-content {
 }
 
 .lb-row-has-rank-icon {
-  height: var(--lb-rank-icon-height);
-  width: min(calc(100% - 110px), 620px);
+  height: var(--lb-bar-height);
+  width: min(84%, 620px);
   background-position: center;
-  background-size: 100% var(--lb-bar-height);
+  background-size: 100% 100%;
 }
 
 .lb-rank-icon {
@@ -978,14 +978,6 @@ body[data-page="index"] .page-content {
 @media (max-width: 520px) {
   .lb-row {
     --lb-bar-height: 34px;
-  }
-
-  .lb-row-has-rank-icon {
-    width: min(calc(100% - 96px), 620px);
-  }
-
-  .lb-rank-icon {
-    left: calc(var(--lb-rank-icon-height) * -0.78);
   }
 }
 
