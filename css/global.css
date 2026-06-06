@@ -3080,6 +3080,11 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 
 .profile-rating-label {
   color: #d7d8de;
+  font-weight: 400;
+}
+
+.profile-rating-value {
+  font-weight: 700;
 }
 
 .profile-rank-icon {
@@ -3450,10 +3455,12 @@ body.player-popup-open {
 
 .player-popup-rating-label {
   color: rgba(255, 255, 255, 0.92);
+  font-weight: 400;
 }
 
 .player-popup-rating-value {
   color: #ffffff;
+  font-weight: 700;
 }
 
 .player-popup-rating-card.is-msbl-rating .player-popup-rating-title,
