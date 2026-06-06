@@ -1,7 +1,10 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
 const {
+  buildAccolades,
   buildRatings,
+  buildPlayerProfileBatchQuery,
+  buildPlayerProfileFromRecordsets,
   buildPlayersListQuery,
   buildPlayerDisplayName,
   buildSeasonRewardLevel,
@@ -184,6 +187,92 @@ test("season reward level query reads highest earned progress from the active se
   assert.match(sql, /progress\.PlayerId = @playerId/);
   assert.match(sql, /season\.IsActive = 1/);
   assert.match(sql, /season\.LifecycleStatus = 'active'/);
+});
+
+test("profile batch query reads all profile data in one multi-recordset batch", function () {
+  const sql = buildPlayerProfileBatchQuery();
+
+  assert.match(sql, /SELECT TOP 1\s+p\.ID AS player_id/s);
+  assert.match(sql, /FROM FriendCodes fc/);
+  assert.match(sql, /FROM CompetitiveLeaderboard lb/);
+  assert.match(sql, /CompetitiveSeasonRewardProgress/);
+  assert.match(sql, /FROM Tournament t/);
+  assert.match(sql, /CROSS APPLY \(VALUES/);
+  assert.match(sql, /@playerIdText/);
+  assert.doesNotMatch(sql, /UNION ALL/);
+});
+
+test("profile batch recordsets map to the existing profile DTO shape", function () {
+  const profile = buildPlayerProfileFromRecordsets([
+    [{
+      player_id: 223,
+      name: "GoldCobra",
+      country: "DE",
+      id_start_gg: "goldcobra",
+      club_id: 8,
+      club_name: "Chaos Edge",
+      club_tag: "CE",
+      activity: new Date("2026-06-01T12:00:00.000Z")
+    }],
+    [{
+      GameType: 3,
+      Region: "",
+      LineSeq: 1,
+      Label: "",
+      Code: "SW-0333-7404-4529"
+    }],
+    [{
+      BlRating: 2112,
+      BlRecord: "454-117"
+    }],
+    [{
+      GameType: 3,
+      Mode: "1v1",
+      Elo: 703.2,
+      RankNumber: 3,
+      RankName: "Bronze III",
+      MatchWins: 6,
+      MatchLosses: 0
+    }],
+    [{ RewardLevelOrder: 2 }],
+    [{
+      Name: "MSBL World Championship",
+      Place: ":first_place: ",
+      Game: "MSBL",
+      TournamentStartDate: new Date("2026-05-15T00:00:00.000Z")
+    }]
+  ]);
+
+  assert.equal(profile.player.id, 223);
+  assert.equal(profile.player.results_url, "https://start.gg/user/goldcobra/results");
+  assert.deepEqual(profile.friend_codes.switch, ["1: SW-0333-7404-4529"]);
+  assert.equal(profile.ratings.msbl.rating, 703);
+  assert.equal(profile.ratings.msbl.sets, "6-0");
+  assert.equal(profile.ratings.msbl.whr, 2112);
+  assert.equal(profile.ratings.msbl.rank_icon_url, "/assets/leaderboards/rankicons/1-bronze-III.png");
+  assert.equal(profile.season_reward_level.name, "Silver");
+  assert.equal(profile.accolades[0].place_medal, "🥇");
+});
+
+test("profile accolades mapper handles all placements and keeps newest first", function () {
+  const accolades = buildAccolades([
+    {
+      Name: "Older Cup",
+      Place: ":third_place: ",
+      Game: "MSC",
+      TournamentStartDate: new Date("2024-01-01T00:00:00.000Z")
+    },
+    {
+      Name: "Newer Cup",
+      Place: ":second_place: ",
+      Game: "SMS",
+      TournamentStartDate: new Date("2025-01-01T00:00:00.000Z")
+    }
+  ]);
+
+  assert.equal(accolades[0].tournament_name, "Newer Cup");
+  assert.equal(accolades[0].place_medal, "🥈");
+  assert.equal(accolades[1].place_medal, "🥉");
 });
 
 test("players list only includes rows with visible profile content", function () {

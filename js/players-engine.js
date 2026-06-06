@@ -1,7 +1,6 @@
 (function () {
   "use strict";
 
-  var PROFILE_CACHE_TTL_MS = 30000;
   var POPUP_CLOSE_BLOCK_MS = 500;
   var lastPopupCloseAt = 0;
 
@@ -43,7 +42,7 @@
     "gbni": "gb-nir"
   });
 
-  var profileCache = new Map();
+  var inFlightProfileRequests = new Map();
   var templateLoadPromise = null;
   var keydownHandlerBound = false;
 
@@ -299,6 +298,9 @@
         return response.text();
       }).then(function (html) {
         return mountPopupTemplate(html);
+      }).catch(function (error) {
+        templateLoadPromise = null;
+        throw error;
       });
     }
 
@@ -691,16 +693,26 @@
 
   async function fetchPlayerProfile(playerId) {
     var base = getApiBase();
-    var url = (base || "") + "/api/players/" + encodeURIComponent(String(playerId)) + "/profile";
-    var response = await fetch(url, {
-      headers: { Accept: "application/json" }
-    });
-
-    if (!response.ok) {
-      throw new Error("Profile request failed.");
+    var profileKey = String(playerId);
+    var existingRequest = inFlightProfileRequests.get(profileKey);
+    if (existingRequest) {
+      return existingRequest;
     }
 
-    return response.json();
+    var url = (base || "") + "/api/players/" + encodeURIComponent(profileKey) + "/profile";
+    var request = fetch(url, {
+      headers: { Accept: "application/json" }
+    }).then(function (response) {
+      if (!response.ok) {
+        throw new Error("Profile request failed.");
+      }
+      return response.json();
+    }).finally(function () {
+      inFlightProfileRequests.delete(profileKey);
+    });
+
+    inFlightProfileRequests.set(profileKey, request);
+    return request;
   }
 
   function buildRowsHtml(rows) {
@@ -761,15 +773,6 @@
       staleFlag.removeAttribute("src");
     }
 
-    var cached = profileCache.get(playerId);
-    if (cached && Date.now() - cached.ts < PROFILE_CACHE_TTL_MS) {
-      renderProfile(cached.data);
-      renderPopupContent();
-      return;
-    } else if (cached) {
-      profileCache.delete(playerId);
-    }
-
     renderPopupLoading("Loading...");
 
     var requestToken = Symbol("profile-request");
@@ -781,7 +784,6 @@
         return;
       }
 
-      profileCache.set(playerId, { data: profile, ts: Date.now() });
       renderProfile(profile);
       renderPopupContent();
     } catch (_error) {
@@ -803,6 +805,7 @@
       return;
     }
 
+    ensurePopup().catch(function () {});
     renderLoading(mount);
 
     try {

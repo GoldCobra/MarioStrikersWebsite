@@ -1,6 +1,7 @@
 const { withPool, mssql } = require("../db");
 const { normalizeCountryCode } = require("./flag-codes");
 const DEFAULT_ACTIVITY_WINDOW_DAYS = 90;
+const PROFILE_SLOW_LOG_THRESHOLD_MS = 1500;
 const COMPETITIVE_RANK_ICON_BASE_URL = "/assets/leaderboards/rankicons/";
 const SEASON_REWARD_LEVEL_BASE_URL = "/assets/players/rewardlevel/";
 const COMPETITIVE_UNRANKED_RANK_ICON_URL = SEASON_REWARD_LEVEL_BASE_URL + "0-unranked.png";
@@ -650,6 +651,26 @@ function buildSeasonRewardLevelQuery() {
   ].join(" ");
 }
 
+function buildAccolades(rows) {
+  return (Array.isArray(rows) ? rows : []).map(function (row) {
+    return {
+      place_medal: normalizeAccoladeMedal(row && row.Place),
+      game_code: normalizeText(row && row.Game).toUpperCase(),
+      tournament_name: normalizeText(row && row.Name),
+      start_date: toIsoDateOnly(row && row.TournamentStartDate)
+    };
+  }).filter(function (row) {
+    return row.tournament_name !== "";
+  }).sort(function (a, b) {
+    var dateA = String(a.start_date || "");
+    var dateB = String(b.start_date || "");
+    if (dateA && dateB && dateA !== dateB) {
+      return dateB.localeCompare(dateA);
+    }
+    return String(a.tournament_name || "").localeCompare(String(b.tournament_name || ""));
+  });
+}
+
 async function getPlayerSeasonRewardLevel(pool, playerId) {
   const request = pool.request();
   request.input("playerId", mssql.Int, playerId);
@@ -680,23 +701,204 @@ async function getPlayerAccolades(pool, playerId) {
   );
   const rows = Array.isArray(result && result.recordset) ? result.recordset : [];
 
-  return rows.map(function (row) {
-    return {
-      place_medal: normalizeAccoladeMedal(row && row.Place),
-      game_code: normalizeText(row && row.Game).toUpperCase(),
-      tournament_name: normalizeText(row && row.Name),
-      start_date: toIsoDateOnly(row && row.TournamentStartDate)
-    };
-  }).filter(function (row) {
-    return row.tournament_name !== "";
-  }).sort(function (a, b) {
-    var dateA = String(a.start_date || "");
-    var dateB = String(b.start_date || "");
-    if (dateA && dateB && dateA !== dateB) {
-      return dateB.localeCompare(dateA);
-    }
-    return String(a.tournament_name || "").localeCompare(String(b.tournament_name || ""));
+  return buildAccolades(rows);
+}
+
+function buildPlayerProfileBatchQuery() {
+  return [
+    "DECLARE @playerIdText NVARCHAR(20) = CONVERT(NVARCHAR(20), @playerId);",
+    "SELECT TOP 1",
+    "  p.ID AS player_id,",
+    "  p.Name AS name,",
+    "  p.Country AS country,",
+    "  p.IdStartGG AS id_start_gg,",
+    "  p.Activity AS activity,",
+    "  club.club_id AS club_id,",
+    "  club.ClubName AS club_name,",
+    "  club.ClanTag AS club_tag",
+    "FROM Player p",
+    "OUTER APPLY (",
+    "  SELECT TOP 1 c.ID AS club_id, c.ClubName, c.ClanTag",
+    "  FROM ClubRoster cr",
+    "  INNER JOIN Club c ON c.ID = cr.Club",
+    "  WHERE cr.Player = p.ID",
+    "  ORDER BY ISNULL(cr.Rank, 9999), c.ClubName",
+    ") club",
+    "WHERE p.ID = @playerId;",
+    "SELECT",
+    "  fc.GameType,",
+    "  fc.Region,",
+    "  fc.LineSeq,",
+    "  fc.Label,",
+    "  fc.Code",
+    "FROM FriendCodes fc",
+    "WHERE fc.Player = @playerId",
+    "ORDER BY fc.GameType, fc.Region, fc.LineSeq;",
+    "SELECT TOP 1",
+    "  p.Name,",
+    "  c.ClubName AS Club,",
+    "  ISNULL(CAST(sms.Wins AS NVARCHAR(5)) + '-' + CAST(sms.Losses AS NVARCHAR(5)), '0-0') AS SmsRecord,",
+    "  ISNULL(CAST(sms.MatchWins AS NVARCHAR(5)) + '-' + CAST(sms.MatchLosses AS NVARCHAR(5)), '0-0') AS SmsMatchRecord,",
+    "  CAST(ROUND(sms.RatingWHR + 1000, 0) AS INT) AS SmsRating,",
+    "  CAST(ROUND(sms.Elo, 0) AS INT) AS SmsElo,",
+    "  smsRank.Value AS SmsRank,",
+    "  ISNULL(CAST(msc.Wins AS NVARCHAR(5)) + '-' + CAST(msc.Losses AS NVARCHAR(5)), '0-0') AS MscRecord,",
+    "  ISNULL(CAST(msc.MatchWins AS NVARCHAR(5)) + '-' + CAST(msc.MatchLosses AS NVARCHAR(5)), '0-0') AS MscMatchRecord,",
+    "  CAST(ROUND(msc.RatingWHR + 1000, 0) AS INT) AS MscRating,",
+    "  CAST(ROUND(msc.Elo, 0) AS INT) AS MscElo,",
+    "  mscRank.Value AS MscRank,",
+    "  ISNULL(CAST(bl.Wins AS NVARCHAR(5)) + '-' + CAST(bl.Losses AS NVARCHAR(5)), '0-0') AS BlRecord,",
+    "  ISNULL(CAST(bl.MatchWins AS NVARCHAR(5)) + '-' + CAST(bl.MatchLosses AS NVARCHAR(5)), '0-0') AS BlMatchRecord,",
+    "  CAST(ROUND(bl.RatingWHR + 1000, 0) AS INT) AS BlRating,",
+    "  CAST(ROUND(bl.Elo, 0) AS INT) AS BlElo,",
+    "  blRank.Value AS BlRank,",
+    "  ISNULL(CAST(sms.Wins2v2 AS NVARCHAR(5)) + '-' + CAST(sms.Losses2v2 AS NVARCHAR(5)), '0-0') AS SmsRecord2v2,",
+    "  ISNULL(CAST(sms.MatchWins2v2 AS NVARCHAR(5)) + '-' + CAST(sms.MatchLosses2v2 AS NVARCHAR(5)), '0-0') AS SmsMatchRecord2v2,",
+    "  CAST(ROUND(sms.RatingTS + 1000, 0) AS INT) AS SmsRating2v2,",
+    "  CAST(ROUND(sms.Elo2, 0) AS INT) AS SmsElo2v2,",
+    "  smsRank2v2.Value AS SmsRank2v2,",
+    "  ISNULL(CAST(msc.Wins2v2 AS NVARCHAR(5)) + '-' + CAST(msc.Losses2v2 AS NVARCHAR(5)), '0-0') AS MscRecord2v2,",
+    "  ISNULL(CAST(msc.MatchWins2v2 AS NVARCHAR(5)) + '-' + CAST(msc.MatchLosses2v2 AS NVARCHAR(5)), '0-0') AS MscMatchRecord2v2,",
+    "  CAST(ROUND(msc.RatingTS + 1000, 0) AS INT) AS MscRating2v2,",
+    "  CAST(ROUND(msc.Elo2, 0) AS INT) AS MscElo2v2,",
+    "  mscRank2v2.Value AS MscRank2v2,",
+    "  ISNULL(CAST(bl.Wins2v2 AS NVARCHAR(5)) + '-' + CAST(bl.Losses2v2 AS NVARCHAR(5)), '0-0') AS BlRecord2v2,",
+    "  ISNULL(CAST(bl.MatchWins2v2 AS NVARCHAR(5)) + '-' + CAST(bl.MatchLosses2v2 AS NVARCHAR(5)), '0-0') AS BlMatchRecord2v2,",
+    "  CAST(ROUND(bl.RatingTS + 1000, 0) AS INT) AS BlRating2v2,",
+    "  CAST(ROUND(bl.Elo2, 0) AS INT) AS BlElo2v2,",
+    "  blRank2v2.Value AS BlRank2v2,",
+    "  ISNULL(zest.Description, '') AS RankImage",
+    "FROM Player p",
+    "LEFT JOIN PlayerStats sms ON p.ID = sms.Player AND sms.GameType = 2 AND ISNULL(p.HideStats, 0) = 0",
+    "LEFT JOIN Enumeration smsRank ON sms.Rank = smsRank.Code AND smsRank.Type = 'emoji'",
+    "LEFT JOIN Enumeration smsRank2v2 ON sms.Rank2v2 = smsRank2v2.Code AND smsRank2v2.Type = 'emoji'",
+    "LEFT JOIN PlayerStats msc ON p.ID = msc.Player AND msc.GameType = 1 AND ISNULL(p.HideStats, 0) = 0",
+    "LEFT JOIN Enumeration mscRank ON msc.Rank = mscRank.Code AND mscRank.Type = 'emoji'",
+    "LEFT JOIN Enumeration mscRank2v2 ON msc.Rank2v2 = mscRank2v2.Code AND mscRank2v2.Type = 'emoji'",
+    "LEFT JOIN PlayerStats bl ON p.ID = bl.Player AND bl.GameType = 3 AND ISNULL(p.HideStats, 0) = 0",
+    "LEFT JOIN Enumeration blRank ON bl.Rank = blRank.Code AND blRank.Type = 'emoji'",
+    "LEFT JOIN Enumeration blRank2v2 ON bl.Rank2v2 = blRank2v2.Code AND blRank2v2.Type = 'emoji'",
+    "LEFT JOIN ClubRoster roster ON p.ID = roster.Player",
+    "LEFT JOIN Club c ON roster.Club = c.ID",
+    "LEFT JOIN (",
+    "  SELECT Player, ((MAX(CASE WHEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) > ISNULL(IsActive, 0) * ISNULL(Rank, 0) THEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) ELSE ISNULL(IsActive, 0) * ISNULL(Rank, 0) END) - 1) / 3) + 1 AS rankrole",
+    "  FROM PlayerStats",
+    "  GROUP BY Player",
+    "  HAVING MAX(CASE WHEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) > ISNULL(IsActive, 0) * ISNULL(Rank, 0) THEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) ELSE ISNULL(IsActive, 0) * ISNULL(Rank, 0) END) > 0",
+    ") maxRank ON p.ID = maxRank.Player",
+    "LEFT JOIN Enumeration zest ON zest.Type = 'ProfileZest' AND maxRank.rankrole = zest.Code",
+    "WHERE p.ID = @playerId",
+    "ORDER BY ISNULL(roster.Rank, 9999), c.ClubName;",
+    "SELECT",
+    "  lb.GameType,",
+    "  lb.Mode,",
+    "  lb.Elo,",
+    "  lb.RankNumber,",
+    "  lb.RankName,",
+    "  lb.MatchWins,",
+    "  lb.MatchLosses,",
+    "  lb.TotalMatches",
+    "FROM CompetitiveLeaderboard lb",
+    "INNER JOIN CompetitiveSeason season ON season.Id = lb.SeasonId",
+    "WHERE season.IsActive = 1",
+    "  AND season.LifecycleStatus = 'active'",
+    "  AND lb.PlayerId = @playerId",
+    "ORDER BY lb.GameType ASC, lb.Mode ASC;",
+    "SELECT TOP 1",
+    "  ISNULL(MAX(ISNULL(progress.HighestEarnedTierOrder, 0)), 0) AS RewardLevelOrder",
+    "FROM CompetitiveSeason season",
+    "LEFT JOIN CompetitiveSeasonRewardProgress progress ON progress.SeasonId = season.Id AND progress.PlayerId = @playerId",
+    "WHERE season.IsActive = 1",
+    "  AND season.LifecycleStatus = 'active'",
+    "GROUP BY season.Id",
+    "ORDER BY season.Id DESC;",
+    "SELECT",
+    "  t.Name,",
+    "  placement.Place,",
+    "  CASE WHEN t.GameType = 1 THEN 'MSC' WHEN t.GameType = 2 THEN 'SMS' WHEN t.GameType = 3 THEN 'MSBL' ELSE '?' END AS Game,",
+    "  t.TournamentStartDate",
+    "FROM Tournament t",
+    "CROSS APPLY (VALUES",
+    "  (CONVERT(NVARCHAR(MAX), ISNULL(t.Winner, '')), ':first_place: '),",
+    "  (CONVERT(NVARCHAR(MAX), ISNULL(t.RunnerUp, '')), ':second_place: '),",
+    "  (CONVERT(NVARCHAR(MAX), ISNULL(t.Bronze, '')), ':third_place: ')",
+    ") placement(PlayerList, Place)",
+    "WHERE (',' + REPLACE(placement.PlayerList, ' ', '') + ',') LIKE '%,' + @playerIdText + ',%'",
+    "ORDER BY t.TournamentStartDate DESC, t.Name ASC;"
+  ].join(" ");
+}
+
+function getRecordset(recordsets, index) {
+  return Array.isArray(recordsets && recordsets[index]) ? recordsets[index] : [];
+}
+
+function buildPlayerProfileFromRecordsets(recordsets) {
+  const baseRows = getRecordset(recordsets, 0);
+  const playerRow = baseRows[0] || null;
+  const name = normalizeText(playerRow && playerRow.name);
+  if (!playerRow || !name) {
+    return null;
+  }
+
+  const player = {
+    player_id: Number(playerRow.player_id) || null,
+    name: name,
+    country: normalizeCountry(playerRow.country),
+    id_start_gg: normalizeText(playerRow.id_start_gg),
+    club_id: Number(playerRow.club_id) || null,
+    club_name: normalizeText(playerRow.club_name),
+    club_tag: normalizeText(playerRow.club_tag),
+    activity: playerRow.activity || null
+  };
+  const profileData = getRecordset(recordsets, 2)[0] || {};
+  const rewardRow = getRecordset(recordsets, 4)[0] || null;
+
+  return {
+    player: {
+      id: player.player_id,
+      name: player.name,
+      country: player.country,
+      club_id: player.club_id,
+      club_name: player.club_name,
+      club_tag: player.club_tag,
+      results_url: normalizeResultsUrl(profileData.ResultsStartGG, player.id_start_gg),
+      activity: toActivityIso(player.activity),
+      is_active: isActivityActive(player.activity)
+    },
+    friend_codes: buildFriendCodes(getRecordset(recordsets, 1)),
+    accolades: buildAccolades(getRecordset(recordsets, 5)),
+    ratings: buildRatings(profileData, getRecordset(recordsets, 3)),
+    season_reward_level: buildSeasonRewardLevel(rewardRow && rewardRow.RewardLevelOrder),
+    highest_rank_banner_url: ""
+  };
+}
+
+async function getPlayerProfileBatch(pool, playerId) {
+  const request = pool.request();
+  request.multiple = true;
+  request.input("playerId", mssql.Int, playerId);
+  const startedAt = Date.now();
+  const result = await request.query(buildPlayerProfileBatchQuery());
+  return {
+    recordsets: Array.isArray(result && result.recordsets) ? result.recordsets : [],
+    dbMs: Date.now() - startedAt
+  };
+}
+
+function logSlowProfileLoad(playerId, totalMs, dbMs, recordsets) {
+  if (totalMs < PROFILE_SLOW_LOG_THRESHOLD_MS) {
+    return;
+  }
+
+  const counts = (Array.isArray(recordsets) ? recordsets : []).map(function (rows) {
+    return Array.isArray(rows) ? rows.length : 0;
   });
+  console.warn("[players-profile] slow profile load", JSON.stringify({
+    playerId: playerId,
+    totalMs: totalMs,
+    dbMs: dbMs,
+    recordsetCounts: counts
+  }));
 }
 
 function buildPlayersListQuery() {
@@ -776,34 +978,19 @@ async function buildPlayerProfile(pool, player) {
     throw new Error("Player not found.");
   }
 
-  const [friendCodes, profile, accolades, competitiveRatings, seasonRewardLevel] = await Promise.all([
-    getPlayerFriendCodes(pool, playerId),
-    getPlayerProfileSummary(pool, playerId),
-    getPlayerAccolades(pool, playerId),
-    getPlayerCompetitiveRatings(pool, playerId),
-    getPlayerSeasonRewardLevel(pool, playerId)
-  ]);
+  const profile = await getPlayerProfileByIdFromPool(pool, playerId);
+  if (!profile) {
+    throw new Error("Player not found.");
+  }
+  return profile;
+}
 
-  const profileData = profile || {};
-
-  return {
-    player: {
-      id: player.player_id,
-      name: player.name,
-      country: player.country,
-      club_id: player.club_id,
-      club_name: player.club_name,
-      club_tag: player.club_tag,
-      results_url: normalizeResultsUrl(profileData.ResultsStartGG, player.id_start_gg),
-      activity: toActivityIso(player.activity),
-      is_active: isActivityActive(player.activity)
-    },
-    friend_codes: friendCodes,
-    accolades: accolades,
-    ratings: buildRatings(profileData, competitiveRatings),
-    season_reward_level: seasonRewardLevel,
-    highest_rank_banner_url: ""
-  };
+async function getPlayerProfileByIdFromPool(pool, playerId) {
+  const startedAt = Date.now();
+  const batch = await getPlayerProfileBatch(pool, playerId);
+  const profile = buildPlayerProfileFromRecordsets(batch.recordsets);
+  logSlowProfileLoad(playerId, Date.now() - startedAt, batch.dbMs, batch.recordsets);
+  return profile;
 }
 
 async function getPlayerProfile(playerIdRaw) {
@@ -813,12 +1000,11 @@ async function getPlayerProfile(playerIdRaw) {
   }
 
   return withPool(async function (pool) {
-    const player = await getPlayerBaseById(pool, playerId);
-    if (!player) {
+    const profile = await getPlayerProfileByIdFromPool(pool, playerId);
+    if (!profile) {
       throw new Error("Player not found.");
     }
-
-    return buildPlayerProfile(pool, player);
+    return profile;
   });
 }
 
@@ -835,7 +1021,10 @@ async function getPlayerProfileByDiscordId(discordIdRaw) {
 
 module.exports = {
   DEFAULT_ACTIVITY_WINDOW_DAYS,
+  buildAccolades,
   buildCompetitiveRatingsByKey,
+  buildPlayerProfileBatchQuery,
+  buildPlayerProfileFromRecordsets,
   buildPlayersListQuery,
   buildRatingBlock,
   buildRatings,
