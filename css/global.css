@@ -772,7 +772,7 @@ body[data-page="index"] .page-content {
 
 .lb-row {
   --lb-bar-height: 46px;
-  --lb-rank-icon-height: calc(var(--lb-bar-height) * 1.12);
+  --lb-rank-icon-height: calc(var(--lb-bar-height) * 0.92);
   --lb-text-zone-left: 1px;
   --lb-text-zone-right: 1px;
   --lb-text-zone-top: 2px;
@@ -803,7 +803,7 @@ body[data-page="index"] .page-content {
 
 .lb-rank-icon {
   position: absolute;
-  left: calc(var(--lb-rank-icon-height) * -0.88);
+  left: calc(var(--lb-rank-icon-height) * -1.08);
   top: 50%;
   z-index: 3;
   height: var(--lb-rank-icon-height);
