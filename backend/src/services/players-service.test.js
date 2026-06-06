@@ -1,6 +1,7 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
 const {
+  buildRatings,
   buildPlayerDisplayName,
   isActivityActive,
   normalizeCountry,
@@ -91,4 +92,49 @@ test("normalizeDiscordId supports raw IDs and mention formats", function () {
   assert.equal(normalizeDiscordId("<@709777875686916210>"), "709777875686916210");
   assert.equal(normalizeDiscordId("<@!709777875686916210>xshadow39"), "709777875686916210");
   assert.equal(normalizeDiscordId("not-a-discord-id"), "");
+});
+
+test("profile rating cards use Competitive ELO, sets and rank icons", function () {
+  const ratings = buildRatings({
+    SmsElo: 2017,
+    SmsMatchRecord: "155-24",
+    SmsRating: 1641,
+    SmsRecord: "259-159",
+    SmsRank: "<:legacy:1>",
+    BlRating2v2: 983,
+    BlRecord2v2: "8-3"
+  }, [
+    {
+      GameType: 2,
+      Mode: "1v1",
+      Elo: 1756.6,
+      RankNumber: 16,
+      RankName: "Master I",
+      MatchWins: 4,
+      MatchLosses: 1
+    },
+    {
+      GameType: 3,
+      Mode: "2v2",
+      Elo: 1029.4,
+      RankNumber: 8,
+      RankName: "Gold II",
+      MatchWins: 3,
+      MatchLosses: 0
+    }
+  ]);
+
+  assert.equal(ratings.sms.rating, 1757);
+  assert.equal(ratings.sms.sets, "4-1");
+  assert.equal(ratings.sms.whr, 1641);
+  assert.equal(ratings.sms.games, "259-159");
+  assert.equal(ratings.sms.competitive_rank, "Master I");
+  assert.equal(ratings.sms.rank_icon_url, "/assets/leaderboards/rankicons/6-master-I.png");
+  assert.equal(ratings.sms.rank_emoji, "");
+
+  assert.equal(ratings.msbl2v2.rating, 1029);
+  assert.equal(ratings.msbl2v2.sets, "3-0");
+  assert.equal(ratings.msbl2v2.tst, 983);
+  assert.equal(ratings.msbl2v2.rank_icon_url, "/assets/leaderboards/rankicons/3-gold-II.png");
+  assert.deepEqual(ratings.msc, {});
 });

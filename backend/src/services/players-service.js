@@ -1,6 +1,28 @@
 const { withPool, mssql } = require("../db");
 const { normalizeCountryCode } = require("./flag-codes");
 const DEFAULT_ACTIVITY_WINDOW_DAYS = 90;
+const COMPETITIVE_RANK_ICON_BASE_URL = "/assets/leaderboards/rankicons/";
+const COMPETITIVE_RANK_ICON_BY_NUMBER = {
+  1: "1-bronze-I.png",
+  2: "1-bronze-II.png",
+  3: "1-bronze-III.png",
+  4: "2-silver-I.png",
+  5: "2-silver-II.png",
+  6: "2-silver-III.png",
+  7: "3-gold-I.png",
+  8: "3-gold-II.png",
+  9: "3-gold-III.png",
+  10: "4-platinum-I.png",
+  11: "4-platinum-II.png",
+  12: "4-platinum-III.png",
+  13: "5-diamond-I.png",
+  14: "5-diamond-II.png",
+  15: "5-diamond-III.png",
+  16: "6-master-I.png",
+  17: "6-master-II.png",
+  18: "6-master-III.png",
+  19: "7-strikerstitan-b.png"
+};
 
 function normalizeText(value) {
   return String(value || "").trim();
@@ -239,17 +261,64 @@ function toPlayerListDTO(row, opts) {
   };
 }
 
+function toSafeCount(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return 0;
+  }
+  return Math.max(0, Math.floor(parsed));
+}
+
+function hasCompetitiveMatches(row) {
+  return toSafeCount(row && row.MatchWins) + toSafeCount(row && row.MatchLosses) > 0;
+}
+
+function getCompetitiveRankIconUrl(rankNumberValue) {
+  const rankNumber = Number(rankNumberValue);
+  const fileName = Number.isFinite(rankNumber) ? COMPETITIVE_RANK_ICON_BY_NUMBER[rankNumber] : "";
+  return fileName ? COMPETITIVE_RANK_ICON_BASE_URL + fileName : "";
+}
+
+function buildCompetitiveRatingsByKey(rows) {
+  const map = new Map();
+  (Array.isArray(rows) ? rows : []).forEach(function (row) {
+    const gameType = Number(row && row.GameType);
+    const mode = normalizeText(row && row.Mode).toLowerCase();
+    if (!gameType || !mode) {
+      return;
+    }
+    map.set(String(gameType) + ":" + mode, row);
+  });
+  return map;
+}
+
+function getCompetitiveRating(competitiveRatingsByKey, gameType, mode) {
+  if (!competitiveRatingsByKey || typeof competitiveRatingsByKey.get !== "function") {
+    return null;
+  }
+  return competitiveRatingsByKey.get(String(gameType) + ":" + String(mode || "").toLowerCase()) || null;
+}
+
 function buildRatingBlock(options) {
-  const rawRankEmoji = normalizeText(options && options.rankEmoji);
+  const competitive = options && options.competitive;
+  if (!hasCompetitiveMatches(competitive)) {
+    return {};
+  }
+
   const metricName = String(options && options.metricName || "").trim();
   const metricValue = roundOrNull(options && options.metricValue);
+  const rankNumber = Number(competitive && competitive.RankNumber);
+  const wins = toSafeCount(competitive && competitive.MatchWins);
+  const losses = toSafeCount(competitive && competitive.MatchLosses);
 
   const result = {
-    rating: roundOrNull(options && options.rating),
-    sets: normalizeRecordPair(options && options.sets),
+    rating: roundOrNull(competitive && competitive.Elo),
+    sets: wins + "-" + losses,
     games: normalizeRecordPair(options && options.games),
-    rank_emoji: rawRankEmoji,
-    rank_icon_url: discordEmojiToPngUrl(rawRankEmoji)
+    rank_emoji: "",
+    rank_icon_url: getCompetitiveRankIconUrl(rankNumber),
+    competitive_rank: normalizeText(competitive && competitive.RankName),
+    competitive_rank_number: Number.isFinite(rankNumber) ? rankNumber : null
   };
 
   if (metricName) {
@@ -259,55 +328,44 @@ function buildRatingBlock(options) {
   return result;
 }
 
-function buildRatings(profile) {
+function buildRatings(profile, competitiveRatings) {
+  const competitiveRatingsByKey = buildCompetitiveRatingsByKey(competitiveRatings);
   return {
     sms: buildRatingBlock({
-      rating: profile && profile.SmsElo,
-      sets: profile && profile.SmsMatchRecord,
+      competitive: getCompetitiveRating(competitiveRatingsByKey, 2, "1v1"),
       games: profile && profile.SmsRecord,
       metricName: "whr",
-      metricValue: profile && profile.SmsRating,
-      rankEmoji: profile && profile.SmsRank
+      metricValue: profile && profile.SmsRating
     }),
     msc: buildRatingBlock({
-      rating: profile && profile.MscElo,
-      sets: profile && profile.MscMatchRecord,
+      competitive: getCompetitiveRating(competitiveRatingsByKey, 1, "1v1"),
       games: profile && profile.MscRecord,
       metricName: "whr",
-      metricValue: profile && profile.MscRating,
-      rankEmoji: profile && profile.MscRank
+      metricValue: profile && profile.MscRating
     }),
     msbl: buildRatingBlock({
-      rating: profile && profile.BlElo,
-      sets: profile && profile.BlMatchRecord,
+      competitive: getCompetitiveRating(competitiveRatingsByKey, 3, "1v1"),
       games: profile && profile.BlRecord,
       metricName: "whr",
-      metricValue: profile && profile.BlRating,
-      rankEmoji: profile && profile.BlRank
+      metricValue: profile && profile.BlRating
     }),
     sms2v2: buildRatingBlock({
-      rating: profile && profile.SmsElo2v2,
-      sets: profile && profile.SmsMatchRecord2v2,
+      competitive: getCompetitiveRating(competitiveRatingsByKey, 2, "2v2"),
       games: profile && profile.SmsRecord2v2,
       metricName: "tst",
-      metricValue: profile && profile.SmsRating2v2,
-      rankEmoji: profile && profile.SmsRank2v2
+      metricValue: profile && profile.SmsRating2v2
     }),
     msc2v2: buildRatingBlock({
-      rating: profile && profile.MscElo2v2,
-      sets: profile && profile.MscMatchRecord2v2,
+      competitive: getCompetitiveRating(competitiveRatingsByKey, 1, "2v2"),
       games: profile && profile.MscRecord2v2,
       metricName: "tst",
-      metricValue: profile && profile.MscRating2v2,
-      rankEmoji: profile && profile.MscRank2v2
+      metricValue: profile && profile.MscRating2v2
     }),
     msbl2v2: buildRatingBlock({
-      rating: profile && profile.BlElo2v2,
-      sets: profile && profile.BlMatchRecord2v2,
+      competitive: getCompetitiveRating(competitiveRatingsByKey, 3, "2v2"),
       games: profile && profile.BlRecord2v2,
       metricName: "tst",
-      metricValue: profile && profile.BlRating2v2,
-      rankEmoji: profile && profile.BlRank2v2
+      metricValue: profile && profile.BlRating2v2
     })
   };
 }
@@ -525,6 +583,31 @@ async function getPlayerProfileSummary(pool, playerId) {
   return rows[0] || null;
 }
 
+async function getPlayerCompetitiveRatings(pool, playerId) {
+  const request = pool.request();
+  request.input("playerId", mssql.Int, playerId);
+  const result = await request.query(
+    [
+      "SELECT",
+      "  lb.GameType,",
+      "  lb.Mode,",
+      "  lb.Elo,",
+      "  lb.RankNumber,",
+      "  lb.RankName,",
+      "  lb.MatchWins,",
+      "  lb.MatchLosses,",
+      "  lb.TotalMatches",
+      "FROM CompetitiveLeaderboard lb",
+      "INNER JOIN CompetitiveSeason season ON season.Id = lb.SeasonId",
+      "WHERE season.IsActive = 1",
+      "  AND season.LifecycleStatus = 'active'",
+      "  AND lb.PlayerId = @playerId",
+      "ORDER BY lb.GameType ASC, lb.Mode ASC"
+    ].join(" ")
+  );
+  return Array.isArray(result && result.recordset) ? result.recordset : [];
+}
+
 async function getPlayerAccolades(pool, playerId) {
   const request = pool.request();
   request.input("playerId", mssql.Int, playerId);
@@ -627,10 +710,11 @@ async function buildPlayerProfile(pool, player) {
     throw new Error("Player not found.");
   }
 
-  const [friendCodes, profile, accolades] = await Promise.all([
+  const [friendCodes, profile, accolades, competitiveRatings] = await Promise.all([
     getPlayerFriendCodes(pool, playerId),
     getPlayerProfileSummary(pool, playerId),
-    getPlayerAccolades(pool, playerId)
+    getPlayerAccolades(pool, playerId),
+    getPlayerCompetitiveRatings(pool, playerId)
   ]);
 
   const profileData = profile || {};
@@ -649,7 +733,7 @@ async function buildPlayerProfile(pool, player) {
     },
     friend_codes: friendCodes,
     accolades: accolades,
-    ratings: buildRatings(profileData),
+    ratings: buildRatings(profileData, competitiveRatings),
     highest_rank_banner_url: normalizeText(profileData.RankImage)
   };
 }
@@ -683,6 +767,9 @@ async function getPlayerProfileByDiscordId(discordIdRaw) {
 
 module.exports = {
   DEFAULT_ACTIVITY_WINDOW_DAYS,
+  buildCompetitiveRatingsByKey,
+  buildRatingBlock,
+  buildRatings,
   buildPlayerDisplayName,
   getPlayersList,
   getPlayerProfile,
