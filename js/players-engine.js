@@ -5,7 +5,7 @@
   var POPUP_CLOSE_BLOCK_MS = 500;
   var lastPopupCloseAt = 0;
 
-  var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260429-global-popup-v1";
+  var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260606-profile-rating-order-v1";
   var POPUP_OPEN_CLASS = "player-popup-open";
   var FLAG_CODE_ALIASES = Object.freeze({
     "uk": "gb",
@@ -418,12 +418,13 @@
     return true;
   }
 
-  function buildRatingLine(label, value, extraHtml) {
+  function buildRatingLine(label, value, leadingHtml, trailingHtml) {
     return [
       '<p class="player-popup-rating-line">',
       '<span class="player-popup-rating-label">', escapeHtml(label), ':</span>',
+      leadingHtml || "",
       '<span class="player-popup-rating-value">', escapeHtml(String(value)), "</span>",
-      extraHtml || "",
+      trailingHtml || "",
       "</p>"
     ].join("");
   }
@@ -606,15 +607,9 @@
 
     var rankBannerSection = popupState.slots["rank-banner-section"];
     var rankBanner = popupState.slots["rank-banner"];
-    var bannerUrl = String(data.highest_rank_banner_url || "").trim();
     if (rankBannerSection && rankBanner) {
-      if (bannerUrl) {
-        rankBanner.src = bannerUrl;
-        rankBannerSection.hidden = false;
-      } else {
-        rankBanner.removeAttribute("src");
-        rankBannerSection.hidden = true;
-      }
+      rankBanner.removeAttribute("src");
+      rankBannerSection.hidden = true;
     }
   }
 

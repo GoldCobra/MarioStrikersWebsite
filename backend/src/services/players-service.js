@@ -734,7 +734,7 @@ async function buildPlayerProfile(pool, player) {
     friend_codes: friendCodes,
     accolades: accolades,
     ratings: buildRatings(profileData, competitiveRatings),
-    highest_rank_banner_url: normalizeText(profileData.RankImage)
+    highest_rank_banner_url: ""
   };
 }
 

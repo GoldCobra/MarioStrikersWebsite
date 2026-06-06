@@ -200,12 +200,13 @@
     return sections.join("");
   }
 
-  function buildRatingLine(label, value, extraHtml) {
+  function buildRatingLine(label, value, leadingHtml, trailingHtml) {
     return [
       '<p class="profile-rating-line">',
       '<span class="profile-rating-label">', escapeHtml(label), ':</span>',
+      leadingHtml || "",
       '<span class="profile-rating-value">', escapeHtml(String(value)), "</span>",
-      extraHtml || "",
+      trailingHtml || "",
       "</p>"
     ].join("");
   }
@@ -319,8 +320,9 @@
       ? String(player.club_name || "").trim() + (player.club_tag ? " [" + player.club_tag + "]" : "")
       : "No club membership listed.";
     var resultsUrl = String(player.results_url || "").trim();
+    var ratingsHtml = buildRatings(data.ratings || {});
     var resultsHtml = resultsUrl
-      ? '<p class="profile-meta-line"><span>Results</span><a href="' + escapeHtml(resultsUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(resultsUrl) + "</a></p>"
+      ? '<section class="profile-panel profile-results-panel"><h3 class="profile-panel-title">Results</h3><p class="profile-meta-line"><span>Results</span><a href="' + escapeHtml(resultsUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(resultsUrl) + "</a></p></section>"
       : "";
 
     return [
@@ -332,16 +334,16 @@
       "</div>",
       '<div class="profile-meta">',
       '<p class="profile-meta-line"><span>Club</span><strong>', escapeHtml(clubText), "</strong></p>",
-      resultsHtml,
       "</div>",
       "</header>",
       '<div class="profile-grid">',
       '<div class="profile-grid-main">',
       buildFriendCodes(data.friend_codes || {}),
+      resultsHtml,
       buildAccolades(data.accolades || []),
       "</div>",
       '<div class="profile-grid-side">',
-      buildRatings(data.ratings || {}),
+      ratingsHtml,
       "</div>",
       "</div>",
       "</section>"

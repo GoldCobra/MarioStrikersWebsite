@@ -3086,7 +3086,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   width: 14px;
   height: 14px;
   object-fit: contain;
-  margin-left: 0.1rem;
+  margin-right: 0.1rem;
 }
 
 .profile-accolades {
@@ -3482,7 +3482,7 @@ body.player-popup-open {
   width: 14px;
   height: 14px;
   object-fit: contain;
-  margin-left: 0.1rem;
+  margin-right: 0.1rem;
 }
 
 .player-popup-rank-banner {
