@@ -5,7 +5,7 @@
   var POPUP_CLOSE_BLOCK_MS = 500;
   var lastPopupCloseAt = 0;
 
-  var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260606-profile-rating-order-v1";
+  var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260606-profile-accolades-toggle-v1";
   var POPUP_OPEN_CLASS = "player-popup-open";
   var FLAG_CODE_ALIASES = Object.freeze({
     "uk": "gb",
@@ -493,6 +493,10 @@
     }
 
     var rows = Array.isArray(accolades) ? accolades : [];
+    var details = mount.closest(".player-popup-accolades-details");
+    if (details) {
+      details.open = false;
+    }
     if (!rows.length) {
       mount.innerHTML = "";
       setSectionHidden(mount, true);

@@ -3094,8 +3094,58 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   margin-right: 0.1rem;
 }
 
-.profile-accolades {
+.profile-accolades-details,
+.player-popup-accolades-details {
+  min-width: 0;
+}
+
+.profile-accolades-details > summary,
+.player-popup-accolades-details > summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  list-style: none;
+  user-select: none;
+}
+
+.profile-accolades-details > summary::-webkit-details-marker,
+.player-popup-accolades-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.profile-accolades-details > summary:focus-visible,
+.player-popup-accolades-details > summary:focus-visible {
+  outline: 2px solid rgba(255, 180, 64, 0.72);
+  outline-offset: 3px;
+}
+
+.profile-accolades-summary .profile-panel-title,
+.player-popup-accolades-summary .player-popup-section-title {
   margin: 0;
+}
+
+.profile-accolades-details > summary::after,
+.player-popup-accolades-details > summary::after {
+  content: "";
+  width: 0.44rem;
+  height: 0.44rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  color: rgba(255, 255, 255, 0.78);
+  transform: translateY(-0.08rem) rotate(45deg);
+  transition: transform 150ms ease;
+  flex: 0 0 auto;
+}
+
+.profile-accolades-details[open] > summary::after,
+.player-popup-accolades-details[open] > summary::after {
+  transform: translateY(0.12rem) rotate(225deg);
+}
+
+.profile-accolades {
+  margin: 0.42rem 0 0;
   padding: 0;
   list-style: none;
   display: grid;
