@@ -803,7 +803,7 @@ body[data-page="index"] .page-content {
 
 .lb-rank-icon {
   position: absolute;
-  left: calc(var(--lb-rank-icon-height) * -1.08);
+  left: calc(var(--lb-rank-icon-height) * -1.20);
   top: 50%;
   z-index: 3;
   height: var(--lb-rank-icon-height);
