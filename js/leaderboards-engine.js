@@ -1,9 +1,70 @@
 (function () {
   "use strict";
 
-  var SESSION_CACHE_PREFIX = "leaderboardRows:v2::";
+  var SESSION_CACHE_PREFIX = "leaderboardRows:v3::";
   var SESSION_CACHE_TTL_MS = 5 * 60 * 1000;
   var ROW_ASSET_FILES = ["normal-rank.png", "rank1.png", "rank2.png", "rank3.png"];
+  var COMPETITIVE_RANK_ICON_BY_NUMBER = {
+    1: "1-bronze-I.png",
+    2: "1-bronze-II.png",
+    3: "1-bronze-III.png",
+    4: "2-silver-I.png",
+    5: "2-silver-II.png",
+    6: "2-silver-III.png",
+    7: "3-gold-I.png",
+    8: "3-gold-II.png",
+    9: "3-gold-III.png",
+    10: "4-platinum-I.png",
+    11: "4-platinum-II.png",
+    12: "4-platinum-III.png",
+    13: "5-diamond-I.png",
+    14: "5-diamond-II.png",
+    15: "5-diamond-III.png",
+    16: "6-master-I.png",
+    17: "6-master-II.png",
+    18: "6-master-III.png",
+    19: "7-strikerstitan-b.png"
+  };
+  var COMPETITIVE_RANK_ICON_BY_KEY = {
+    bronzei: "1-bronze-I.png",
+    bronze1: "1-bronze-I.png",
+    bronzeii: "1-bronze-II.png",
+    bronze2: "1-bronze-II.png",
+    bronzeiii: "1-bronze-III.png",
+    bronze3: "1-bronze-III.png",
+    silveri: "2-silver-I.png",
+    silver1: "2-silver-I.png",
+    silverii: "2-silver-II.png",
+    silver2: "2-silver-II.png",
+    silveriii: "2-silver-III.png",
+    silver3: "2-silver-III.png",
+    goldi: "3-gold-I.png",
+    gold1: "3-gold-I.png",
+    goldii: "3-gold-II.png",
+    gold2: "3-gold-II.png",
+    goldiii: "3-gold-III.png",
+    gold3: "3-gold-III.png",
+    platinumi: "4-platinum-I.png",
+    platinum1: "4-platinum-I.png",
+    platinumii: "4-platinum-II.png",
+    platinum2: "4-platinum-II.png",
+    platinumiii: "4-platinum-III.png",
+    platinum3: "4-platinum-III.png",
+    diamondi: "5-diamond-I.png",
+    diamond1: "5-diamond-I.png",
+    diamondii: "5-diamond-II.png",
+    diamond2: "5-diamond-II.png",
+    diamondiii: "5-diamond-III.png",
+    diamond3: "5-diamond-III.png",
+    masteri: "6-master-I.png",
+    master1: "6-master-I.png",
+    masterii: "6-master-II.png",
+    master2: "6-master-II.png",
+    masteriii: "6-master-III.png",
+    master3: "6-master-III.png",
+    strikerstitan: "7-strikerstitan-b.png",
+    titan: "7-strikerstitan-b.png"
+  };
   var activeRenderRequestId = 0;
   var rowAssetsPreloadPromise = null;
   var tabIconsPreloadPromise = null;
@@ -241,18 +302,48 @@
     return rating.toFixed(2).replace(/\.?0+$/, "");
   }
 
-  function toRowClass(rank) {
+  function toRowClass(rank, hasRankIcon) {
     var safeRank = Number(rank);
+    var className = "lb-row";
     if (safeRank === 1) {
-      return "lb-row lb-row-rank-1";
+      className += " lb-row-rank-1";
+    } else if (safeRank === 2) {
+      className += " lb-row-rank-2";
+    } else if (safeRank === 3) {
+      className += " lb-row-rank-3";
     }
-    if (safeRank === 2) {
-      return "lb-row lb-row-rank-2";
+
+    if (hasRankIcon) {
+      className += " lb-row-has-rank-icon";
     }
-    if (safeRank === 3) {
-      return "lb-row lb-row-rank-3";
+    return className;
+  }
+
+  function normalizeCompetitiveRankKey(value) {
+    return String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  }
+
+  function getCompetitiveRankIconFile(row) {
+    var rankNumber = Number(row && row.rank_number);
+    if (Number.isFinite(rankNumber) && COMPETITIVE_RANK_ICON_BY_NUMBER[Math.floor(rankNumber)]) {
+      return COMPETITIVE_RANK_ICON_BY_NUMBER[Math.floor(rankNumber)];
     }
-    return "lb-row";
+
+    var key = normalizeCompetitiveRankKey(row && row.competitive_rank);
+    return key ? COMPETITIVE_RANK_ICON_BY_KEY[key] || "" : "";
+  }
+
+  function buildCompetitiveRankIconMarkup(row, prefix) {
+    var fileName = getCompetitiveRankIconFile(row);
+    if (!fileName) {
+      return "";
+    }
+
+    return [
+      '<img class="lb-rank-icon" src="',
+      escapeHtml(prefix + "/assets/leaderboards/rankicons/" + fileName),
+      '" alt="" aria-hidden="true" loading="lazy">'
+    ].join("");
   }
 
   function normalizeRows(rows) {
@@ -263,20 +354,24 @@
       .map(function (row, index) {
         var rank = Number(row && row.rank);
         var rating = Number(row && row.rating);
+        var rankNumber = Number(row && row.rank_number);
         var displayName = String(row && (row.display_name || row.player || row.name) || "").trim();
+        var competitiveRank = String(row && (row.competitive_rank || row.competitiveRank || row.rank_name || row.rankName) || "").trim();
         if (!displayName || !Number.isFinite(rating)) {
           return null;
         }
         return {
           rank: Number.isFinite(rank) && rank > 0 ? Math.floor(rank) : index + 1,
           display_name: displayName,
-          rating: rating
+          rating: rating,
+          rank_number: Number.isFinite(rankNumber) && rankNumber > 0 ? Math.floor(rankNumber) : 0,
+          competitive_rank: competitiveRank
         };
       })
       .filter(Boolean);
   }
 
-  function buildRowsHtml(rows) {
+  function buildRowsHtml(rows, prefix) {
     function buildRankMarkup(rank) {
       if (Number(rank) === 1) {
         return [
@@ -297,8 +392,10 @@
     }
 
     return rows.map(function (row) {
+      var rankIconMarkup = buildCompetitiveRankIconMarkup(row, prefix || ".");
       return [
-        '<article class="', toRowClass(row.rank), '" role="listitem">',
+        '<article class="', toRowClass(row.rank, !!rankIconMarkup), '" role="listitem">',
+        rankIconMarkup,
         '<div class="lb-inner-frame">',
         '<div class="lb-rank-cell">', buildRankMarkup(row.rank), "</div>",
         '<div class="lb-player">', escapeHtml(row.display_name), "</div>",
@@ -373,6 +470,7 @@
     var requestId = ++activeRenderRequestId;
     var listEl = document.getElementById("leaderboard-list");
     var emptyEl = document.getElementById("leaderboard-empty");
+    var prefix = getPathPrefix();
     if (!listEl || !emptyEl) {
       return;
     }
@@ -395,7 +493,7 @@
       return;
     }
 
-    listEl.innerHTML = buildRowsHtml(rows);
+    listEl.innerHTML = buildRowsHtml(rows, prefix);
     emptyEl.hidden = true;
 
     if (primary.source === "cache") {
@@ -407,7 +505,7 @@
           if (requestId !== activeRenderRequestId) {
             return;
           }
-          listEl.innerHTML = buildRowsHtml(refreshed.rows);
+          listEl.innerHTML = buildRowsHtml(refreshed.rows, prefix);
           emptyEl.hidden = refreshed.rows.length > 0;
         })
         .catch(function () {

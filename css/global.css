@@ -755,7 +755,7 @@ body[data-page="index"] .page-content {
 }
 
 .leaderboard-block {
-  max-width: 780px;
+  max-width: 900px;
   margin: 0 auto;
   padding: var(--space-2) var(--space-2) var(--space-4);
 }
@@ -771,6 +771,8 @@ body[data-page="index"] .page-content {
 }
 
 .lb-row {
+  --lb-bar-height: 46px;
+  --lb-rank-icon-height: 100px;
   --lb-text-zone-left: 1px;
   --lb-text-zone-right: 1px;
   --lb-text-zone-top: 2px;
@@ -779,7 +781,7 @@ body[data-page="index"] .page-content {
   --lb-player-nudge-y: 0px;
   --lb-points-nudge-y: 1px;
   width: min(84%, 620px);
-  height: 46px;
+  height: var(--lb-bar-height);
   margin: 0 auto;
   position: relative;
   background-image: url("../assets/leaderboards/normal-rank.png");
@@ -790,6 +792,27 @@ body[data-page="index"] .page-content {
   font-size: calc(clamp(0.55rem, 1.1vw, 0.95rem) + 6px);
   letter-spacing: 0.01em;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+}
+
+.lb-row-has-rank-icon {
+  height: var(--lb-rank-icon-height);
+  width: min(calc(100% - 110px), 620px);
+  background-position: center;
+  background-size: 100% var(--lb-bar-height);
+}
+
+.lb-rank-icon {
+  position: absolute;
+  left: calc(var(--lb-rank-icon-height) * -0.88);
+  top: 50%;
+  z-index: 3;
+  height: var(--lb-rank-icon-height);
+  width: auto;
+  max-width: calc(var(--lb-rank-icon-height) * 1.22);
+  object-fit: contain;
+  transform: translateY(-50%);
+  pointer-events: none;
+  filter: drop-shadow(-3px 4px 0 rgba(0, 0, 0, 0.72));
 }
 
 .lb-inner-frame {
@@ -942,19 +965,27 @@ body[data-page="index"] .page-content {
 
 @media (max-width: 1024px) {
   .lb-row {
-    height: 42px;
+    --lb-bar-height: 42px;
   }
 }
 
 @media (max-width: 700px) {
   .lb-row {
-    height: 38px;
+    --lb-bar-height: 38px;
   }
 }
 
 @media (max-width: 520px) {
   .lb-row {
-    height: 34px;
+    --lb-bar-height: 34px;
+  }
+
+  .lb-row-has-rank-icon {
+    width: min(calc(100% - 96px), 620px);
+  }
+
+  .lb-rank-icon {
+    left: calc(var(--lb-rank-icon-height) * -0.78);
   }
 }
 
