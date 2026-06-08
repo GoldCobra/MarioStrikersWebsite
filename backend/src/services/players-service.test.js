@@ -137,12 +137,74 @@ test("profile rating cards use Competitive ELO, sets and rank icons", function (
   assert.equal(ratings.sms.competitive_rank, "Master I");
   assert.equal(ratings.sms.rank_icon_url, "/assets/leaderboards/rankicons/6-master-I.png");
   assert.equal(ratings.sms.rank_emoji, "");
+  assert.deepEqual(ratings.sms.season_reward_level, {
+    order: 0,
+    name: "Unranked",
+    image_url: "/assets/players/rewardlevel/0-unranked.png",
+    current_wins: 0,
+    required_wins: 5
+  });
 
   assert.equal(ratings.msbl2v2.rating, 1029);
   assert.equal(ratings.msbl2v2.sets, "3-0");
   assert.equal(ratings.msbl2v2.tst, 983);
   assert.equal(ratings.msbl2v2.rank_icon_url, "/assets/leaderboards/rankicons/3-gold-II.png");
   assert.deepEqual(ratings.msc, {});
+});
+
+test("profile rating cards attach per-game season reward progress", function () {
+  const ratings = buildRatings({}, [
+    {
+      GameType: 2,
+      Mode: "1v1",
+      Elo: 612,
+      RankNumber: 4,
+      RankName: "Silver I",
+      MatchWins: 2,
+      MatchLosses: 0
+    },
+    {
+      GameType: 3,
+      Mode: "2v2",
+      Elo: 701,
+      RankNumber: 19,
+      RankName: "Strikers Titan",
+      MatchWins: 8,
+      MatchLosses: 1
+    }
+  ], [
+    {
+      GameId: 2,
+      ModeCode: "1v1",
+      HighestEarnedTierOrder: 1,
+      CurrentTargetTierOrder: 2,
+      CurrentTargetWins: 2,
+      RequiredWins: 5
+    },
+    {
+      GameId: 3,
+      ModeCode: "2v2",
+      HighestEarnedTierOrder: 7,
+      CurrentTargetTierOrder: null,
+      CurrentTargetWins: 0,
+      RequiredWins: 5
+    }
+  ]);
+
+  assert.deepEqual(ratings.sms.season_reward_level, {
+    order: 2,
+    name: "Silver",
+    image_url: "/assets/players/rewardlevel/2-silver.png",
+    current_wins: 2,
+    required_wins: 5
+  });
+  assert.deepEqual(ratings.msbl2v2.season_reward_level, {
+    order: 7,
+    name: "Strikers Titan",
+    image_url: "/assets/players/rewardlevel/7-strikerstitan-b.png",
+    current_wins: 5,
+    required_wins: 5
+  });
 });
 
 test("profile rating cards show an unranked icon for competitive rank zero", function () {
@@ -196,6 +258,10 @@ test("profile batch query reads all profile data in one multi-recordset batch", 
   assert.match(sql, /FROM FriendCodes fc/);
   assert.match(sql, /FROM CompetitiveLeaderboard lb/);
   assert.match(sql, /CompetitiveSeasonRewardProgress/);
+  assert.match(sql, /progress\.GameId/);
+  assert.match(sql, /progress\.ModeCode/);
+  assert.match(sql, /progress\.CurrentTargetTierOrder/);
+  assert.match(sql, /progress\.CurrentTargetWins/);
   assert.match(sql, /FROM Tournament t/);
   assert.match(sql, /CROSS APPLY \(VALUES/);
   assert.match(sql, /LEFT JOIN PlayerStats ps ON ps\.Player = p\.ID AND ps\.GameType IN \(1, 2, 3\)/);
@@ -241,6 +307,14 @@ test("profile batch recordsets map to the existing profile DTO shape", function 
     }],
     [{ RewardLevelOrder: 2 }],
     [{
+      GameId: 3,
+      ModeCode: "1v1",
+      HighestEarnedTierOrder: 0,
+      CurrentTargetTierOrder: 1,
+      CurrentTargetWins: 2,
+      RequiredWins: 5
+    }],
+    [{
       Name: "MSBL World Championship",
       Place: ":first_place: ",
       Game: "MSBL",
@@ -255,6 +329,9 @@ test("profile batch recordsets map to the existing profile DTO shape", function 
   assert.equal(profile.ratings.msbl.sets, "6-0");
   assert.equal(profile.ratings.msbl.whr, 2112);
   assert.equal(profile.ratings.msbl.rank_icon_url, "/assets/leaderboards/rankicons/1-bronze-III.png");
+  assert.equal(profile.ratings.msbl.season_reward_level.name, "Bronze");
+  assert.equal(profile.ratings.msbl.season_reward_level.current_wins, 2);
+  assert.equal(profile.ratings.msbl.season_reward_level.required_wins, 5);
   assert.equal(profile.season_reward_level.name, "Silver");
   assert.equal(profile.accolades[0].place_medal, "🥇");
 });

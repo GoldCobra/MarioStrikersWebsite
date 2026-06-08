@@ -309,6 +309,46 @@ function buildSeasonRewardLevel(orderValue) {
   };
 }
 
+function toRewardWins(value, fallback) {
+  if (value === null || value === undefined || value === "") {
+    return fallback;
+  }
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return fallback;
+  }
+  return Math.max(0, Math.floor(parsed));
+}
+
+function buildSeasonRewardProgressLevel(row) {
+  const requiredWins = Math.max(1, toRewardWins(row && row.RequiredWins, 5));
+  if (!row) {
+    const unranked = buildSeasonRewardLevel(0);
+    return Object.assign(unranked, {
+      current_wins: 0,
+      required_wins: requiredWins
+    });
+  }
+
+  const targetOrder = Number(row.CurrentTargetTierOrder);
+  const highestOrder = Number(row.HighestEarnedTierOrder);
+  const hasTargetOrder = row.CurrentTargetTierOrder !== null && row.CurrentTargetTierOrder !== undefined && row.CurrentTargetTierOrder !== "";
+  const isTargetValid = hasTargetOrder && Number.isInteger(targetOrder) && SEASON_REWARD_LEVEL_BY_ORDER[targetOrder];
+  const isCompletedTitan = !isTargetValid && Number.isInteger(highestOrder) && highestOrder >= 7;
+  const order = isTargetValid
+    ? targetOrder
+    : (isCompletedTitan ? 7 : 0);
+  const level = buildSeasonRewardLevel(order);
+  const currentWins = isCompletedTitan
+    ? requiredWins
+    : Math.min(requiredWins, toRewardWins(row.CurrentTargetWins, 0));
+
+  return Object.assign(level, {
+    current_wins: currentWins,
+    required_wins: requiredWins
+  });
+}
+
 function buildCompetitiveRatingsByKey(rows) {
   const map = new Map();
   (Array.isArray(rows) ? rows : []).forEach(function (row) {
@@ -327,6 +367,26 @@ function getCompetitiveRating(competitiveRatingsByKey, gameType, mode) {
     return null;
   }
   return competitiveRatingsByKey.get(String(gameType) + ":" + String(mode || "").toLowerCase()) || null;
+}
+
+function buildRewardProgressByKey(rows) {
+  const map = new Map();
+  (Array.isArray(rows) ? rows : []).forEach(function (row) {
+    const gameId = Number(row && row.GameId);
+    const mode = normalizeText(row && row.ModeCode).toLowerCase();
+    if (!gameId || !mode) {
+      return;
+    }
+    map.set(String(gameId) + ":" + mode, row);
+  });
+  return map;
+}
+
+function getRewardProgress(rewardProgressByKey, gameType, mode) {
+  if (!rewardProgressByKey || typeof rewardProgressByKey.get !== "function") {
+    return null;
+  }
+  return rewardProgressByKey.get(String(gameType) + ":" + String(mode || "").toLowerCase()) || null;
 }
 
 function buildRatingBlock(options) {
@@ -348,7 +408,8 @@ function buildRatingBlock(options) {
     rank_emoji: "",
     rank_icon_url: getCompetitiveRankIconUrl(rankNumber),
     competitive_rank: normalizeText(competitive && competitive.RankName),
-    competitive_rank_number: Number.isFinite(rankNumber) ? rankNumber : null
+    competitive_rank_number: Number.isFinite(rankNumber) ? rankNumber : null,
+    season_reward_level: buildSeasonRewardProgressLevel(options && options.rewardProgress)
   };
 
   if (metricName) {
@@ -358,41 +419,48 @@ function buildRatingBlock(options) {
   return result;
 }
 
-function buildRatings(profile, competitiveRatings) {
+function buildRatings(profile, competitiveRatings, rewardProgressRows) {
   const competitiveRatingsByKey = buildCompetitiveRatingsByKey(competitiveRatings);
+  const rewardProgressByKey = buildRewardProgressByKey(rewardProgressRows);
   return {
     sms: buildRatingBlock({
       competitive: getCompetitiveRating(competitiveRatingsByKey, 2, "1v1"),
+      rewardProgress: getRewardProgress(rewardProgressByKey, 2, "1v1"),
       games: profile && profile.SmsRecord,
       metricName: "whr",
       metricValue: profile && profile.SmsRating
     }),
     msc: buildRatingBlock({
       competitive: getCompetitiveRating(competitiveRatingsByKey, 1, "1v1"),
+      rewardProgress: getRewardProgress(rewardProgressByKey, 1, "1v1"),
       games: profile && profile.MscRecord,
       metricName: "whr",
       metricValue: profile && profile.MscRating
     }),
     msbl: buildRatingBlock({
       competitive: getCompetitiveRating(competitiveRatingsByKey, 3, "1v1"),
+      rewardProgress: getRewardProgress(rewardProgressByKey, 3, "1v1"),
       games: profile && profile.BlRecord,
       metricName: "whr",
       metricValue: profile && profile.BlRating
     }),
     sms2v2: buildRatingBlock({
       competitive: getCompetitiveRating(competitiveRatingsByKey, 2, "2v2"),
+      rewardProgress: getRewardProgress(rewardProgressByKey, 2, "2v2"),
       games: profile && profile.SmsRecord2v2,
       metricName: "tst",
       metricValue: profile && profile.SmsRating2v2
     }),
     msc2v2: buildRatingBlock({
       competitive: getCompetitiveRating(competitiveRatingsByKey, 1, "2v2"),
+      rewardProgress: getRewardProgress(rewardProgressByKey, 1, "2v2"),
       games: profile && profile.MscRecord2v2,
       metricName: "tst",
       metricValue: profile && profile.MscRating2v2
     }),
     msbl2v2: buildRatingBlock({
       competitive: getCompetitiveRating(competitiveRatingsByKey, 3, "2v2"),
+      rewardProgress: getRewardProgress(rewardProgressByKey, 3, "2v2"),
       games: profile && profile.BlRecord2v2,
       metricName: "tst",
       metricValue: profile && profile.BlRating2v2
@@ -725,6 +793,21 @@ function buildPlayerProfileBatchQuery() {
     "GROUP BY season.Id",
     "ORDER BY season.Id DESC;",
     "SELECT",
+    "  progress.GameId,",
+    "  progress.ModeCode,",
+    "  progress.HighestEarnedTier,",
+    "  progress.HighestEarnedTierOrder,",
+    "  progress.CurrentTargetTier,",
+    "  progress.CurrentTargetTierOrder,",
+    "  progress.CurrentTargetWins,",
+    "  progress.RequiredWins",
+    "FROM CompetitiveSeason season",
+    "INNER JOIN CompetitiveSeasonRewardProgress progress ON progress.SeasonId = season.Id",
+    "WHERE season.IsActive = 1",
+    "  AND season.LifecycleStatus = 'active'",
+    "  AND progress.PlayerId = @playerId",
+    "ORDER BY progress.GameId ASC, progress.ModeCode ASC;",
+    "SELECT",
     "  t.Name,",
     "  placement.Place,",
     "  CASE WHEN t.GameType = 1 THEN 'MSC' WHEN t.GameType = 2 THEN 'SMS' WHEN t.GameType = 3 THEN 'MSBL' ELSE '?' END AS Game,",
@@ -778,8 +861,8 @@ function buildPlayerProfileFromRecordsets(recordsets) {
       is_active: isActivityActive(player.activity)
     },
     friend_codes: buildFriendCodes(getRecordset(recordsets, 1)),
-    accolades: buildAccolades(getRecordset(recordsets, 5)),
-    ratings: buildRatings(profileData, getRecordset(recordsets, 3)),
+    accolades: buildAccolades(getRecordset(recordsets, 6)),
+    ratings: buildRatings(profileData, getRecordset(recordsets, 3), getRecordset(recordsets, 5)),
     season_reward_level: buildSeasonRewardLevel(rewardRow && rewardRow.RewardLevelOrder),
     highest_rank_banner_url: ""
   };

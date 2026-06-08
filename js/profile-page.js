@@ -212,6 +212,42 @@
     ].join("");
   }
 
+  function toRewardWins(value, fallback) {
+    if (value === null || value === undefined || value === "") {
+      return fallback;
+    }
+    var parsed = Number(value);
+    if (!Number.isFinite(parsed)) {
+      return fallback;
+    }
+    return Math.max(0, Math.floor(parsed));
+  }
+
+  function buildRatingReward(rewardLevel) {
+    var reward = rewardLevel || {};
+    var imageUrl = String(reward.image_url || "").trim();
+    var name = String(reward.name || "Unranked").trim() || "Unranked";
+    var requiredWins = Math.max(1, toRewardWins(reward.required_wins, 5));
+    var currentWins = Math.min(requiredWins, toRewardWins(reward.current_wins, 0));
+    if (!imageUrl) {
+      return "";
+    }
+
+    return [
+      '<div class="profile-rating-reward">',
+      '<div class="profile-rating-reward-main">',
+      '<img class="profile-rating-reward-icon" src="', escapeHtml(imageUrl), '" alt="', escapeHtml(name), '" title="', escapeHtml(name), '" loading="lazy">',
+      '<span class="profile-rating-reward-name">', escapeHtml(name), "</span>",
+      "</div>",
+      '<div class="profile-rating-reward-rule" aria-hidden="true"></div>',
+      '<p class="profile-rating-reward-progress">',
+      '<span>Season Reward Level</span>',
+      '<strong>', escapeHtml(currentWins + "/" + requiredWins), "</strong>",
+      "</p>",
+      "</div>"
+    ].join("");
+  }
+
   function buildRatingCards(cards) {
     return cards.map(function (card) {
       var rating = card && card.rating ? card.rating : {};
@@ -248,10 +284,13 @@
       }
 
       return [
+        '<div class="profile-rating-unit">',
         '<article class="', cardClass, '">',
         '<h4 class="profile-rating-title">', escapeHtml(card.title), "</h4>",
         lines.join(""),
-        "</article>"
+        "</article>",
+        buildRatingReward(rating.season_reward_level),
+        "</div>"
       ].join("");
     }).filter(Boolean).join("");
   }
@@ -278,24 +317,6 @@
       '<h3 class="profile-panel-title">Ratings</h3>',
       singles ? '<div class="profile-ratings-grid">' + singles + "</div>" : "",
       doubles ? '<div class="profile-ratings-grid">' + doubles + "</div>" : "",
-      "</section>"
-    ].join("");
-  }
-
-  function buildSeasonRewardLevel(rewardLevel, hasRatings) {
-    var reward = rewardLevel || {};
-    var imageUrl = String(reward.image_url || "").trim();
-    var name = String(reward.name || "Unranked").trim() || "Unranked";
-    if (!hasRatings || !imageUrl) {
-      return "";
-    }
-
-    return [
-      '<section class="profile-panel profile-season-reward-panel">',
-      '<p class="profile-season-reward-line">',
-      '<span class="profile-season-reward-label">Season Reward Level</span>',
-      '<img class="profile-season-reward-icon" src="', escapeHtml(imageUrl), '" alt="', escapeHtml(name), '" title="', escapeHtml(name), '" loading="lazy">',
-      "</p>",
       "</section>"
     ].join("");
   }
@@ -342,7 +363,6 @@
       : "No club membership listed.";
     var resultsUrl = String(player.results_url || "").trim();
     var ratingsHtml = buildRatings(data.ratings || {});
-    var rewardHtml = buildSeasonRewardLevel(data.season_reward_level, !!ratingsHtml);
     var resultsHtml = resultsUrl
       ? '<section class="profile-panel profile-results-panel"><h3 class="profile-panel-title">Results</h3><p class="profile-meta-line"><span>Results</span><a href="' + escapeHtml(resultsUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(resultsUrl) + "</a></p></section>"
       : "";
@@ -366,7 +386,6 @@
       "</div>",
       '<div class="profile-grid-side">',
       ratingsHtml,
-      rewardHtml,
       "</div>",
       "</div>",
       "</section>"

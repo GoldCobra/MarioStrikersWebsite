@@ -432,6 +432,42 @@
     ].join("");
   }
 
+  function toRewardWins(value, fallback) {
+    if (value === null || value === undefined || value === "") {
+      return fallback;
+    }
+    var parsed = Number(value);
+    if (!Number.isFinite(parsed)) {
+      return fallback;
+    }
+    return Math.max(0, Math.floor(parsed));
+  }
+
+  function buildRatingRewardMarkup(rewardLevel) {
+    var reward = rewardLevel || {};
+    var imageUrl = String(reward.image_url || "").trim();
+    var name = String(reward.name || "Unranked").trim() || "Unranked";
+    var requiredWins = Math.max(1, toRewardWins(reward.required_wins, 5));
+    var currentWins = Math.min(requiredWins, toRewardWins(reward.current_wins, 0));
+    if (!imageUrl) {
+      return "";
+    }
+
+    return [
+      '<div class="player-popup-rating-reward">',
+      '<div class="player-popup-rating-reward-main">',
+      '<img class="player-popup-rating-reward-icon" src="', escapeHtml(imageUrl), '" alt="', escapeHtml(name), '" title="', escapeHtml(name), '" loading="lazy">',
+      '<span class="player-popup-rating-reward-name">', escapeHtml(name), "</span>",
+      "</div>",
+      '<div class="player-popup-rating-reward-rule" aria-hidden="true"></div>',
+      '<p class="player-popup-rating-reward-progress">',
+      '<span>Season Reward Level</span>',
+      '<strong>', escapeHtml(currentWins + "/" + requiredWins), "</strong>",
+      "</p>",
+      "</div>"
+    ].join("");
+  }
+
   function buildRatingsMarkup(cards) {
     return cards.map(function (card) {
       var ratingValue = card && card.rating && Number.isFinite(card.rating.rating) ? card.rating.rating : null;
@@ -481,36 +517,15 @@
       }
 
       return [
+        '<div class="player-popup-rating-unit">',
         '<article class="' + cardClass + '">',
         '<h4 class="player-popup-rating-title">', escapeHtml(title), "</h4>",
         lines.join(""),
-        "</article>"
+        "</article>",
+        buildRatingRewardMarkup(card && card.rating && card.rating.season_reward_level),
+        "</div>"
       ].join("");
     }).filter(Boolean).join("");
-  }
-
-  function renderSeasonRewardLevel(rewardLevel, hasRatings) {
-    var section = popupState.slots["season-reward-section"];
-    var icon = popupState.slots["season-reward-icon"];
-    if (!section || !icon) {
-      return;
-    }
-
-    var reward = rewardLevel || {};
-    var imageUrl = String(reward.image_url || "").trim();
-    var name = String(reward.name || "Unranked").trim() || "Unranked";
-    if (!hasRatings || !imageUrl) {
-      section.hidden = true;
-      icon.removeAttribute("src");
-      icon.removeAttribute("title");
-      icon.alt = "";
-      return;
-    }
-
-    icon.src = imageUrl;
-    icon.alt = name;
-    icon.title = name;
-    section.hidden = false;
   }
 
   function renderAccolades(accolades) {
@@ -635,7 +650,6 @@
     if (singlesMount || doublesMount) {
       setSectionHidden(singlesMount || doublesMount, !singlesMarkup && !doublesMarkup);
     }
-    renderSeasonRewardLevel(data.season_reward_level, !!(singlesMarkup || doublesMarkup));
 
     var rankBannerSection = popupState.slots["rank-banner-section"];
     var rankBanner = popupState.slots["rank-banner"];

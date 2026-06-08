@@ -3057,6 +3057,12 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   gap: 0.5rem;
 }
 
+.profile-rating-unit {
+  min-width: 0;
+  display: grid;
+  gap: 0.32rem;
+}
+
 .profile-rating-card {
   min-height: 108px;
   padding: 0.42rem 0.4rem;
@@ -3098,6 +3104,61 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   height: 21px;
   object-fit: contain;
   margin-right: 0.1rem;
+}
+
+.profile-rating-reward {
+  min-width: 0;
+  display: grid;
+  gap: 0.18rem;
+  padding: 0 0.08rem;
+  color: #f2f2f2;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  letter-spacing: var(--reporter-letter-spacing);
+}
+
+.profile-rating-reward-main {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.34rem;
+}
+
+.profile-rating-reward-icon {
+  flex: 0 0 auto;
+  width: auto;
+  height: 23px;
+  object-fit: contain;
+}
+
+.profile-rating-reward-name {
+  min-width: 0;
+  overflow: hidden;
+  color: #f4f4f4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-rating-reward-rule {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.profile-rating-reward-progress {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.78em;
+  line-height: 1.15;
+}
+
+.profile-rating-reward-progress strong {
+  flex: 0 0 auto;
+  color: rgba(255, 255, 255, 0.86);
+  font-weight: 700;
 }
 
 .profile-season-reward-line {
@@ -3483,6 +3544,12 @@ body.player-popup-open {
   gap: 0.5rem;
 }
 
+.player-popup-rating-unit {
+  min-width: 0;
+  display: grid;
+  gap: 0.32rem;
+}
+
 .player-popup-rating-card {
   min-height: 108px;
   padding: 0.38rem 0.34rem;
@@ -3512,6 +3579,7 @@ body.player-popup-open {
   .player-popup-accolade-item,
   .player-popup-rating-title,
   .player-popup-rating-line,
+  .player-popup-rating-reward-main,
   .player-popup-season-reward-line
 ) {
   font-size: var(--reporter-font-size-sm);
@@ -3525,6 +3593,7 @@ body.player-popup-open {
   .player-popup-accolade-item,
   .player-popup-rating-title,
   .player-popup-rating-line,
+  .player-popup-rating-reward-main,
   .player-popup-season-reward-line
 ) {
   font-size: 15px;
@@ -3573,6 +3642,61 @@ body.player-popup-open {
   height: 21px;
   object-fit: contain;
   margin-right: 0.1rem;
+}
+
+.player-popup-rating-reward {
+  min-width: 0;
+  display: grid;
+  gap: 0.18rem;
+  padding: 0 0.08rem;
+  color: #f2f2f2;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  letter-spacing: var(--reporter-letter-spacing);
+}
+
+.player-popup-rating-reward-main {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.34rem;
+}
+
+.player-popup-rating-reward-icon {
+  flex: 0 0 auto;
+  width: auto;
+  height: 23px;
+  object-fit: contain;
+}
+
+.player-popup-rating-reward-name {
+  min-width: 0;
+  overflow: hidden;
+  color: #f4f4f4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-popup-rating-reward-rule {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.player-popup-rating-reward-progress {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.78em;
+  line-height: 1.15;
+}
+
+.player-popup-rating-reward-progress strong {
+  flex: 0 0 auto;
+  color: rgba(255, 255, 255, 0.86);
+  font-weight: 700;
 }
 
 .player-popup-season-reward-line {
