@@ -218,6 +218,8 @@ test("profile rating cards show an unranked icon for competitive rank zero", fun
       Elo: 500,
       RankNumber: 0,
       RankName: "Unranked",
+      PlacementPlayed: 1,
+      PlacementComplete: false,
       MatchWins: 1,
       MatchLosses: 0
     }
@@ -226,6 +228,13 @@ test("profile rating cards show an unranked icon for competitive rank zero", fun
   assert.equal(ratings.msbl.rating, 500);
   assert.equal(ratings.msbl.rank_icon_url, "/assets/players/rewardlevel/0-unranked.png?v=20260608-rank-crop-v1");
   assert.equal(ratings.msbl.competitive_rank, "Unranked");
+  assert.deepEqual(ratings.msbl.season_reward_level, {
+    order: 0,
+    name: "Unranked",
+    image_url: "/assets/players/rewardlevel/0-unranked.png?v=20260608-rank-crop-v1",
+    current_wins: 1,
+    required_wins: 5
+  });
 });
 
 test("season reward level falls back to unranked and maps earned tiers", function () {
@@ -257,6 +266,8 @@ test("profile batch query reads all profile data in one multi-recordset batch", 
   assert.match(sql, /SELECT TOP 1\s+p\.ID AS player_id/s);
   assert.match(sql, /FROM FriendCodes fc/);
   assert.match(sql, /FROM CompetitiveLeaderboard lb/);
+  assert.match(sql, /lb\.PlacementPlayed/);
+  assert.match(sql, /lb\.PlacementComplete/);
   assert.match(sql, /CompetitiveSeasonRewardProgress/);
   assert.match(sql, /progress\.GameId/);
   assert.match(sql, /progress\.ModeCode/);
@@ -302,6 +313,8 @@ test("profile batch recordsets map to the existing profile DTO shape", function 
       Elo: 703.2,
       RankNumber: 3,
       RankName: "Bronze III",
+      PlacementPlayed: 5,
+      PlacementComplete: true,
       MatchWins: 6,
       MatchLosses: 0
     }],

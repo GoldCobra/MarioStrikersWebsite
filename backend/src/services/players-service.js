@@ -325,13 +325,31 @@ function toRewardWins(value, fallback) {
   return Math.max(0, Math.floor(parsed));
 }
 
-function buildSeasonRewardProgressLevel(row) {
+function normalizePlacementProgress(competitive) {
+  if (!competitive) {
+    return null;
+  }
+
+  const rankNumber = Number(competitive.RankNumber);
+  if (rankNumber !== 0) {
+    return null;
+  }
+
+  const placementPlayed = toSafeCount(competitive.PlacementPlayed);
+  const totalMatches = toSafeCount(competitive.MatchWins) + toSafeCount(competitive.MatchLosses);
+  return {
+    currentWins: Math.min(5, Math.max(placementPlayed, totalMatches)),
+    requiredWins: 5
+  };
+}
+
+function buildSeasonRewardProgressLevel(row, placementProgress) {
   const requiredWins = Math.max(1, toRewardWins(row && row.RequiredWins, 5));
   if (!row) {
     const unranked = buildSeasonRewardLevel(0);
     return Object.assign(unranked, {
-      current_wins: 0,
-      required_wins: requiredWins
+      current_wins: placementProgress ? Math.min(requiredWins, placementProgress.currentWins) : 0,
+      required_wins: placementProgress ? placementProgress.requiredWins : requiredWins
     });
   }
 
@@ -342,7 +360,7 @@ function buildSeasonRewardProgressLevel(row) {
   const level = buildSeasonRewardLevel(order);
   const currentWins = order > 0 || isCompletedTitan
     ? requiredWins
-    : Math.min(requiredWins, toRewardWins(row.CurrentTargetWins, 0));
+    : Math.min(requiredWins, toRewardWins(row.CurrentTargetWins, placementProgress ? placementProgress.currentWins : 0));
 
   return Object.assign(level, {
     current_wins: currentWins,
@@ -410,7 +428,10 @@ function buildRatingBlock(options) {
     rank_icon_url: getCompetitiveRankIconUrl(rankNumber),
     competitive_rank: normalizeText(competitive && competitive.RankName),
     competitive_rank_number: Number.isFinite(rankNumber) ? rankNumber : null,
-    season_reward_level: buildSeasonRewardProgressLevel(options && options.rewardProgress)
+    season_reward_level: buildSeasonRewardProgressLevel(
+      options && options.rewardProgress,
+      normalizePlacementProgress(competitive)
+    )
   };
 
   if (metricName) {
@@ -661,6 +682,8 @@ async function getPlayerCompetitiveRatings(pool, playerId) {
       "  lb.RankName,",
       "  lb.MatchWins,",
       "  lb.MatchLosses,",
+      "  lb.PlacementPlayed,",
+      "  lb.PlacementComplete,",
       "  lb.TotalMatches",
       "FROM CompetitiveLeaderboard lb",
       "INNER JOIN CompetitiveSeason season ON season.Id = lb.SeasonId",
@@ -778,6 +801,8 @@ function buildPlayerProfileBatchQuery() {
     "  lb.RankName,",
     "  lb.MatchWins,",
     "  lb.MatchLosses,",
+    "  lb.PlacementPlayed,",
+    "  lb.PlacementComplete,",
     "  lb.TotalMatches",
     "FROM CompetitiveLeaderboard lb",
     "INNER JOIN CompetitiveSeason season ON season.Id = lb.SeasonId",
