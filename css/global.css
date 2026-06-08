@@ -3837,6 +3837,22 @@ body.player-popup-open {
   box-shadow: none !important;
 }
 
+#player-profile-popup .player-popup-rating-reward:not(.is-reward-tier-0) .player-popup-rating-reward-icon {
+  filter:
+    drop-shadow(0 0 1px var(--profile-rating-reward-glow))
+    drop-shadow(0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow))
+    drop-shadow(0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow))
+    drop-shadow(0 0 var(--profile-rating-reward-glow-wide) var(--profile-rating-reward-glow)) !important;
+}
+
+#player-profile-popup .player-popup-rating-reward:not(.is-reward-tier-0) .player-popup-rating-reward-name {
+  text-shadow:
+    0 0 1px var(--profile-rating-reward-glow),
+    0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow),
+    0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow),
+    0 0 var(--profile-rating-reward-glow-wide) var(--profile-rating-reward-glow) !important;
+}
+
 .msbl-club-row[data-club-id] {
   cursor: pointer;
 }
