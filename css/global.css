@@ -70,6 +70,7 @@ body {
   --tabs-tab-font-size-fluid: clamp(0.84rem, 0.95vw, 1rem);
   --profile-rank-icon-height: 21px;
   --profile-rating-reward-icon-height: 23px;
+  --profile-rating-reward-glow-gutter: 0.46rem;
   --tab-content-start-gap: 0.56rem;
   --subnav-reserve-height: 48px;
   --content-box-shell-max-width: 1154px;
@@ -3050,6 +3051,10 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 .profile-ratings-panel {
   display: grid;
   gap: 0.55rem;
+  width: calc(100% + var(--profile-rating-reward-glow-gutter));
+  margin-left: calc(-1 * var(--profile-rating-reward-glow-gutter));
+  padding-left: var(--profile-rating-reward-glow-gutter);
+  overflow: visible;
 }
 
 .profile-ratings-grid {
@@ -3116,7 +3121,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   min-width: 0;
   display: grid;
   gap: 0.18rem;
-  padding: 0.04rem 0.08rem 0 0.46rem;
+  padding: 0 0.08rem;
   overflow: visible;
   color: #f2f2f2;
   font-family: var(--reporter-font-stack);
@@ -3519,6 +3524,9 @@ body.player-popup-open {
 .player-popup-content {
   max-height: min(68vh, 720px);
   overflow-y: auto;
+  width: calc(100% + var(--profile-rating-reward-glow-gutter));
+  margin-left: calc(-1 * var(--profile-rating-reward-glow-gutter));
+  padding-left: var(--profile-rating-reward-glow-gutter);
   padding-right: 0;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -3745,7 +3753,7 @@ body.player-popup-open {
   min-width: 0;
   display: grid;
   gap: 0.18rem;
-  padding: 0.04rem 0.08rem 0 0.46rem;
+  padding: 0 0.08rem;
   overflow: visible;
   color: #f2f2f2;
   font-family: var(--reporter-font-stack);
