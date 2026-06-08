@@ -3142,13 +3142,24 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   text-overflow: ellipsis;
   text-shadow: 0 0 5px var(--profile-rating-reward-glow);
   text-transform: uppercase;
+  transform: translateY(1px);
   white-space: nowrap;
 }
 
 .profile-rating-reward.is-reward-tier-0,
 .player-popup-rating-reward.is-reward-tier-0 {
   --profile-rating-reward-accent: #d7d8de;
-  --profile-rating-reward-glow: rgba(215, 216, 222, 0.26);
+  --profile-rating-reward-glow: rgba(215, 216, 222, 0);
+}
+
+.profile-rating-reward.is-reward-tier-0 .profile-rating-reward-icon,
+.player-popup-rating-reward.is-reward-tier-0 .player-popup-rating-reward-icon {
+  filter: none;
+}
+
+.profile-rating-reward.is-reward-tier-0 .profile-rating-reward-name,
+.player-popup-rating-reward.is-reward-tier-0 .player-popup-rating-reward-name {
+  text-shadow: none;
 }
 
 .profile-rating-reward.is-reward-tier-1,
@@ -3738,6 +3749,7 @@ body.player-popup-open {
   text-overflow: ellipsis;
   text-shadow: 0 0 5px var(--profile-rating-reward-glow);
   text-transform: uppercase;
+  transform: translateY(1px);
   white-space: nowrap;
 }
 
