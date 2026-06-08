@@ -3110,6 +3110,8 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 .profile-rating-reward {
   --profile-rating-reward-accent: #f4f4f4;
   --profile-rating-reward-glow: rgba(244, 244, 244, 0.24);
+  --profile-rating-reward-glow-soft: 4px;
+  --profile-rating-reward-glow-strong: 9px;
   min-width: 0;
   display: grid;
   gap: 0.18rem;
@@ -3130,7 +3132,6 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 .profile-rating-reward-icon-wrap,
 .player-popup-rating-reward-icon-wrap {
   flex: 0 0 auto;
-  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3138,24 +3139,13 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   height: var(--profile-rating-reward-icon-height);
 }
 
-.profile-rating-reward-icon-wrap::before,
-.player-popup-rating-reward-icon-wrap::before {
-  content: "";
-  position: absolute;
-  inset: -4px;
-  border-radius: 999px;
-  box-shadow:
-    0 0 8px 2px var(--profile-rating-reward-glow),
-    0 0 16px 4px var(--profile-rating-reward-glow);
-  pointer-events: none;
-}
-
 .profile-rating-reward-icon,
 .player-popup-rating-reward-icon {
-  position: relative;
-  z-index: 1;
   width: auto;
   height: var(--profile-rating-reward-icon-height);
+  filter:
+    drop-shadow(0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow))
+    drop-shadow(0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow));
   object-fit: contain;
 }
 
@@ -3165,9 +3155,8 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   color: var(--profile-rating-reward-accent);
   text-overflow: ellipsis;
   text-shadow:
-    0 0 2px var(--profile-rating-reward-glow),
-    0 0 8px var(--profile-rating-reward-glow),
-    0 0 14px var(--profile-rating-reward-glow);
+    0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow),
+    0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow);
   text-transform: uppercase;
   transform: translateY(2px);
   white-space: nowrap;
@@ -3179,9 +3168,9 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   --profile-rating-reward-glow: rgba(215, 216, 222, 0);
 }
 
-.profile-rating-reward.is-reward-tier-0 .profile-rating-reward-icon-wrap::before,
-.player-popup-rating-reward.is-reward-tier-0 .player-popup-rating-reward-icon-wrap::before {
-  display: none;
+.profile-rating-reward.is-reward-tier-0 .profile-rating-reward-icon,
+.player-popup-rating-reward.is-reward-tier-0 .player-popup-rating-reward-icon {
+  filter: none;
 }
 
 .profile-rating-reward.is-reward-tier-0 .profile-rating-reward-name,
@@ -3744,6 +3733,8 @@ body.player-popup-open {
 .player-popup-rating-reward {
   --profile-rating-reward-accent: #f4f4f4;
   --profile-rating-reward-glow: rgba(244, 244, 244, 0.24);
+  --profile-rating-reward-glow-soft: 4px;
+  --profile-rating-reward-glow-strong: 9px;
   min-width: 0;
   display: grid;
   gap: 0.18rem;
@@ -3767,9 +3758,8 @@ body.player-popup-open {
   color: var(--profile-rating-reward-accent);
   text-overflow: ellipsis;
   text-shadow:
-    0 0 2px var(--profile-rating-reward-glow),
-    0 0 8px var(--profile-rating-reward-glow),
-    0 0 14px var(--profile-rating-reward-glow);
+    0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow),
+    0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow);
   text-transform: uppercase;
   transform: translateY(2px);
   white-space: nowrap;
