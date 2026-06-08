@@ -138,9 +138,9 @@ test("profile rating cards use Competitive ELO, sets and rank icons", function (
   assert.equal(ratings.sms.rank_icon_url, "/assets/leaderboards/rankicons/6-master-I.png?v=20260608-rank-crop-v1");
   assert.equal(ratings.sms.rank_emoji, "");
   assert.deepEqual(ratings.sms.season_reward_level, {
-    order: 0,
-    name: "Unranked",
-    image_url: "/assets/players/rewardlevel/0-unranked.png?v=20260608-rank-crop-v1",
+    order: 1,
+    name: "Bronze",
+    image_url: "/assets/players/rewardlevel/1-bronze.png?v=20260608-rank-crop-v1",
     current_wins: 0,
     required_wins: 5
   });
@@ -203,6 +203,57 @@ test("profile rating cards attach per-game current season reward progress", func
     name: "Strikers Titan",
     image_url: "/assets/players/rewardlevel/7-strikerstitan-b.png?v=20260608-rank-crop-v1",
     current_wins: 5,
+    required_wins: 5
+  });
+});
+
+test("profile rating cards show the current bronze reward target after placements complete", function () {
+  const ratings = buildRatings({}, [
+    {
+      GameType: 1,
+      Mode: "1v1",
+      Elo: 705,
+      RankNumber: 3,
+      RankName: "Bronze III",
+      MatchWins: 5,
+      MatchLosses: 0,
+      PlacementPlayed: 5,
+      PlacementComplete: true
+    },
+    {
+      GameType: 2,
+      Mode: "1v1",
+      Elo: 602,
+      RankNumber: 1,
+      RankName: "Bronze I",
+      MatchWins: 0,
+      MatchLosses: 5,
+      PlacementPlayed: 5,
+      PlacementComplete: true
+    }
+  ], [
+    {
+      GameId: 1,
+      ModeCode: "1v1",
+      HighestEarnedTierOrder: 0,
+      CurrentTargetTierOrder: 1,
+      CurrentTargetWins: 0,
+      RequiredWins: 5
+    }
+  ]);
+
+  assert.deepEqual(ratings.msc.season_reward_level, {
+    order: 1,
+    name: "Bronze",
+    image_url: "/assets/players/rewardlevel/1-bronze.png?v=20260608-rank-crop-v1",
+    current_wins: 0,
+    required_wins: 5
+  });
+  assert.deepEqual(ratings.sms.season_reward_level, {
+    order: 1,
+    name: "Bronze",
+    image_url: "/assets/players/rewardlevel/1-bronze.png?v=20260608-rank-crop-v1",
+    current_wins: 0,
     required_wins: 5
   });
 });
@@ -342,7 +393,7 @@ test("profile batch recordsets map to the existing profile DTO shape", function 
   assert.equal(profile.ratings.msbl.sets, "6-0");
   assert.equal(profile.ratings.msbl.whr, 2112);
   assert.equal(profile.ratings.msbl.rank_icon_url, "/assets/leaderboards/rankicons/1-bronze-III.png?v=20260608-rank-crop-v1");
-  assert.equal(profile.ratings.msbl.season_reward_level.name, "Unranked");
+  assert.equal(profile.ratings.msbl.season_reward_level.name, "Bronze");
   assert.equal(profile.ratings.msbl.season_reward_level.current_wins, 2);
   assert.equal(profile.ratings.msbl.season_reward_level.required_wins, 5);
   assert.equal(profile.season_reward_level.name, "Silver");

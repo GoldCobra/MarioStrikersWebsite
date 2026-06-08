@@ -331,34 +331,38 @@ function normalizePlacementProgress(competitive) {
   }
 
   const rankNumber = Number(competitive.RankNumber);
-  if (rankNumber !== 0) {
-    return null;
-  }
-
   const placementPlayed = toSafeCount(competitive.PlacementPlayed);
   const totalMatches = toSafeCount(competitive.MatchWins) + toSafeCount(competitive.MatchLosses);
+  const placementComplete = Boolean(competitive.PlacementComplete)
+    || placementPlayed >= 5
+    || rankNumber > 0;
   return {
     currentWins: Math.min(5, Math.max(placementPlayed, totalMatches)),
-    requiredWins: 5
+    requiredWins: 5,
+    placementComplete
   };
 }
 
 function buildSeasonRewardProgressLevel(row, placementProgress) {
   const requiredWins = Math.max(1, toRewardWins(row && row.RequiredWins, 5));
   if (!row) {
-    const unranked = buildSeasonRewardLevel(0);
-    return Object.assign(unranked, {
-      current_wins: placementProgress ? Math.min(requiredWins, placementProgress.currentWins) : 0,
+    const fallbackLevel = buildSeasonRewardLevel(placementProgress && placementProgress.placementComplete ? 1 : 0);
+    return Object.assign(fallbackLevel, {
+      current_wins: placementProgress && !placementProgress.placementComplete
+        ? Math.min(requiredWins, placementProgress.currentWins)
+        : 0,
       required_wins: placementProgress ? placementProgress.requiredWins : requiredWins
     });
   }
 
   const highestOrder = Number(row.HighestEarnedTierOrder);
+  const targetOrder = Number(row.CurrentTargetTierOrder);
   const isHighestValid = Number.isInteger(highestOrder) && SEASON_REWARD_LEVEL_BY_ORDER[highestOrder];
-  const isCompletedTitan = isHighestValid && highestOrder >= 7;
-  const order = isHighestValid ? highestOrder : 0;
+  const isEarnedTier = isHighestValid && highestOrder > 0;
+  const isTargetValid = Number.isInteger(targetOrder) && SEASON_REWARD_LEVEL_BY_ORDER[targetOrder];
+  const order = isEarnedTier ? highestOrder : (isTargetValid ? targetOrder : 0);
   const level = buildSeasonRewardLevel(order);
-  const currentWins = order > 0 || isCompletedTitan
+  const currentWins = isEarnedTier
     ? requiredWins
     : Math.min(requiredWins, toRewardWins(row.CurrentTargetWins, placementProgress ? placementProgress.currentWins : 0));
 
