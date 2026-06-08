@@ -3109,9 +3109,10 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 
 .profile-rating-reward {
   --profile-rating-reward-accent: #f4f4f4;
-  --profile-rating-reward-glow: rgba(244, 244, 244, 0.24);
-  --profile-rating-reward-glow-soft: 4px;
-  --profile-rating-reward-glow-strong: 9px;
+  --profile-rating-reward-glow: rgba(244, 244, 244, 0.95);
+  --profile-rating-reward-glow-soft: 3px;
+  --profile-rating-reward-glow-strong: 12px;
+  --profile-rating-reward-glow-wide: 26px;
   min-width: 0;
   display: grid;
   gap: 0.18rem;
@@ -3144,19 +3145,23 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   width: auto;
   height: var(--profile-rating-reward-icon-height);
   filter:
+    drop-shadow(0 0 1px var(--profile-rating-reward-glow))
     drop-shadow(0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow))
-    drop-shadow(0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow));
+    drop-shadow(0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow))
+    drop-shadow(0 0 var(--profile-rating-reward-glow-wide) var(--profile-rating-reward-glow));
   object-fit: contain;
 }
 
 .profile-rating-reward-name {
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
   color: var(--profile-rating-reward-accent);
-  text-overflow: ellipsis;
+  padding: 0 0.08rem;
   text-shadow:
+    0 0 1px var(--profile-rating-reward-glow),
     0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow),
-    0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow);
+    0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow),
+    0 0 var(--profile-rating-reward-glow-wide) var(--profile-rating-reward-glow);
   text-transform: uppercase;
   transform: translateY(2px);
   white-space: nowrap;
@@ -3181,43 +3186,43 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 .profile-rating-reward.is-reward-tier-1,
 .player-popup-rating-reward.is-reward-tier-1 {
   --profile-rating-reward-accent: #d47a2d;
-  --profile-rating-reward-glow: rgba(212, 122, 45, 0.52);
+  --profile-rating-reward-glow: rgba(212, 122, 45, 0.95);
 }
 
 .profile-rating-reward.is-reward-tier-2,
 .player-popup-rating-reward.is-reward-tier-2 {
-  --profile-rating-reward-accent: #dceaf2;
-  --profile-rating-reward-glow: rgba(220, 234, 242, 0.62);
+  --profile-rating-reward-accent: #e7f8ff;
+  --profile-rating-reward-glow: rgba(231, 248, 255, 1);
 }
 
 .profile-rating-reward.is-reward-tier-3,
 .player-popup-rating-reward.is-reward-tier-3 {
   --profile-rating-reward-accent: #f2b832;
-  --profile-rating-reward-glow: rgba(242, 184, 50, 0.54);
+  --profile-rating-reward-glow: rgba(242, 184, 50, 0.95);
 }
 
 .profile-rating-reward.is-reward-tier-4,
 .player-popup-rating-reward.is-reward-tier-4 {
   --profile-rating-reward-accent: #65dce4;
-  --profile-rating-reward-glow: rgba(101, 220, 228, 0.5);
+  --profile-rating-reward-glow: rgba(101, 220, 228, 0.95);
 }
 
 .profile-rating-reward.is-reward-tier-5,
 .player-popup-rating-reward.is-reward-tier-5 {
   --profile-rating-reward-accent: #82d8ff;
-  --profile-rating-reward-glow: rgba(130, 216, 255, 0.54);
+  --profile-rating-reward-glow: rgba(130, 216, 255, 0.95);
 }
 
 .profile-rating-reward.is-reward-tier-6,
 .player-popup-rating-reward.is-reward-tier-6 {
   --profile-rating-reward-accent: #a77cff;
-  --profile-rating-reward-glow: rgba(167, 124, 255, 0.54);
+  --profile-rating-reward-glow: rgba(167, 124, 255, 0.95);
 }
 
 .profile-rating-reward.is-reward-tier-7,
 .player-popup-rating-reward.is-reward-tier-7 {
   --profile-rating-reward-accent: #f05b6a;
-  --profile-rating-reward-glow: rgba(240, 91, 106, 0.54);
+  --profile-rating-reward-glow: rgba(240, 91, 106, 0.95);
 }
 
 .profile-rating-reward-rule {
@@ -3732,9 +3737,10 @@ body.player-popup-open {
 
 .player-popup-rating-reward {
   --profile-rating-reward-accent: #f4f4f4;
-  --profile-rating-reward-glow: rgba(244, 244, 244, 0.24);
-  --profile-rating-reward-glow-soft: 4px;
-  --profile-rating-reward-glow-strong: 9px;
+  --profile-rating-reward-glow: rgba(244, 244, 244, 0.95);
+  --profile-rating-reward-glow-soft: 3px;
+  --profile-rating-reward-glow-strong: 12px;
+  --profile-rating-reward-glow-wide: 26px;
   min-width: 0;
   display: grid;
   gap: 0.18rem;
@@ -3754,12 +3760,14 @@ body.player-popup-open {
 
 .player-popup-rating-reward-name {
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
   color: var(--profile-rating-reward-accent);
-  text-overflow: ellipsis;
+  padding: 0 0.08rem;
   text-shadow:
+    0 0 1px var(--profile-rating-reward-glow),
     0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow),
-    0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow);
+    0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow),
+    0 0 var(--profile-rating-reward-glow-wide) var(--profile-rating-reward-glow);
   text-transform: uppercase;
   transform: translateY(2px);
   white-space: nowrap;
