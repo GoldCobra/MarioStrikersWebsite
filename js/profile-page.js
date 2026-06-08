@@ -229,12 +229,14 @@
     var name = String(reward.name || "Unranked").trim() || "Unranked";
     var requiredWins = Math.max(1, toRewardWins(reward.required_wins, 5));
     var currentWins = Math.min(requiredWins, toRewardWins(reward.current_wins, 0));
+    var tierOrder = Number(reward.order);
+    var tierClass = Number.isFinite(tierOrder) ? " is-reward-tier-" + Math.max(0, Math.min(7, Math.floor(tierOrder))) : " is-reward-tier-0";
     if (!imageUrl) {
       return "";
     }
 
     return [
-      '<div class="profile-rating-reward">',
+      '<div class="profile-rating-reward', tierClass, '">',
       '<div class="profile-rating-reward-main">',
       '<img class="profile-rating-reward-icon" src="', escapeHtml(imageUrl), '" alt="', escapeHtml(name), '" title="', escapeHtml(name), '" loading="lazy">',
       '<span class="profile-rating-reward-name">', escapeHtml(name), "</span>",

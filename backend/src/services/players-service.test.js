@@ -152,7 +152,7 @@ test("profile rating cards use Competitive ELO, sets and rank icons", function (
   assert.deepEqual(ratings.msc, {});
 });
 
-test("profile rating cards attach per-game season reward progress", function () {
+test("profile rating cards attach per-game current season reward progress", function () {
   const ratings = buildRatings({}, [
     {
       GameType: 2,
@@ -192,9 +192,9 @@ test("profile rating cards attach per-game season reward progress", function () 
   ]);
 
   assert.deepEqual(ratings.sms.season_reward_level, {
-    order: 2,
-    name: "Silver",
-    image_url: "/assets/players/rewardlevel/2-silver.png?v=20260608-rank-crop-v1",
+    order: 1,
+    name: "Bronze",
+    image_url: "/assets/players/rewardlevel/1-bronze.png?v=20260608-rank-crop-v1",
     current_wins: 2,
     required_wins: 5
   });
@@ -329,7 +329,7 @@ test("profile batch recordsets map to the existing profile DTO shape", function 
   assert.equal(profile.ratings.msbl.sets, "6-0");
   assert.equal(profile.ratings.msbl.whr, 2112);
   assert.equal(profile.ratings.msbl.rank_icon_url, "/assets/leaderboards/rankicons/1-bronze-III.png?v=20260608-rank-crop-v1");
-  assert.equal(profile.ratings.msbl.season_reward_level.name, "Bronze");
+  assert.equal(profile.ratings.msbl.season_reward_level.name, "Unranked");
   assert.equal(profile.ratings.msbl.season_reward_level.current_wins, 2);
   assert.equal(profile.ratings.msbl.season_reward_level.required_wins, 5);
   assert.equal(profile.season_reward_level.name, "Silver");

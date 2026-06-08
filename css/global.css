@@ -68,7 +68,8 @@ body {
   --tabs-panel-height-fluid: clamp(44px, 4.2vw, 54px);
   --tabs-tab-width-fluid: clamp(136px, 11.4vw, 152px);
   --tabs-tab-font-size-fluid: clamp(0.84rem, 0.95vw, 1rem);
-  --profile-rating-icon-height: 23px;
+  --profile-rank-icon-height: 21px;
+  --profile-rating-reward-icon-height: 23px;
   --tab-content-start-gap: 0.56rem;
   --subnav-reserve-height: 48px;
   --content-box-shell-max-width: 1154px;
@@ -3101,7 +3102,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 
 .profile-rank-icon {
   width: auto;
-  height: var(--profile-rating-icon-height);
+  height: var(--profile-rank-icon-height);
   object-fit: contain;
   margin-right: 0.1rem;
 }
@@ -3127,7 +3128,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 .profile-rating-reward-icon {
   flex: 0 0 auto;
   width: auto;
-  height: var(--profile-rating-icon-height);
+  height: var(--profile-rating-reward-icon-height);
   object-fit: contain;
 }
 
@@ -3136,7 +3137,48 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   overflow: hidden;
   color: #f4f4f4;
   text-overflow: ellipsis;
+  text-transform: uppercase;
   white-space: nowrap;
+}
+
+.profile-rating-reward.is-reward-tier-0 .profile-rating-reward-name,
+.player-popup-rating-reward.is-reward-tier-0 .player-popup-rating-reward-name {
+  color: #d7d8de;
+}
+
+.profile-rating-reward.is-reward-tier-1 .profile-rating-reward-name,
+.player-popup-rating-reward.is-reward-tier-1 .player-popup-rating-reward-name {
+  color: #d47a2d;
+}
+
+.profile-rating-reward.is-reward-tier-2 .profile-rating-reward-name,
+.player-popup-rating-reward.is-reward-tier-2 .player-popup-rating-reward-name {
+  color: #c9d7e4;
+}
+
+.profile-rating-reward.is-reward-tier-3 .profile-rating-reward-name,
+.player-popup-rating-reward.is-reward-tier-3 .player-popup-rating-reward-name {
+  color: #f2b832;
+}
+
+.profile-rating-reward.is-reward-tier-4 .profile-rating-reward-name,
+.player-popup-rating-reward.is-reward-tier-4 .player-popup-rating-reward-name {
+  color: #65dce4;
+}
+
+.profile-rating-reward.is-reward-tier-5 .profile-rating-reward-name,
+.player-popup-rating-reward.is-reward-tier-5 .player-popup-rating-reward-name {
+  color: #82d8ff;
+}
+
+.profile-rating-reward.is-reward-tier-6 .profile-rating-reward-name,
+.player-popup-rating-reward.is-reward-tier-6 .player-popup-rating-reward-name {
+  color: #a77cff;
+}
+
+.profile-rating-reward.is-reward-tier-7 .profile-rating-reward-name,
+.player-popup-rating-reward.is-reward-tier-7 .player-popup-rating-reward-name {
+  color: #f05b6a;
 }
 
 .profile-rating-reward-rule {
@@ -3153,6 +3195,11 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   color: rgba(255, 255, 255, 0.68);
   font-size: 0.78em;
   line-height: 1.15;
+}
+
+.profile-rating-reward-progress span,
+.player-popup-rating-reward-progress span {
+  letter-spacing: 0;
 }
 
 .profile-rating-reward-progress strong {
@@ -3181,7 +3228,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 
 .profile-season-reward-icon {
   width: auto;
-  height: var(--profile-rating-icon-height);
+  height: var(--profile-rating-reward-icon-height);
   object-fit: contain;
 }
 
@@ -3639,7 +3686,7 @@ body.player-popup-open {
 
 .player-popup-rank-icon {
   width: auto;
-  height: var(--profile-rating-icon-height);
+  height: var(--profile-rank-icon-height);
   object-fit: contain;
   margin-right: 0.1rem;
 }
@@ -3665,7 +3712,7 @@ body.player-popup-open {
 .player-popup-rating-reward-icon {
   flex: 0 0 auto;
   width: auto;
-  height: var(--profile-rating-icon-height);
+  height: var(--profile-rating-reward-icon-height);
   object-fit: contain;
 }
 
@@ -3674,6 +3721,7 @@ body.player-popup-open {
   overflow: hidden;
   color: #f4f4f4;
   text-overflow: ellipsis;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -3721,7 +3769,7 @@ body.player-popup-open {
 
 .player-popup-season-reward-icon {
   width: auto;
-  height: var(--profile-rating-icon-height);
+  height: var(--profile-rating-reward-icon-height);
   object-fit: contain;
 }
 

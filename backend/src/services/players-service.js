@@ -335,14 +335,10 @@ function buildSeasonRewardProgressLevel(row) {
     });
   }
 
-  const targetOrder = Number(row.CurrentTargetTierOrder);
   const highestOrder = Number(row.HighestEarnedTierOrder);
-  const hasTargetOrder = row.CurrentTargetTierOrder !== null && row.CurrentTargetTierOrder !== undefined && row.CurrentTargetTierOrder !== "";
-  const isTargetValid = hasTargetOrder && Number.isInteger(targetOrder) && SEASON_REWARD_LEVEL_BY_ORDER[targetOrder];
-  const isCompletedTitan = !isTargetValid && Number.isInteger(highestOrder) && highestOrder >= 7;
-  const order = isTargetValid
-    ? targetOrder
-    : (isCompletedTitan ? 7 : 0);
+  const isHighestValid = Number.isInteger(highestOrder) && SEASON_REWARD_LEVEL_BY_ORDER[highestOrder];
+  const isCompletedTitan = isHighestValid && highestOrder >= 7;
+  const order = isHighestValid ? highestOrder : 0;
   const level = buildSeasonRewardLevel(order);
   const currentWins = isCompletedTitan
     ? requiredWins
