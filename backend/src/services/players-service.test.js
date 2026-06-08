@@ -195,7 +195,7 @@ test("profile rating cards attach per-game current season reward progress", func
     order: 1,
     name: "Bronze",
     image_url: "/assets/players/rewardlevel/1-bronze.png?v=20260608-rank-crop-v1",
-    current_wins: 2,
+    current_wins: 5,
     required_wins: 5
   });
   assert.deepEqual(ratings.msbl2v2.season_reward_level, {

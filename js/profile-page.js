@@ -230,7 +230,9 @@
     var requiredWins = Math.max(1, toRewardWins(reward.required_wins, 5));
     var currentWins = Math.min(requiredWins, toRewardWins(reward.current_wins, 0));
     var tierOrder = Number(reward.order);
-    var tierClass = Number.isFinite(tierOrder) ? " is-reward-tier-" + Math.max(0, Math.min(7, Math.floor(tierOrder))) : " is-reward-tier-0";
+    var normalizedTierOrder = Number.isFinite(tierOrder) ? Math.max(0, Math.min(7, Math.floor(tierOrder))) : 0;
+    var tierClass = " is-reward-tier-" + normalizedTierOrder;
+    var progressLabel = normalizedTierOrder > 0 ? "Season Reward Level" : "Matches";
     if (!imageUrl) {
       return "";
     }
@@ -245,7 +247,7 @@
       "</div>",
       '<div class="profile-rating-reward-rule" aria-hidden="true"></div>',
       '<p class="profile-rating-reward-progress">',
-      '<span>Season Reward Level</span>',
+      '<span>', escapeHtml(progressLabel), '</span>',
       '<strong>', escapeHtml(currentWins + "/" + requiredWins), "</strong>",
       "</p>",
       "</div>"

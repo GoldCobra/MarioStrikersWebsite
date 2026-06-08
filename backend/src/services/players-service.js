@@ -340,7 +340,7 @@ function buildSeasonRewardProgressLevel(row) {
   const isCompletedTitan = isHighestValid && highestOrder >= 7;
   const order = isHighestValid ? highestOrder : 0;
   const level = buildSeasonRewardLevel(order);
-  const currentWins = isCompletedTitan
+  const currentWins = order > 0 || isCompletedTitan
     ? requiredWins
     : Math.min(requiredWins, toRewardWins(row.CurrentTargetWins, 0));
 
