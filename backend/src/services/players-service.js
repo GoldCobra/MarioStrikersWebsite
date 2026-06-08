@@ -1,4 +1,4 @@
-const { withPool, mssql } = require("../db");
+const { withPool, measurePool, mssql } = require("../db");
 const { normalizeCountryCode } = require("./flag-codes");
 const DEFAULT_ACTIVITY_WINDOW_DAYS = 90;
 const PROFILE_SLOW_LOG_THRESHOLD_MS = 1500;
@@ -547,68 +547,34 @@ async function getPlayerFriendCodes(pool, playerId) {
   return buildFriendCodes(rows);
 }
 
+function buildPlayerProfileSummaryQuery(terminator) {
+  const suffix = terminator || "";
+  return [
+    "SELECT",
+    "  p.Name,",
+    "  MAX(CASE WHEN ps.GameType = 2 THEN ISNULL(CAST(ps.Wins AS NVARCHAR(5)) + '-' + CAST(ps.Losses AS NVARCHAR(5)), '0-0') END) AS SmsRecord,",
+    "  MAX(CASE WHEN ps.GameType = 2 THEN CAST(ROUND(ps.RatingWHR + 1000, 0) AS INT) END) AS SmsRating,",
+    "  MAX(CASE WHEN ps.GameType = 1 THEN ISNULL(CAST(ps.Wins AS NVARCHAR(5)) + '-' + CAST(ps.Losses AS NVARCHAR(5)), '0-0') END) AS MscRecord,",
+    "  MAX(CASE WHEN ps.GameType = 1 THEN CAST(ROUND(ps.RatingWHR + 1000, 0) AS INT) END) AS MscRating,",
+    "  MAX(CASE WHEN ps.GameType = 3 THEN ISNULL(CAST(ps.Wins AS NVARCHAR(5)) + '-' + CAST(ps.Losses AS NVARCHAR(5)), '0-0') END) AS BlRecord,",
+    "  MAX(CASE WHEN ps.GameType = 3 THEN CAST(ROUND(ps.RatingWHR + 1000, 0) AS INT) END) AS BlRating,",
+    "  MAX(CASE WHEN ps.GameType = 2 THEN ISNULL(CAST(ps.Wins2v2 AS NVARCHAR(5)) + '-' + CAST(ps.Losses2v2 AS NVARCHAR(5)), '0-0') END) AS SmsRecord2v2,",
+    "  MAX(CASE WHEN ps.GameType = 2 THEN CAST(ROUND(ps.RatingTS + 1000, 0) AS INT) END) AS SmsRating2v2,",
+    "  MAX(CASE WHEN ps.GameType = 1 THEN ISNULL(CAST(ps.Wins2v2 AS NVARCHAR(5)) + '-' + CAST(ps.Losses2v2 AS NVARCHAR(5)), '0-0') END) AS MscRecord2v2,",
+    "  MAX(CASE WHEN ps.GameType = 1 THEN CAST(ROUND(ps.RatingTS + 1000, 0) AS INT) END) AS MscRating2v2,",
+    "  MAX(CASE WHEN ps.GameType = 3 THEN ISNULL(CAST(ps.Wins2v2 AS NVARCHAR(5)) + '-' + CAST(ps.Losses2v2 AS NVARCHAR(5)), '0-0') END) AS BlRecord2v2,",
+    "  MAX(CASE WHEN ps.GameType = 3 THEN CAST(ROUND(ps.RatingTS + 1000, 0) AS INT) END) AS BlRating2v2",
+    "FROM Player p",
+    "LEFT JOIN PlayerStats ps ON ps.Player = p.ID AND ps.GameType IN (1, 2, 3) AND ISNULL(p.HideStats, 0) = 0",
+    "WHERE p.ID = @playerId",
+    "GROUP BY p.ID, p.Name" + suffix
+  ].join(" ");
+}
+
 async function getPlayerProfileSummary(pool, playerId) {
   const request = pool.request();
   request.input("playerId", mssql.Int, playerId);
-  const result = await request.query(
-    [
-      "SELECT TOP 1",
-      "  p.Name,",
-      "  c.ClubName AS Club,",
-      "  ISNULL(CAST(sms.Wins AS NVARCHAR(5)) + '-' + CAST(sms.Losses AS NVARCHAR(5)), '0-0') AS SmsRecord,",
-      "  ISNULL(CAST(sms.MatchWins AS NVARCHAR(5)) + '-' + CAST(sms.MatchLosses AS NVARCHAR(5)), '0-0') AS SmsMatchRecord,",
-      "  CAST(ROUND(sms.RatingWHR + 1000, 0) AS INT) AS SmsRating,",
-      "  CAST(ROUND(sms.Elo, 0) AS INT) AS SmsElo,",
-      "  smsRank.Value AS SmsRank,",
-      "  ISNULL(CAST(msc.Wins AS NVARCHAR(5)) + '-' + CAST(msc.Losses AS NVARCHAR(5)), '0-0') AS MscRecord,",
-      "  ISNULL(CAST(msc.MatchWins AS NVARCHAR(5)) + '-' + CAST(msc.MatchLosses AS NVARCHAR(5)), '0-0') AS MscMatchRecord,",
-      "  CAST(ROUND(msc.RatingWHR + 1000, 0) AS INT) AS MscRating,",
-      "  CAST(ROUND(msc.Elo, 0) AS INT) AS MscElo,",
-      "  mscRank.Value AS MscRank,",
-      "  ISNULL(CAST(bl.Wins AS NVARCHAR(5)) + '-' + CAST(bl.Losses AS NVARCHAR(5)), '0-0') AS BlRecord,",
-      "  ISNULL(CAST(bl.MatchWins AS NVARCHAR(5)) + '-' + CAST(bl.MatchLosses AS NVARCHAR(5)), '0-0') AS BlMatchRecord,",
-      "  CAST(ROUND(bl.RatingWHR + 1000, 0) AS INT) AS BlRating,",
-      "  CAST(ROUND(bl.Elo, 0) AS INT) AS BlElo,",
-      "  blRank.Value AS BlRank,",
-      "  ISNULL(CAST(sms.Wins2v2 AS NVARCHAR(5)) + '-' + CAST(sms.Losses2v2 AS NVARCHAR(5)), '0-0') AS SmsRecord2v2,",
-      "  ISNULL(CAST(sms.MatchWins2v2 AS NVARCHAR(5)) + '-' + CAST(sms.MatchLosses2v2 AS NVARCHAR(5)), '0-0') AS SmsMatchRecord2v2,",
-      "  CAST(ROUND(sms.RatingTS + 1000, 0) AS INT) AS SmsRating2v2,",
-      "  CAST(ROUND(sms.Elo2, 0) AS INT) AS SmsElo2v2,",
-      "  smsRank2v2.Value AS SmsRank2v2,",
-      "  ISNULL(CAST(msc.Wins2v2 AS NVARCHAR(5)) + '-' + CAST(msc.Losses2v2 AS NVARCHAR(5)), '0-0') AS MscRecord2v2,",
-      "  ISNULL(CAST(msc.MatchWins2v2 AS NVARCHAR(5)) + '-' + CAST(msc.MatchLosses2v2 AS NVARCHAR(5)), '0-0') AS MscMatchRecord2v2,",
-      "  CAST(ROUND(msc.RatingTS + 1000, 0) AS INT) AS MscRating2v2,",
-      "  CAST(ROUND(msc.Elo2, 0) AS INT) AS MscElo2v2,",
-      "  mscRank2v2.Value AS MscRank2v2,",
-      "  ISNULL(CAST(bl.Wins2v2 AS NVARCHAR(5)) + '-' + CAST(bl.Losses2v2 AS NVARCHAR(5)), '0-0') AS BlRecord2v2,",
-      "  ISNULL(CAST(bl.MatchWins2v2 AS NVARCHAR(5)) + '-' + CAST(bl.MatchLosses2v2 AS NVARCHAR(5)), '0-0') AS BlMatchRecord2v2,",
-      "  CAST(ROUND(bl.RatingTS + 1000, 0) AS INT) AS BlRating2v2,",
-      "  CAST(ROUND(bl.Elo2, 0) AS INT) AS BlElo2v2,",
-      "  blRank2v2.Value AS BlRank2v2,",
-      "  ISNULL(zest.Description, '') AS RankImage",
-      "FROM Player p",
-      "LEFT JOIN PlayerStats sms ON p.ID = sms.Player AND sms.GameType = 2 AND ISNULL(p.HideStats, 0) = 0",
-      "LEFT JOIN Enumeration smsRank ON sms.Rank = smsRank.Code AND smsRank.Type = 'emoji'",
-      "LEFT JOIN Enumeration smsRank2v2 ON sms.Rank2v2 = smsRank2v2.Code AND smsRank2v2.Type = 'emoji'",
-      "LEFT JOIN PlayerStats msc ON p.ID = msc.Player AND msc.GameType = 1 AND ISNULL(p.HideStats, 0) = 0",
-      "LEFT JOIN Enumeration mscRank ON msc.Rank = mscRank.Code AND mscRank.Type = 'emoji'",
-      "LEFT JOIN Enumeration mscRank2v2 ON msc.Rank2v2 = mscRank2v2.Code AND mscRank2v2.Type = 'emoji'",
-      "LEFT JOIN PlayerStats bl ON p.ID = bl.Player AND bl.GameType = 3 AND ISNULL(p.HideStats, 0) = 0",
-      "LEFT JOIN Enumeration blRank ON bl.Rank = blRank.Code AND blRank.Type = 'emoji'",
-      "LEFT JOIN Enumeration blRank2v2 ON bl.Rank2v2 = blRank2v2.Code AND blRank2v2.Type = 'emoji'",
-      "LEFT JOIN ClubRoster roster ON p.ID = roster.Player",
-      "LEFT JOIN Club c ON roster.Club = c.ID",
-      "LEFT JOIN (",
-      "  SELECT Player, ((MAX(CASE WHEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) > ISNULL(IsActive, 0) * ISNULL(Rank, 0) THEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) ELSE ISNULL(IsActive, 0) * ISNULL(Rank, 0) END) - 1) / 3) + 1 AS rankrole",
-      "  FROM PlayerStats",
-      "  GROUP BY Player",
-      "  HAVING MAX(CASE WHEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) > ISNULL(IsActive, 0) * ISNULL(Rank, 0) THEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) ELSE ISNULL(IsActive, 0) * ISNULL(Rank, 0) END) > 0",
-      ") maxRank ON p.ID = maxRank.Player",
-      "LEFT JOIN Enumeration zest ON zest.Type = 'ProfileZest' AND maxRank.rankrole = zest.Code",
-      "WHERE p.ID = @playerId",
-      "ORDER BY ISNULL(roster.Rank, 9999), c.ClubName"
-    ].join(" ")
-  );
+  const result = await request.query(buildPlayerProfileSummaryQuery());
   const rows = Array.isArray(result && result.recordset) ? result.recordset : [];
   return rows[0] || null;
 }
@@ -734,61 +700,7 @@ function buildPlayerProfileBatchQuery() {
     "FROM FriendCodes fc",
     "WHERE fc.Player = @playerId",
     "ORDER BY fc.GameType, fc.Region, fc.LineSeq;",
-    "SELECT TOP 1",
-    "  p.Name,",
-    "  c.ClubName AS Club,",
-    "  ISNULL(CAST(sms.Wins AS NVARCHAR(5)) + '-' + CAST(sms.Losses AS NVARCHAR(5)), '0-0') AS SmsRecord,",
-    "  ISNULL(CAST(sms.MatchWins AS NVARCHAR(5)) + '-' + CAST(sms.MatchLosses AS NVARCHAR(5)), '0-0') AS SmsMatchRecord,",
-    "  CAST(ROUND(sms.RatingWHR + 1000, 0) AS INT) AS SmsRating,",
-    "  CAST(ROUND(sms.Elo, 0) AS INT) AS SmsElo,",
-    "  smsRank.Value AS SmsRank,",
-    "  ISNULL(CAST(msc.Wins AS NVARCHAR(5)) + '-' + CAST(msc.Losses AS NVARCHAR(5)), '0-0') AS MscRecord,",
-    "  ISNULL(CAST(msc.MatchWins AS NVARCHAR(5)) + '-' + CAST(msc.MatchLosses AS NVARCHAR(5)), '0-0') AS MscMatchRecord,",
-    "  CAST(ROUND(msc.RatingWHR + 1000, 0) AS INT) AS MscRating,",
-    "  CAST(ROUND(msc.Elo, 0) AS INT) AS MscElo,",
-    "  mscRank.Value AS MscRank,",
-    "  ISNULL(CAST(bl.Wins AS NVARCHAR(5)) + '-' + CAST(bl.Losses AS NVARCHAR(5)), '0-0') AS BlRecord,",
-    "  ISNULL(CAST(bl.MatchWins AS NVARCHAR(5)) + '-' + CAST(bl.MatchLosses AS NVARCHAR(5)), '0-0') AS BlMatchRecord,",
-    "  CAST(ROUND(bl.RatingWHR + 1000, 0) AS INT) AS BlRating,",
-    "  CAST(ROUND(bl.Elo, 0) AS INT) AS BlElo,",
-    "  blRank.Value AS BlRank,",
-    "  ISNULL(CAST(sms.Wins2v2 AS NVARCHAR(5)) + '-' + CAST(sms.Losses2v2 AS NVARCHAR(5)), '0-0') AS SmsRecord2v2,",
-    "  ISNULL(CAST(sms.MatchWins2v2 AS NVARCHAR(5)) + '-' + CAST(sms.MatchLosses2v2 AS NVARCHAR(5)), '0-0') AS SmsMatchRecord2v2,",
-    "  CAST(ROUND(sms.RatingTS + 1000, 0) AS INT) AS SmsRating2v2,",
-    "  CAST(ROUND(sms.Elo2, 0) AS INT) AS SmsElo2v2,",
-    "  smsRank2v2.Value AS SmsRank2v2,",
-    "  ISNULL(CAST(msc.Wins2v2 AS NVARCHAR(5)) + '-' + CAST(msc.Losses2v2 AS NVARCHAR(5)), '0-0') AS MscRecord2v2,",
-    "  ISNULL(CAST(msc.MatchWins2v2 AS NVARCHAR(5)) + '-' + CAST(msc.MatchLosses2v2 AS NVARCHAR(5)), '0-0') AS MscMatchRecord2v2,",
-    "  CAST(ROUND(msc.RatingTS + 1000, 0) AS INT) AS MscRating2v2,",
-    "  CAST(ROUND(msc.Elo2, 0) AS INT) AS MscElo2v2,",
-    "  mscRank2v2.Value AS MscRank2v2,",
-    "  ISNULL(CAST(bl.Wins2v2 AS NVARCHAR(5)) + '-' + CAST(bl.Losses2v2 AS NVARCHAR(5)), '0-0') AS BlRecord2v2,",
-    "  ISNULL(CAST(bl.MatchWins2v2 AS NVARCHAR(5)) + '-' + CAST(bl.MatchLosses2v2 AS NVARCHAR(5)), '0-0') AS BlMatchRecord2v2,",
-    "  CAST(ROUND(bl.RatingTS + 1000, 0) AS INT) AS BlRating2v2,",
-    "  CAST(ROUND(bl.Elo2, 0) AS INT) AS BlElo2v2,",
-    "  blRank2v2.Value AS BlRank2v2,",
-    "  ISNULL(zest.Description, '') AS RankImage",
-    "FROM Player p",
-    "LEFT JOIN PlayerStats sms ON p.ID = sms.Player AND sms.GameType = 2 AND ISNULL(p.HideStats, 0) = 0",
-    "LEFT JOIN Enumeration smsRank ON sms.Rank = smsRank.Code AND smsRank.Type = 'emoji'",
-    "LEFT JOIN Enumeration smsRank2v2 ON sms.Rank2v2 = smsRank2v2.Code AND smsRank2v2.Type = 'emoji'",
-    "LEFT JOIN PlayerStats msc ON p.ID = msc.Player AND msc.GameType = 1 AND ISNULL(p.HideStats, 0) = 0",
-    "LEFT JOIN Enumeration mscRank ON msc.Rank = mscRank.Code AND mscRank.Type = 'emoji'",
-    "LEFT JOIN Enumeration mscRank2v2 ON msc.Rank2v2 = mscRank2v2.Code AND mscRank2v2.Type = 'emoji'",
-    "LEFT JOIN PlayerStats bl ON p.ID = bl.Player AND bl.GameType = 3 AND ISNULL(p.HideStats, 0) = 0",
-    "LEFT JOIN Enumeration blRank ON bl.Rank = blRank.Code AND blRank.Type = 'emoji'",
-    "LEFT JOIN Enumeration blRank2v2 ON bl.Rank2v2 = blRank2v2.Code AND blRank2v2.Type = 'emoji'",
-    "LEFT JOIN ClubRoster roster ON p.ID = roster.Player",
-    "LEFT JOIN Club c ON roster.Club = c.ID",
-    "LEFT JOIN (",
-    "  SELECT Player, ((MAX(CASE WHEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) > ISNULL(IsActive, 0) * ISNULL(Rank, 0) THEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) ELSE ISNULL(IsActive, 0) * ISNULL(Rank, 0) END) - 1) / 3) + 1 AS rankrole",
-    "  FROM PlayerStats",
-    "  GROUP BY Player",
-    "  HAVING MAX(CASE WHEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) > ISNULL(IsActive, 0) * ISNULL(Rank, 0) THEN ISNULL(IsActive2v2, 0) * ISNULL(Rank2v2, 0) ELSE ISNULL(IsActive, 0) * ISNULL(Rank, 0) END) > 0",
-    ") maxRank ON p.ID = maxRank.Player",
-    "LEFT JOIN Enumeration zest ON zest.Type = 'ProfileZest' AND maxRank.rankrole = zest.Code",
-    "WHERE p.ID = @playerId",
-    "ORDER BY ISNULL(roster.Rank, 9999), c.ClubName;",
+    buildPlayerProfileSummaryQuery(";"),
     "SELECT",
     "  lb.GameType,",
     "  lb.Mode,",
@@ -885,7 +797,7 @@ async function getPlayerProfileBatch(pool, playerId) {
   };
 }
 
-function logSlowProfileLoad(playerId, totalMs, dbMs, recordsets) {
+function logSlowProfileLoad(playerId, totalMs, dbMs, poolMs, recordsets) {
   if (totalMs < PROFILE_SLOW_LOG_THRESHOLD_MS) {
     return;
   }
@@ -896,6 +808,8 @@ function logSlowProfileLoad(playerId, totalMs, dbMs, recordsets) {
   console.warn("[players-profile] slow profile load", JSON.stringify({
     playerId: playerId,
     totalMs: totalMs,
+    poolMs: poolMs,
+    queryMs: dbMs,
     dbMs: dbMs,
     recordsetCounts: counts
   }));
@@ -972,24 +886,24 @@ async function getPlayersList() {
   });
 }
 
-async function buildPlayerProfile(pool, player) {
+async function buildPlayerProfile(pool, player, poolMs) {
   const playerId = toPositiveInt(player && player.player_id);
   if (!playerId) {
     throw new Error("Player not found.");
   }
 
-  const profile = await getPlayerProfileByIdFromPool(pool, playerId);
+  const profile = await getPlayerProfileByIdFromPool(pool, playerId, poolMs);
   if (!profile) {
     throw new Error("Player not found.");
   }
   return profile;
 }
 
-async function getPlayerProfileByIdFromPool(pool, playerId) {
+async function getPlayerProfileByIdFromPool(pool, playerId, poolMs) {
   const startedAt = Date.now();
   const batch = await getPlayerProfileBatch(pool, playerId);
   const profile = buildPlayerProfileFromRecordsets(batch.recordsets);
-  logSlowProfileLoad(playerId, Date.now() - startedAt, batch.dbMs, batch.recordsets);
+  logSlowProfileLoad(playerId, Date.now() - startedAt + Number(poolMs || 0), batch.dbMs, Number(poolMs || 0), batch.recordsets);
   return profile;
 }
 
@@ -999,8 +913,8 @@ async function getPlayerProfile(playerIdRaw) {
     throw new Error("Invalid player id.");
   }
 
-  return withPool(async function (pool) {
-    const profile = await getPlayerProfileByIdFromPool(pool, playerId);
+  return measurePool(async function (pool, poolMs) {
+    const profile = await getPlayerProfileByIdFromPool(pool, playerId, poolMs);
     if (!profile) {
       throw new Error("Player not found.");
     }
@@ -1009,13 +923,13 @@ async function getPlayerProfile(playerIdRaw) {
 }
 
 async function getPlayerProfileByDiscordId(discordIdRaw) {
-  return withPool(async function (pool) {
+  return measurePool(async function (pool, poolMs) {
     const player = await getPlayerBaseByDiscordId(pool, discordIdRaw);
     if (!player) {
       return null;
     }
 
-    return buildPlayerProfile(pool, player);
+    return buildPlayerProfile(pool, player, poolMs);
   });
 }
 

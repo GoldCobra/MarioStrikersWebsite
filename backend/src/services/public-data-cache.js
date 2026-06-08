@@ -11,6 +11,7 @@ const PLAYERS_LIST_KEY = "players:list";
 const MSBL_CLUBS_KEY = "clubs:msbl";
 const COMPETITIVE_SEASON_KEY = "competitive-season:current";
 const PUBLIC_LEADERBOARD_LIMIT = 100;
+const PUBLIC_DATA_SLOW_REFRESH_THRESHOLD_MS = 1500;
 const PUBLIC_LEADERBOARD_VARIANTS = Object.freeze([
   { game: "msbl", mode: "elo1v1" },
   { game: "msbl", mode: "elo2v2" },
@@ -79,6 +80,7 @@ class PublicDataCache {
     this.ttlMs = toPositiveInt(opts.ttlMs, 60000);
     this.refreshIntervalMs = toPositiveInt(opts.refreshIntervalMs, 60000);
     this.parallelism = toPositiveInt(opts.parallelism, 2);
+    this.slowRefreshThresholdMs = toPositiveInt(opts.slowRefreshThresholdMs, PUBLIC_DATA_SLOW_REFRESH_THRESHOLD_MS);
     this.snapshotPath = String(opts.snapshotPath || "").trim();
     this.logger = opts.logger || console;
     this.loaders = new Map(Object.entries(opts.loaders || {}));
@@ -145,9 +147,14 @@ class PublicDataCache {
       throw new Error("Unknown public data cache key: " + key);
     }
 
+    const startedAt = Date.now();
     const promise = Promise.resolve()
       .then(loader)
       .then((payload) => {
+        const elapsedMs = Date.now() - startedAt;
+        if (elapsedMs >= this.slowRefreshThresholdMs) {
+          this.log("warn", "[public-data-cache] Slow refresh for " + key + ": " + elapsedMs + "ms.");
+        }
         const entry = createEntry(payload, Date.now());
         this.entries.set(key, entry);
         this.scheduleSnapshotSave();
@@ -164,6 +171,7 @@ class PublicDataCache {
   async warmupAll() {
     const keys = this.getKeys();
     let refreshed = 0;
+    const startedAt = Date.now();
     await runLimited(keys, this.parallelism, async (key) => {
       try {
         await this.refresh(key);
@@ -172,7 +180,7 @@ class PublicDataCache {
         this.log("warn", "[public-data-cache] Warmup failed for " + key + ":", error);
       }
     });
-    this.log("info", "[public-data-cache] Warmup complete: " + refreshed + "/" + keys.length + " datasets refreshed.");
+    this.log("info", "[public-data-cache] Warmup complete: " + refreshed + "/" + keys.length + " datasets refreshed in " + (Date.now() - startedAt) + "ms.");
     return refreshed;
   }
 

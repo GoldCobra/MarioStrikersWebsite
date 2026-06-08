@@ -2,6 +2,9 @@ const mssql = require("mssql");
 const { config, assertMssqlConfigured } = require("./config");
 
 let poolPromise = null;
+let keepaliveHandle = null;
+
+const DEFAULT_KEEPALIVE_INTERVAL_MS = 25000;
 
 function getConnectionConfig() {
   assertMssqlConfigured();
@@ -11,6 +14,13 @@ function getConnectionConfig() {
     server: config.mssqlHost,
     database: config.mssqlDatabase,
     port: Number(config.mssqlPort || 443),
+    connectionTimeout: Number(config.mssqlConnectionTimeoutMs || 15000),
+    requestTimeout: Number(config.mssqlRequestTimeoutMs || 15000),
+    pool: {
+      min: Number(config.mssqlPoolMin || 1),
+      max: Number(config.mssqlPoolMax || 10),
+      idleTimeoutMillis: Number(config.mssqlPoolIdleTimeoutMs || 300000)
+    },
     options: {
       encrypt: true,
       trustServerCertificate: true,
@@ -37,16 +47,24 @@ async function getPool() {
   return poolPromise;
 }
 
-async function withPool(run) {
+async function measurePool(run) {
   try {
+    const startedAt = Date.now();
     const pool = await getPool();
-    return await run(pool);
+    const poolMs = Date.now() - startedAt;
+    return await run(pool, poolMs);
   } catch (error) {
     if (error && /Failed to connect|Connection is closed|ESOCKET|ETIMEOUT|EAI_AGAIN/i.test(String(error.message || ""))) {
       poolPromise = null;
     }
     throw error;
   }
+}
+
+async function withPool(run) {
+  return measurePool(async function (pool) {
+    return run(pool);
+  });
 }
 
 async function healthCheck() {
@@ -56,7 +74,44 @@ async function healthCheck() {
   });
 }
 
+function startKeepalive(options) {
+  if (keepaliveHandle) {
+    return keepaliveHandle;
+  }
+
+  const opts = options || {};
+  const intervalMs = Number(opts.intervalMs || DEFAULT_KEEPALIVE_INTERVAL_MS);
+  const logger = opts.logger || console;
+  const run = typeof opts.run === "function" ? opts.run : healthCheck;
+
+  async function tick() {
+    try {
+      await run();
+    } catch (error) {
+      if (logger && typeof logger.warn === "function") {
+        logger.warn("[mssql] Keepalive failed:", error && error.message ? error.message : error);
+      }
+    }
+  }
+
+  tick();
+  keepaliveHandle = setInterval(tick, intervalMs);
+  if (typeof keepaliveHandle.unref === "function") {
+    keepaliveHandle.unref();
+  }
+  return keepaliveHandle;
+}
+
+function stopKeepalive() {
+  if (!keepaliveHandle) {
+    return;
+  }
+  clearInterval(keepaliveHandle);
+  keepaliveHandle = null;
+}
+
 async function closePool() {
+  stopKeepalive();
   if (!poolPromise) {
     return;
   }
@@ -73,7 +128,12 @@ async function closePool() {
 
 module.exports = {
   mssql,
+  getConnectionConfig,
+  getPool,
+  measurePool,
   withPool,
   healthCheck,
+  startKeepalive,
+  stopKeepalive,
   closePool
 };

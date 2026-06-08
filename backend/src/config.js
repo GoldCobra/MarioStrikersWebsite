@@ -60,7 +60,12 @@ const config = {
   mssqlPort: readInt("MSSQL_PORT", 443),
   mssqlDatabase: process.env.MSSQL_DATABASE || "",
   mssqlUser: process.env.MSSQL_USER || "",
-  mssqlPassword: process.env.MSSQL_PASSWORD || ""
+  mssqlPassword: process.env.MSSQL_PASSWORD || "",
+  mssqlPoolMin: readInt("MSSQL_POOL_MIN", 1),
+  mssqlPoolMax: readInt("MSSQL_POOL_MAX", 10),
+  mssqlPoolIdleTimeoutMs: readInt("MSSQL_POOL_IDLE_TIMEOUT_MS", 300000),
+  mssqlConnectionTimeoutMs: readInt("MSSQL_CONNECTION_TIMEOUT_MS", 15000),
+  mssqlRequestTimeoutMs: readInt("MSSQL_REQUEST_TIMEOUT_MS", 15000)
 };
 
 function assertMssqlConfigured() {

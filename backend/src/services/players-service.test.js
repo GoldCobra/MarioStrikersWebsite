@@ -198,7 +198,12 @@ test("profile batch query reads all profile data in one multi-recordset batch", 
   assert.match(sql, /CompetitiveSeasonRewardProgress/);
   assert.match(sql, /FROM Tournament t/);
   assert.match(sql, /CROSS APPLY \(VALUES/);
+  assert.match(sql, /LEFT JOIN PlayerStats ps ON ps\.Player = p\.ID AND ps\.GameType IN \(1, 2, 3\)/);
   assert.match(sql, /@playerIdText/);
+  assert.doesNotMatch(sql, /ProfileZest/);
+  assert.doesNotMatch(sql, /RankImage/);
+  assert.doesNotMatch(sql, /LEFT JOIN Enumeration .*Rank/i);
+  assert.doesNotMatch(sql, /GROUP BY Player/);
   assert.doesNotMatch(sql, /UNION ALL/);
 });
 

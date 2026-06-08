@@ -135,3 +135,36 @@ test("loads and saves a persistent snapshot", async function () {
   assert.equal(loaded.cacheStatus, "hit");
   assert.equal(loaded.payload.value, "snapshot");
 });
+
+test("logs slow refreshes and warmup duration", async function () {
+  const warnings = [];
+  const infos = [];
+  const cache = createCache({
+    slowRefreshThresholdMs: 1,
+    logger: {
+      info: function (message) {
+        infos.push(String(message));
+      },
+      warn: function (message) {
+        warnings.push(String(message));
+      }
+    },
+    loaders: {
+      alpha: async function () {
+        await new Promise(function (resolve) {
+          setTimeout(resolve, 5);
+        });
+        return { value: "slow" };
+      }
+    }
+  });
+
+  await cache.warmupAll();
+
+  assert.ok(warnings.some(function (message) {
+    return /Slow refresh for alpha: \d+ms/.test(message);
+  }));
+  assert.ok(infos.some(function (message) {
+    return /Warmup complete: 1\/1 datasets refreshed in \d+ms/.test(message);
+  }));
+});
