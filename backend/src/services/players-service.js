@@ -4,7 +4,8 @@ const DEFAULT_ACTIVITY_WINDOW_DAYS = 90;
 const PROFILE_SLOW_LOG_THRESHOLD_MS = 1500;
 const COMPETITIVE_RANK_ICON_BASE_URL = "/assets/leaderboards/rankicons/";
 const SEASON_REWARD_LEVEL_BASE_URL = "/assets/players/rewardlevel/";
-const COMPETITIVE_UNRANKED_RANK_ICON_URL = SEASON_REWARD_LEVEL_BASE_URL + "0-unranked.png";
+const RANK_ICON_ASSET_VERSION = "20260608-rank-crop-v1";
+const COMPETITIVE_UNRANKED_RANK_ICON_URL = versionAssetUrl(SEASON_REWARD_LEVEL_BASE_URL + "0-unranked.png");
 const COMPETITIVE_RANK_ICON_BY_NUMBER = {
   1: "1-bronze-I.png",
   2: "1-bronze-II.png",
@@ -36,6 +37,10 @@ const SEASON_REWARD_LEVEL_BY_ORDER = {
   6: { name: "Master", image: "6-master.png" },
   7: { name: "Strikers Titan", image: "7-strikerstitan-b.png" }
 };
+
+function versionAssetUrl(url) {
+  return url + "?v=" + RANK_ICON_ASSET_VERSION;
+}
 
 function normalizeText(value) {
   return String(value || "").trim();
@@ -292,7 +297,7 @@ function getCompetitiveRankIconUrl(rankNumberValue) {
     return COMPETITIVE_UNRANKED_RANK_ICON_URL;
   }
   const fileName = Number.isFinite(rankNumber) ? COMPETITIVE_RANK_ICON_BY_NUMBER[rankNumber] : "";
-  return fileName ? COMPETITIVE_RANK_ICON_BASE_URL + fileName : "";
+  return fileName ? versionAssetUrl(COMPETITIVE_RANK_ICON_BASE_URL + fileName) : "";
 }
 
 function buildSeasonRewardLevel(orderValue) {
@@ -305,7 +310,7 @@ function buildSeasonRewardLevel(orderValue) {
   return {
     order: order,
     name: level.name,
-    image_url: SEASON_REWARD_LEVEL_BASE_URL + level.image
+    image_url: versionAssetUrl(SEASON_REWARD_LEVEL_BASE_URL + level.image)
   };
 }
 

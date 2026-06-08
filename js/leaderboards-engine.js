@@ -3,6 +3,7 @@
 
   var SESSION_CACHE_PREFIX = "leaderboardRows:v3::";
   var SESSION_CACHE_TTL_MS = 5 * 60 * 1000;
+  var RANK_ICON_ASSET_VERSION = "20260608-rank-crop-v1";
   var ROW_ASSET_FILES = ["normal-rank.png", "rank1.png", "rank2.png", "rank3.png"];
   var COMPETITIVE_RANK_ICON_BY_NUMBER = {
     1: "1-bronze-I.png",
@@ -341,7 +342,7 @@
 
     return [
       '<img class="lb-rank-icon" src="',
-      escapeHtml(prefix + "/assets/leaderboards/rankicons/" + fileName),
+      escapeHtml(prefix + "/assets/leaderboards/rankicons/" + fileName + "?v=" + RANK_ICON_ASSET_VERSION),
       '" alt="" aria-hidden="true" loading="lazy">'
     ].join("");
   }

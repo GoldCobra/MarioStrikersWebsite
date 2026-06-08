@@ -68,6 +68,7 @@ body {
   --tabs-panel-height-fluid: clamp(44px, 4.2vw, 54px);
   --tabs-tab-width-fluid: clamp(136px, 11.4vw, 152px);
   --tabs-tab-font-size-fluid: clamp(0.84rem, 0.95vw, 1rem);
+  --profile-rating-icon-height: 23px;
   --tab-content-start-gap: 0.56rem;
   --subnav-reserve-height: 48px;
   --content-box-shell-max-width: 1154px;
@@ -810,7 +811,6 @@ body[data-page="index"] .page-content {
   z-index: 3;
   height: var(--lb-rank-icon-height);
   width: auto;
-  max-width: calc(var(--lb-rank-icon-height) * 1.22);
   object-fit: contain;
   transform: translateY(-50%);
   pointer-events: none;
@@ -3100,8 +3100,8 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 }
 
 .profile-rank-icon {
-  width: 21px;
-  height: 21px;
+  width: auto;
+  height: var(--profile-rating-icon-height);
   object-fit: contain;
   margin-right: 0.1rem;
 }
@@ -3127,7 +3127,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 .profile-rating-reward-icon {
   flex: 0 0 auto;
   width: auto;
-  height: 23px;
+  height: var(--profile-rating-icon-height);
   object-fit: contain;
 }
 
@@ -3181,7 +3181,7 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 
 .profile-season-reward-icon {
   width: auto;
-  height: 26px;
+  height: var(--profile-rating-icon-height);
   object-fit: contain;
 }
 
@@ -3638,8 +3638,8 @@ body.player-popup-open {
 }
 
 .player-popup-rank-icon {
-  width: 21px;
-  height: 21px;
+  width: auto;
+  height: var(--profile-rating-icon-height);
   object-fit: contain;
   margin-right: 0.1rem;
 }
@@ -3665,7 +3665,7 @@ body.player-popup-open {
 .player-popup-rating-reward-icon {
   flex: 0 0 auto;
   width: auto;
-  height: 23px;
+  height: var(--profile-rating-icon-height);
   object-fit: contain;
 }
 
@@ -3721,7 +3721,7 @@ body.player-popup-open {
 
 .player-popup-season-reward-icon {
   width: auto;
-  height: 26px;
+  height: var(--profile-rating-icon-height);
   object-fit: contain;
 }
 

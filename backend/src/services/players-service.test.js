@@ -135,12 +135,12 @@ test("profile rating cards use Competitive ELO, sets and rank icons", function (
   assert.equal(ratings.sms.whr, 1641);
   assert.equal(ratings.sms.games, "259-159");
   assert.equal(ratings.sms.competitive_rank, "Master I");
-  assert.equal(ratings.sms.rank_icon_url, "/assets/leaderboards/rankicons/6-master-I.png");
+  assert.equal(ratings.sms.rank_icon_url, "/assets/leaderboards/rankicons/6-master-I.png?v=20260608-rank-crop-v1");
   assert.equal(ratings.sms.rank_emoji, "");
   assert.deepEqual(ratings.sms.season_reward_level, {
     order: 0,
     name: "Unranked",
-    image_url: "/assets/players/rewardlevel/0-unranked.png",
+    image_url: "/assets/players/rewardlevel/0-unranked.png?v=20260608-rank-crop-v1",
     current_wins: 0,
     required_wins: 5
   });
@@ -148,7 +148,7 @@ test("profile rating cards use Competitive ELO, sets and rank icons", function (
   assert.equal(ratings.msbl2v2.rating, 1029);
   assert.equal(ratings.msbl2v2.sets, "3-0");
   assert.equal(ratings.msbl2v2.tst, 983);
-  assert.equal(ratings.msbl2v2.rank_icon_url, "/assets/leaderboards/rankicons/3-gold-II.png");
+  assert.equal(ratings.msbl2v2.rank_icon_url, "/assets/leaderboards/rankicons/3-gold-II.png?v=20260608-rank-crop-v1");
   assert.deepEqual(ratings.msc, {});
 });
 
@@ -194,14 +194,14 @@ test("profile rating cards attach per-game season reward progress", function () 
   assert.deepEqual(ratings.sms.season_reward_level, {
     order: 2,
     name: "Silver",
-    image_url: "/assets/players/rewardlevel/2-silver.png",
+    image_url: "/assets/players/rewardlevel/2-silver.png?v=20260608-rank-crop-v1",
     current_wins: 2,
     required_wins: 5
   });
   assert.deepEqual(ratings.msbl2v2.season_reward_level, {
     order: 7,
     name: "Strikers Titan",
-    image_url: "/assets/players/rewardlevel/7-strikerstitan-b.png",
+    image_url: "/assets/players/rewardlevel/7-strikerstitan-b.png?v=20260608-rank-crop-v1",
     current_wins: 5,
     required_wins: 5
   });
@@ -224,7 +224,7 @@ test("profile rating cards show an unranked icon for competitive rank zero", fun
   ]);
 
   assert.equal(ratings.msbl.rating, 500);
-  assert.equal(ratings.msbl.rank_icon_url, "/assets/players/rewardlevel/0-unranked.png");
+  assert.equal(ratings.msbl.rank_icon_url, "/assets/players/rewardlevel/0-unranked.png?v=20260608-rank-crop-v1");
   assert.equal(ratings.msbl.competitive_rank, "Unranked");
 });
 
@@ -232,12 +232,12 @@ test("season reward level falls back to unranked and maps earned tiers", functio
   assert.deepEqual(buildSeasonRewardLevel(null), {
     order: 0,
     name: "Unranked",
-    image_url: "/assets/players/rewardlevel/0-unranked.png"
+    image_url: "/assets/players/rewardlevel/0-unranked.png?v=20260608-rank-crop-v1"
   });
   assert.deepEqual(buildSeasonRewardLevel(7), {
     order: 7,
     name: "Strikers Titan",
-    image_url: "/assets/players/rewardlevel/7-strikerstitan-b.png"
+    image_url: "/assets/players/rewardlevel/7-strikerstitan-b.png?v=20260608-rank-crop-v1"
   });
 });
 
@@ -328,7 +328,7 @@ test("profile batch recordsets map to the existing profile DTO shape", function 
   assert.equal(profile.ratings.msbl.rating, 703);
   assert.equal(profile.ratings.msbl.sets, "6-0");
   assert.equal(profile.ratings.msbl.whr, 2112);
-  assert.equal(profile.ratings.msbl.rank_icon_url, "/assets/leaderboards/rankicons/1-bronze-III.png");
+  assert.equal(profile.ratings.msbl.rank_icon_url, "/assets/leaderboards/rankicons/1-bronze-III.png?v=20260608-rank-crop-v1");
   assert.equal(profile.ratings.msbl.season_reward_level.name, "Bronze");
   assert.equal(profile.ratings.msbl.season_reward_level.current_wins, 2);
   assert.equal(profile.ratings.msbl.season_reward_level.required_wins, 5);
