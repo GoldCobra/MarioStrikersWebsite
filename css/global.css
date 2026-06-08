@@ -4792,28 +4792,31 @@ body.player-popup-open {
     padding-inline: 0;
   }
 
-  .lb-row,
+  .lb-row {
+    --lb-bar-height: 31px;
+    --lb-rank-icon-height: calc(var(--lb-bar-height) * 0.70);
+    width: min(82vw, 560px);
+    max-width: 100%;
+    font-size: clamp(0.72rem, 3.2vw, 0.84rem);
+  }
+
   .players-list .players-row {
-    width: min(90vw, 620px);
+    width: min(94vw, 620px);
     max-width: 100%;
   }
 
-  .lb-row {
-    --lb-rank-icon-height: calc(var(--lb-bar-height) * 0.72);
-  }
-
   .lb-rank-icon {
-    left: calc(var(--lb-rank-icon-height) * -0.66);
+    left: calc(var(--lb-rank-icon-height) * -1.08);
     filter: drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.55));
   }
 
   .lb-inner-frame {
-    grid-template-columns: 13% minmax(0, 1fr) 28%;
+    grid-template-columns: 15% minmax(0, 1fr) 25%;
   }
 
   .lb-rank-cell {
     overflow: hidden;
-    padding-inline-start: 0.45rem;
+    padding-inline-start: 0.24rem;
   }
 
   .lb-rank-1 {
@@ -4837,12 +4840,12 @@ body.player-popup-open {
   }
 
   .lb-player {
-    padding-left: 0.7rem;
+    padding-left: 0.5rem;
     padding-right: 0.25rem;
   }
 
   .lb-points {
-    padding-right: 0.65rem;
+    padding-right: 0.5rem;
     filter: drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.72));
   }
 
