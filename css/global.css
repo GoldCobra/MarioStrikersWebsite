@@ -4794,8 +4794,17 @@ body.player-popup-open {
 
   .lb-row,
   .players-list .players-row {
-    width: min(94vw, 620px);
+    width: min(90vw, 620px);
     max-width: 100%;
+  }
+
+  .lb-row {
+    --lb-rank-icon-height: calc(var(--lb-bar-height) * 0.72);
+  }
+
+  .lb-rank-icon {
+    left: calc(var(--lb-rank-icon-height) * -0.66);
+    filter: drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.55));
   }
 
   .lb-inner-frame {
@@ -4815,6 +4824,16 @@ body.player-popup-open {
   .lb-rank-1-svg {
     width: 1em;
     height: 1.1em;
+    filter: drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.72));
+  }
+
+  .lb-rank {
+    filter: drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.72));
+  }
+
+  .lb-row-rank-2 .lb-rank,
+  .lb-row-rank-3 .lb-rank {
+    filter: drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.72));
   }
 
   .lb-player {
@@ -4824,6 +4843,7 @@ body.player-popup-open {
 
   .lb-points {
     padding-right: 0.65rem;
+    filter: drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.72));
   }
 
   .players-name-trigger {
