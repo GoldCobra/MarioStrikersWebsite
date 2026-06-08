@@ -3127,14 +3127,36 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   gap: 0.34rem;
 }
 
-.profile-rating-reward-icon {
+.profile-rating-reward-icon-wrap,
+.player-popup-rating-reward-icon-wrap {
   flex: 0 0 auto;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: var(--profile-rating-reward-icon-height);
+}
+
+.profile-rating-reward-icon-wrap::before,
+.player-popup-rating-reward-icon-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 999px;
+  box-shadow:
+    0 0 8px 2px var(--profile-rating-reward-glow),
+    0 0 16px 4px var(--profile-rating-reward-glow);
+  pointer-events: none;
+}
+
+.profile-rating-reward-icon,
+.player-popup-rating-reward-icon {
+  position: relative;
+  z-index: 1;
   width: auto;
   height: var(--profile-rating-reward-icon-height);
   object-fit: contain;
-  filter:
-    drop-shadow(0 0 4px var(--profile-rating-reward-glow))
-    drop-shadow(0 0 9px var(--profile-rating-reward-glow));
 }
 
 .profile-rating-reward-name {
@@ -3143,10 +3165,11 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   color: var(--profile-rating-reward-accent);
   text-overflow: ellipsis;
   text-shadow:
-    0 0 4px var(--profile-rating-reward-glow),
-    0 0 10px var(--profile-rating-reward-glow);
+    0 0 2px var(--profile-rating-reward-glow),
+    0 0 8px var(--profile-rating-reward-glow),
+    0 0 14px var(--profile-rating-reward-glow);
   text-transform: uppercase;
-  transform: translateY(1px);
+  transform: translateY(2px);
   white-space: nowrap;
 }
 
@@ -3156,9 +3179,9 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   --profile-rating-reward-glow: rgba(215, 216, 222, 0);
 }
 
-.profile-rating-reward.is-reward-tier-0 .profile-rating-reward-icon,
-.player-popup-rating-reward.is-reward-tier-0 .player-popup-rating-reward-icon {
-  filter: none;
+.profile-rating-reward.is-reward-tier-0 .profile-rating-reward-icon-wrap::before,
+.player-popup-rating-reward.is-reward-tier-0 .player-popup-rating-reward-icon-wrap::before {
+  display: none;
 }
 
 .profile-rating-reward.is-reward-tier-0 .profile-rating-reward-name,
@@ -3738,26 +3761,17 @@ body.player-popup-open {
   gap: 0.34rem;
 }
 
-.player-popup-rating-reward-icon {
-  flex: 0 0 auto;
-  width: auto;
-  height: var(--profile-rating-reward-icon-height);
-  object-fit: contain;
-  filter:
-    drop-shadow(0 0 4px var(--profile-rating-reward-glow))
-    drop-shadow(0 0 9px var(--profile-rating-reward-glow));
-}
-
 .player-popup-rating-reward-name {
   min-width: 0;
   overflow: hidden;
   color: var(--profile-rating-reward-accent);
   text-overflow: ellipsis;
   text-shadow:
-    0 0 4px var(--profile-rating-reward-glow),
-    0 0 10px var(--profile-rating-reward-glow);
+    0 0 2px var(--profile-rating-reward-glow),
+    0 0 8px var(--profile-rating-reward-glow),
+    0 0 14px var(--profile-rating-reward-glow);
   text-transform: uppercase;
-  transform: translateY(1px);
+  transform: translateY(2px);
   white-space: nowrap;
 }
 

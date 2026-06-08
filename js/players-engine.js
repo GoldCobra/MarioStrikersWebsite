@@ -458,7 +458,9 @@
     return [
       '<div class="player-popup-rating-reward', tierClass, '">',
       '<div class="player-popup-rating-reward-main">',
+      '<span class="player-popup-rating-reward-icon-wrap">',
       '<img class="player-popup-rating-reward-icon" src="', escapeHtml(imageUrl), '" alt="', escapeHtml(name), '" title="', escapeHtml(name), '" loading="lazy">',
+      '</span>',
       '<span class="player-popup-rating-reward-name">', escapeHtml(name), "</span>",
       "</div>",
       '<div class="player-popup-rating-reward-rule" aria-hidden="true"></div>',

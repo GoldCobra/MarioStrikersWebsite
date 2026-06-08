@@ -238,7 +238,9 @@
     return [
       '<div class="profile-rating-reward', tierClass, '">',
       '<div class="profile-rating-reward-main">',
+      '<span class="profile-rating-reward-icon-wrap">',
       '<img class="profile-rating-reward-icon" src="', escapeHtml(imageUrl), '" alt="', escapeHtml(name), '" title="', escapeHtml(name), '" loading="lazy">',
+      '</span>',
       '<span class="profile-rating-reward-name">', escapeHtml(name), "</span>",
       "</div>",
       '<div class="profile-rating-reward-rule" aria-hidden="true"></div>',
