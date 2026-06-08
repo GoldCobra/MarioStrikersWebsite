@@ -773,6 +773,7 @@ body[data-page="index"] .page-content {
 .lb-row {
   --lb-bar-height: 46px;
   --lb-rank-icon-height: calc(var(--lb-bar-height) * 0.78);
+  --lb-rank-icon-protrusion: calc(var(--lb-rank-icon-height) * 1.26);
   --lb-text-zone-left: 1px;
   --lb-text-zone-right: 1px;
   --lb-text-zone-top: 2px;
@@ -799,11 +800,12 @@ body[data-page="index"] .page-content {
   width: min(84%, 620px);
   background-position: center;
   background-size: 100% 100%;
+  transform: translateX(calc(var(--lb-rank-icon-protrusion) / 2));
 }
 
 .lb-rank-icon {
   position: absolute;
-  left: calc(var(--lb-rank-icon-height) * -1.26);
+  left: calc(var(--lb-rank-icon-protrusion) * -1);
   top: 50%;
   z-index: 3;
   height: var(--lb-rank-icon-height);
@@ -4795,6 +4797,7 @@ body.player-popup-open {
   .lb-row {
     --lb-bar-height: 31px;
     --lb-rank-icon-height: calc(var(--lb-bar-height) * 0.70);
+    --lb-rank-icon-protrusion: calc(var(--lb-rank-icon-height) * 1.08);
     width: min(82vw, 560px);
     max-width: 100%;
     font-size: clamp(0.72rem, 3.2vw, 0.84rem);
@@ -4806,7 +4809,6 @@ body.player-popup-open {
   }
 
   .lb-rank-icon {
-    left: calc(var(--lb-rank-icon-height) * -1.08);
     filter: drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.55));
   }
 
