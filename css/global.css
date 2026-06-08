@@ -4797,7 +4797,7 @@ body.player-popup-open {
   .lb-row {
     --lb-bar-height: 31px;
     --lb-rank-icon-height: calc(var(--lb-bar-height) * 0.70);
-    --lb-rank-icon-protrusion: calc(var(--lb-rank-icon-height) * 1.08);
+    --lb-rank-icon-protrusion: calc(var(--lb-rank-icon-height) * 1.32);
     width: min(82vw, 560px);
     max-width: 100%;
     font-size: clamp(0.72rem, 3.2vw, 0.84rem);
