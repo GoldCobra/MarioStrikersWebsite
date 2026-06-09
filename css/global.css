@@ -1038,8 +1038,8 @@ body[data-page="index"] .page-content {
 
 .events-row {
   --events-icon-size: clamp(21px, 1.65vw, 28px);
-  --events-icon-x: 0px;
-  --events-icon-y: 1px;
+  --events-icon-x: 2px;
+  --events-icon-y: -4px;
   isolation: isolate;
 }
 
@@ -5233,8 +5233,8 @@ body.player-popup-open {
 
   .events-row {
     --events-icon-size: 20px;
-    --events-icon-x: 0px;
-    --events-icon-y: 0px;
+    --events-icon-x: 2px;
+    --events-icon-y: -4px;
   }
 
   .save-editor-panel {
