@@ -1065,7 +1065,7 @@ body[data-page="index"] .page-content {
 .events-inner-frame {
   top: 0;
   bottom: 0;
-  grid-template-columns: 15% minmax(0, 1fr) 0;
+  grid-template-columns: 12% minmax(0, 1fr) 0;
 }
 
 .events-channel-cell.lb-rank-cell {
