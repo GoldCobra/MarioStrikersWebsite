@@ -9,6 +9,7 @@ const { getLeaderboardRows, assertGameAndMode, parseLimit, parseOffset } = requi
 const { getPlayerProfile, getPlayerProfileByDiscordId } = require("./services/players-service");
 const { getMsblClubProfile } = require("./services/clubs-service");
 const { defaultClubLogoCache } = require("./services/club-logo-cache");
+const { communityEventsCache } = require("./services/events-service");
 const {
   appendQuery,
   buildDiscordAuthorizeUrl,
@@ -414,6 +415,16 @@ function createApp() {
     try {
       const cached = await publicDataCache.get(MSBL_CLUBS_KEY);
       sendPublicDataJson(res, cached, cached.payload);
+    } catch (error) {
+      sendApiError(res, error);
+    }
+  });
+
+  app.get("/api/events/community", async function (_req, res) {
+    try {
+      const payload = await communityEventsCache.get();
+      res.set("Cache-Control", PUBLIC_DATA_CACHE_CONTROL);
+      res.json(payload);
     } catch (error) {
       sendApiError(res, error);
     }

@@ -118,7 +118,7 @@
           label: "Tournaments",
           slug: "competitive-tournaments",
           children: [
-            { key: "community", label: "Community Tournaments", slug: "community-tournaments" }
+            { key: "community", label: "Events", slug: "community-tournaments" }
           ]
         },
         {

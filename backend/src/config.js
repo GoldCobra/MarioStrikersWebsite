@@ -47,6 +47,8 @@ const config = {
   discordGuildId: process.env.DISCORD_GUILD_ID || "",
   discordApiBase: process.env.DISCORD_API_BASE || "https://discord.com/api/v10",
   discordBotToken: process.env.DISCORD_BOT_TOKEN || process.env.BOT_TOKEN || "",
+  discordEventsCategoryId: process.env.DISCORD_EVENTS_CATEGORY_ID || "",
+  discordEventsRefreshIntervalMs: readInt("DISCORD_EVENTS_REFRESH_INTERVAL_MS", 60 * 60 * 1000),
   discordMemberCacheTtlMs: readInt("DISCORD_MEMBER_CACHE_TTL_MS", 60 * 60 * 1000),
   discordMemberFailureCacheTtlMs: readInt("DISCORD_MEMBER_FAILURE_CACHE_TTL_MS", 60 * 1000),
   discordMemberFetchTimeoutMs: readInt("DISCORD_MEMBER_FETCH_TIMEOUT_MS", 5000),

@@ -1025,6 +1025,80 @@ body[data-page="index"] .page-content {
   text-align: center;
 }
 
+.events-page {
+  width: min(780px, 100%);
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-2) var(--space-5);
+}
+
+.events-title {
+  margin: 0 0 var(--space-3);
+  color: #ff7a00;
+  font-family: "ITC Grizzly", sans-serif;
+  font-size: clamp(2.1rem, 5vw, 4rem);
+  line-height: 1;
+  text-align: center;
+  letter-spacing: 0;
+  text-shadow: -2px 3px 0 #000;
+}
+
+.events-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.events-card {
+  min-height: 46px;
+  background: linear-gradient(90deg, rgba(174, 59, 4, 0.9), rgba(121, 20, 9, 0.88));
+  border: 1px solid rgba(255, 122, 0, 0.55);
+  box-shadow: -3px 4px 0 rgba(0, 0, 0, 0.7);
+}
+
+.events-card-link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 46px;
+  padding: 0.55rem 1rem;
+  color: #fff;
+  font-family: "MLSBY", sans-serif;
+  font-size: clamp(1rem, 2.1vw, 1.35rem);
+  line-height: 1.1;
+  text-decoration: none;
+}
+
+.events-card-link:hover,
+.events-card-link:focus-visible {
+  color: #f5c300;
+}
+
+.events-card-link:focus-visible {
+  outline: 2px solid #f5c300;
+  outline-offset: 3px;
+}
+
+.events-card-hash {
+  color: #f5c300;
+  filter: drop-shadow(-1px 1px 0 #000);
+}
+
+.events-card-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.events-note {
+  margin: 0;
+  color: #fff;
+  font-family: "MLSBY", sans-serif;
+  text-align: center;
+}
+
+.events-note-error {
+  color: #ffb6b6;
+}
+
 .loading-note {
   color: #fff;
   text-align: center;
