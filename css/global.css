@@ -5232,9 +5232,13 @@ body.player-popup-open {
   }
 
   .events-row {
-    --events-icon-size: 20px;
+    --events-icon-size: 17px;
     --events-icon-x: 2px;
-    --events-icon-y: -4px;
+    --events-icon-y: -7px;
+  }
+
+  body[data-page="community-tournaments"] .events-page {
+    margin-top: -4.75rem;
   }
 
   .save-editor-panel {
