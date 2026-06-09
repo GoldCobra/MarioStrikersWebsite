@@ -1059,7 +1059,15 @@ body[data-page="index"] .page-content {
   outline-offset: 2px;
 }
 
-.events-channel-icon {
+.events-channel-cell.players-flag-cell {
+  padding-inline-start: 0;
+  justify-content: center;
+}
+
+.events-channel-icon.players-flag-slot {
+  width: clamp(28px, 2.15vw, 38px);
+  height: clamp(28px, 2.15vw, 38px);
+  transform: none;
   overflow: visible;
 }
 
