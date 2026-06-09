@@ -4,8 +4,10 @@ const test = require("node:test");
 const {
   CommunityEventsCache,
   buildDiscordChannelUrl,
+  detectEventGame,
   fetchCommunityEvents,
-  filterCommunityEventChannels
+  filterCommunityEventChannels,
+  formatEventDisplayName
 } = require("./events-service");
 
 test("filters Discord event category channels and skips permanent channels", function () {
@@ -24,7 +26,35 @@ test("filters Discord event category channels and skips permanent channels", fun
     "msc-rebalanced-world-cup",
     "sms-tech-showcase"
   ]);
+  assert.deepEqual(rows.map(function (row) { return row.display_name; }), [
+    "MSC REBALANCED WORLD CUP",
+    "SMS TECH SHOWCASE"
+  ]);
+  assert.deepEqual(rows.map(function (row) { return row.game; }), ["msc", "sms"]);
+  assert.deepEqual(rows.map(function (row) { return row.image_url; }), [
+    "/assets/games/mscball.png",
+    "/assets/games/smsball.png"
+  ]);
   assert.equal(rows[0].url, "https://discord.com/channels/268737069939949569/12");
+});
+
+test("formats event names and detects game marker icons", function () {
+  assert.equal(formatEventDisplayName("🔺・bruiser-cup-2"), "BRUISER CUP 2");
+  assert.equal(formatEventDisplayName("🔹・sms-tech-showcase"), "SMS TECH SHOWCASE");
+  assert.equal(formatEventDisplayName("🔸・msc_rebalanced-world-cup"), "MSC REBALANCED WORLD CUP");
+
+  assert.deepEqual(detectEventGame("🔹・sms-tech-showcase"), {
+    game: "sms",
+    image_url: "/assets/games/smsball.png"
+  });
+  assert.deepEqual(detectEventGame("🔸・msc-rebalanced-world-cup"), {
+    game: "msc",
+    image_url: "/assets/games/mscball.png"
+  });
+  assert.deepEqual(detectEventGame("🔺・bl-league-one"), {
+    game: "msbl",
+    image_url: "/assets/games/msblball.png"
+  });
 });
 
 test("builds Discord channel URLs", function () {
@@ -65,6 +95,9 @@ test("community events cache keeps the last successful payload after refresh fai
         rows: [{
           id: "11",
           name: "sms-tech-showcase",
+          display_name: "SMS TECH SHOWCASE",
+          game: "sms",
+          image_url: "/assets/games/smsball.png",
           slug: "sms-tech-showcase",
           position: 1,
           url: "https://discord.com/channels/1/11"

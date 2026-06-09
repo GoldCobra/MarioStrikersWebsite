@@ -2,6 +2,11 @@ const { config } = require("../config");
 
 const TEXT_CHANNEL_TYPES = new Set([0, 5, 15, 16]);
 const EXCLUDED_EVENT_KEYS = new Set(["tournaments", "event-voice-channel"]);
+const EVENT_GAME_MARKERS = Object.freeze([
+  { game: "sms", imageUrl: "/assets/games/smsball.png", symbols: ["🔹", "🔷", "💠"] },
+  { game: "msc", imageUrl: "/assets/games/mscball.png", symbols: ["🔸", "🔶", "🟠", "🟧"] },
+  { game: "msbl", imageUrl: "/assets/games/msblball.png", symbols: ["🔺", "🔻", "🔴", "🟥"] }
+]);
 
 function normalizeText(value) {
   return String(value || "").trim();
@@ -17,6 +22,31 @@ function cleanChannelName(value) {
     .replace(/^[^a-zA-Z0-9]+/, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function detectEventGame(value) {
+  const text = normalizeText(value);
+  for (const marker of EVENT_GAME_MARKERS) {
+    if (marker.symbols.some(function (symbol) { return text.includes(symbol); })) {
+      return {
+        game: marker.game,
+        image_url: marker.imageUrl
+      };
+    }
+  }
+  return {
+    game: "",
+    image_url: ""
+  };
+}
+
+function formatEventDisplayName(value) {
+  const name = cleanChannelName(value);
+  return name
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toUpperCase();
 }
 
 function toEventKey(value) {
@@ -41,6 +71,7 @@ function isTextLikeChannel(channel) {
 function toEventRow(channel, guildId) {
   const id = normalizeDiscordId(channel && channel.id);
   const name = cleanChannelName(channel && channel.name);
+  const game = detectEventGame(channel && channel.name);
   if (!id || !name) {
     return null;
   }
@@ -48,6 +79,9 @@ function toEventRow(channel, guildId) {
   return {
     id,
     name,
+    display_name: formatEventDisplayName(name),
+    game: game.game,
+    image_url: game.image_url,
     slug: toEventSlug(name),
     position: Number.isFinite(Number(channel.position)) ? Number(channel.position) : 999999,
     url: buildDiscordChannelUrl(guildId, id)
@@ -247,8 +281,10 @@ module.exports = {
   buildDiscordChannelUrl,
   cleanChannelName,
   communityEventsCache,
+  detectEventGame,
   fetchCommunityEvents,
   filterCommunityEventChannels,
+  formatEventDisplayName,
   toEventKey,
   toEventSlug
 };

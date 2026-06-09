@@ -43,8 +43,12 @@
       '<section class="leaderboard-block players-list-block events-list-block">',
       '<section class="leaderboard-list players-list events-list" role="list" aria-label="Current tournaments">',
       rows.map(function (row) {
-        var name = String(row && row.name || "").trim() || "Event";
+        var name = String(row && (row.display_name || row.name) || "").trim() || "EVENT";
         var url = String(row && row.url || "").trim();
+        var imageUrl = String(row && row.image_url || "").trim();
+        var iconHtml = imageUrl
+          ? '<img class="players-flag events-game-ball" src="' + escapeHtml(imageUrl) + '" alt="" aria-hidden="true" loading="lazy" onerror="this.onerror=null;this.remove();">'
+          : "";
         if (!url) {
           return "";
         }
@@ -53,7 +57,7 @@
           '<a class="events-row-link" href="', escapeHtml(url), '" target="_blank" rel="noopener noreferrer" aria-label="Open Discord channel for ', escapeHtml(name), '">',
           '<div class="lb-inner-frame players-inner-frame events-inner-frame">',
           '<div class="lb-rank-cell players-flag-cell events-channel-cell" aria-hidden="true">',
-          '<span class="players-flag-slot events-channel-icon">#</span>',
+          '<span class="players-flag-slot events-channel-icon">', iconHtml, '</span>',
           '</div>',
           '<span class="lb-player players-name events-name">',
           '<span class="players-name-text events-name-text">', escapeHtml(name), '</span>',

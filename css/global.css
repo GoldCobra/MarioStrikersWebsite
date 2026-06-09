@@ -1060,10 +1060,13 @@ body[data-page="index"] .page-content {
 }
 
 .events-channel-icon {
-  font-family: "MLSBY", sans-serif;
-  font-size: clamp(0.95rem, 1.7vw, 1.25rem);
-  line-height: 1;
-  color: #f5c300;
+  overflow: visible;
+}
+
+.events-game-ball {
+  object-fit: contain;
+  border: 0;
+  box-shadow: none;
   filter: drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.72));
 }
 
