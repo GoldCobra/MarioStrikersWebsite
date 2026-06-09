@@ -47,7 +47,7 @@
         var url = String(row && row.url || "").trim();
         var imageUrl = String(row && row.image_url || "").trim();
         var iconHtml = imageUrl
-          ? '<img class="events-game-ball" src="' + escapeHtml(imageUrl) + '" alt="" aria-hidden="true" loading="lazy" onerror="this.onerror=null;this.remove();">'
+          ? '<img class="events-game-ball" src="' + escapeHtml(imageUrl) + '" alt="" aria-hidden="true" onerror="this.onerror=null;this.remove();">'
           : "";
         if (!url) {
           return "";
