@@ -115,10 +115,10 @@
         },
         {
           key: "tournaments",
-          label: "Tournaments",
+          label: "Events",
           slug: "competitive-tournaments",
           children: [
-            { key: "community", label: "Events", slug: "community-tournaments" }
+            { key: "community", label: "Tournaments", slug: "community-tournaments" }
           ]
         },
         {
