@@ -61,6 +61,14 @@ function toSafeInteger(value) {
   return Math.max(0, Math.floor(parsed));
 }
 
+function toPositiveIntegerOrNull(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return null;
+  }
+  return Math.floor(parsed);
+}
+
 function toRating(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) {
@@ -151,6 +159,7 @@ async function fetchCompetitiveLeaderboardRows(pool, gameType, mode, limit, offs
   const query = [
     "SELECT",
     "  lb.Position AS rank,",
+    "  lb.PlayerId AS player_id,",
     "  lb.DiscordId AS discord_user_id,",
     "  lb.PlayerName AS display_name,",
     "  lb.TotalMatches AS total_matches,",
@@ -182,6 +191,7 @@ async function fetchCompetitiveLeaderboardRows(pool, gameType, mode, limit, offs
     const totalMatches = toSafeInteger(row.total_matches);
     return {
       rank: offset + index + 1,
+      player_id: toPositiveIntegerOrNull(row.player_id),
       discord_user_id: row.discord_user_id ? String(row.discord_user_id).trim() : null,
       display_name: String(row.display_name || "").trim(),
       total_matches: totalMatches || wins + losses,
@@ -245,7 +255,7 @@ async function fetchWinsLosses(pool, gameType, names) {
   return map;
 }
 
-async function fetchDiscordIds(pool, names) {
+async function fetchPlayerIdentities(pool, names) {
   if (!Array.isArray(names) || names.length === 0) {
     return new Map();
   }
@@ -258,11 +268,9 @@ async function fetchDiscordIds(pool, names) {
   });
 
   const query = [
-    "SELECT p.Name AS name, p.DiscordID AS discord_user_id",
+    "SELECT p.Name AS name, p.ID AS player_id, p.DiscordID AS discord_user_id",
     "FROM Player p",
-    "WHERE p.Name IN (" + nameParams.join(",") + ")",
-    "AND p.DiscordID IS NOT NULL",
-    "AND p.DiscordID <> ''"
+    "WHERE p.Name IN (" + nameParams.join(",") + ")"
   ].join(" ");
 
   const result = await request.query(query);
@@ -270,10 +278,13 @@ async function fetchDiscordIds(pool, names) {
   (result.recordset || []).forEach(function (row) {
     const key = String(row.name || "").trim().toLowerCase();
     const discordId = String(row.discord_user_id || "").trim();
-    if (!key || !discordId) {
+    if (!key) {
       return;
     }
-    map.set(key, discordId);
+    map.set(key, {
+      playerId: toPositiveIntegerOrNull(row.player_id),
+      discordUserId: discordId || null
+    });
   });
 
   return map;
@@ -308,18 +319,20 @@ async function getLeaderboardRows(options) {
       return row.displayName;
     });
 
-    const [winsLossesMap, discordIdMap] = await Promise.all([
+    const [winsLossesMap, identityMap] = await Promise.all([
       fetchWinsLosses(pool, gameType, names),
-      fetchDiscordIds(pool, names)
+      fetchPlayerIdentities(pool, names)
     ]);
 
     const merged = parsed.map(function (row) {
       const key = row.displayName.toLowerCase();
       const wl = winsLossesMap.get(key) || { totalWins: 0, totalLosses: 0, totalDraws: 0 };
+      const identity = identityMap.get(key) || {};
       const totalMatches = wl.totalWins + wl.totalLosses + wl.totalDraws;
 
       return {
-        discord_user_id: discordIdMap.get(key) || null,
+        player_id: identity.playerId || null,
+        discord_user_id: identity.discordUserId || null,
         display_name: row.displayName,
         total_matches: totalMatches,
         total_wins: wl.totalWins,
@@ -346,6 +359,7 @@ async function getLeaderboardRows(options) {
     return merged.slice(offset, offset + limit).map(function (row, index) {
       return {
         rank: offset + index + 1,
+        player_id: row.player_id,
         discord_user_id: row.discord_user_id,
         display_name: row.display_name,
         total_matches: row.total_matches,

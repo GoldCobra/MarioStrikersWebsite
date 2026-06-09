@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var SESSION_CACHE_PREFIX = "leaderboardRows:v3::";
+  var SESSION_CACHE_PREFIX = "leaderboardRows:v4::";
   var SESSION_CACHE_TTL_MS = 5 * 60 * 1000;
   var RANK_ICON_ASSET_VERSION = "20260608-rank-crop-v1";
   var ROW_ASSET_FILES = ["normal-rank.png", "rank1.png", "rank2.png", "rank3.png"];
@@ -303,6 +303,14 @@
     return rating.toFixed(2).replace(/\.?0+$/, "");
   }
 
+  function toPositiveInt(value) {
+    var parsed = Number(value);
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+      return null;
+    }
+    return parsed;
+  }
+
   function toRowClass(rank, hasRankIcon) {
     var safeRank = Number(rank);
     var className = "lb-row";
@@ -356,6 +364,7 @@
         var rank = Number(row && row.rank);
         var rating = Number(row && row.rating);
         var rankNumber = Number(row && row.rank_number);
+        var playerId = toPositiveInt(row && row.player_id);
         var displayName = String(row && (row.display_name || row.player || row.name) || "").trim();
         var competitiveRank = String(row && (row.competitive_rank || row.competitiveRank || row.rank_name || row.rankName) || "").trim();
         if (!displayName || !Number.isFinite(rating)) {
@@ -363,6 +372,7 @@
         }
         return {
           rank: Number.isFinite(rank) && rank > 0 ? Math.floor(rank) : index + 1,
+          player_id: playerId,
           display_name: displayName,
           rating: rating,
           rank_number: Number.isFinite(rankNumber) && rankNumber > 0 ? Math.floor(rankNumber) : 0,
@@ -394,12 +404,15 @@
 
     return rows.map(function (row) {
       var rankIconMarkup = buildCompetitiveRankIconMarkup(row, prefix || ".");
+      var playerNameHtml = row.player_id
+        ? '<button type="button" class="lb-player-trigger" data-player-id="' + row.player_id + '" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for ' + escapeHtml(row.display_name) + '">' + escapeHtml(row.display_name) + "</button>"
+        : '<span class="lb-player-static">' + escapeHtml(row.display_name) + "</span>";
       return [
         '<article class="', toRowClass(row.rank, !!rankIconMarkup), '" role="listitem">',
         rankIconMarkup,
         '<div class="lb-inner-frame">',
         '<div class="lb-rank-cell">', buildRankMarkup(row.rank), "</div>",
-        '<div class="lb-player">', escapeHtml(row.display_name), "</div>",
+        '<div class="lb-player">', playerNameHtml, "</div>",
         '<div class="lb-points">', escapeHtml(formatRating(row.rating)), "</div>",
         "</div>",
         "</article>"

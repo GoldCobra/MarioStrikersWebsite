@@ -947,6 +947,40 @@ body[data-page="index"] .page-content {
   text-shadow: none;
 }
 
+.lb-player-trigger,
+.lb-player-static {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: inherit;
+  color: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+}
+
+.lb-player-trigger {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  text-align: left;
+}
+
+.lb-player-trigger:hover,
+.lb-player-trigger:focus-visible {
+  color: #f5c300;
+}
+
+.lb-player-trigger:focus-visible {
+  outline: 2px solid #f5c300;
+  outline-offset: 2px;
+}
+
 .lb-points {
   display: flex;
   align-items: center;

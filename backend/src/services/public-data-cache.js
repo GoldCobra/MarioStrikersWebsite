@@ -6,7 +6,7 @@ const { getMsblClubs } = require("./clubs-service");
 const { getPlayersList } = require("./players-service");
 const { getCompetitiveSeasonStatus } = require("./competitive-season-service");
 
-const SNAPSHOT_VERSION = 4;
+const SNAPSHOT_VERSION = 5;
 const PLAYERS_LIST_KEY = "players:list";
 const MSBL_CLUBS_KEY = "clubs:msbl";
 const COMPETITIVE_SEASON_KEY = "competitive-season:current";

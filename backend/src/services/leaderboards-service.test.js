@@ -67,6 +67,7 @@ test("elo1v1 reads the active CompetitiveLeaderboard instead of the legacy ratin
       recordset: [
         {
           rank: 1,
+          player_id: 398,
           discord_user_id: "650333745232216077",
           display_name: "BKXO",
           total_matches: 1,
@@ -79,6 +80,7 @@ test("elo1v1 reads the active CompetitiveLeaderboard instead of the legacy ratin
         },
         {
           rank: 2,
+          player_id: 223,
           discord_user_id: "709777875686916210",
           display_name: "Ranked Player",
           total_matches: 4,
@@ -111,6 +113,7 @@ test("elo1v1 reads the active CompetitiveLeaderboard instead of the legacy ratin
     assert.deepEqual(rows, [
       {
         rank: 1,
+        player_id: 223,
         discord_user_id: "709777875686916210",
         display_name: "Ranked Player",
         total_matches: 4,
@@ -175,6 +178,7 @@ test("whr remains on the legacy rating procedure", async function () {
         recordset: [
           {
             name: "Legacy Player",
+            player_id: 441,
             discord_user_id: "709777875686916210"
           }
         ]
@@ -197,6 +201,7 @@ test("whr remains on the legacy rating procedure", async function () {
     assert.equal(harness.queries[0].inputs.doubles, 0);
     assert.equal(harness.queries[0].inputs.isWhr, 2);
     assert.equal(rows.length, 1);
+    assert.equal(rows[0].player_id, 441);
     assert.equal(rows[0].display_name, "Legacy Player");
     assert.equal(rows[0].rating, 1500);
     assert.equal(rows[0].total_matches, 11);

@@ -3,6 +3,7 @@
 
   var POPUP_CLOSE_BLOCK_MS = 500;
   var lastPopupCloseAt = 0;
+  var profileTriggersBound = false;
 
   var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260606-profile-reward-level-v1";
   var POPUP_OPEN_CLASS = "player-popup-open";
@@ -814,6 +815,32 @@
     }
   }
 
+  function bindPlayerProfileTriggers() {
+    if (profileTriggersBound) {
+      return;
+    }
+    profileTriggersBound = true;
+
+    document.addEventListener("click", function (event) {
+      if (Date.now() - lastPopupCloseAt < POPUP_CLOSE_BLOCK_MS) { return; }
+      var trigger = event.target.closest(".players-name-trigger, .lb-player-trigger");
+      if (!trigger) {
+        return;
+      }
+      var playerId = toPositiveInt(trigger.getAttribute("data-player-id"));
+      if (!playerId) {
+        return;
+      }
+      event.preventDefault();
+      openPlayerPopup(playerId, trigger);
+    });
+  }
+
+  function shouldBindProfileTriggers() {
+    var page = String(document.body && document.body.getAttribute("data-page") || "").toLowerCase();
+    return page === "players" || !!document.getElementById("leaderboards-root");
+  }
+
   async function initPlayersPage() {
     var page = String(document.body && document.body.getAttribute("data-page") || "").toLowerCase();
     if (page !== "players") {
@@ -842,28 +869,22 @@
         "</section>",
         "</section>"
       ].join("");
-
-      mount.addEventListener("click", function (event) {
-        if (Date.now() - lastPopupCloseAt < POPUP_CLOSE_BLOCK_MS) { return; }
-        var trigger = event.target.closest(".players-name-trigger");
-        if (!trigger) {
-          return;
-        }
-        var playerId = toPositiveInt(trigger.getAttribute("data-player-id"));
-        if (!playerId) {
-          return;
-        }
-        openPlayerPopup(playerId, trigger);
-      });
     } catch (_error) {
       renderError(mount);
     }
   }
 
+  function initPlayerProfileFeatures() {
+    if (shouldBindProfileTriggers()) {
+      bindPlayerProfileTriggers();
+    }
+    initPlayersPage();
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initPlayersPage);
+    document.addEventListener("DOMContentLoaded", initPlayerProfileFeatures);
     return;
   }
 
-  initPlayersPage();
+  initPlayerProfileFeatures();
 })();
