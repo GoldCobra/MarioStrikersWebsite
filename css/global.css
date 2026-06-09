@@ -1067,7 +1067,7 @@ body[data-page="index"] .page-content {
 .events-channel-icon.players-flag-slot {
   width: clamp(21px, 1.65vw, 28px);
   height: clamp(21px, 1.65vw, 28px);
-  transform: translate(-7px, 8px);
+  transform: translate(-10px, 11px);
   overflow: visible;
 }
 
@@ -5210,6 +5210,12 @@ body.player-popup-open {
 
   .players-flag-slot {
     transform: translateX(4px);
+  }
+
+  .events-channel-icon.players-flag-slot {
+    width: 19px;
+    height: 19px;
+    transform: translate(-6px, 5px);
   }
 
   .save-editor-panel {
