@@ -1038,8 +1038,8 @@ body[data-page="index"] .page-content {
 
 .events-row {
   --events-icon-size: clamp(21px, 1.65vw, 28px);
-  --events-icon-x: 2px;
-  --events-icon-y: -4px;
+  --events-icon-x: 0px;
+  --events-icon-y: -2px;
   isolation: isolate;
 }
 
