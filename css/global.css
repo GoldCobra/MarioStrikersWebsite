@@ -1037,6 +1037,9 @@ body[data-page="index"] .page-content {
 }
 
 .events-row {
+  --events-icon-size: clamp(21px, 1.65vw, 28px);
+  --events-icon-x: 0px;
+  --events-icon-y: 1px;
   isolation: isolate;
 }
 
@@ -1059,15 +1062,31 @@ body[data-page="index"] .page-content {
   outline-offset: 2px;
 }
 
-.events-channel-cell.players-flag-cell {
-  padding-inline-start: 0;
-  justify-content: center;
+.events-inner-frame {
+  top: 0;
+  bottom: 0;
+  grid-template-columns: 15% minmax(0, 1fr) 0;
 }
 
-.events-channel-icon.players-flag-slot {
-  width: clamp(21px, 1.65vw, 28px);
-  height: clamp(21px, 1.65vw, 28px);
-  transform: translate(-10px, 11px);
+.events-channel-cell.lb-rank-cell {
+  position: relative;
+  align-self: stretch;
+  justify-self: stretch;
+  width: auto;
+  min-height: 0;
+  padding: 0;
+  transform: none;
+  overflow: visible;
+}
+
+.events-channel-icon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  width: var(--events-icon-size);
+  height: var(--events-icon-size);
+  transform: translate(calc(-50% + var(--events-icon-x)), calc(-50% + var(--events-icon-y)));
   overflow: visible;
 }
 
@@ -5212,10 +5231,10 @@ body.player-popup-open {
     transform: translateX(4px);
   }
 
-  .events-channel-icon.players-flag-slot {
-    width: 19px;
-    height: 19px;
-    transform: translate(-6px, 5px);
+  .events-row {
+    --events-icon-size: 20px;
+    --events-icon-x: 0px;
+    --events-icon-y: 0px;
   }
 
   .save-editor-panel {
