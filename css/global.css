@@ -1036,13 +1036,6 @@ body[data-page="index"] .page-content {
   padding-top: 0;
 }
 
-.events-row {
-  --events-icon-size: clamp(21px, 1.65vw, 28px);
-  --events-icon-x: 0px;
-  --events-icon-y: -2px;
-  isolation: isolate;
-}
-
 .events-row-link {
   position: absolute;
   inset: 0;
@@ -1060,34 +1053,6 @@ body[data-page="index"] .page-content {
 .events-row-link:focus-visible {
   outline: 2px solid #f5c300;
   outline-offset: 2px;
-}
-
-.events-inner-frame {
-  top: 0;
-  bottom: 0;
-  grid-template-columns: 12% minmax(0, 1fr) 0;
-}
-
-.events-channel-cell.lb-rank-cell {
-  position: relative;
-  align-self: stretch;
-  justify-self: stretch;
-  width: auto;
-  min-height: 0;
-  padding: 0;
-  transform: none;
-  overflow: visible;
-}
-
-.events-channel-icon {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  display: block;
-  width: var(--events-icon-size);
-  height: var(--events-icon-size);
-  transform: translate(calc(-50% + var(--events-icon-x)), calc(-50% + var(--events-icon-y)));
-  overflow: visible;
 }
 
 .events-game-ball {
@@ -5229,16 +5194,6 @@ body.player-popup-open {
 
   .players-flag-slot {
     transform: translateX(4px);
-  }
-
-  .events-row {
-    --events-icon-size: 17px;
-    --events-icon-x: 2px;
-    --events-icon-y: -7px;
-  }
-
-  body[data-page="community-tournaments"] .events-page {
-    margin-top: -4.75rem;
   }
 
   .save-editor-panel {
