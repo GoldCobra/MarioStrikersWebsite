@@ -1065,9 +1065,9 @@ body[data-page="index"] .page-content {
 }
 
 .events-channel-icon.players-flag-slot {
-  width: clamp(24px, 1.9vw, 32px);
-  height: clamp(24px, 1.9vw, 32px);
-  transform: translate(-4px, 2px);
+  width: clamp(21px, 1.65vw, 28px);
+  height: clamp(21px, 1.65vw, 28px);
+  transform: translate(-4px, 5px);
   overflow: visible;
 }
 
