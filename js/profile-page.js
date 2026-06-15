@@ -178,14 +178,39 @@
     ].join("");
   }
 
+  function stripLegacyFriendCodePrefix(lineValue) {
+    return parseCodeLine(lineValue).code;
+  }
+
+  function getSwitchFriendCodeLines(data) {
+    return (Array.isArray(data.switch) ? data.switch : [])
+      .filter(hasDisplayText)
+      .map(stripLegacyFriendCodePrefix);
+  }
+
+  function prefixLegacyMscLines(lines, regionLabel) {
+    return (Array.isArray(lines) ? lines : []).filter(hasDisplayText).map(function (lineValue) {
+      return regionLabel + ": " + stripLegacyFriendCodePrefix(lineValue);
+    });
+  }
+
+  function getMscFriendCodeLines(data) {
+    if (Array.isArray(data.msc) && data.msc.some(hasDisplayText)) {
+      return data.msc;
+    }
+
+    return []
+      .concat(prefixLegacyMscLines(data.msc_pal, "PAL"))
+      .concat(prefixLegacyMscLines(data.msc_ntsc, "NTSC-U"))
+      .concat(prefixLegacyMscLines(data.msc_jpn, "NTSC-J"))
+      .concat(prefixLegacyMscLines(data.msc_kor, "NTSC-K"));
+  }
+
   function buildFriendCodes(friendCodes) {
     var data = friendCodes || {};
     var sections = [
-      buildCodeSection("Switch Friend Codes", data.switch || []),
-      buildCodeSection("MSC Friend Codes (PAL)", data.msc_pal || []),
-      buildCodeSection("MSC Friend Codes (NTSC)", data.msc_ntsc || []),
-      buildCodeSection("MSC Friend Codes (KOR)", data.msc_kor || []),
-      buildCodeSection("MSC Friend Codes (JPN)", data.msc_jpn || [])
+      buildCodeSection("Switch Friend Code", getSwitchFriendCodeLines(data)),
+      buildCodeSection("MSC Friend Codes", getMscFriendCodeLines(data))
     ].filter(Boolean);
 
     if (!sections.length) {
