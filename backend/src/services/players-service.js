@@ -195,36 +195,85 @@ function resolveFriendCodeBucket(gameTypeValue, regionValue) {
   return "";
 }
 
+function getMscRegionLabel(regionValue) {
+  const region = normalizeText(regionValue).toUpperCase();
+  if (region === "NTSC") {
+    return "NTSC-U";
+  }
+  if (region === "JPN") {
+    return "NTSC-J";
+  }
+  if (region === "KOR") {
+    return "NTSC-K";
+  }
+  return region || "MSC";
+}
+
+function formatTwelveDigitFriendCode(value) {
+  const raw = normalizeText(value);
+  const digits = raw.replace(/^SW[\s-]*/i, "").replace(/\D/g, "");
+  if (digits.length !== 12) {
+    return raw;
+  }
+
+  return digits.slice(0, 4) + "-" + digits.slice(4, 8) + "-" + digits.slice(8, 12);
+}
+
 function formatFriendCodeValue(bucket, codeValue) {
-  const raw = normalizeText(codeValue);
-  if (!raw) {
+  const code = formatTwelveDigitFriendCode(codeValue);
+  if (!code) {
     return "";
   }
 
   if (bucket !== "switch") {
-    return raw;
+    return code;
   }
 
-  const withoutPrefix = raw.replace(/^SW-?/i, "");
-  if (/^\d{4}-\d{4}-\d{4}$/.test(withoutPrefix)) {
-    return "SW-" + withoutPrefix;
+  if (/^SW-/i.test(code)) {
+    return code;
   }
-  if (/^SW-/i.test(raw)) {
-    return raw;
+  return "SW-" + code;
+}
+
+function getFriendCodeSortRank(row) {
+  const bucket = resolveFriendCodeBucket(row && row.GameType, row && row.Region);
+  const region = normalizeText(row && row.Region).toUpperCase();
+  const regionOrder = {
+    PAL: 1,
+    NTSC: 2,
+    JPN: 3,
+    KOR: 4
+  };
+
+  return [
+    bucket === "switch" ? 0 : 1,
+    bucket === "switch" ? 0 : regionOrder[region] || 9,
+    toPositiveInt(row && row.LineSeq) || 9999
+  ];
+}
+
+function compareFriendCodeRows(a, b) {
+  const left = getFriendCodeSortRank(a);
+  const right = getFriendCodeSortRank(b);
+  for (let index = 0; index < left.length; index += 1) {
+    if (left[index] !== right[index]) {
+      return left[index] - right[index];
+    }
   }
-  return "SW-" + raw;
+  return 0;
 }
 
 function buildFriendCodes(rows) {
   const grouped = {
     switch: [],
+    msc: [],
     msc_pal: [],
     msc_ntsc: [],
     msc_kor: [],
     msc_jpn: []
   };
 
-  rows.forEach(function (row) {
+  (Array.isArray(rows) ? rows.slice().sort(compareFriendCodeRows) : []).forEach(function (row) {
     const bucket = resolveFriendCodeBucket(row && row.GameType, row && row.Region);
     if (!bucket) {
       return;
@@ -235,10 +284,14 @@ function buildFriendCodes(rows) {
       return;
     }
 
-    const lineSeq = toPositiveInt(row && row.LineSeq) || 1;
-    const label = normalizeText(row && row.Label);
-    const prefix = label || String(lineSeq);
-    grouped[bucket].push(prefix + ": " + code);
+    if (bucket === "switch") {
+      grouped.switch.push(code);
+      return;
+    }
+
+    const line = getMscRegionLabel(row && row.Region) + ": " + code;
+    grouped.msc.push(line);
+    grouped[bucket].push(line);
   });
 
   return grouped;
@@ -633,7 +686,10 @@ async function getPlayerFriendCodes(pool, playerId) {
       "  fc.Code",
       "FROM FriendCodes fc",
       "WHERE fc.Player = @playerId",
-      "ORDER BY fc.GameType, fc.Region, fc.LineSeq"
+      "ORDER BY",
+      "  CASE WHEN fc.Region = 'SW' OR fc.GameType = 3 THEN 0 ELSE 1 END,",
+      "  CASE fc.Region WHEN 'PAL' THEN 1 WHEN 'NTSC' THEN 2 WHEN 'JPN' THEN 3 WHEN 'KOR' THEN 4 ELSE 9 END,",
+      "  fc.LineSeq"
     ].join(" ")
   );
 
@@ -795,7 +851,10 @@ function buildPlayerProfileBatchQuery() {
     "  fc.Code",
     "FROM FriendCodes fc",
     "WHERE fc.Player = @playerId",
-    "ORDER BY fc.GameType, fc.Region, fc.LineSeq;",
+    "ORDER BY",
+    "  CASE WHEN fc.Region = 'SW' OR fc.GameType = 3 THEN 0 ELSE 1 END,",
+    "  CASE fc.Region WHEN 'PAL' THEN 1 WHEN 'NTSC' THEN 2 WHEN 'JPN' THEN 3 WHEN 'KOR' THEN 4 ELSE 9 END,",
+    "  fc.LineSeq;",
     buildPlayerProfileSummaryQuery(";"),
     "SELECT",
     "  lb.GameType,",

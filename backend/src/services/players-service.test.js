@@ -351,8 +351,32 @@ test("profile batch recordsets map to the existing profile DTO shape", function 
       GameType: 3,
       Region: "",
       LineSeq: 1,
-      Label: "",
+      Label: "Switch",
       Code: "SW-0333-7404-4529"
+    }, {
+      GameType: 1,
+      Region: "KOR",
+      LineSeq: 1,
+      Label: "Korea",
+      Code: "3141 3518 9838"
+    }, {
+      GameType: 1,
+      Region: "PAL",
+      LineSeq: 1,
+      Label: "Dolphin",
+      Code: "4859-3388-1672"
+    }, {
+      GameType: 1,
+      Region: "JPN",
+      LineSeq: 1,
+      Label: "Japan",
+      Code: "056834577367"
+    }, {
+      GameType: 1,
+      Region: "NTSC",
+      LineSeq: 1,
+      Label: "USA",
+      Code: "3274-1757-7014"
     }],
     [{
       BlRating: 2112,
@@ -388,7 +412,14 @@ test("profile batch recordsets map to the existing profile DTO shape", function 
 
   assert.equal(profile.player.id, 223);
   assert.equal(profile.player.results_url, "https://start.gg/user/goldcobra/results");
-  assert.deepEqual(profile.friend_codes.switch, ["1: SW-0333-7404-4529"]);
+  assert.deepEqual(profile.friend_codes.switch, ["SW-0333-7404-4529"]);
+  assert.deepEqual(profile.friend_codes.msc, [
+    "PAL: 4859-3388-1672",
+    "NTSC-U: 3274-1757-7014",
+    "NTSC-J: 0568-3457-7367",
+    "NTSC-K: 3141-3518-9838"
+  ]);
+  assert.deepEqual(profile.friend_codes.msc_pal, ["PAL: 4859-3388-1672"]);
   assert.equal(profile.ratings.msbl.rating, 703);
   assert.equal(profile.ratings.msbl.sets, "6-0");
   assert.equal(profile.ratings.msbl.whr, 2112);

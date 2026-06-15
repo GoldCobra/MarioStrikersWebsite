@@ -5,7 +5,7 @@
   var lastPopupCloseAt = 0;
   var profileTriggersBound = false;
 
-  var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260606-profile-reward-level-v1";
+  var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260610-profile-friendcodes-v1";
   var POPUP_OPEN_CLASS = "player-popup-open";
   var FLAG_CODE_ALIASES = Object.freeze({
     "uk": "gb",
@@ -421,6 +421,36 @@
     return true;
   }
 
+  function stripLegacyFriendCodePrefix(lineValue) {
+    return parseCodeLine(lineValue).code;
+  }
+
+  function getSwitchFriendCodeLines(friendCodes) {
+    var data = friendCodes || {};
+    return (Array.isArray(data.switch) ? data.switch : [])
+      .filter(hasDisplayText)
+      .map(stripLegacyFriendCodePrefix);
+  }
+
+  function prefixLegacyMscLines(lines, regionLabel) {
+    return (Array.isArray(lines) ? lines : []).filter(hasDisplayText).map(function (lineValue) {
+      return regionLabel + ": " + stripLegacyFriendCodePrefix(lineValue);
+    });
+  }
+
+  function getMscFriendCodeLines(friendCodes) {
+    var data = friendCodes || {};
+    if (Array.isArray(data.msc) && data.msc.some(hasDisplayText)) {
+      return data.msc;
+    }
+
+    return []
+      .concat(prefixLegacyMscLines(data.msc_pal, "PAL"))
+      .concat(prefixLegacyMscLines(data.msc_ntsc, "NTSC-U"))
+      .concat(prefixLegacyMscLines(data.msc_jpn, "NTSC-J"))
+      .concat(prefixLegacyMscLines(data.msc_kor, "NTSC-K"));
+  }
+
   function buildRatingLine(label, value, leadingHtml, trailingHtml, valueClassName) {
     var valueClass = "player-popup-rating-value" + (valueClassName ? " " + valueClassName : "");
     return [
@@ -607,11 +637,8 @@
       }
     }
 
-    renderCodeLines("fc-switch", (data.friend_codes && data.friend_codes.switch) || []);
-    renderCodeLines("fc-msc-pal", (data.friend_codes && data.friend_codes.msc_pal) || []);
-    renderCodeLines("fc-msc-ntsc", (data.friend_codes && data.friend_codes.msc_ntsc) || []);
-    renderCodeLines("fc-msc-kor", (data.friend_codes && data.friend_codes.msc_kor) || []);
-    renderCodeLines("fc-msc-jpn", (data.friend_codes && data.friend_codes.msc_jpn) || []);
+    renderCodeLines("fc-switch", getSwitchFriendCodeLines(data.friend_codes));
+    renderCodeLines("fc-msc", getMscFriendCodeLines(data.friend_codes));
 
     var resultsSection = popupState.slots["results-section"];
     var resultsLink = popupState.slots["results-link"];
