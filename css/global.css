@@ -3205,6 +3205,10 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   color: rgba(255, 255, 255, 0.66);
 }
 
+.profile-rating-line:has(.is-muted-stat-value) .profile-rating-label {
+  color: rgba(255, 255, 255, 0.66);
+}
+
 .profile-rank-icon {
   width: auto;
   height: var(--profile-rank-icon-height);
@@ -3827,6 +3831,10 @@ body.player-popup-open {
 }
 
 .player-popup-rating-card .player-popup-rating-value.is-muted-stat-value {
+  color: rgba(255, 255, 255, 0.66);
+}
+
+.player-popup-rating-card .player-popup-rating-line:has(.is-muted-stat-value) .player-popup-rating-label {
   color: rgba(255, 255, 255, 0.66);
 }
 

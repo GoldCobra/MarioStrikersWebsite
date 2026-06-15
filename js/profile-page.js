@@ -302,7 +302,7 @@
         lines.push(buildRatingLine("Rank", "", rankIconHtml));
       }
       if (hasDisplayText(setsValue)) {
-        lines.push(buildRatingLine("Sets", setsValue));
+        lines.push(buildRatingLine("Matches", setsValue));
       }
       if (metricValue !== null) {
         lines.push(buildRatingLine(card.metricLabel, metricValue, "", "", "is-muted-stat-value"));
