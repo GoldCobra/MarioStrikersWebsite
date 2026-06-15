@@ -361,7 +361,7 @@
     return [
       '<section class="profile-panel profile-accolades-panel">',
       '<details class="profile-accolades-details">',
-      '<summary class="profile-accolades-summary"><span class="profile-panel-title">Recent Tourney Accolades</span></summary>',
+      '<summary class="profile-accolades-summary"><span class="profile-panel-title">Tourney Accolades</span></summary>',
       '<ul class="profile-accolades">',
       rows.map(function (entry) {
         var ballIcon = getGameBallIconUrl(entry && entry.game_code);
