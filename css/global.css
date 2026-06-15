@@ -3202,11 +3202,11 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 }
 
 .profile-rating-value.is-muted-stat-value {
-  color: rgba(255, 255, 255, 0.66);
+  color: rgba(255, 255, 255, 0.50);
 }
 
 .profile-rating-line:has(.is-muted-stat-value) .profile-rating-label {
-  color: rgba(255, 255, 255, 0.66);
+  color: rgba(255, 255, 255, 0.50);
 }
 
 .profile-rank-icon {
@@ -3831,11 +3831,11 @@ body.player-popup-open {
 }
 
 .player-popup-rating-card .player-popup-rating-value.is-muted-stat-value {
-  color: rgba(255, 255, 255, 0.66);
+  color: rgba(255, 255, 255, 0.50);
 }
 
 .player-popup-rating-card .player-popup-rating-line:has(.is-muted-stat-value) .player-popup-rating-label {
-  color: rgba(255, 255, 255, 0.66);
+  color: rgba(255, 255, 255, 0.50);
 }
 
 .player-popup-rating-card.is-inactive-rating .player-popup-rating-title,
