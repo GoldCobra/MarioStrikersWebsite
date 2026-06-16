@@ -3595,13 +3595,23 @@ body.player-popup-open {
 }
 
 .player-popup-header-title {
-  display: inline-flex;
+  display: flex;
+  width: 100%;
   align-items: center;
   gap: 0.45rem;
   max-width: calc(100% - 1.8rem);
 }
 
+/* Username uses the full popup width and only wraps at the right edge.
+   (Removes the compounding max-width reserve inherited from .popup-title.) */
+.player-popup-name.popup-title {
+  max-width: none;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .player-popup-flag {
+  flex: 0 0 auto;
   width: 28px;
   height: 19px;
   object-fit: cover;
