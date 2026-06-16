@@ -414,12 +414,12 @@ test("profile batch recordsets map to the existing profile DTO shape", function 
   assert.equal(profile.player.results_url, "https://start.gg/user/goldcobra/results");
   assert.deepEqual(profile.friend_codes.switch, ["SW-0333-7404-4529"]);
   assert.deepEqual(profile.friend_codes.msc, [
-    "PAL: 4859-3388-1672",
-    "NTSC-U: 3274-1757-7014",
-    "NTSC-J: 0568-3457-7367",
-    "NTSC-K: 3141-3518-9838"
+    "PAL (Dolphin): 4859-3388-1672",
+    "NTSC-U (USA): 3274-1757-7014",
+    "NTSC-J (Japan): 0568-3457-7367",
+    "NTSC-K (Korea): 3141-3518-9838"
   ]);
-  assert.deepEqual(profile.friend_codes.msc_pal, ["PAL: 4859-3388-1672"]);
+  assert.deepEqual(profile.friend_codes.msc_pal, ["PAL (Dolphin): 4859-3388-1672"]);
   assert.equal(profile.ratings.msbl.rating, 703);
   assert.equal(profile.ratings.msbl.sets, "6-0");
   assert.equal(profile.ratings.msbl.whr, 2112);

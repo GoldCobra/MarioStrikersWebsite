@@ -289,7 +289,8 @@ function buildFriendCodes(rows) {
       return;
     }
 
-    const line = getMscRegionLabel(row && row.Region) + ": " + code;
+    const label = normalizeText(row && row.Label);
+    const line = getMscRegionLabel(row && row.Region) + (label ? " (" + label + ")" : "") + ": " + code;
     grouped.msc.push(line);
     grouped[bucket].push(line);
   });
