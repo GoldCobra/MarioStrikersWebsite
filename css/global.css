@@ -1233,15 +1233,16 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
   position: static;
 }
 
-/* Bullet lists: the square ::marker inherited the list item's box-level
-   drop-shadow filter. Remove that filter for bullet items so the marker has no
-   shadow, and give the plain text a matching single text-shadow instead. Links
-   keep their own (.competitive-rules a) drop-shadow, so only the bullet loses
-   its shadow. The class is doubled to outrank the (0,2,0) :is(...) rule that
-   sets the filter on .competitive-rules li. */
-.competitive-rules.competitive-rules ul li {
+/* Guide body text + links: use a single, inherited, light text-shadow instead
+   of the box-level drop-shadow filter. The filter doubled the shadow of any
+   nested element that also had its own filter (links/spans), so links looked
+   stronger inside <p>/<ol> than inside bullet <li>. text-shadow does not stack
+   on nesting, so all yellow links and body text get one uniform, lighter shadow.
+   The class is doubled to outrank the (0,2,0) :is(...) rule. The bullet ::marker
+   gets no shadow at all. */
+.competitive-rules.competitive-rules :is(p, li, a, span, strong, em) {
   filter: none;
-  text-shadow: -2px 2px 0 #000;
+  text-shadow: -1px 1px 0 #000;
 }
 
 .competitive-rules.competitive-rules ul li::marker {
