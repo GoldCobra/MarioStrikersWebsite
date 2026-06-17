@@ -1237,13 +1237,14 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
    drop-shadow filter. Remove that filter for bullet items so the marker has no
    shadow, and give the plain text a matching single text-shadow instead. Links
    keep their own (.competitive-rules a) drop-shadow, so only the bullet loses
-   its shadow. */
-.competitive-rules ul li {
+   its shadow. The class is doubled to outrank the (0,2,0) :is(...) rule that
+   sets the filter on .competitive-rules li. */
+.competitive-rules.competitive-rules ul li {
   filter: none;
   text-shadow: -2px 2px 0 #000;
 }
 
-.competitive-rules ul li::marker {
+.competitive-rules.competitive-rules ul li::marker {
   color: #000;
   text-shadow: none;
 }
