@@ -1233,8 +1233,19 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
   position: static;
 }
 
+/* Bullet lists: the square ::marker inherited the list item's box-level
+   drop-shadow filter. Remove that filter for bullet items so the marker has no
+   shadow, and give the plain text a matching single text-shadow instead. Links
+   keep their own (.competitive-rules a) drop-shadow, so only the bullet loses
+   its shadow. */
+.competitive-rules ul li {
+  filter: none;
+  text-shadow: -2px 2px 0 #000;
+}
+
 .competitive-rules ul li::marker {
   color: #000;
+  text-shadow: none;
 }
 
 .cr-intro {
