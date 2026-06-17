@@ -1233,8 +1233,23 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
   position: static;
 }
 
+/* Bullet lists: the square ::marker must not have a drop-shadow. The shadow came
+   from the box-level drop-shadow filter on the list item (which also covers the
+   ::marker). Drop that filter for bullet items and re-apply the identical shadow
+   to the text only (plain text via text-shadow, inline elements via the same
+   chained drop-shadow the li used to add), so nothing but the bullet changes. */
+.competitive-rules ul li {
+  filter: none;
+  text-shadow: -2px 2px 0 #000;
+}
+
+.competitive-rules ul li :is(a, span, strong, em) {
+  filter: drop-shadow(-2px 2px 0 #000) drop-shadow(-2px 2px 0 #000);
+}
+
 .competitive-rules ul li::marker {
   color: #000;
+  text-shadow: none;
 }
 
 .cr-intro {
