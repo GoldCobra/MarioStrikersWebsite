@@ -1755,7 +1755,7 @@ body[data-page="sms-setup-guide"] .setup-guide-video-frame {
 .msl-schedule-banner {
   display: block;
   margin-inline: auto;
-  width: min(100%, 300px);
+  width: min(100%, 330px);
   height: auto;
 }
 
