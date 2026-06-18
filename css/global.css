@@ -1757,6 +1757,14 @@ body[data-page="sms-setup-guide"] .setup-guide-video-frame {
   color: #35e0a1;
 }
 
+/* Split-title banner images (Spring/Summer/Fall) replace the text titles;
+   scaled down so they don't dominate the schedule item. */
+.msl-schedule-banner {
+  display: block;
+  width: min(100%, 380px);
+  height: auto;
+}
+
 .msl-schedule-meta {
   margin: 0.35rem 0 0;
   color: #f4f4f4;
