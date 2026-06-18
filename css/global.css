@@ -1745,23 +1745,17 @@ body[data-page="sms-setup-guide"] .setup-guide-video-frame {
   color: #ffd700;
 }
 
-.msl-schedule-title.is-fall {
-  color: #9b5cff;
+/* Split-title banner images replace the Spring/Summer/Fall text titles. The
+   wrapper drops the text-title styling (stroke/drop-shadow/font/color) — those
+   only make sense for text — and the banner is centered and scaled down. */
+.msl-schedule-banner-title {
+  margin: 0;
 }
 
-.msl-schedule-title.is-summer {
-  color: #6ecbff;
-}
-
-.msl-schedule-title.is-spring {
-  color: #35e0a1;
-}
-
-/* Split-title banner images (Spring/Summer/Fall) replace the text titles;
-   scaled down so they don't dominate the schedule item. */
 .msl-schedule-banner {
   display: block;
-  width: min(100%, 380px);
+  margin-inline: auto;
+  width: min(100%, 300px);
   height: auto;
 }
 
