@@ -153,6 +153,15 @@ body::before {
   background-size: 100% 100%;
 }
 
+/* Reserve the nav shell height on the always-present wrapper so the slot keeps its
+   height from the very first paint, before global-nav.js injects <header id="2">.
+   Prevents the content below (e.g. leaderboards) from shifting down on cached
+   reloads where an early paint can occur before the deferred scripts run. */
+#global-nav {
+  display: block;
+  min-height: var(--nav-shell-height);
+}
+
 .main-nav {
   position: relative;
   z-index: 3;
@@ -382,6 +391,15 @@ body::before {
 body[data-subnav="off"] #global-subnav,
 #global-subnav:empty {
   min-height: 0;
+}
+
+/* When a page statically declares it has a subnav (data-subnav="on" in the HTML),
+   keep the reserved height even while #global-subnav is still empty (before
+   global-nav.js fills it). Specificity (0,2,1) beats #global-subnav:empty (0,1,1),
+   so the subnav slot does not collapse-then-expand on cached reloads — the content
+   below stays put. */
+body[data-subnav="on"] #global-subnav {
+  min-height: var(--subnav-reserve-height);
 }
 
 .sub-link-text {
