@@ -4012,6 +4012,16 @@ body.player-popup-open {
   filter: none !important;
 }
 
+/* At 5/5 the progress count itself is tinted in the reached tier's colour. */
+.profile-rating-reward.is-reward-complete .profile-rating-reward-progress strong,
+.player-popup-rating-reward.is-reward-complete .player-popup-rating-reward-progress strong {
+  color: var(--profile-rating-reward-accent);
+}
+
+#player-profile-popup .player-popup-rating-reward.is-reward-complete .player-popup-rating-reward-progress strong {
+  color: var(--profile-rating-reward-accent) !important;
+}
+
 .msbl-club-row[data-club-id] {
   cursor: pointer;
 }
