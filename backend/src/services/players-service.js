@@ -413,21 +413,27 @@ function buildSeasonRewardProgressLevel(row, placementProgress) {
   const targetOrder = Number(row.CurrentTargetTierOrder);
   // A valid current target / earned tier is an actual reward tier (Bronze=1 … Titan=7);
   // order 0 (Unranked) is never a reward target. NB: Number(null) === 0, so the `> 0` guard
-  // also correctly treats "no current target left" (all tiers earned) as the fallback case.
+  // also treats "no current target left" (all tiers earned) as the all-earned case.
   const isTargetValid = Number.isInteger(targetOrder) && targetOrder > 0 && SEASON_REWARD_LEVEL_BY_ORDER[targetOrder];
   const isHighestEarnedTier = Number.isInteger(highestOrder) && highestOrder > 0 && SEASON_REWARD_LEVEL_BY_ORDER[highestOrder];
+  const targetWins = Math.min(requiredWins, toRewardWins(row.CurrentTargetWins, placementProgress ? placementProgress.currentWins : 0));
 
-  // Show the tier the player is currently progressing through, with its live win count
-  // (e.g. "Silver 2/5"). Only when every tier has already been earned (no current target
-  // left) do we fall back to the highest earned tier shown as complete (e.g. "Strikers Titan 5/5").
-  const order = isTargetValid ? targetOrder : (isHighestEarnedTier ? highestOrder : 0);
-  const level = buildSeasonRewardLevel(order);
-  const currentWins = isTargetValid
-    ? Math.min(requiredWins, toRewardWins(row.CurrentTargetWins, placementProgress ? placementProgress.currentWins : 0))
-    : (isHighestEarnedTier ? requiredWins : 0);
+  // A completed tier is shown at full — e.g. "Bronze 5/5" — until the next tier records its
+  // first qualifying win. Completion resets the target's win count to 0 (and advances the
+  // target), so "earned a tier AND the current target has no wins yet" means just-completed;
+  // "no current target left" means every tier is earned. Otherwise show the in-progress tier
+  // with its live win count, e.g. "Silver 2/5".
+  if (isHighestEarnedTier && (!isTargetValid || targetWins === 0)) {
+    const level = buildSeasonRewardLevel(highestOrder);
+    return Object.assign(level, {
+      current_wins: requiredWins,
+      required_wins: requiredWins
+    });
+  }
 
+  const level = buildSeasonRewardLevel(isTargetValid ? targetOrder : 0);
   return Object.assign(level, {
-    current_wins: currentWins,
+    current_wins: targetWins,
     required_wins: requiredWins
   });
 }

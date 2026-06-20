@@ -207,6 +207,65 @@ test("profile rating cards attach per-game current season reward progress", func
   });
 });
 
+test("profile rating cards show a just-completed tier at full until the next tier starts", function () {
+  const ratings = buildRatings({}, [
+    {
+      GameType: 1,
+      Mode: "1v1",
+      Elo: 700,
+      RankNumber: 3,
+      RankName: "Bronze III",
+      MatchWins: 10,
+      MatchLosses: 0,
+      PlacementPlayed: 10,
+      PlacementComplete: true
+    },
+    {
+      GameType: 2,
+      Mode: "1v1",
+      Elo: 760,
+      RankNumber: 4,
+      RankName: "Silver I",
+      MatchWins: 13,
+      MatchLosses: 0,
+      PlacementPlayed: 13,
+      PlacementComplete: true
+    }
+  ], [
+    {
+      GameId: 1,
+      ModeCode: "1v1",
+      HighestEarnedTierOrder: 1,
+      CurrentTargetTierOrder: 2,
+      CurrentTargetWins: 0,
+      RequiredWins: 5
+    },
+    {
+      GameId: 2,
+      ModeCode: "1v1",
+      HighestEarnedTierOrder: 1,
+      CurrentTargetTierOrder: 2,
+      CurrentTargetWins: 3,
+      RequiredWins: 5
+    }
+  ]);
+
+  assert.deepEqual(ratings.msc.season_reward_level, {
+    order: 1,
+    name: "Bronze",
+    image_url: "/assets/players/rewardlevel/1-bronze.png?v=20260608-rank-crop-v1",
+    current_wins: 5,
+    required_wins: 5
+  });
+  assert.deepEqual(ratings.sms.season_reward_level, {
+    order: 2,
+    name: "Silver",
+    image_url: "/assets/players/rewardlevel/2-silver.png?v=20260608-rank-crop-v1",
+    current_wins: 3,
+    required_wins: 5
+  });
+});
+
 test("profile rating cards show the current bronze reward target after placements complete", function () {
   const ratings = buildRatings({}, [
     {

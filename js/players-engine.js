@@ -483,6 +483,9 @@
     var tierOrder = Number(reward.order);
     var normalizedTierOrder = Number.isFinite(tierOrder) ? Math.max(0, Math.min(7, Math.floor(tierOrder))) : 0;
     var tierClass = " is-reward-tier-" + normalizedTierOrder;
+    if (normalizedTierOrder > 0 && currentWins >= requiredWins) {
+      tierClass += " is-reward-complete";
+    }
     var progressLabel = normalizedTierOrder > 0 ? "Season Reward Level" : "Matches";
     if (!imageUrl) {
       return "";
