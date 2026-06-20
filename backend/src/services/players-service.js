@@ -411,14 +411,20 @@ function buildSeasonRewardProgressLevel(row, placementProgress) {
 
   const highestOrder = Number(row.HighestEarnedTierOrder);
   const targetOrder = Number(row.CurrentTargetTierOrder);
-  const isHighestValid = Number.isInteger(highestOrder) && SEASON_REWARD_LEVEL_BY_ORDER[highestOrder];
-  const isEarnedTier = isHighestValid && highestOrder > 0;
-  const isTargetValid = Number.isInteger(targetOrder) && SEASON_REWARD_LEVEL_BY_ORDER[targetOrder];
-  const order = isEarnedTier ? highestOrder : (isTargetValid ? targetOrder : 0);
+  // A valid current target / earned tier is an actual reward tier (Bronze=1 … Titan=7);
+  // order 0 (Unranked) is never a reward target. NB: Number(null) === 0, so the `> 0` guard
+  // also correctly treats "no current target left" (all tiers earned) as the fallback case.
+  const isTargetValid = Number.isInteger(targetOrder) && targetOrder > 0 && SEASON_REWARD_LEVEL_BY_ORDER[targetOrder];
+  const isHighestEarnedTier = Number.isInteger(highestOrder) && highestOrder > 0 && SEASON_REWARD_LEVEL_BY_ORDER[highestOrder];
+
+  // Show the tier the player is currently progressing through, with its live win count
+  // (e.g. "Silver 2/5"). Only when every tier has already been earned (no current target
+  // left) do we fall back to the highest earned tier shown as complete (e.g. "Strikers Titan 5/5").
+  const order = isTargetValid ? targetOrder : (isHighestEarnedTier ? highestOrder : 0);
   const level = buildSeasonRewardLevel(order);
-  const currentWins = isEarnedTier
-    ? requiredWins
-    : Math.min(requiredWins, toRewardWins(row.CurrentTargetWins, placementProgress ? placementProgress.currentWins : 0));
+  const currentWins = isTargetValid
+    ? Math.min(requiredWins, toRewardWins(row.CurrentTargetWins, placementProgress ? placementProgress.currentWins : 0))
+    : (isHighestEarnedTier ? requiredWins : 0);
 
   return Object.assign(level, {
     current_wins: currentWins,
