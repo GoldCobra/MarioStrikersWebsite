@@ -3993,26 +3993,8 @@ body.player-popup-open {
     0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow) !important;
 }
 
-/* A fully-earned reward tier (5/5) keeps its tier text colour but drops the glow. */
-.profile-rating-reward.is-reward-complete .profile-rating-reward-name,
-.player-popup-rating-reward.is-reward-complete .player-popup-rating-reward-name {
-  text-shadow: none;
-}
-
-.profile-rating-reward.is-reward-complete .profile-rating-reward-icon,
-.player-popup-rating-reward.is-reward-complete .player-popup-rating-reward-icon {
-  filter: none;
-}
-
-#player-profile-popup .player-popup-rating-reward.is-reward-complete .player-popup-rating-reward-name {
-  text-shadow: none !important;
-}
-
-#player-profile-popup .player-popup-rating-reward.is-reward-complete .player-popup-rating-reward-icon {
-  filter: none !important;
-}
-
-/* At 5/5 the progress count itself is tinted in the reached tier's colour. */
+/* At 5/5 only the progress count is tinted in the reached tier's colour (plain colour,
+   no glow). The tier name and reward icon keep their normal per-tier glow. */
 .profile-rating-reward.is-reward-complete .profile-rating-reward-progress strong,
 .player-popup-rating-reward.is-reward-complete .player-popup-rating-reward-progress strong {
   color: var(--profile-rating-reward-accent);
