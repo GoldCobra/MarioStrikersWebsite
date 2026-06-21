@@ -796,7 +796,7 @@
     }).join("");
 
     return [
-      '<header id="2">',
+      '<header id="global-header">',
       brandHtml,
       '<nav class="main-nav main-nav-text" aria-label="Main navigation">', navHtml, "</nav>",
       buildAccountShellHtml(),

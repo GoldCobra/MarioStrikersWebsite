@@ -137,7 +137,7 @@ body::before {
   overflow-x: hidden;
 }
 
-#\32 {
+#global-header {
   position: relative;
   width: var(--full-bleed-width);
   margin-left: calc(50% - (var(--full-bleed-width) / 2));
@@ -1222,13 +1222,6 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
   color: #000;
   text-shadow: -1px 1px 0 #d36402;
 }
-
-.competitive-rules p,
-.competitive-rules li,
-.competitive-rules a,
-.competitive-rules span,
-.competitive-rules strong,
-.competitive-rules em {}
 
 .competitive-rules p,
 .competitive-rules li {
@@ -4573,7 +4566,7 @@ body.player-popup-open {
     --subnav-reserve-height: 42px;
   }
 
-  #\32 {
+  #global-header {
     padding-inline: 0.32rem;
   }
 
@@ -4582,8 +4575,6 @@ body.player-popup-open {
     left: 0.28rem;
     width: clamp(50px, 13vw, 68px);
   }
-
-  .nav-brand-est {}
 
   .main-nav-text {
     max-width: min(840px, calc(100vw - 36px));
@@ -4978,7 +4969,7 @@ body.player-popup-open {
     --reporter-text-drop-shadow: drop-shadow(-1px 1px 0 #000);
   }
 
-  #\32 {
+  #global-header {
     padding-inline: 0.25rem;
   }
 
@@ -5618,7 +5609,7 @@ body.player-popup-open {
     --msbl-club-meta-slot-height: clamp(7px, 2vw, 9px);
   }
 
-  #\32 {
+  #global-header {
     align-items: flex-start;
     padding: 0.1rem 0.32rem 0.32rem;
   }
