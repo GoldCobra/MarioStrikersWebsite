@@ -90,5 +90,7 @@ LEFT JOIN Candidate ON 1 = 1;
 }
 
 module.exports = {
-  getCompetitiveSeasonStatus
+  getCompetitiveSeasonStatus,
+  mapSeasonRow,
+  toBoolean
 };

@@ -1,6 +1,4 @@
-function normalizeText(value) {
-  return String(value || "").trim();
-}
+const { normalizeText } = require("../lib/text");
 
 const FLAG_CODE_ALIASES = Object.freeze({
   "uk": "gb",

@@ -2,29 +2,24 @@ const { withPool } = require("../db");
 const { defaultClubLogoCache, normalizeSourceUrl } = require("./club-logo-cache");
 const { resolveDiscordNamesForRoster } = require("./discord-users-service");
 const { normalizeCountryCode } = require("./flag-codes");
+const { normalizeText } = require("../lib/text");
+const { normalizeDiscordId: extractDiscordId } = require("../lib/discord-id");
+const { toPositiveIntOrNull: toPositiveInt } = require("../lib/numbers");
+const {
+  DEFAULT_ACTIVITY_WINDOW_DAYS,
+  toActivityIso,
+  isActivityActive
+} = require("../lib/dates");
 
 const CLUB_LOGO_EXCLUSION_RULES = [
   { tags: ["strk"], names: ["i be strikin", "i be stirkin"] },
   { tags: ["bros"], names: ["hammer bros"] }
 ];
-const DEFAULT_ACTIVITY_WINDOW_DAYS = 90;
-
-function normalizeText(value) {
-  return String(value || "").trim();
-}
 
 function compactTextList(values) {
   return (Array.isArray(values) ? values : [])
     .map(normalizeText)
     .filter(Boolean);
-}
-
-function toPositiveInt(value) {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed <= 0) {
-    return null;
-  }
-  return Math.floor(parsed);
 }
 
 function normalizeKey(value) {
@@ -73,20 +68,6 @@ function normalizeLogoSource(value) {
   return normalizeSourceUrl(value);
 }
 
-function extractDiscordId(value) {
-  const text = normalizeText(value);
-  if (!text) {
-    return "";
-  }
-
-  const mentionMatch = text.match(/<@!?(\d+)>/);
-  if (mentionMatch) {
-    return mentionMatch[1];
-  }
-
-  return /^\d+$/.test(text) ? text : "";
-}
-
 function extractMentionSuffixName(value) {
   const text = normalizeText(value);
   if (!text.startsWith("<@")) {
@@ -103,48 +84,12 @@ function extractDiscordName(value) {
   return extractMentionSuffixName(value);
 }
 
-function normalizeActivityDate(value) {
-  if (!value) {
-    return null;
-  }
-  const date = value instanceof Date ? value : new Date(value);
-  if (!Number.isFinite(date.getTime())) {
-    return null;
-  }
-  return date;
-}
-
-function toActivityIso(value) {
-  const date = normalizeActivityDate(value);
-  return date ? date.toISOString() : null;
-}
-
-function isActivityActive(value, now, activityWindowDays) {
-  const activity = normalizeActivityDate(value);
-  const reference = normalizeActivityDate(now) || new Date();
-  const windowDays = Number.isFinite(Number(activityWindowDays))
-    ? Number(activityWindowDays)
-    : DEFAULT_ACTIVITY_WINDOW_DAYS;
-
-  if (!activity || windowDays <= 0) {
-    return false;
-  }
-
-  return reference.getTime() - activity.getTime() <= windowDays * 24 * 60 * 60 * 1000;
-}
-
 function resolveStatus(joinConditions, isOpen) {
   const joinText = normalizeText(joinConditions);
   if (joinText) {
     return joinText;
   }
-  if (isOpen === true || isOpen === 1) {
-    return "Open to Anyone";
-  }
-  if (isOpen === false || isOpen === 0) {
-    return "Invite Only";
-  }
-  return "";
+  return resolveOpenStatus(isOpen);
 }
 
 function resolveOpenStatus(isOpen) {

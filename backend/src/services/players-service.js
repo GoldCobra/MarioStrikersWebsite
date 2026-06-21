@@ -1,6 +1,14 @@
 const { withPool, measurePool, mssql } = require("../db");
 const { normalizeCountryCode } = require("./flag-codes");
-const DEFAULT_ACTIVITY_WINDOW_DAYS = 90;
+const { normalizeText } = require("../lib/text");
+const { normalizeDiscordId } = require("../lib/discord-id");
+const { toPositiveIntId: toPositiveInt, toSafeCount } = require("../lib/numbers");
+const {
+  DEFAULT_ACTIVITY_WINDOW_DAYS,
+  toActivityIso,
+  isActivityActive,
+  toIsoDateOnly
+} = require("../lib/dates");
 const PROFILE_SLOW_LOG_THRESHOLD_MS = 1500;
 const COMPETITIVE_RANK_ICON_BASE_URL = "/assets/leaderboards/rankicons/";
 const SEASON_REWARD_LEVEL_BASE_URL = "/assets/players/rewardlevel/";
@@ -42,34 +50,8 @@ function versionAssetUrl(url) {
   return url + "?v=" + RANK_ICON_ASSET_VERSION;
 }
 
-function normalizeText(value) {
-  return String(value || "").trim();
-}
-
 function normalizeCountry(value) {
   return normalizeCountryCode(value);
-}
-
-function normalizeDiscordId(value) {
-  const text = normalizeText(value);
-  if (!text) {
-    return "";
-  }
-
-  const mentionMatch = text.match(/<@!?(\d+)>/);
-  if (mentionMatch) {
-    return mentionMatch[1];
-  }
-
-  return /^\d+$/.test(text) ? text : "";
-}
-
-function toPositiveInt(value) {
-  const parsed = Number(value);
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    return null;
-  }
-  return parsed;
 }
 
 function roundOrNull(value) {
@@ -78,36 +60,6 @@ function roundOrNull(value) {
     return null;
   }
   return Math.round(parsed);
-}
-
-function normalizeActivityDate(value) {
-  if (!value) {
-    return null;
-  }
-  const date = value instanceof Date ? value : new Date(value);
-  if (!Number.isFinite(date.getTime())) {
-    return null;
-  }
-  return date;
-}
-
-function toActivityIso(value) {
-  const date = normalizeActivityDate(value);
-  return date ? date.toISOString() : null;
-}
-
-function isActivityActive(value, now, activityWindowDays) {
-  const activity = normalizeActivityDate(value);
-  const reference = normalizeActivityDate(now) || new Date();
-  const windowDays = Number.isFinite(Number(activityWindowDays))
-    ? Number(activityWindowDays)
-    : DEFAULT_ACTIVITY_WINDOW_DAYS;
-
-  if (!activity || windowDays <= 0) {
-    return false;
-  }
-
-  return reference.getTime() - activity.getTime() <= windowDays * 24 * 60 * 60 * 1000;
 }
 
 function normalizeRecordPair(value) {
@@ -333,14 +285,6 @@ function toPlayerListDTO(row, opts) {
   };
 }
 
-function toSafeCount(value) {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) {
-    return 0;
-  }
-  return Math.max(0, Math.floor(parsed));
-}
-
 function hasCompetitiveMatches(row) {
   return toSafeCount(row && row.MatchWins) + toSafeCount(row && row.MatchLosses) > 0;
 }
@@ -560,62 +504,6 @@ function buildRatings(profile, competitiveRatings, rewardProgressRows) {
   };
 }
 
-function toIsoDateOnly(value) {
-  if (!value) {
-    return "";
-  }
-
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "";
-  }
-  return date.toISOString().slice(0, 10);
-}
-
-async function getPlayerBaseById(pool, playerId) {
-  const request = pool.request();
-  request.input("playerId", mssql.Int, playerId);
-  const result = await request.query(
-    [
-      "SELECT TOP 1",
-      "  p.ID AS player_id,",
-      "  p.Name AS name,",
-      "  p.Country AS country,",
-      "  p.IdStartGG AS id_start_gg,",
-      "  p.Activity AS activity,",
-      "  club.club_id AS club_id,",
-      "  club.ClubName AS club_name,",
-      "  club.ClanTag AS club_tag",
-      "FROM Player p",
-      "OUTER APPLY (",
-      "  SELECT TOP 1 c.ID AS club_id, c.ClubName, c.ClanTag",
-      "  FROM ClubRoster cr",
-      "  INNER JOIN Club c ON c.ID = cr.Club",
-      "  WHERE cr.Player = p.ID",
-      "  ORDER BY ISNULL(cr.Rank, 9999), c.ClubName",
-      ") club",
-      "WHERE p.ID = @playerId"
-    ].join(" ")
-  );
-
-  const row = Array.isArray(result && result.recordset) ? result.recordset[0] : null;
-  const name = normalizeText(row && row.name);
-  if (!row || !name) {
-    return null;
-  }
-
-  return {
-    player_id: Number(row.player_id) || null,
-    name: name,
-    country: normalizeCountry(row.country),
-    id_start_gg: normalizeText(row.id_start_gg),
-    club_id: Number(row.club_id) || null,
-    club_name: normalizeText(row.club_name),
-    club_tag: normalizeText(row.club_tag),
-    activity: row.activity || null
-  };
-}
-
 async function getPlayerBaseByDiscordId(pool, discordIdRaw) {
   const discordId = normalizeDiscordId(discordIdRaw);
   if (!discordId) {
@@ -686,30 +574,6 @@ async function getPlayerBaseByDiscordId(pool, discordIdRaw) {
   };
 }
 
-async function getPlayerFriendCodes(pool, playerId) {
-  const request = pool.request();
-  request.input("playerId", mssql.Int, playerId);
-  const result = await request.query(
-    [
-      "SELECT",
-      "  fc.GameType,",
-      "  fc.Region,",
-      "  fc.LineSeq,",
-      "  fc.Label,",
-      "  fc.Code",
-      "FROM FriendCodes fc",
-      "WHERE fc.Player = @playerId",
-      "ORDER BY",
-      "  CASE WHEN fc.Region = 'SW' OR fc.GameType = 3 THEN 0 ELSE 1 END,",
-      "  CASE fc.Region WHEN 'PAL' THEN 1 WHEN 'NTSC' THEN 2 WHEN 'JPN' THEN 3 WHEN 'KOR' THEN 4 ELSE 9 END,",
-      "  fc.LineSeq"
-    ].join(" ")
-  );
-
-  const rows = Array.isArray(result && result.recordset) ? result.recordset : [];
-  return buildFriendCodes(rows);
-}
-
 function buildPlayerProfileSummaryQuery(terminator) {
   const suffix = terminator || "";
   return [
@@ -732,41 +596,6 @@ function buildPlayerProfileSummaryQuery(terminator) {
     "WHERE p.ID = @playerId",
     "GROUP BY p.ID, p.Name" + suffix
   ].join(" ");
-}
-
-async function getPlayerProfileSummary(pool, playerId) {
-  const request = pool.request();
-  request.input("playerId", mssql.Int, playerId);
-  const result = await request.query(buildPlayerProfileSummaryQuery());
-  const rows = Array.isArray(result && result.recordset) ? result.recordset : [];
-  return rows[0] || null;
-}
-
-async function getPlayerCompetitiveRatings(pool, playerId) {
-  const request = pool.request();
-  request.input("playerId", mssql.Int, playerId);
-  const result = await request.query(
-    [
-      "SELECT",
-      "  lb.GameType,",
-      "  lb.Mode,",
-      "  lb.Elo,",
-      "  lb.RankNumber,",
-      "  lb.RankName,",
-      "  lb.MatchWins,",
-      "  lb.MatchLosses,",
-      "  lb.PlacementPlayed,",
-      "  lb.PlacementComplete,",
-      "  lb.TotalMatches",
-      "FROM CompetitiveLeaderboard lb",
-      "INNER JOIN CompetitiveSeason season ON season.Id = lb.SeasonId",
-      "WHERE season.IsActive = 1",
-      "  AND season.LifecycleStatus = 'active'",
-      "  AND lb.PlayerId = @playerId",
-      "ORDER BY lb.GameType ASC, lb.Mode ASC"
-    ].join(" ")
-  );
-  return Array.isArray(result && result.recordset) ? result.recordset : [];
 }
 
 function buildSeasonRewardLevelQuery() {
@@ -800,39 +629,6 @@ function buildAccolades(rows) {
     }
     return String(a.tournament_name || "").localeCompare(String(b.tournament_name || ""));
   });
-}
-
-async function getPlayerSeasonRewardLevel(pool, playerId) {
-  const request = pool.request();
-  request.input("playerId", mssql.Int, playerId);
-  const result = await request.query(buildSeasonRewardLevelQuery());
-  const row = Array.isArray(result && result.recordset) ? result.recordset[0] : null;
-  return buildSeasonRewardLevel(row && row.RewardLevelOrder);
-}
-
-async function getPlayerAccolades(pool, playerId) {
-  const request = pool.request();
-  request.input("playerId", mssql.Int, playerId);
-  const result = await request.query(
-    [
-      "DECLARE @playerIdText NVARCHAR(20) = CONVERT(NVARCHAR(20), @playerId);",
-      "SELECT t.Name, ':first_place: ' AS Place, CASE WHEN t.GameType = 1 THEN 'MSC' WHEN t.GameType = 2 THEN 'SMS' WHEN t.GameType = 3 THEN 'MSBL' ELSE '?' END AS Game, t.TournamentStartDate",
-      "FROM Tournament t",
-      "WHERE (',' + REPLACE(CONVERT(NVARCHAR(MAX), ISNULL(t.Winner, '')), ' ', '') + ',') LIKE '%,' + @playerIdText + ',%'",
-      "UNION ALL",
-      "SELECT t.Name, ':second_place: ' AS Place, CASE WHEN t.GameType = 1 THEN 'MSC' WHEN t.GameType = 2 THEN 'SMS' WHEN t.GameType = 3 THEN 'MSBL' ELSE '?' END AS Game, t.TournamentStartDate",
-      "FROM Tournament t",
-      "WHERE (',' + REPLACE(CONVERT(NVARCHAR(MAX), ISNULL(t.RunnerUp, '')), ' ', '') + ',') LIKE '%,' + @playerIdText + ',%'",
-      "UNION ALL",
-      "SELECT t.Name, ':third_place: ' AS Place, CASE WHEN t.GameType = 1 THEN 'MSC' WHEN t.GameType = 2 THEN 'SMS' WHEN t.GameType = 3 THEN 'MSBL' ELSE '?' END AS Game, t.TournamentStartDate",
-      "FROM Tournament t",
-      "WHERE (',' + REPLACE(CONVERT(NVARCHAR(MAX), ISNULL(t.Bronze, '')), ' ', '') + ',') LIKE '%,' + @playerIdText + ',%'",
-      "ORDER BY TournamentStartDate DESC"
-    ].join(" ")
-  );
-  const rows = Array.isArray(result && result.recordset) ? result.recordset : [];
-
-  return buildAccolades(rows);
 }
 
 function buildPlayerProfileBatchQuery() {

@@ -4,6 +4,7 @@ const fs = require("node:fs/promises");
 const net = require("node:net");
 const path = require("node:path");
 const { config } = require("../config");
+const { toPositiveIntOr } = require("../lib/numbers");
 
 const MANIFEST_VERSION = 1;
 const ALLOWED_CONTENT_TYPES = new Map([
@@ -80,11 +81,6 @@ function getSourceIdentity(sourceUrl) {
 
 function hashText(value) {
   return crypto.createHash("sha256").update(String(value)).digest("hex").slice(0, 16);
-}
-
-function toPositiveInt(value) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0;
 }
 
 function isPrivateIpv4(address) {
@@ -227,7 +223,7 @@ class ClubLogoCache {
   }
 
   async ensureClubLogo(club) {
-    const clubId = toPositiveInt(club && club.club_id);
+    const clubId = toPositiveIntOr(club && club.club_id, 0);
     const sourceUrl = normalizeSourceUrl(club && club.logo_source);
     if (!clubId || !sourceUrl) {
       return "";
@@ -378,7 +374,7 @@ class ClubLogoCache {
   }
 
   async getLogoFile(clubId) {
-    const normalizedClubId = toPositiveInt(clubId);
+    const normalizedClubId = toPositiveIntOr(clubId, 0);
     if (!normalizedClubId) {
       return null;
     }

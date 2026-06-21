@@ -1,4 +1,7 @@
 const { config } = require("../config");
+const { normalizeText } = require("../lib/text");
+const { normalizeDiscordId } = require("../lib/discord-id");
+const { fetchDiscordJson } = require("../lib/discord-rest");
 
 const TEXT_CHANNEL_TYPES = new Set([0, 5, 15, 16]);
 const EXCLUDED_EVENT_KEYS = new Set(["tournaments", "event-voice-channel"]);
@@ -7,15 +10,6 @@ const EVENT_GAME_MARKERS = Object.freeze([
   { game: "msc", imageUrl: "/assets/games/mscball.png", symbols: ["🔸", "🔶", "🟠", "🟧"] },
   { game: "msbl", imageUrl: "/assets/games/msblball.png", symbols: ["🔺", "🔻", "🔴", "🟥"] }
 ]);
-
-function normalizeText(value) {
-  return String(value || "").trim();
-}
-
-function normalizeDiscordId(value) {
-  const text = normalizeText(value);
-  return /^\d+$/.test(text) ? text : "";
-}
 
 function cleanChannelName(value) {
   return normalizeText(value)
@@ -135,43 +129,6 @@ function readEventsConfig(options) {
     fetchFn: opts.fetchFn || fetch,
     logger: opts.logger || console
   };
-}
-
-async function fetchDiscordJson(pathname, eventsConfig, attempt) {
-  const controller = typeof AbortController === "function" ? new AbortController() : null;
-  const timeout = controller && eventsConfig.fetchTimeoutMs > 0
-    ? setTimeout(function () { controller.abort(); }, eventsConfig.fetchTimeoutMs)
-    : null;
-
-  try {
-    const response = await eventsConfig.fetchFn(eventsConfig.apiBase + pathname, {
-      headers: {
-        Accept: "application/json",
-        Authorization: "Bot " + eventsConfig.botToken
-      },
-      signal: controller ? controller.signal : undefined
-    });
-    let payload = null;
-    if (response && typeof response.json === "function") {
-      payload = await response.json().catch(function () { return null; });
-    }
-
-    if (response && response.status === 429 && !attempt) {
-      const retryAfterMs = Math.min(Math.max(Number(payload && payload.retry_after || 0) * 1000, 250), 2000);
-      await new Promise(function (resolve) { setTimeout(resolve, retryAfterMs); });
-      return fetchDiscordJson(pathname, eventsConfig, 1);
-    }
-
-    return {
-      ok: !!(response && response.ok),
-      status: response ? response.status : 0,
-      payload
-    };
-  } finally {
-    if (timeout) {
-      clearTimeout(timeout);
-    }
-  }
 }
 
 async function fetchCommunityEvents(options) {

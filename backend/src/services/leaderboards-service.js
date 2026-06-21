@@ -1,6 +1,7 @@
 const { config } = require("../config");
 const { withPool, mssql } = require("../db");
 const { normalizeCompetitiveRank } = require("./competitive-ranks");
+const { toSafeCount: toSafeInteger, toPositiveIntOrNull: toPositiveIntegerOrNull } = require("../lib/numbers");
 
 const GAME_TYPE_BY_CODE = {
   msc: 1,
@@ -51,22 +52,6 @@ function assertGameAndMode(gameCode, modeCode) {
   }
 
   return { game: game, mode: mode };
-}
-
-function toSafeInteger(value) {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) {
-    return 0;
-  }
-  return Math.max(0, Math.floor(parsed));
-}
-
-function toPositiveIntegerOrNull(value) {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed <= 0) {
-    return null;
-  }
-  return Math.floor(parsed);
 }
 
 function toRating(value) {

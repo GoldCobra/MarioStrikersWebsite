@@ -1,28 +1,9 @@
 const { config } = require("../config");
+const { normalizeText } = require("../lib/text");
+const { normalizeDiscordId } = require("../lib/discord-id");
+const { fetchDiscordJson } = require("../lib/discord-rest");
 
 const userCache = new Map();
-
-function normalizeText(value) {
-  return String(value || "").trim();
-}
-
-function normalizeDiscordId(value) {
-  const text = normalizeText(value);
-  if (!text) {
-    return "";
-  }
-
-  const mentionMatch = text.match(/<@!?(\d+)>/);
-  if (mentionMatch) {
-    return mentionMatch[1];
-  }
-
-  return /^\d+$/.test(text) ? text : "";
-}
-
-function getDiscordApiUrl(pathname, apiBase) {
-  return String(apiBase || config.discordApiBase || "https://discord.com/api/v10").replace(/\/+$/, "") + pathname;
-}
 
 function readLookupConfig(opts) {
   const options = opts || {};
@@ -43,58 +24,6 @@ function toDiscordUsername(member) {
   return normalizeText(user && user.username)
     || normalizeText(member && member.nick)
     || normalizeText(user && user.global_name);
-}
-
-function delay(ms) {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, ms);
-  });
-}
-
-async function fetchDiscordJson(pathname, lookup, attempt) {
-  const controller = typeof AbortController === "function" ? new AbortController() : null;
-  const timeout = controller && lookup.fetchTimeoutMs > 0
-    ? setTimeout(function () { controller.abort(); }, lookup.fetchTimeoutMs)
-    : null;
-
-  try {
-    const response = await lookup.fetchFn(
-      getDiscordApiUrl(pathname, lookup.apiBase),
-      {
-        headers: {
-          Accept: "application/json",
-          Authorization: "Bot " + lookup.botToken
-        },
-        signal: controller ? controller.signal : undefined
-      }
-    );
-    let payload = null;
-    if (response && typeof response.json === "function") {
-      try {
-        payload = await response.json();
-      } catch (_error) {
-        payload = null;
-      }
-    }
-
-    if (response && response.status === 429 && !attempt) {
-      const retryAfterMs = Math.min(Math.max(Number(payload && payload.retry_after || 0) * 1000, 250), 2000);
-      await delay(retryAfterMs);
-      return fetchDiscordJson(pathname, lookup, 1);
-    }
-
-    return {
-      ok: !!(response && response.ok),
-      status: response ? response.status : 0,
-      payload: payload
-    };
-  } catch (_error) {
-    return { ok: false, status: 0, payload: null };
-  } finally {
-    if (timeout) {
-      clearTimeout(timeout);
-    }
-  }
 }
 
 async function fetchDiscordGuildMember(discordId, opts) {

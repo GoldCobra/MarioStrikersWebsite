@@ -1,5 +1,6 @@
 const crypto = require("node:crypto");
 const { config, assertDiscordAuthConfigured } = require("../config");
+const { getDiscordApiUrl: getDiscordApiUrlBase } = require("../lib/discord-rest");
 
 const DISCORD_OAUTH_AUTHORIZE_URL = "https://discord.com/oauth2/authorize";
 const DISCORD_OAUTH_SCOPES = ["identify", "guilds.members.read"];
@@ -169,7 +170,7 @@ function buildDiscordAuthorizeUrl(returnTo) {
 }
 
 function getDiscordApiUrl(pathname) {
-  return String(config.discordApiBase || "https://discord.com/api/v10").replace(/\/+$/, "") + pathname;
+  return getDiscordApiUrlBase(pathname, config.discordApiBase);
 }
 
 async function exchangeDiscordCode(code, fetchFn) {

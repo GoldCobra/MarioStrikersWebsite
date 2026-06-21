@@ -5,6 +5,7 @@ const { getLeaderboardRows } = require("./leaderboards-service");
 const { getMsblClubs } = require("./clubs-service");
 const { getPlayersList } = require("./players-service");
 const { getCompetitiveSeasonStatus } = require("./competitive-season-service");
+const { toPositiveIntOr: toPositiveInt } = require("../lib/numbers");
 
 const SNAPSHOT_VERSION = 5;
 const PLAYERS_LIST_KEY = "players:list";
@@ -24,14 +25,6 @@ const PUBLIC_LEADERBOARD_VARIANTS = Object.freeze([
 
 function leaderboardCacheKey(game, mode) {
   return "leaderboard:" + String(game || "").toLowerCase() + ":" + String(mode || "").toLowerCase();
-}
-
-function toPositiveInt(value, fallback) {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed <= 0) {
-    return fallback;
-  }
-  return Math.floor(parsed);
 }
 
 function normalizeGeneratedAt(value) {
