@@ -137,7 +137,7 @@ body::before {
   overflow-x: hidden;
 }
 
-#global-header {
+#\32 {
   position: relative;
   width: var(--full-bleed-width);
   margin-left: calc(50% - (var(--full-bleed-width) / 2));
@@ -4566,7 +4566,7 @@ body.player-popup-open {
     --subnav-reserve-height: 42px;
   }
 
-  #global-header {
+  #\32 {
     padding-inline: 0.32rem;
   }
 
@@ -4969,7 +4969,7 @@ body.player-popup-open {
     --reporter-text-drop-shadow: drop-shadow(-1px 1px 0 #000);
   }
 
-  #global-header {
+  #\32 {
     padding-inline: 0.25rem;
   }
 
@@ -5609,7 +5609,7 @@ body.player-popup-open {
     --msbl-club-meta-slot-height: clamp(7px, 2vw, 9px);
   }
 
-  #global-header {
+  #\32 {
     align-items: flex-start;
     padding: 0.1rem 0.32rem 0.32rem;
   }
