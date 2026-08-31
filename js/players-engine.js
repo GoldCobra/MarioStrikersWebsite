@@ -5,7 +5,7 @@
   var lastPopupCloseAt = 0;
   var profileTriggersBound = false;
 
-  var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260610-profile-friendcodes-v1";
+  var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260831-season-rewards-v1";
   var POPUP_OPEN_CLASS = "player-popup-open";
   var inFlightProfileRequests = new Map();
   var templateLoadPromise = null;
@@ -514,6 +514,41 @@
     }).filter(Boolean).join("");
   }
 
+  function renderSeasonAwards(awards) {
+    var mount = popupState.lists["season-awards"];
+    if (!mount) {
+      return false;
+    }
+
+    var rows = Array.isArray(awards) ? awards : [];
+    var details = mount.closest(".player-popup-season-awards-details");
+    if (details) {
+      details.open = false;
+    }
+    if (!rows.length) {
+      mount.innerHTML = "";
+      setSectionHidden(mount, true);
+      return false;
+    }
+
+    setSectionHidden(mount, false);
+    mount.innerHTML = rows.map(function (entry) {
+      var ballIcon = getGameBallIconUrl(entry && entry.game_code);
+      var ballIconFallback = String(ballIcon || "").replace(/\.webp$/i, ".png");
+      var season = String(entry && entry.season_name || "").trim();
+      var award = String(entry && entry.award_name || "").trim() || "-";
+
+      return [
+        '<li class="player-popup-season-award-item">',
+        '<span class="player-popup-season-award-season">', escapeHtml(season), "</span>",
+        '<img class="player-popup-season-award-ball" src="', escapeHtml(ballIcon), '" alt="" aria-hidden="true" loading="lazy" onerror="this.onerror=null;this.src=\'', escapeHtml(ballIconFallback), '\'">',
+        '<span class="player-popup-season-award-name">', escapeHtml(award), "</span>",
+        "</li>"
+      ].join("");
+    }).join("");
+    return true;
+  }
+
   function renderAccolades(accolades) {
     var mount = popupState.lists.accolades;
     if (!mount) {
@@ -604,6 +639,7 @@
       }
     }
 
+    renderSeasonAwards(data.season_awards || []);
     renderAccolades(data.accolades || []);
 
     var singlesMount = popupState.slots["ratings-grid-singles"];

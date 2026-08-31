@@ -7,6 +7,8 @@ const {
   buildPlayerProfileFromRecordsets,
   buildPlayersListQuery,
   buildPlayerDisplayName,
+  buildSeasonAwards,
+  buildSeasonAwardsQuery,
   buildSeasonRewardLevel,
   buildSeasonRewardLevelQuery,
   isActivityActive,
@@ -519,4 +521,66 @@ test("players list only includes rows with visible profile content", function ()
   assert.match(sql, /Tournament/);
   assert.match(sql, /IdStartGG/);
   assert.doesNotMatch(sql, /FROM PlayerStats ps/);
+});
+
+test("buildSeasonAwards maps award rows and keeps the SQL ordering", function () {
+  const awards = buildSeasonAwards([
+    {
+      SeasonName: "Burst Season 2026",
+      Game: "msbl",
+      ModeCode: "1v1",
+      AwardCode: "TOP_10",
+      AwardName: "Top 10",
+      RankPosition: 3,
+      MetricLabel: "865.57 ELO"
+    },
+    {
+      SeasonName: "Burst Season 2026",
+      Game: "MSC",
+      ModeCode: "1v1",
+      AwardCode: "IRON_PLAYER",
+      AwardName: "Iron Player",
+      RankPosition: 1,
+      MetricLabel: "33 matches"
+    }
+  ]);
+
+  assert.equal(awards.length, 2);
+  assert.deepEqual(awards[0], {
+    season_name: "Burst Season 2026",
+    game_code: "MSBL",
+    mode_code: "1v1",
+    award_code: "TOP_10",
+    award_name: "Top 10",
+    rank_position: 3,
+    metric_label: "865.57 ELO"
+  });
+  assert.equal(awards[1].game_code, "MSC");
+  assert.equal(awards[1].award_name, "Iron Player");
+});
+
+test("buildSeasonAwards drops rows without a season or award name", function () {
+  const awards = buildSeasonAwards([
+    { SeasonName: "", AwardName: "Top 10" },
+    { SeasonName: "Burst Season 2026", AwardName: "" },
+    { SeasonName: "Burst Season 2026", AwardName: "Most Wins", Game: "SMS" }
+  ]);
+
+  assert.equal(awards.length, 1);
+  assert.equal(awards[0].award_name, "Most Wins");
+});
+
+test("buildSeasonAwards tolerates a missing or non-array recordset", function () {
+  assert.deepEqual(buildSeasonAwards(null), []);
+  assert.deepEqual(buildSeasonAwards(undefined), []);
+  assert.deepEqual(buildSeasonAwards("nope"), []);
+});
+
+test("buildSeasonAwardsQuery selects award rows for the requested player", function () {
+  const sql = buildSeasonAwardsQuery();
+
+  assert.match(sql, /CompetitiveSeasonAwardResult/);
+  assert.match(sql, /CompetitiveSeasonAwardResultPlayer/);
+  assert.match(sql, /resultPlayer\.PlayerId = @playerId/);
+  assert.match(sql, /ORDER BY season\.StartDateUtc DESC/);
 });

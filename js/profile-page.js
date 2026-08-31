@@ -301,6 +301,34 @@
     ].join("");
   }
 
+  function buildSeasonAwards(awards) {
+    var rows = Array.isArray(awards) ? awards : [];
+    if (!rows.length) {
+      return "";
+    }
+
+    return [
+      '<section class="profile-panel profile-season-awards-panel">',
+      '<details class="profile-season-awards-details">',
+      '<summary class="profile-season-awards-summary"><span class="profile-panel-title">Season Rewards</span></summary>',
+      '<ul class="profile-season-awards">',
+      rows.map(function (entry) {
+        var ballIcon = getGameBallIconUrl(entry && entry.game_code);
+        var ballIconFallback = String(ballIcon || "").replace(/\.webp$/i, ".png");
+        return [
+          '<li class="profile-season-award-item">',
+          '<span class="profile-season-award-season">', escapeHtml(entry && entry.season_name || ""), "</span>",
+          '<img class="profile-season-award-ball" src="', escapeHtml(ballIcon), '" alt="" aria-hidden="true" loading="lazy" onerror="this.onerror=null;this.src=\'', escapeHtml(ballIconFallback), '\'">',
+          '<span class="profile-season-award-name">', escapeHtml(entry && entry.award_name || "-"), "</span>",
+          "</li>"
+        ].join("");
+      }).join(""),
+      "</ul>",
+      "</details>",
+      "</section>"
+    ].join("");
+  }
+
   function buildAccolades(accolades) {
     var rows = Array.isArray(accolades) ? accolades : [];
     if (!rows.length) {
@@ -362,6 +390,7 @@
       '<div class="profile-grid-main">',
       buildFriendCodes(data.friend_codes || {}),
       resultsHtml,
+      buildSeasonAwards(data.season_awards || []),
       buildAccolades(data.accolades || []),
       "</div>",
       '<div class="profile-grid-side">',

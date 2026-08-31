@@ -2,7 +2,7 @@ const { withPool, measurePool, mssql } = require("../db");
 const { normalizeCountryCode } = require("./flag-codes");
 const { normalizeText } = require("../lib/text");
 const { normalizeDiscordId } = require("../lib/discord-id");
-const { toPositiveIntId: toPositiveInt, toSafeCount } = require("../lib/numbers");
+const { toPositiveIntId: toPositiveInt, toPositiveIntOrNull, toSafeCount } = require("../lib/numbers");
 const {
   DEFAULT_ACTIVITY_WINDOW_DAYS,
   toActivityIso,
@@ -611,6 +611,43 @@ function buildSeasonRewardLevelQuery() {
   ].join(" ");
 }
 
+function buildSeasonAwardsQuery() {
+  return [
+    "SELECT",
+    "  season.DisplayName AS SeasonName,",
+    "  season.StartDateUtc AS SeasonStartDateUtc,",
+    "  CASE WHEN result.GameId = 1 THEN 'MSC' WHEN result.GameId = 2 THEN 'SMS' WHEN result.GameId = 3 THEN 'MSBL' ELSE '?' END AS Game,",
+    "  result.ModeCode,",
+    "  result.AwardCode,",
+    "  result.AwardName,",
+    "  result.RankPosition,",
+    "  result.MetricLabel",
+    "FROM CompetitiveSeasonAwardResult result",
+    "INNER JOIN CompetitiveSeasonAwardResultPlayer resultPlayer ON resultPlayer.AwardResultId = result.Id",
+    "INNER JOIN CompetitiveSeason season ON season.Id = result.SeasonId",
+    "WHERE resultPlayer.PlayerId = @playerId",
+    "ORDER BY season.StartDateUtc DESC, result.GameId ASC, result.ModeCode ASC,",
+    "  result.AwardCode ASC, result.RankPosition ASC;"
+  ].join(" ");
+}
+
+// Season awards are written once, when a season is finalized, and never change afterwards.
+function buildSeasonAwards(rows) {
+  return (Array.isArray(rows) ? rows : []).map(function (row) {
+    return {
+      season_name: normalizeText(row && row.SeasonName),
+      game_code: normalizeText(row && row.Game).toUpperCase(),
+      mode_code: normalizeText(row && row.ModeCode).toLowerCase(),
+      award_code: normalizeText(row && row.AwardCode),
+      award_name: normalizeText(row && row.AwardName),
+      rank_position: toPositiveIntOrNull(row && row.RankPosition),
+      metric_label: normalizeText(row && row.MetricLabel)
+    };
+  }).filter(function (row) {
+    return row.season_name !== "" && row.award_name !== "";
+  });
+}
+
 function buildAccolades(rows) {
   return (Array.isArray(rows) ? rows : []).map(function (row) {
     return {
@@ -717,7 +754,8 @@ function buildPlayerProfileBatchQuery() {
     "  (CONVERT(NVARCHAR(MAX), ISNULL(t.Bronze, '')), ':third_place: ')",
     ") placement(PlayerList, Place)",
     "WHERE (',' + REPLACE(placement.PlayerList, ' ', '') + ',') LIKE '%,' + @playerIdText + ',%'",
-    "ORDER BY t.TournamentStartDate DESC, t.Name ASC;"
+    "ORDER BY t.TournamentStartDate DESC, t.Name ASC;",
+    buildSeasonAwardsQuery()
   ].join(" ");
 }
 
@@ -759,6 +797,7 @@ function buildPlayerProfileFromRecordsets(recordsets) {
       is_active: isActivityActive(player.activity)
     },
     friend_codes: buildFriendCodes(getRecordset(recordsets, 1)),
+    season_awards: buildSeasonAwards(getRecordset(recordsets, 7)),
     accolades: buildAccolades(getRecordset(recordsets, 6)),
     ratings: buildRatings(profileData, getRecordset(recordsets, 3), getRecordset(recordsets, 5)),
     season_reward_level: buildSeasonRewardLevel(rewardRow && rewardRow.RewardLevelOrder),
@@ -917,6 +956,8 @@ async function getPlayerProfileByDiscordId(discordIdRaw) {
 module.exports = {
   DEFAULT_ACTIVITY_WINDOW_DAYS,
   buildAccolades,
+  buildSeasonAwards,
+  buildSeasonAwardsQuery,
   buildCompetitiveRatingsByKey,
   buildPlayerProfileBatchQuery,
   buildPlayerProfileFromRecordsets,

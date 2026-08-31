@@ -3414,12 +3414,16 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 }
 
 .profile-accolades-details,
-.player-popup-accolades-details {
+.player-popup-accolades-details,
+.profile-season-awards-details,
+.player-popup-season-awards-details {
   min-width: 0;
 }
 
 .profile-accolades-details > summary,
-.player-popup-accolades-details > summary {
+.player-popup-accolades-details > summary,
+.profile-season-awards-details > summary,
+.player-popup-season-awards-details > summary {
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -3430,23 +3434,31 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 }
 
 .profile-accolades-details > summary::-webkit-details-marker,
-.player-popup-accolades-details > summary::-webkit-details-marker {
+.player-popup-accolades-details > summary::-webkit-details-marker,
+.profile-season-awards-details > summary::-webkit-details-marker,
+.player-popup-season-awards-details > summary::-webkit-details-marker {
   display: none;
 }
 
 .profile-accolades-details > summary:focus-visible,
-.player-popup-accolades-details > summary:focus-visible {
+.player-popup-accolades-details > summary:focus-visible,
+.profile-season-awards-details > summary:focus-visible,
+.player-popup-season-awards-details > summary:focus-visible {
   outline: 2px solid rgba(255, 180, 64, 0.72);
   outline-offset: 3px;
 }
 
 .profile-accolades-summary .profile-panel-title,
-.player-popup-accolades-summary .player-popup-section-title {
+.player-popup-accolades-summary .player-popup-section-title,
+.profile-season-awards-summary .profile-panel-title,
+.player-popup-season-awards-summary .player-popup-section-title {
   margin: 0;
 }
 
 .profile-accolades-details > summary::after,
-.player-popup-accolades-details > summary::after {
+.player-popup-accolades-details > summary::after,
+.profile-season-awards-details > summary::after,
+.player-popup-season-awards-details > summary::after {
   content: "▶";
   color: #ff8a00;
   font-size: 0.78em;
@@ -3456,10 +3468,45 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 }
 
 .profile-accolades-details[open] > summary::after,
-.player-popup-accolades-details[open] > summary::after {
+.player-popup-accolades-details[open] > summary::after,
+.profile-season-awards-details[open] > summary::after,
+.player-popup-season-awards-details[open] > summary::after {
   content: "▼";
 }
 
+.profile-season-awards,
+.player-popup-season-awards {
+  margin: 0.42rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.25rem;
+}
+.profile-season-award-item,
+.player-popup-season-award-item {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.32rem;
+  color: #f2f2f2;
+}
+.profile-season-award-ball,
+.player-popup-season-award-ball {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+.profile-season-award-season,
+.player-popup-season-award-season {
+  white-space: nowrap;
+}
+.profile-season-award-name,
+.player-popup-season-award-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .profile-accolades {
   margin: 0.42rem 0 0;
   padding: 0;
