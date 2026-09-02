@@ -8,10 +8,14 @@
   var CYCLE_DURATION_MS = SEASON_DURATION_MS + OFFSEASON_DURATION_MS;
   var SECOND_MS = 1000;
   var COMPETITIVE_SEASON_API_PATH = "/api/competitive-season/current";
+  var COMPETITIVE_SEASON_IMAGE_BASE = "./assets/landing/comp-season-";
+  var COMPETITIVE_SEASON_NAMES = ["rise", "burst", "dusk", "chill"];
 
   var anchorUtcMs = new Date(ANCHOR_ISO).getTime();
   var localCountdownNodes = Array.prototype.slice.call(document.querySelectorAll("[data-local-season-countdown]"));
   var competitiveCountdownNodes = Array.prototype.slice.call(document.querySelectorAll("[data-competitive-season-countdown]"));
+  var competitiveSeasonImageNode = document.querySelector(".landing-club--competitive-season .landing-club-image");
+  var competitiveSeasonImageFailures = {};
   var competitiveSeasonState = {
     payload: null,
     serverOffsetMs: 0,
@@ -210,6 +214,43 @@
     };
   }
 
+  function getCompetitiveSeasonImageName(displayName) {
+    var firstWord = String(displayName || "").trim().split(/\s+/)[0].toLowerCase();
+    return COMPETITIVE_SEASON_NAMES.indexOf(firstWord) === -1 ? "" : firstWord;
+  }
+
+  function applyCompetitiveSeasonImage(season) {
+    if (!competitiveSeasonImageNode) {
+      return;
+    }
+
+    var seasonName = getCompetitiveSeasonImageName(season && season.displayName);
+    if (!seasonName || competitiveSeasonImageFailures[seasonName]) {
+      return;
+    }
+
+    var nextSrc = COMPETITIVE_SEASON_IMAGE_BASE + seasonName + ".png";
+    var previousSrc = competitiveSeasonImageNode.getAttribute("src");
+    if (previousSrc === nextSrc) {
+      return;
+    }
+
+    var previousAlt = competitiveSeasonImageNode.getAttribute("alt");
+    competitiveSeasonImageNode.onerror = function () {
+      competitiveSeasonImageNode.onerror = null;
+      competitiveSeasonImageFailures[seasonName] = true;
+      if (previousSrc) {
+        competitiveSeasonImageNode.setAttribute("src", previousSrc);
+        competitiveSeasonImageNode.setAttribute("alt", previousAlt || "");
+      }
+    };
+    competitiveSeasonImageNode.setAttribute("src", nextSrc);
+    competitiveSeasonImageNode.setAttribute(
+      "alt",
+      "Competitive Season " + seasonName.charAt(0).toUpperCase() + seasonName.slice(1)
+    );
+  }
+
   function renderCompetitiveSeasonCountdown(nowUtcMs) {
     if (!competitiveCountdownNodes.length || !competitiveSeasonState.payload) {
       return;
@@ -219,6 +260,8 @@
     if (!season) {
       return;
     }
+
+    applyCompetitiveSeasonImage(season);
 
     var phase = getCompetitiveSeasonPhase(season, nowUtcMs);
     var segmentsHtml = buildSegmentsForRemaining(phase.remainingMs);

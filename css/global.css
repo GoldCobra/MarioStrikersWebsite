@@ -3489,6 +3489,11 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   align-items: center;
   gap: 0.32rem;
   color: #f2f2f2;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: var(--reporter-font-size-sm);
+  letter-spacing: var(--reporter-letter-spacing);
+  line-height: var(--reporter-line-height);
 }
 .profile-season-award-ball,
 .player-popup-season-award-ball {
@@ -3521,6 +3526,11 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   align-items: center;
   gap: 0.32rem;
   color: #f2f2f2;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: var(--reporter-font-size-sm);
+  letter-spacing: var(--reporter-letter-spacing);
+  line-height: var(--reporter-line-height);
 }
 
 .profile-accolade-ball {
@@ -3866,6 +3876,7 @@ body.player-popup-open {
   .player-popup-code-row,
   .player-popup-results-link,
   .player-popup-accolade-item,
+  .player-popup-season-award-item,
   .player-popup-rating-title,
   .player-popup-rating-line,
   .player-popup-rating-reward-main,
@@ -3880,6 +3891,7 @@ body.player-popup-open {
   .player-popup-code-row,
   .player-popup-results-link,
   .player-popup-accolade-item,
+  .player-popup-season-award-item,
   .player-popup-rating-title,
   .player-popup-rating-line,
   .player-popup-rating-reward-main,
@@ -4762,6 +4774,7 @@ body.player-popup-open {
   .player-popup-code-row,
   .player-popup-results-link,
   .player-popup-accolade-item,
+  .player-popup-season-award-item,
   .player-popup-rating-title,
   .player-popup-rating-line,
   .tab-placeholder-switch
@@ -4795,6 +4808,7 @@ body.player-popup-open {
   .player-popup-code-row,
   .player-popup-results-link,
   .player-popup-accolade-item,
+  .player-popup-season-award-item,
   .player-popup-rating-title,
   .player-popup-rating-line
 ) {
