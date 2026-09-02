@@ -3504,6 +3504,9 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 .profile-season-award-season,
 .player-popup-season-award-season {
   white-space: nowrap;
+  /* letter-spacing is also applied AFTER the last glyph, which pushed the ball 1.33px
+     further right than the gap on its other side; cancel that trailing advance. */
+  margin-right: calc(-1 * var(--reporter-letter-spacing));
 }
 .profile-season-award-name,
 .player-popup-season-award-name {
