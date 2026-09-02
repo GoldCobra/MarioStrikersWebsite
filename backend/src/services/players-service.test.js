@@ -585,6 +585,8 @@ test("buildSeasonAwardsQuery selects award rows for the requested player", funct
   assert.match(sql, /CompetitiveSeasonAwardResult/);
   assert.match(sql, /CompetitiveSeasonAwardResultPlayer/);
   assert.match(sql, /resultPlayer\.PlayerId = @playerId/);
+  // Doubles are withheld for now; the profile shows 1v1 awards only.
+  assert.match(sql, /result\.ModeCode = '1v1'/);
   assert.match(sql, /ORDER BY season\.StartDateUtc DESC/);
 });
 

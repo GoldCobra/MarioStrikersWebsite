@@ -667,7 +667,10 @@ function buildSeasonAwardsQuery() {
     "FROM CompetitiveSeasonAwardResult result",
     "INNER JOIN CompetitiveSeasonAwardResultPlayer resultPlayer ON resultPlayer.AwardResultId = result.Id",
     "INNER JOIN CompetitiveSeason season ON season.Id = result.SeasonId",
+    // 2v2 awards are withheld for now: SMS 2v2 saw a single match all of Burst, which produced
+    // six awards off one game. Drop this line to bring doubles back once the mode has volume.
     "WHERE resultPlayer.PlayerId = @playerId",
+    "  AND result.ModeCode = '1v1'",
     "ORDER BY season.StartDateUtc DESC, " + buildSeasonGameOrderCase() + " ASC, result.ModeCode ASC,",
     "  " + buildSeasonAwardOrderCase() + " ASC, result.AwardCode ASC, result.RankPosition ASC;"
   ].join(" ");

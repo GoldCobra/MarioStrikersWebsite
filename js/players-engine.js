@@ -5,7 +5,7 @@
   var lastPopupCloseAt = 0;
   var profileTriggersBound = false;
 
-  var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260902-season-visuals-v4";
+  var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260902-season-visuals-v5";
   var POPUP_OPEN_CLASS = "player-popup-open";
   var inFlightProfileRequests = new Map();
   var templateLoadPromise = null;
@@ -514,19 +514,6 @@
     }).filter(Boolean).join("");
   }
 
-  // Mode and Top 10 placing are what tell two otherwise identical rows apart: a 1v1 and a
-  // 2v2 award share the same game ball, and Top 10 #1 reads the same as Top 10 #10 without it.
-  function buildSeasonAwardLabel(entry) {
-    var award = String(entry && entry.award_name || "").trim() || "-";
-    var mode = String(entry && entry.mode_code || "").trim();
-    var position = parseInt(entry && entry.rank_position, 10);
-    var label = mode ? mode + " \u00b7 " + award : award;
-    if (String(entry && entry.award_code || "") === "TOP_10" && position > 0) {
-      label += " #" + position;
-    }
-    return label;
-  }
-
   function renderSeasonAwards(awards) {
     var mount = popupState.lists["season-awards"];
     if (!mount) {
@@ -549,7 +536,7 @@
       var ballIcon = getGameBallIconUrl(entry && entry.game_code);
       var ballIconFallback = String(ballIcon || "").replace(/\.webp$/i, ".png");
       var season = String(entry && entry.season_name || "").trim();
-      var award = buildSeasonAwardLabel(entry);
+      var award = String(entry && entry.award_name || "").trim() || "-";
 
       return [
         '<li class="player-popup-season-award-item">',
