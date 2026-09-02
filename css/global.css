@@ -3120,6 +3120,12 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   text-decoration: underline;
 }
 
+/* The results line reuses .profile-meta-line for font and link colours but holds a
+   single clickable label, so it drops the 96px label column. */
+.profile-results-line {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .profile-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(300px, 0.72fr);

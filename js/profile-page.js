@@ -372,7 +372,7 @@
     var resultsUrl = String(player.results_url || "").trim();
     var ratingsHtml = buildRatings(data.ratings || {});
     var resultsHtml = resultsUrl
-      ? '<section class="profile-panel profile-results-panel"><h3 class="profile-panel-title">Results</h3><p class="profile-meta-line"><span>Results</span><a href="' + escapeHtml(resultsUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(resultsUrl) + "</a></p></section>"
+      ? '<section class="profile-panel profile-results-panel"><p class="profile-meta-line profile-results-line"><a href="' + escapeHtml(resultsUrl) + '" target="_blank" rel="noopener noreferrer">Results at start.gg</a></p></section>'
       : "";
 
     return [
@@ -389,9 +389,9 @@
       '<div class="profile-grid">',
       '<div class="profile-grid-main">',
       buildFriendCodes(data.friend_codes || {}),
-      resultsHtml,
       buildSeasonAwards(data.season_awards || []),
       buildAccolades(data.accolades || []),
+      resultsHtml,
       "</div>",
       '<div class="profile-grid-side">',
       ratingsHtml,

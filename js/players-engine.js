@@ -5,7 +5,7 @@
   var lastPopupCloseAt = 0;
   var profileTriggersBound = false;
 
-  var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260831-season-rewards-v1";
+  var PROFILE_TEMPLATE_URL = "/pages/templates/player-profile-popup.html?v=20260902-season-visuals-v3";
   var POPUP_OPEN_CLASS = "player-popup-open";
   var inFlightProfileRequests = new Map();
   var templateLoadPromise = null;
@@ -630,7 +630,7 @@
     if (resultsSection && resultsLink) {
       if (resultsUrl) {
         resultsLink.href = resultsUrl;
-        resultsLink.textContent = resultsUrl;
+        resultsLink.textContent = "Results at start.gg";
         resultsSection.hidden = false;
       } else {
         resultsSection.hidden = true;

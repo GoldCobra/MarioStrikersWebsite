@@ -10,6 +10,8 @@ const {
   buildSeasonAwards,
   buildSeasonAwardsQuery,
   SEASON_AWARD_DISPLAY_ORDER,
+  SEASON_AWARD_GAME_ORDER,
+  formatSeasonAwardSeasonName,
   buildSeasonRewardLevel,
   buildSeasonRewardLevelQuery,
   isActivityActive,
@@ -548,7 +550,7 @@ test("buildSeasonAwards maps award rows and keeps the SQL ordering", function ()
 
   assert.equal(awards.length, 2);
   assert.deepEqual(awards[0], {
-    season_name: "Burst Season 2026",
+    season_name: "Burst 2026",
     game_code: "MSBL",
     mode_code: "1v1",
     award_code: "TOP_10",
@@ -595,22 +597,47 @@ test("buildSeasonAwardsQuery orders awards by prestige, not by award code", func
   assert.match(sql, /WHEN 'DUO_OF_THE_SEASON' THEN 8 /);
   assert.match(sql, /ELSE 9 END ASC/);
 
-  // Grouping stays season -> game -> mode, and TOP_10 keeps its 1..10 run.
-  assert.match(sql, /result\.GameId ASC, result\.ModeCode ASC/);
+  // Newest season first, then MSBL -> MSC -> SMS, then 1v1 before 2v2.
+  assert.match(sql, /ORDER BY season\.StartDateUtc DESC/);
+  assert.match(sql, /CASE result\.GameId WHEN 3 THEN 0 WHEN 1 THEN 1 WHEN 2 THEN 2 ELSE 3 END ASC/);
+  assert.match(sql, /result\.ModeCode ASC/);
+
+  // TOP_10 keeps its 1..10 run.
   assert.match(sql, /result\.RankPosition ASC;$/);
+
+  // GameId must never be sorted numerically again - that yields MSC, SMS, MSBL.
+  assert.doesNotMatch(sql, /result\.GameId ASC/);
+});
+
+test("SEASON_AWARD_GAME_ORDER puts MSBL first, then MSC, then SMS", function () {
+  // GameId 1 = MSC, 2 = SMS, 3 = MSBL - so the display order is deliberately not 1,2,3.
+  assert.deepEqual(SEASON_AWARD_GAME_ORDER, [3, 1, 2]);
+});
+
+test("formatSeasonAwardSeasonName drops the standalone word Season", function () {
+  assert.equal(formatSeasonAwardSeasonName("Burst Season 2026"), "Burst 2026");
+  assert.equal(formatSeasonAwardSeasonName("Dusk Season 2026"), "Dusk 2026");
+  assert.equal(formatSeasonAwardSeasonName("  Chill   Season   2026  "), "Chill 2026");
+
+  // Names that do not carry the middle word are left alone.
+  assert.equal(formatSeasonAwardSeasonName("Burst 2026"), "Burst 2026");
+  assert.equal(formatSeasonAwardSeasonName("Season 2026"), "Season 2026");
+  assert.equal(formatSeasonAwardSeasonName(""), "");
+  assert.equal(formatSeasonAwardSeasonName(null), "");
 });
 
 test("SEASON_AWARD_DISPLAY_ORDER covers every award futbot writes, without duplicates", function () {
-  // Mirrors futbot's SEASON_AWARD_DEFINITIONS; a drift here silently reorders profiles.
+  // Profile display order - intentionally NOT futbot's SEASON_AWARD_DEFINITIONS order.
+  // A drift here silently reorders every profile, so the list is pinned exactly.
   assert.deepEqual(SEASON_AWARD_DISPLAY_ORDER, [
     "TOP_10",
     "MOST_WINS",
+    "SWEEP_SPECIALIST",
     "BIGGEST_UPSET",
     "CLUTCH_PLAYER",
-    "SWEEP_SPECIALIST",
     "COMEBACK_KING",
-    "MOST_ACTIVE",
     "IRON_PLAYER",
+    "MOST_ACTIVE",
     "DUO_OF_THE_SEASON"
   ]);
   assert.equal(new Set(SEASON_AWARD_DISPLAY_ORDER).size, SEASON_AWARD_DISPLAY_ORDER.length);

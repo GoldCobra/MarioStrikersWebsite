@@ -611,22 +611,28 @@ function buildSeasonRewardLevelQuery() {
   ].join(" ");
 }
 
-// Display order for season awards, mirroring futbot's SEASON_AWARD_DEFINITIONS
-// (futbot/src/utils/competitiveSeasonAwards.js) - most prestigious first.
-// KEEP THE TWO LISTS IN SYNC when an award is added or reordered there.
+// Display order for season awards on player profiles, most prestigious first.
+// This order is a product decision and DELIBERATELY DIFFERS from futbot's
+// SEASON_AWARD_DEFINITIONS (futbot/src/utils/competitiveSeasonAwards.js), which is
+// the definition order used when awards are computed - do not "resync" the two.
+// What must stay in sync is the SET of codes: an award added there needs adding here.
 // Codes missing from this list sort last (then alphabetically), so a newly added
 // award still shows up on profiles instead of silently vanishing.
 const SEASON_AWARD_DISPLAY_ORDER = [
   "TOP_10",
   "MOST_WINS",
+  "SWEEP_SPECIALIST",
   "BIGGEST_UPSET",
   "CLUTCH_PLAYER",
-  "SWEEP_SPECIALIST",
   "COMEBACK_KING",
-  "MOST_ACTIVE",
   "IRON_PLAYER",
+  "MOST_ACTIVE",
   "DUO_OF_THE_SEASON"
 ];
+
+// Games are shown MSBL -> MSC -> SMS, which is deliberately NOT GameId order
+// (1 = MSC, 2 = SMS, 3 = MSBL). Unknown ids sort last.
+const SEASON_AWARD_GAME_ORDER = [3, 1, 2];
 
 // Built from the list above rather than hand-written, so the SQL can never drift from it.
 function buildSeasonAwardOrderCase() {
@@ -636,6 +642,15 @@ function buildSeasonAwardOrderCase() {
 
   return "CASE result.AwardCode " + whenClauses.join(" ")
     + " ELSE " + SEASON_AWARD_DISPLAY_ORDER.length + " END";
+}
+
+function buildSeasonGameOrderCase() {
+  const whenClauses = SEASON_AWARD_GAME_ORDER.map(function (gameId, index) {
+    return "WHEN " + gameId + " THEN " + index;
+  });
+
+  return "CASE result.GameId " + whenClauses.join(" ")
+    + " ELSE " + SEASON_AWARD_GAME_ORDER.length + " END";
 }
 
 function buildSeasonAwardsQuery() {
@@ -653,16 +668,22 @@ function buildSeasonAwardsQuery() {
     "INNER JOIN CompetitiveSeasonAwardResultPlayer resultPlayer ON resultPlayer.AwardResultId = result.Id",
     "INNER JOIN CompetitiveSeason season ON season.Id = result.SeasonId",
     "WHERE resultPlayer.PlayerId = @playerId",
-    "ORDER BY season.StartDateUtc DESC, result.GameId ASC, result.ModeCode ASC,",
+    "ORDER BY season.StartDateUtc DESC, " + buildSeasonGameOrderCase() + " ASC, result.ModeCode ASC,",
     "  " + buildSeasonAwardOrderCase() + " ASC, result.AwardCode ASC, result.RankPosition ASC;"
   ].join(" ");
+}
+
+// Season display names are stored as "<Name> Season <Year>"; profiles show "<Name> <Year>".
+// Only the standalone middle word is dropped, so a name without it survives untouched.
+function formatSeasonAwardSeasonName(value) {
+  return normalizeText(value).replace(/^(.*\S)\s+Season\s+(\S.*)$/i, "$1 $2");
 }
 
 // Season awards are written once, when a season is finalized, and never change afterwards.
 function buildSeasonAwards(rows) {
   return (Array.isArray(rows) ? rows : []).map(function (row) {
     return {
-      season_name: normalizeText(row && row.SeasonName),
+      season_name: formatSeasonAwardSeasonName(row && row.SeasonName),
       game_code: normalizeText(row && row.Game).toUpperCase(),
       mode_code: normalizeText(row && row.ModeCode).toLowerCase(),
       award_code: normalizeText(row && row.AwardCode),
@@ -986,6 +1007,8 @@ module.exports = {
   buildSeasonAwards,
   buildSeasonAwardsQuery,
   SEASON_AWARD_DISPLAY_ORDER,
+  SEASON_AWARD_GAME_ORDER,
+  formatSeasonAwardSeasonName,
   buildCompetitiveRatingsByKey,
   buildPlayerProfileBatchQuery,
   buildPlayerProfileFromRecordsets,
