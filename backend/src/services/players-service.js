@@ -611,6 +611,33 @@ function buildSeasonRewardLevelQuery() {
   ].join(" ");
 }
 
+// Display order for season awards, mirroring futbot's SEASON_AWARD_DEFINITIONS
+// (futbot/src/utils/competitiveSeasonAwards.js) - most prestigious first.
+// KEEP THE TWO LISTS IN SYNC when an award is added or reordered there.
+// Codes missing from this list sort last (then alphabetically), so a newly added
+// award still shows up on profiles instead of silently vanishing.
+const SEASON_AWARD_DISPLAY_ORDER = [
+  "TOP_10",
+  "MOST_WINS",
+  "BIGGEST_UPSET",
+  "CLUTCH_PLAYER",
+  "SWEEP_SPECIALIST",
+  "COMEBACK_KING",
+  "MOST_ACTIVE",
+  "IRON_PLAYER",
+  "DUO_OF_THE_SEASON"
+];
+
+// Built from the list above rather than hand-written, so the SQL can never drift from it.
+function buildSeasonAwardOrderCase() {
+  const whenClauses = SEASON_AWARD_DISPLAY_ORDER.map(function (code, index) {
+    return "WHEN '" + code + "' THEN " + index;
+  });
+
+  return "CASE result.AwardCode " + whenClauses.join(" ")
+    + " ELSE " + SEASON_AWARD_DISPLAY_ORDER.length + " END";
+}
+
 function buildSeasonAwardsQuery() {
   return [
     "SELECT",
@@ -627,7 +654,7 @@ function buildSeasonAwardsQuery() {
     "INNER JOIN CompetitiveSeason season ON season.Id = result.SeasonId",
     "WHERE resultPlayer.PlayerId = @playerId",
     "ORDER BY season.StartDateUtc DESC, result.GameId ASC, result.ModeCode ASC,",
-    "  result.AwardCode ASC, result.RankPosition ASC;"
+    "  " + buildSeasonAwardOrderCase() + " ASC, result.AwardCode ASC, result.RankPosition ASC;"
   ].join(" ");
 }
 
@@ -958,6 +985,7 @@ module.exports = {
   buildAccolades,
   buildSeasonAwards,
   buildSeasonAwardsQuery,
+  SEASON_AWARD_DISPLAY_ORDER,
   buildCompetitiveRatingsByKey,
   buildPlayerProfileBatchQuery,
   buildPlayerProfileFromRecordsets,

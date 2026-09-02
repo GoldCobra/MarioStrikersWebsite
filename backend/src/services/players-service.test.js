@@ -9,6 +9,7 @@ const {
   buildPlayerDisplayName,
   buildSeasonAwards,
   buildSeasonAwardsQuery,
+  SEASON_AWARD_DISPLAY_ORDER,
   buildSeasonRewardLevel,
   buildSeasonRewardLevelQuery,
   isActivityActive,
@@ -583,4 +584,34 @@ test("buildSeasonAwardsQuery selects award rows for the requested player", funct
   assert.match(sql, /CompetitiveSeasonAwardResultPlayer/);
   assert.match(sql, /resultPlayer\.PlayerId = @playerId/);
   assert.match(sql, /ORDER BY season\.StartDateUtc DESC/);
+});
+
+test("buildSeasonAwardsQuery orders awards by prestige, not by award code", function () {
+  const sql = buildSeasonAwardsQuery();
+
+  // The old ordering sorted alphabetically by AwardCode, which put CLUTCH_PLAYER
+  // above TOP_10. Ordering must come from SEASON_AWARD_DISPLAY_ORDER instead.
+  assert.match(sql, /CASE result\.AwardCode WHEN 'TOP_10' THEN 0 /);
+  assert.match(sql, /WHEN 'DUO_OF_THE_SEASON' THEN 8 /);
+  assert.match(sql, /ELSE 9 END ASC/);
+
+  // Grouping stays season -> game -> mode, and TOP_10 keeps its 1..10 run.
+  assert.match(sql, /result\.GameId ASC, result\.ModeCode ASC/);
+  assert.match(sql, /result\.RankPosition ASC;$/);
+});
+
+test("SEASON_AWARD_DISPLAY_ORDER covers every award futbot writes, without duplicates", function () {
+  // Mirrors futbot's SEASON_AWARD_DEFINITIONS; a drift here silently reorders profiles.
+  assert.deepEqual(SEASON_AWARD_DISPLAY_ORDER, [
+    "TOP_10",
+    "MOST_WINS",
+    "BIGGEST_UPSET",
+    "CLUTCH_PLAYER",
+    "SWEEP_SPECIALIST",
+    "COMEBACK_KING",
+    "MOST_ACTIVE",
+    "IRON_PLAYER",
+    "DUO_OF_THE_SEASON"
+  ]);
+  assert.equal(new Set(SEASON_AWARD_DISPLAY_ORDER).size, SEASON_AWARD_DISPLAY_ORDER.length);
 });
