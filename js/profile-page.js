@@ -301,6 +301,19 @@
     ].join("");
   }
 
+  // Mode and Top 10 placing are what tell two otherwise identical rows apart: a 1v1 and a
+  // 2v2 award share the same game ball, and Top 10 #1 reads the same as Top 10 #10 without it.
+  function buildSeasonAwardLabel(entry) {
+    var award = String(entry && entry.award_name || "").trim() || "-";
+    var mode = String(entry && entry.mode_code || "").trim();
+    var position = parseInt(entry && entry.rank_position, 10);
+    var label = mode ? mode + " \u00b7 " + award : award;
+    if (String(entry && entry.award_code || "") === "TOP_10" && position > 0) {
+      label += " #" + position;
+    }
+    return label;
+  }
+
   function buildSeasonAwards(awards) {
     var rows = Array.isArray(awards) ? awards : [];
     if (!rows.length) {
@@ -319,7 +332,7 @@
           '<li class="profile-season-award-item">',
           '<span class="profile-season-award-season">', escapeHtml(entry && entry.season_name || ""), "</span>",
           '<img class="profile-season-award-ball" src="', escapeHtml(ballIcon), '" alt="" aria-hidden="true" loading="lazy" onerror="this.onerror=null;this.src=\'', escapeHtml(ballIconFallback), '\'">',
-          '<span class="profile-season-award-name">', escapeHtml(entry && entry.award_name || "-"), "</span>",
+          '<span class="profile-season-award-name">', escapeHtml(buildSeasonAwardLabel(entry)), "</span>",
           "</li>"
         ].join("");
       }).join(""),
