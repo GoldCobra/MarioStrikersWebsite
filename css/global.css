@@ -71,6 +71,9 @@ body {
   --profile-rank-icon-height: 21px;
   --profile-rating-reward-icon-height: 23px;
   --profile-rating-reward-glow-gutter: 0.46rem;
+  /* Breathing room so the world champion glow is not clipped by the boxes it sits in.
+     Matches the outer glow radius. */
+  --accolade-glow-room: 10px;
   --tab-content-start-gap: 0.56rem;
   --subnav-reserve-height: 48px;
   --content-box-shell-max-width: 1154px;
@@ -3573,15 +3576,15 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   text-shadow:
     0 0 2px rgba(255, 224, 70, 0.98),
     0 0 5px rgba(255, 205, 40, 0.85),
-    0 0 12px rgba(255, 170, 20, 0.62);
+    0 0 10px rgba(255, 170, 20, 0.62);
 }
 
 /* .profile-accolade-name clips with overflow: hidden for its ellipsis, which would cut the
    glow off. Widen the clip box sideways without moving the text - same trick the rating
    cards use with --profile-rating-reward-glow-gutter. */
 .profile-accolade-name.is-world-champion {
-  padding-inline: var(--profile-rating-reward-glow-gutter);
-  margin-inline: calc(-1 * var(--profile-rating-reward-glow-gutter));
+  padding: var(--accolade-glow-room) var(--profile-rating-reward-glow-gutter);
+  margin: calc(-1 * var(--accolade-glow-room)) calc(-1 * var(--profile-rating-reward-glow-gutter));
 }
 
 .tier-list-page {
@@ -3840,10 +3843,14 @@ body.player-popup-open {
 }
 
 .player-popup-accolades {
-  margin: 0.42rem 0 0;
-  padding: 0;
+  /* This list is a scroll container, so it clips on every side - a glowing title scrolled to the
+     top or bottom edge would lose its halo. Pad the box, then take the same amount back off the
+     surrounding margins and add it to max-height: the rows do not move and the popup does not
+     grow, but the clip box has room for the glow. */
+  margin: calc(0.42rem - var(--accolade-glow-room)) 0 calc(-1 * var(--accolade-glow-room));
+  padding: var(--accolade-glow-room) 0;
   list-style: none;
-  max-height: min(32vh, 300px);
+  max-height: calc(min(32vh, 300px) + (var(--accolade-glow-room) * 2));
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -4117,7 +4124,7 @@ body.player-popup-open {
   text-shadow:
     0 0 2px rgba(255, 224, 70, 0.98),
     0 0 5px rgba(255, 205, 40, 0.85),
-    0 0 12px rgba(255, 170, 20, 0.62) !important;
+    0 0 10px rgba(255, 170, 20, 0.62) !important;
 }
 
 /* At 5/5 only the progress count is tinted in the reached tier's colour (plain colour,
