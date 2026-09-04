@@ -2,6 +2,8 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 const {
   buildAccolades,
+  formatAccoladeTournamentName,
+  stripEventWord,
   isWorldChampionTitle,
   buildRatings,
   buildPlayerProfileBatchQuery,
@@ -562,9 +564,85 @@ test("accolades carry the world champion flag through to the DTO", function () {
   assert.equal(accolades[1].is_winner, true);
   // The four pre-existing fields are untouched.
   assert.equal(accolades[0].place_medal, "🥇");
-  assert.equal(accolades[0].tournament_name, "MSL 2025 World Championship");
+  // Gold at a World Championship reads as the title, not the bracket.
+  assert.equal(accolades[0].tournament_name, "MSL 2025 World Champion");
   assert.equal(accolades[0].game_code, "MSBL");
   assert.equal(accolades[0].start_date, "2025-12-01");
+});
+
+test('strips the word "Event" from accolade names, wherever it sits', function () {
+  // Trailing, which is where 108 of the 110 rows carry it.
+  assert.equal(stripEventWord("MSL 2026 Spring Series - Live Event"), "MSL 2026 Spring Series - Live");
+  assert.equal(stripEventWord("MSBL Double Trouble - Championship Event"), "MSBL Double Trouble - Championship");
+
+  // Mid-name, which is where the other two carry it - no double space may survive.
+  assert.equal(
+    stripEventWord("MSL 2025 Spring Split - March Live Event Consolation"),
+    "MSL 2025 Spring Split - March Live Consolation"
+  );
+  assert.equal(
+    stripEventWord("MSL 2025 Summer Split - August Live Event - Consolation"),
+    "MSL 2025 Summer Split - August Live - Consolation"
+  );
+
+  // A name that is nothing but a qualifier plus the word must not keep a dangling separator.
+  assert.equal(stripEventWord("Some Cup - Event"), "Some Cup");
+
+  // Names without the word are returned untouched, and junk must not throw.
+  assert.equal(stripEventWord("MSL 2025 World Championship"), "MSL 2025 World Championship");
+  assert.equal(stripEventWord(""), "");
+  assert.equal(stripEventWord(null), "");
+  assert.equal(stripEventWord(undefined), "");
+});
+
+test("a world champion is a champion, but only the winner is", function () {
+  assert.equal(
+    formatAccoladeTournamentName("MSL 2025 World Championship", true),
+    "MSL 2025 World Champion"
+  );
+  // Silver and bronze did not win it, so they keep the event name.
+  assert.equal(
+    formatAccoladeTournamentName("MSL 2025 World Championship", false),
+    "MSL 2025 World Championship"
+  );
+  // "Championship" that is not a world title is never rewritten - this one only loses "Event".
+  assert.equal(
+    formatAccoladeTournamentName("MSBL Double Trouble - Championship Event", false),
+    "MSBL Double Trouble - Championship"
+  );
+});
+
+test("accolade DTO applies both name rules and keeps the flags intact", function () {
+  const accolades = buildAccolades([
+    {
+      Name: "MSL 2025 World Championship",
+      Place: ":first_place: ",
+      Game: "MSBL",
+      TournamentStartDate: new Date("2025-12-01T00:00:00.000Z")
+    },
+    {
+      Name: "MSL 2025 World Championship",
+      Place: ":second_place: ",
+      Game: "MSBL",
+      TournamentStartDate: new Date("2025-12-01T00:00:00.000Z")
+    },
+    {
+      Name: "MSL 2026 Spring Series - Live Event",
+      Place: ":first_place: ",
+      Game: "SMS",
+      TournamentStartDate: new Date("2026-05-23T00:00:00.000Z")
+    }
+  ]);
+
+  const byName = accolades.map(function (row) { return row.tournament_name; });
+  assert.ok(byName.includes("MSL 2025 World Champion"));
+  assert.ok(byName.includes("MSL 2025 World Championship"));
+  assert.ok(byName.includes("MSL 2026 Spring Series - Live"));
+
+  // The flag still keys off the raw name, so the glow survives the rewrite.
+  const champion = accolades.find(function (row) { return row.tournament_name === "MSL 2025 World Champion"; });
+  assert.equal(champion.is_world_champion, true);
+  assert.equal(champion.is_winner, true);
 });
 
 test("only first place counts as a tournament winner", function () {

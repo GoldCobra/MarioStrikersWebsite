@@ -3532,6 +3532,18 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Reward and accolade entries read as full caps; the "Season Rewards" / "Tourney Accolades"
+   headings above them stay as written. Done here rather than by upper-casing the strings, so the
+   real text still reaches screen readers, copy/paste and the API. */
+.profile-season-award-season,
+.player-popup-season-award-season,
+.profile-season-award-name,
+.player-popup-season-award-name,
+.profile-accolade-name,
+.player-popup-accolade-name {
+  text-transform: uppercase;
+}
 .profile-accolades {
   margin: 0.42rem 0 0;
   padding: 0;

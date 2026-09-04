@@ -710,10 +710,30 @@ function isWorldChampionTitle(placeMedal, tournamentName) {
   return placeMedal === GOLD_MEDAL && MSL_WORLD_CHAMPIONSHIP.test(String(tournamentName || ""));
 }
 
+// Every accolade is an event, so the word carries no information on the line. Stripped for display
+// only - dbo.Tournament keeps the official name. Handles the two rows that carry it mid-name
+// ("... - March Live Event Consolation") as well as the 108 that end on it.
+function stripEventWord(value) {
+  return String(value || "")
+    .replace(/\bevents?\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s*[-–—]\s*$/, "")
+    .trim();
+}
+
+// The gold line names a person, not a bracket: a world champion IS the champion. Silver and bronze
+// keep "Championship", because they did not win it.
+function formatAccoladeTournamentName(name, isWorldChampion) {
+  const stripped = stripEventWord(name);
+  return isWorldChampion ? stripped.replace(/\bChampionship\b/i, "Champion") : stripped;
+}
+
 function buildAccolades(rows) {
   return (Array.isArray(rows) ? rows : []).map(function (row) {
     const placeMedal = normalizeAccoladeMedal(row && row.Place);
-    const tournamentName = normalizeText(row && row.Name);
+    const rawName = normalizeText(row && row.Name);
+    const isWorldChampion = isWorldChampionTitle(placeMedal, rawName);
+    const tournamentName = formatAccoladeTournamentName(rawName, isWorldChampion);
 
     return {
       place_medal: placeMedal,
@@ -721,7 +741,7 @@ function buildAccolades(rows) {
       tournament_name: tournamentName,
       start_date: toIsoDateOnly(row && row.TournamentStartDate),
       is_winner: placeMedal === GOLD_MEDAL,
-      is_world_champion: isWorldChampionTitle(placeMedal, tournamentName)
+      is_world_champion: isWorldChampion
     };
   }).filter(function (row) {
     return row.tournament_name !== "";
@@ -1023,6 +1043,8 @@ async function getPlayerProfileByDiscordId(discordIdRaw) {
 module.exports = {
   DEFAULT_ACTIVITY_WINDOW_DAYS,
   buildAccolades,
+  formatAccoladeTournamentName,
+  stripEventWord,
   isWorldChampionTitle,
   buildSeasonAwards,
   buildSeasonAwardsQuery,
