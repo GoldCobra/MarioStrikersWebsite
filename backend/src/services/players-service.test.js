@@ -557,11 +557,26 @@ test("accolades carry the world champion flag through to the DTO", function () {
 
   assert.equal(accolades[0].is_world_champion, true);
   assert.equal(accolades[1].is_world_champion, false);
+  // Every gold is a winner; only the World Championship is also a world champion title.
+  assert.equal(accolades[0].is_winner, true);
+  assert.equal(accolades[1].is_winner, true);
   // The four pre-existing fields are untouched.
   assert.equal(accolades[0].place_medal, "🥇");
   assert.equal(accolades[0].tournament_name, "MSL 2025 World Championship");
   assert.equal(accolades[0].game_code, "MSBL");
   assert.equal(accolades[0].start_date, "2025-12-01");
+});
+
+test("only first place counts as a tournament winner", function () {
+  const accolades = buildAccolades([
+    { Name: "Some Cup", Place: ":first_place: ", Game: "MSBL", TournamentStartDate: new Date("2025-01-03T00:00:00.000Z") },
+    { Name: "Some Cup", Place: ":second_place: ", Game: "MSC", TournamentStartDate: new Date("2025-01-02T00:00:00.000Z") },
+    { Name: "Some Cup", Place: ":third_place: ", Game: "SMS", TournamentStartDate: new Date("2025-01-01T00:00:00.000Z") }
+  ]);
+
+  assert.deepEqual(accolades.map(function (row) { return row.is_winner; }), [true, false, false]);
+  // Winners are tinted per game on the frontend, so the game code has to survive intact.
+  assert.deepEqual(accolades.map(function (row) { return row.game_code; }), ["MSBL", "MSC", "SMS"]);
 });
 
 test("players list only includes rows with visible profile content", function () {

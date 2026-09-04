@@ -549,6 +549,21 @@
     return true;
   }
 
+  // A world champion title keeps its gold glow; every other tournament win is tinted in that
+  // game's colour instead. Anything below first place stays plain.
+  var ACCOLADE_WINNER_GAMES = ["msbl", "msc", "sms"];
+
+  function buildAccoladeNameClasses(baseClass, entry) {
+    if (entry && entry.is_world_champion) {
+      return baseClass + " is-world-champion";
+    }
+    var game = String(entry && entry.game_code || "").toLowerCase();
+    if (entry && entry.is_winner && ACCOLADE_WINNER_GAMES.indexOf(game) !== -1) {
+      return baseClass + " is-winner-" + game;
+    }
+    return baseClass;
+  }
+
   function renderAccolades(accolades) {
     var mount = popupState.lists.accolades;
     if (!mount) {
@@ -579,7 +594,7 @@
         '<li class="player-popup-accolade-item">',
         '<img class="player-popup-accolade-ball" src="', escapeHtml(ballIcon), '" alt="" aria-hidden="true" loading="lazy" onerror="this.onerror=null;this.src=\'', escapeHtml(ballIconFallback), '\'">',
         '<span class="player-popup-accolade-medal">', escapeHtml(medal), "</span>",
-        '<span class="player-popup-accolade-name', (entry && entry.is_world_champion ? " is-world-champion" : ""), '">', escapeHtml(name), "</span>",
+        '<span class="', escapeHtml(buildAccoladeNameClasses("player-popup-accolade-name", entry)), '">', escapeHtml(name), "</span>",
         dateHtml,
         "</li>"
       ].join("");

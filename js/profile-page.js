@@ -329,6 +329,21 @@
     ].join("");
   }
 
+  // A world champion title keeps its gold glow; every other tournament win is tinted in that
+  // game's colour instead. Anything below first place stays plain.
+  var ACCOLADE_WINNER_GAMES = ["msbl", "msc", "sms"];
+
+  function buildAccoladeNameClasses(baseClass, entry) {
+    if (entry && entry.is_world_champion) {
+      return baseClass + " is-world-champion";
+    }
+    var game = String(entry && entry.game_code || "").toLowerCase();
+    if (entry && entry.is_winner && ACCOLADE_WINNER_GAMES.indexOf(game) !== -1) {
+      return baseClass + " is-winner-" + game;
+    }
+    return baseClass;
+  }
+
   function buildAccolades(accolades) {
     var rows = Array.isArray(accolades) ? accolades : [];
     if (!rows.length) {
@@ -348,7 +363,7 @@
           '<li class="profile-accolade-item">',
           '<img class="profile-accolade-ball" src="', escapeHtml(ballIcon), '" alt="" aria-hidden="true" loading="lazy" onerror="this.onerror=null;this.src=\'', escapeHtml(ballIconFallback), '\'">',
           '<span class="profile-accolade-medal">', escapeHtml(entry && entry.place_medal || ""), "</span>",
-          '<span class="profile-accolade-name', (entry && entry.is_world_champion ? " is-world-champion" : ""), '">', escapeHtml(entry && entry.tournament_name || "-"), "</span>",
+          '<span class="', escapeHtml(buildAccoladeNameClasses("profile-accolade-name", entry)), '">', escapeHtml(entry && entry.tournament_name || "-"), "</span>",
           date ? '<span class="profile-accolade-date">' + escapeHtml(date) + "</span>" : "",
           "</li>"
         ].join("");

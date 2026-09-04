@@ -704,9 +704,10 @@ function buildSeasonAwards(rows) {
 // no tournament carries "MSL" anywhere but at the start, and there is no World Championship
 // without the MSL prefix, so matching on the name is unambiguous.
 const MSL_WORLD_CHAMPIONSHIP = /^MSL\b.*\bWorld Championship\b/i;
+const GOLD_MEDAL = "🥇";
 
 function isWorldChampionTitle(placeMedal, tournamentName) {
-  return placeMedal === "🥇" && MSL_WORLD_CHAMPIONSHIP.test(String(tournamentName || ""));
+  return placeMedal === GOLD_MEDAL && MSL_WORLD_CHAMPIONSHIP.test(String(tournamentName || ""));
 }
 
 function buildAccolades(rows) {
@@ -719,6 +720,7 @@ function buildAccolades(rows) {
       game_code: normalizeText(row && row.Game).toUpperCase(),
       tournament_name: tournamentName,
       start_date: toIsoDateOnly(row && row.TournamentStartDate),
+      is_winner: placeMedal === GOLD_MEDAL,
       is_world_champion: isWorldChampionTitle(placeMedal, tournamentName)
     };
   }).filter(function (row) {
