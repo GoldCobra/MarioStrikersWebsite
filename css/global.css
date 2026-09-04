@@ -3569,11 +3569,11 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
    Set by is_world_champion from the backend - see players-service.js. */
 .profile-accolade-name.is-world-champion,
 .player-popup-accolade-name.is-world-champion {
-  color: #f5c300;
+  color: #ffed60;
   text-shadow:
-    0 0 1px rgba(245, 195, 0, 0.95),
-    0 0 4px rgba(245, 195, 0, 0.75),
-    0 0 10px rgba(255, 170, 20, 0.55);
+    0 0 2px rgba(255, 224, 70, 0.98),
+    0 0 5px rgba(255, 205, 40, 0.85),
+    0 0 12px rgba(255, 170, 20, 0.62);
 }
 
 /* .profile-accolade-name clips with overflow: hidden for its ellipsis, which would cut the
@@ -4113,11 +4113,11 @@ body.player-popup-open {
 /* The blanket rule above strips every shadow in the popup, so the world champion glow has to be
    re-asserted here with the same !important escape the reward name uses. */
 #player-profile-popup .player-popup-accolade-name.is-world-champion {
-  color: #f5c300;
+  color: #ffed60;
   text-shadow:
-    0 0 1px rgba(245, 195, 0, 0.95),
-    0 0 4px rgba(245, 195, 0, 0.75),
-    0 0 10px rgba(255, 170, 20, 0.55) !important;
+    0 0 2px rgba(255, 224, 70, 0.98),
+    0 0 5px rgba(255, 205, 40, 0.85),
+    0 0 12px rgba(255, 170, 20, 0.62) !important;
 }
 
 /* At 5/5 only the progress count is tinted in the reached tier's colour (plain colour,
