@@ -699,13 +699,27 @@ function buildSeasonAwards(rows) {
   });
 }
 
+// Winning an MSL World Championship is the top honour in the scene, so profiles highlight it.
+// Both halves count: the gold medal AND the event. Verified against the live tournament table -
+// no tournament carries "MSL" anywhere but at the start, and there is no World Championship
+// without the MSL prefix, so matching on the name is unambiguous.
+const MSL_WORLD_CHAMPIONSHIP = /^MSL\b.*\bWorld Championship\b/i;
+
+function isWorldChampionTitle(placeMedal, tournamentName) {
+  return placeMedal === "🥇" && MSL_WORLD_CHAMPIONSHIP.test(String(tournamentName || ""));
+}
+
 function buildAccolades(rows) {
   return (Array.isArray(rows) ? rows : []).map(function (row) {
+    const placeMedal = normalizeAccoladeMedal(row && row.Place);
+    const tournamentName = normalizeText(row && row.Name);
+
     return {
-      place_medal: normalizeAccoladeMedal(row && row.Place),
+      place_medal: placeMedal,
       game_code: normalizeText(row && row.Game).toUpperCase(),
-      tournament_name: normalizeText(row && row.Name),
-      start_date: toIsoDateOnly(row && row.TournamentStartDate)
+      tournament_name: tournamentName,
+      start_date: toIsoDateOnly(row && row.TournamentStartDate),
+      is_world_champion: isWorldChampionTitle(placeMedal, tournamentName)
     };
   }).filter(function (row) {
     return row.tournament_name !== "";
@@ -1007,6 +1021,7 @@ async function getPlayerProfileByDiscordId(discordIdRaw) {
 module.exports = {
   DEFAULT_ACTIVITY_WINDOW_DAYS,
   buildAccolades,
+  isWorldChampionTitle,
   buildSeasonAwards,
   buildSeasonAwardsQuery,
   SEASON_AWARD_DISPLAY_ORDER,

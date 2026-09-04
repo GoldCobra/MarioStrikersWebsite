@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 const {
   buildAccolades,
+  isWorldChampionTitle,
   buildRatings,
   buildPlayerProfileBatchQuery,
   buildPlayerProfileFromRecordsets,
@@ -514,6 +515,53 @@ test("profile accolades mapper handles all placements and keeps newest first", f
   assert.equal(accolades[0].tournament_name, "Newer Cup");
   assert.equal(accolades[0].place_medal, "🥈");
   assert.equal(accolades[1].place_medal, "🥉");
+});
+
+test("only a gold medal at an MSL World Championship counts as a world champion title", function () {
+  // Both halves of the rule matter.
+  assert.equal(isWorldChampionTitle("🥇", "MSL 2025 World Championship"), true);
+  assert.equal(isWorldChampionTitle("🥇", "MSL Season 1 World Championship"), true);
+
+  // Runner-up and third place at the same event do not.
+  assert.equal(isWorldChampionTitle("🥈", "MSL 2025 World Championship"), false);
+  assert.equal(isWorldChampionTitle("🥉", "MSL 2025 World Championship"), false);
+
+  // Winning any other MSL event does not - splits, live, challenger, amateur and consolation
+  // events all stay plain. This is the line to move if the highlight is ever widened.
+  assert.equal(isWorldChampionTitle("🥇", "MSL 2022 Summer Split"), false);
+  assert.equal(isWorldChampionTitle("🥇", "MSL Season 1 Spring Split"), false);
+  assert.equal(isWorldChampionTitle("🥇", "MSL 2025 Fall Split - Amateur Event"), false);
+
+  // Case is irrelevant, and junk input must not throw.
+  assert.equal(isWorldChampionTitle("🥇", "msl 2025 world championship"), true);
+  assert.equal(isWorldChampionTitle("🥇", ""), false);
+  assert.equal(isWorldChampionTitle("🥇", null), false);
+  assert.equal(isWorldChampionTitle("🥇", undefined), false);
+});
+
+test("accolades carry the world champion flag through to the DTO", function () {
+  const accolades = buildAccolades([
+    {
+      Name: "MSL 2025 World Championship",
+      Place: ":first_place: ",
+      Game: "MSBL",
+      TournamentStartDate: new Date("2025-12-01T00:00:00.000Z")
+    },
+    {
+      Name: "MSL 2022 Summer Split",
+      Place: ":first_place: ",
+      Game: "MSC",
+      TournamentStartDate: new Date("2022-06-06T00:00:00.000Z")
+    }
+  ]);
+
+  assert.equal(accolades[0].is_world_champion, true);
+  assert.equal(accolades[1].is_world_champion, false);
+  // The four pre-existing fields are untouched.
+  assert.equal(accolades[0].place_medal, "🥇");
+  assert.equal(accolades[0].tournament_name, "MSL 2025 World Championship");
+  assert.equal(accolades[0].game_code, "MSBL");
+  assert.equal(accolades[0].start_date, "2025-12-01");
 });
 
 test("players list only includes rows with visible profile content", function () {

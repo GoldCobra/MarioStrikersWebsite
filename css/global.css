@@ -3565,6 +3565,25 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   font-size: 0.92em;
 }
 
+/* Gold at an MSL World Championship is the top honour in the scene, so the title glows.
+   Set by is_world_champion from the backend - see players-service.js. */
+.profile-accolade-name.is-world-champion,
+.player-popup-accolade-name.is-world-champion {
+  color: #f5c300;
+  text-shadow:
+    0 0 1px rgba(245, 195, 0, 0.95),
+    0 0 4px rgba(245, 195, 0, 0.75),
+    0 0 10px rgba(255, 170, 20, 0.55);
+}
+
+/* .profile-accolade-name clips with overflow: hidden for its ellipsis, which would cut the
+   glow off. Widen the clip box sideways without moving the text - same trick the rating
+   cards use with --profile-rating-reward-glow-gutter. */
+.profile-accolade-name.is-world-champion {
+  padding-inline: var(--profile-rating-reward-glow-gutter);
+  margin-inline: calc(-1 * var(--profile-rating-reward-glow-gutter));
+}
+
 .tier-list-page {
   padding-bottom: clamp(1.5rem, 4vw, 3rem);
 }
@@ -3590,6 +3609,8 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 
 /* --- Global Popup ------------------------------------------------- */
 
+/* Kept for the body's own box, but this does NOT lock the viewport: html carries
+   overflow-y: auto and is the scrolling element. The real lock is on .popup-overlay. */
 body.popup-open {
   overflow: hidden;
 }
@@ -3601,6 +3622,20 @@ body.popup-open {
   display: grid;
   place-items: center;
   padding: clamp(0.6rem, 2vw, 1.15rem);
+  /* The overlay covers the viewport, so making it a scroll container with "contain" lets it
+     swallow wheel and touch input instead of passing it to the page behind. The lock must NOT
+     go on html/body: html is the scrolling element here (it has overflow-y: auto), and hiding
+     its overflow drops the scrollbar and shifts the whole page sideways by ~15px on open. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Reaching the end of a list inside the popup must not chain out to the page either. */
+.player-popup-content,
+.player-popup-accolades,
+.club-popup-roster,
+.online-editor-delete-list {
+  overscroll-behavior: contain;
 }
 
 .popup-overlay[hidden],
@@ -3684,6 +3719,7 @@ body.popup-open {
 
 /* ------------------------------------------------------------------ */
 
+/* See body.popup-open above - the effective scroll lock lives on .popup-overlay. */
 body.player-popup-open {
   overflow: hidden;
 }
@@ -4072,6 +4108,16 @@ body.player-popup-open {
     0 0 1px var(--profile-rating-reward-glow),
     0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow),
     0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow) !important;
+}
+
+/* The blanket rule above strips every shadow in the popup, so the world champion glow has to be
+   re-asserted here with the same !important escape the reward name uses. */
+#player-profile-popup .player-popup-accolade-name.is-world-champion {
+  color: #f5c300;
+  text-shadow:
+    0 0 1px rgba(245, 195, 0, 0.95),
+    0 0 4px rgba(245, 195, 0, 0.75),
+    0 0 10px rgba(255, 170, 20, 0.55) !important;
 }
 
 /* At 5/5 only the progress count is tinted in the reached tier's colour (plain colour,
