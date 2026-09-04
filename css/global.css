@@ -71,9 +71,17 @@ body {
   --profile-rank-icon-height: 21px;
   --profile-rating-reward-icon-height: 23px;
   --profile-rating-reward-glow-gutter: 0.46rem;
-  /* Breathing room so the world champion glow is not clipped by the boxes it sits in.
-     Matches the outer glow radius. */
-  --accolade-glow-room: 10px;
+  /* One definition of the world champion glow, shared by the title (text-shadow) and its medal
+     (drop-shadow), so the two can never drift apart. The far radius doubles as the breathing
+     room the surrounding boxes have to reserve, which is why --accolade-glow-room derives
+     from it instead of repeating the number. */
+  --accolade-champion-glow-near: 2px;
+  --accolade-champion-glow-mid: 5px;
+  --accolade-champion-glow-far: 10px;
+  --accolade-champion-tint-near: rgba(255, 224, 70, 0.98);
+  --accolade-champion-tint-mid: rgba(255, 205, 40, 0.85);
+  --accolade-champion-tint-far: rgba(255, 170, 20, 0.62);
+  --accolade-glow-room: var(--accolade-champion-glow-far);
   --tab-content-start-gap: 0.56rem;
   --subnav-reserve-height: 48px;
   --content-box-shell-max-width: 1154px;
@@ -3592,9 +3600,19 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
 .player-popup-accolade-name.is-world-champion {
   color: #ffed60;
   text-shadow:
-    0 0 2px rgba(255, 224, 70, 0.98),
-    0 0 5px rgba(255, 205, 40, 0.85),
-    0 0 10px rgba(255, 170, 20, 0.62);
+    0 0 var(--accolade-champion-glow-near) var(--accolade-champion-tint-near),
+    0 0 var(--accolade-champion-glow-mid) var(--accolade-champion-tint-mid),
+    0 0 var(--accolade-champion-glow-far) var(--accolade-champion-tint-far);
+}
+
+/* The medal gets the same glow. drop-shadow works off the glyph's alpha channel, so the halo
+   follows the medal's outline instead of its box - the same reason the reward icons use it. */
+.profile-accolade-medal.is-world-champion,
+.player-popup-accolade-medal.is-world-champion {
+  filter:
+    drop-shadow(0 0 var(--accolade-champion-glow-near) var(--accolade-champion-tint-near))
+    drop-shadow(0 0 var(--accolade-champion-glow-mid) var(--accolade-champion-tint-mid))
+    drop-shadow(0 0 var(--accolade-champion-glow-far) var(--accolade-champion-tint-far));
 }
 
 /* .profile-accolade-name clips with overflow: hidden for its ellipsis, which would cut the
@@ -4140,9 +4158,16 @@ body.player-popup-open {
 #player-profile-popup .player-popup-accolade-name.is-world-champion {
   color: #ffed60;
   text-shadow:
-    0 0 2px rgba(255, 224, 70, 0.98),
-    0 0 5px rgba(255, 205, 40, 0.85),
-    0 0 10px rgba(255, 170, 20, 0.62) !important;
+    0 0 var(--accolade-champion-glow-near) var(--accolade-champion-tint-near),
+    0 0 var(--accolade-champion-glow-mid) var(--accolade-champion-tint-mid),
+    0 0 var(--accolade-champion-glow-far) var(--accolade-champion-tint-far) !important;
+}
+
+#player-profile-popup .player-popup-accolade-medal.is-world-champion {
+  filter:
+    drop-shadow(0 0 var(--accolade-champion-glow-near) var(--accolade-champion-tint-near))
+    drop-shadow(0 0 var(--accolade-champion-glow-mid) var(--accolade-champion-tint-mid))
+    drop-shadow(0 0 var(--accolade-champion-glow-far) var(--accolade-champion-tint-far)) !important;
 }
 
 /* At 5/5 only the progress count is tinted in the reached tier's colour (plain colour,

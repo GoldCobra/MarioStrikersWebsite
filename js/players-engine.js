@@ -593,7 +593,7 @@
       return [
         '<li class="player-popup-accolade-item">',
         '<img class="player-popup-accolade-ball" src="', escapeHtml(ballIcon), '" alt="" aria-hidden="true" loading="lazy" onerror="this.onerror=null;this.src=\'', escapeHtml(ballIconFallback), '\'">',
-        '<span class="player-popup-accolade-medal">', escapeHtml(medal), "</span>",
+        '<span class="player-popup-accolade-medal', (entry && entry.is_world_champion ? " is-world-champion" : ""), '">', escapeHtml(medal), "</span>",
         '<span class="', escapeHtml(buildAccoladeNameClasses("player-popup-accolade-name", entry)), '">', escapeHtml(name), "</span>",
         dateHtml,
         "</li>"
