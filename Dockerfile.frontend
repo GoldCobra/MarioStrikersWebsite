@@ -1,4 +1,6 @@
 FROM alpine:3.22
+ARG RELEASE_SHA=development
+LABEL org.opencontainers.image.revision=$RELEASE_SHA
 
 RUN apk add --no-cache nginx nginx-mod-http-brotli \
     && mkdir -p /run/nginx /usr/share/nginx/html \

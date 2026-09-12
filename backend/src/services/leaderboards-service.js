@@ -3,56 +3,14 @@ const { withPool, mssql } = require("../db");
 const { normalizeCompetitiveRank } = require("./competitive-ranks");
 const { toSafeCount: toSafeInteger, toPositiveIntOrNull: toPositiveIntegerOrNull } = require("../lib/numbers");
 
-const GAME_TYPE_BY_CODE = {
-  msc: 1,
-  sms: 2,
-  msbl: 3
-};
-
-const COMPETITIVE_MODE_BY_CODE = {
-  elo1v1: "1v1",
-  elo2v2: "2v2"
-};
-
-const LEGACY_MODE_TO_FLAGS = {
-  whr: { doubles: 0, isWhr: 2 }
-};
+const { GAME_TYPE_BY_CODE, COMPETITIVE_MODE_BY_CODE, LEGACY_MODE_TO_FLAGS,
+  parseLimit, parseOffset, assertGameAndMode } = require("../lib/leaderboard-params");
 
 const ACTIVITY_FILTER_DAYS_BY_GAME = {
   msbl: 90,
   sms: null,
   msc: null
 };
-
-function parseLimit(value, fallback) {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed <= 0) {
-    return fallback;
-  }
-  return Math.min(Math.floor(parsed), config.leaderboardMaxLimit);
-}
-
-function parseOffset(value) {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed < 0) {
-    return 0;
-  }
-  return Math.floor(parsed);
-}
-
-function assertGameAndMode(gameCode, modeCode) {
-  const game = String(gameCode || "").toLowerCase().trim();
-  const mode = String(modeCode || "").toLowerCase().trim();
-
-  if (!GAME_TYPE_BY_CODE[game]) {
-    throw new Error("Invalid game code.");
-  }
-  if (!COMPETITIVE_MODE_BY_CODE[mode] && !LEGACY_MODE_TO_FLAGS[mode]) {
-    throw new Error("Invalid leaderboard mode.");
-  }
-
-  return { game: game, mode: mode };
-}
 
 function toRating(value) {
   const parsed = Number(value);

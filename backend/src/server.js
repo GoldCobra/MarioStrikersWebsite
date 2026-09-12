@@ -4,31 +4,30 @@ const compression = require("compression");
 const express = require("express");
 const cors = require("cors");
 const { config } = require("./config");
-const { healthCheck } = require("./db");
-const { getLeaderboardRows, assertGameAndMode, parseLimit, parseOffset } = require("./services/leaderboards-service");
-const { getPlayerProfile, getPlayerProfileByDiscordId } = require("./services/players-service");
-const { getMsblClubProfile } = require("./services/clubs-service");
-const { defaultClubLogoCache } = require("./services/club-logo-cache");
-const { communityEventsCache } = require("./services/events-service");
-const {
-  appendQuery,
-  buildDiscordAuthorizeUrl,
-  completeDiscordLogin,
-  createClearSessionCookie,
-  createSessionCookie,
-  readSessionFromRequest,
-  toAuthMeResponse,
-  verifyOAuthState
-} = require("./services/auth-service");
+const { assertGameAndMode, parseLimit, parseOffset } = require("./lib/leaderboard-params");
 const {
   COMPETITIVE_SEASON_KEY,
   PLAYERS_LIST_KEY,
   MSBL_CLUBS_KEY,
   PUBLIC_LEADERBOARD_LIMIT,
   isPublicLeaderboardVariant,
-  leaderboardCacheKey,
-  publicDataCache
-} = require("./services/public-data-cache");
+  leaderboardCacheKey
+} = require("./lib/public-data-keys");
+
+function createLiveProviders() {
+  return {
+    source: "mssql",
+    healthCheck: require("./db").healthCheck,
+    getLeaderboardRows: require("./services/leaderboards-service").getLeaderboardRows,
+    getPlayerProfile: require("./services/players-service").getPlayerProfile,
+    getPlayerProfileByDiscordId: require("./services/players-service").getPlayerProfileByDiscordId,
+    getMsblClubProfile: require("./services/clubs-service").getMsblClubProfile,
+    defaultClubLogoCache: require("./services/club-logo-cache").defaultClubLogoCache,
+    communityEventsCache: require("./services/events-service").communityEventsCache,
+    publicDataCache: require("./services/public-data-cache").publicDataCache,
+    auth: require("./services/auth-service")
+  };
+}
 
 const STATIC_ROOT = path.join(__dirname, "../../");
 const STATIC_PAGES_ROOT = path.join(STATIC_ROOT, "pages");
@@ -157,6 +156,18 @@ function redirectToResolvedPage(req, res, pageSlug) {
 }
 
 function sendStaticPage(res, absolutePath, next) {
+  if (res.locals.fixtureMode) {
+    fs.readFile(absolutePath, "utf8", function (error, html) {
+      if (error) {
+        if (typeof next === "function") next();
+        else res.status(404).end();
+        return;
+      }
+      const notice = '<div id="dev-data-notice" role="status" style="position:fixed;bottom:12px;left:12px;right:12px;z-index:2147483647;padding:8px 12px;background:#fff2bd;color:#252015;font:14px system-ui;border:1px solid #796421;border-radius:6px;text-align:center">Local development: synthetic sample data. Discord login is simulated.</div>';
+      res.type("html").send(html.replace(/<body\b[^>]*>/i, function (body) { return body + notice; }));
+    });
+    return;
+  }
   res.sendFile(absolutePath, function (error) {
     if (!error) {
       return;
@@ -173,13 +184,31 @@ function sendStaticPage(res, absolutePath, next) {
   });
 }
 
-function createApp() {
+function createApp(options) {
+  const opts = options || {};
+  const providers = opts.providers || createLiveProviders();
+  const fixtureMode = providers.source === "fixtures";
+  if (fixtureMode && process.env.NODE_ENV === "production") {
+    throw new Error("Fixture development mode cannot run in production.");
+  }
+  const { healthCheck, getLeaderboardRows, getPlayerProfile, getPlayerProfileByDiscordId,
+    getMsblClubProfile, defaultClubLogoCache, communityEventsCache, publicDataCache } = providers;
+  const { appendQuery, buildDiscordAuthorizeUrl, completeDiscordLogin, createClearSessionCookie,
+    createSessionCookie, readSessionFromRequest, toAuthMeResponse, verifyOAuthState } = providers.auth;
+  const serveStatic = opts.serveStatic === undefined ? process.env.SERVE_STATIC === "true" : opts.serveStatic;
   const app = express();
+  if (fixtureMode) {
+    app.use(function (_req, res, next) {
+      res.locals.fixtureMode = true;
+      res.set("X-Data-Source", "fixtures");
+      next();
+    });
+  }
   app.use(compression());
   app.use(cors(buildCorsOptions()));
   app.use(express.json({ limit: "1mb" }));
 
-  if (process.env.SERVE_STATIC === "true") {
+  if (serveStatic) {
     app.use(function (req, res, next) {
       if (req.method !== "GET" && req.method !== "HEAD") {
         next();
@@ -231,7 +260,13 @@ function createApp() {
       next();
     });
 
-    app.use(express.static(STATIC_ROOT));
+    // Serve only public directories; the repository also contains backend code and config.
+    for (const directory of ["assets", "css", "js", "pages/templates"]) {
+      app.use("/" + directory, express.static(path.join(STATIC_ROOT, directory), { dotfiles: "deny", index: false }));
+    }
+    for (const file of ["robots.txt", "sitemap.xml"]) {
+      app.get("/" + file, function (_req, res) { res.sendFile(path.join(STATIC_ROOT, file)); });
+    }
   }
 
   function sendApiError(res, error) {
@@ -539,7 +574,7 @@ function createApp() {
 
   app.get("/api/wiimmfi/msc-charged", async function (_req, res) {
     try {
-      const players = await fetchWiimmfiPlayers();
+      const players = await (providers.fetchWiimmfiPlayers || fetchWiimmfiPlayers)();
       res.set("Cache-Control", PUBLIC_DATA_CACHE_CONTROL);
       res.json({ count: players.length, players: players });
     } catch (error) {
@@ -552,18 +587,18 @@ function createApp() {
       await healthCheck();
       res.json({
         status: "ok",
-        source: "mssql"
+        source: providers.source
       });
     } catch (error) {
       res.status(500).json({
         status: "error",
-        source: "mssql",
+        source: providers.source,
         error: error.message
       });
     }
   });
 
-  if (process.env.SERVE_STATIC === "true") {
+  if (serveStatic) {
     app.get("/", function (_req, res) {
       sendStaticPage(res, path.join(STATIC_ROOT, "index.html"));
     });

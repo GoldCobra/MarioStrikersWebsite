@@ -4,13 +4,13 @@
 .idea
 
 backend/node_modules
+backend/.cache
+backend/reports
 backend/.env
 backend/.env.*
-!backend/.env.example
 
 .env
 .env.*
-!.env.example
 
 *.log
 npm-debug.log*
@@ -20,5 +20,8 @@ yarn-error.log*
 docs
 tmp
 .cache
+.deploy
+reports
+scripts
 Thumbs.db
 .DS_Store
