@@ -9,15 +9,18 @@ services:
       - strikers-network
 
   backend:
+    image: mario-strikers-website-backend:${RELEASE_SHA:?Use scripts/deploy.py to select a release}
     build:
       context: .
       dockerfile: Dockerfile.backend
+      args:
+        RELEASE_SHA: ${RELEASE_SHA}
     container_name: msc-website-backend
     environment:
       - NODE_ENV=production
       - FLARESOLVERR_URL=http://flaresolverr:8191
     env_file:
-      - ./backend/.env
+      - ${BACKEND_ENV_FILE:-./backend/.env}
     volumes:
       - backend-cache:/app/.cache
     expose:
@@ -43,9 +46,12 @@ services:
       - strikers-network
 
   frontend:
+    image: mario-strikers-website-frontend:${RELEASE_SHA:?Use scripts/deploy.py to select a release}
     build:
       context: .
       dockerfile: Dockerfile.frontend
+      args:
+        RELEASE_SHA: ${RELEASE_SHA}
     container_name: msc-website-frontend
     environment:
       - NODE_ENV=production

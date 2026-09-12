@@ -7,14 +7,18 @@
   "scripts": {
     "start": "node src/index.js",
     "start:api": "node src/index.js",
+    "dev": "node --watch src/dev.js",
+    "dev:live": "node --watch src/dev-live.js",
     "sync:mssql:once": "node src/scripts/mssql-sync-once.js",
     "club-logos:cache": "node src/scripts/cache-club-logos-once.js",
     "profile:index": "node src/scripts/apply-profile-performance-index.js",
     "check": "node src/scripts/check-syntax.js",
-    "test": "node --test"
+    "check:frontend": "node src/scripts/check-frontend.js",
+    "test": "node --require ./src/test-support/isolate.js --test",
+    "test:smoke": "node --require ./src/test-support/isolate.js --test src/dev-smoke.test.js"
   },
   "engines": {
-    "node": ">=20"
+    "node": "24.x"
   },
   "dependencies": {
     "compression": "^1.8.1",

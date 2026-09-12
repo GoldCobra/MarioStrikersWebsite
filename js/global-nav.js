@@ -911,6 +911,25 @@
     });
   }
 
+  function showFixtureNotice() {
+    var notice = document.getElementById("dev-data-notice");
+    if (!notice) {
+      notice = document.createElement("div");
+      notice.id = "dev-data-notice";
+      document.body.appendChild(notice);
+    }
+    notice.setAttribute("role", "status");
+    notice.style.cssText = "position:fixed;bottom:12px;left:12px;right:12px;z-index:2147483647;padding:8px 36px 8px 12px;background:#fff2bd;color:#252015;font:14px system-ui;border:1px solid #796421;border-radius:6px;text-align:center";
+    notice.textContent = "Local development: synthetic sample data. Discord login is simulated.";
+    var close = document.createElement("button");
+    close.type = "button";
+    close.textContent = "\u00d7";
+    close.setAttribute("aria-label", "Dismiss local development notice");
+    close.style.cssText = "position:absolute;right:8px;top:4px;background:transparent;color:inherit;border:0;font:24px system-ui;cursor:pointer";
+    close.addEventListener("click", function () { notice.remove(); });
+    notice.appendChild(close);
+  }
+
   function initGlobalAccount(root) {
     if (!root) {
       return;
@@ -922,6 +941,9 @@
     }).then(function (response) {
       if (!response.ok) {
         throw new Error("Auth status failed.");
+      }
+      if (response.headers.get("X-Data-Source") === "fixtures") {
+        showFixtureNotice();
       }
       return response.json();
     }).then(function (payload) {

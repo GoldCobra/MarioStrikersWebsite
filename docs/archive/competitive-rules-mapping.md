@@ -1,5 +1,8 @@
 # Competitive Rules Mapping (Legacy -> Unified v1)
 
+Historical migration record. Current rules are maintained in
+`js/competitive-rules-config.js` and rendered by the shared rules engine.
+
 ## Shared Global Chapters
 - `1. Introduction` (all games) -> `1. Introduction / 1.1 Purpose` (shared, verbatim intent)
 - `Code of Conduct` (all games) -> `6. Code of Conduct / 6.1 Standards of Behavior` (shared, verbatim list)

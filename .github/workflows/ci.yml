@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - gc-updates
+      - 'chore/**'
+  pull_request:
+    branches: [gc-updates]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: backend (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm run test:smoke
+
+  frontend:
+    name: frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+      - run: npm --prefix backend run check:frontend
+      - run: git diff --check
+
+  containers:
+    name: containers
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: docker build --build-arg RELEASE_SHA=${{ github.sha }} -f Dockerfile.backend -t website-backend:ci .
+      - run: docker build --build-arg RELEASE_SHA=${{ github.sha }} -f Dockerfile.frontend -t website-frontend:ci .
+      - run: docker run --rm --add-host backend:127.0.0.1 website-frontend:ci nginx -t
+      - name: Validate local Compose configuration
+        run: docker compose config --quiet
+      - name: Validate production Compose without credentials
+        run: |
+          touch "$RUNNER_TEMP/website-empty.env"
+          RELEASE_SHA="$GITHUB_SHA" BACKEND_ENV_FILE="$RUNNER_TEMP/website-empty.env" docker compose -f docker-compose.prod.yml config --quiet
+      - name: Start Docker development
+        run: docker compose up --build -d
+      - name: Check Docker example data and frontend
+        run: |
+          python3 - <<'PY'
+          import json, time, urllib.request
+          base = 'http://127.0.0.1:8080'
+          for attempt in range(30):
+              try:
+                  with urllib.request.urlopen(base + '/api/health', timeout=2) as response:
+                      assert json.load(response) == {'status': 'ok', 'source': 'fixtures'}
+                  break
+              except (OSError, AssertionError):
+                  if attempt == 29:
+                      raise
+                  time.sleep(1)
+          for route in ['/', '/players', '/msbl-elo1v1', '/pages/templates/player-profile-popup.html', '/api/clubs/msbl/1/logo']:
+              with urllib.request.urlopen(base + route, timeout=5) as response:
+                  assert response.status == 200, route
+          with urllib.request.urlopen(base + '/api/auth/me', timeout=5) as response:
+              assert response.headers['X-Data-Source'] == 'fixtures'
+              assert json.load(response) == {'authenticated': False}
+          with urllib.request.urlopen(base + '/js/global-nav.js', timeout=5) as response:
+              assert 'no-store' in response.headers['Cache-Control']
+          print('Docker development serves synthetic data, clean routes, templates and uncached assets.')
+          PY
+      - name: Stop Docker development
+        if: always()
+        run: docker compose down --volumes
+
+  deployment:
+    name: deployment
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: python3 -m unittest discover -s scripts -p 'test_deploy*.py' -v

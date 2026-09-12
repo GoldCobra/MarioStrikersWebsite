@@ -1,4 +1,6 @@
-FROM node:20-alpine
+FROM node:24-alpine
+ARG RELEASE_SHA=development
+LABEL org.opencontainers.image.revision=$RELEASE_SHA
 
 # Set working directory
 WORKDIR /app
@@ -7,13 +9,10 @@ WORKDIR /app
 COPY backend/package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production || npm install
+RUN npm ci --omit=dev
 
 # Copy the rest of the backend code
 COPY backend/ ./
-
-# Copy .env if it exists (or create from example)
-RUN if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi
 
 # Expose the port
 EXPOSE 8787

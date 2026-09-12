@@ -1,7 +1,14 @@
 const path = require("path");
 const dotenv = require("dotenv");
 
-dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+const fixtureMode = process.env.MSC_DEV_FIXTURES === "1";
+if (fixtureMode && process.env.NODE_ENV === "production") {
+  throw new Error("Fixture development mode cannot run in production.");
+}
+// node --test marks its child processes even when invoked without npm test.
+if (!fixtureMode && process.env.NODE_ENV !== "test" && !process.env.NODE_TEST_CONTEXT) {
+  dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+}
 
 function readInt(name, defaultValue) {
   const raw = process.env[name];
@@ -36,7 +43,8 @@ const config = {
   publicDataCacheTtlMs: readInt("PUBLIC_DATA_CACHE_TTL_MS", 60000),
   publicDataCacheRefreshIntervalMs: readInt("PUBLIC_DATA_CACHE_REFRESH_INTERVAL_MS", 60000),
   publicDataCacheParallelism: readInt("PUBLIC_DATA_CACHE_PARALLELISM", 2),
-  publicDataCacheSnapshotPath: process.env.PUBLIC_DATA_CACHE_SNAPSHOT_PATH || path.resolve(process.cwd(), ".cache/public-data-cache.json"),
+  publicDataCacheSnapshotPath: process.env.NODE_ENV === "test" || fixtureMode || process.env.NODE_TEST_CONTEXT
+    ? "" : process.env.PUBLIC_DATA_CACHE_SNAPSHOT_PATH || path.resolve(process.cwd(), ".cache/public-data-cache.json"),
   clubLogoCachePath: process.env.CLUB_LOGO_CACHE_PATH || path.resolve(process.cwd(), ".cache/club-logos"),
   clubLogoMaxBytes: readInt("CLUB_LOGO_MAX_BYTES", 5 * 1024 * 1024),
   clubLogoFetchTimeoutMs: readInt("CLUB_LOGO_FETCH_TIMEOUT_MS", 15000),

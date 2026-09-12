@@ -8,24 +8,10 @@ const { getCompetitiveSeasonStatus } = require("./competitive-season-service");
 const { toPositiveIntOr: toPositiveInt } = require("../lib/numbers");
 
 const SNAPSHOT_VERSION = 5;
-const PLAYERS_LIST_KEY = "players:list";
-const MSBL_CLUBS_KEY = "clubs:msbl";
-const COMPETITIVE_SEASON_KEY = "competitive-season:current";
-const PUBLIC_LEADERBOARD_LIMIT = 100;
+const { PLAYERS_LIST_KEY, MSBL_CLUBS_KEY, COMPETITIVE_SEASON_KEY,
+  PUBLIC_LEADERBOARD_LIMIT, PUBLIC_LEADERBOARD_VARIANTS, leaderboardCacheKey,
+  isPublicLeaderboardVariant } = require("../lib/public-data-keys");
 const PUBLIC_DATA_SLOW_REFRESH_THRESHOLD_MS = 1500;
-const PUBLIC_LEADERBOARD_VARIANTS = Object.freeze([
-  { game: "msbl", mode: "elo1v1" },
-  { game: "msbl", mode: "elo2v2" },
-  { game: "msbl", mode: "whr" },
-  { game: "msc", mode: "elo1v1" },
-  { game: "msc", mode: "whr" },
-  { game: "sms", mode: "elo1v1" },
-  { game: "sms", mode: "whr" }
-]);
-
-function leaderboardCacheKey(game, mode) {
-  return "leaderboard:" + String(game || "").toLowerCase() + ":" + String(mode || "").toLowerCase();
-}
 
 function normalizeGeneratedAt(value) {
   if (value instanceof Date) {
@@ -347,13 +333,6 @@ function createPublicDataCache(options) {
     loaders: opts.loaders || createDefaultLoaders(),
     logger: opts.logger || console,
     loadSnapshot: opts.loadSnapshot
-  });
-}
-
-function isPublicLeaderboardVariant(game, mode) {
-  const key = leaderboardCacheKey(game, mode);
-  return PUBLIC_LEADERBOARD_VARIANTS.some(function (variant) {
-    return leaderboardCacheKey(variant.game, variant.mode) === key;
   });
 }
 
