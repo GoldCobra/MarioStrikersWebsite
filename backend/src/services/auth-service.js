@@ -73,7 +73,11 @@ function parseCookies(cookieHeader) {
     if (!key) {
       return;
     }
-    cookies[key] = decodeURIComponent(value);
+    try {
+      cookies[key] = decodeURIComponent(value);
+    } catch (_error) {
+      // Ignore malformed entries, including unrelated cookies from other applications.
+    }
   });
   return cookies;
 }

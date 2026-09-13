@@ -353,16 +353,18 @@ function createApp(options) {
   });
 
   app.get("/api/profile/me", async function (req, res) {
-    const session = getAuthSession(req);
-    if (!session) {
-      sendNoStoreJson(res, {
-        error: "Authentication required.",
-        code: "AUTH_REQUIRED"
-      }, 401);
-      return;
-    }
-
+    res.set("Cache-Control", "no-store");
+    let session;
     try {
+      session = getAuthSession(req);
+      if (!session) {
+        sendNoStoreJson(res, {
+          error: "Authentication required.",
+          code: "AUTH_REQUIRED"
+        }, 401);
+        return;
+      }
+
       const profile = await getPlayerProfileByDiscordId(session.discord_user_id);
       if (!profile) {
         sendNoStoreJson(res, {
@@ -506,9 +508,12 @@ function createApp(options) {
   });
 
   app.get("/api/competitive-season/current", async function (_req, res) {
+    res.set("Cache-Control", "no-store");
     try {
       const cached = await publicDataCache.get(COMPETITIVE_SEASON_KEY);
-      sendPublicDataJson(res, cached, cached.payload);
+      res.set("X-Data-Cache", cached.cacheStatus);
+      res.set("X-Data-Generated-At", cached.generatedAt);
+      res.json({ ...cached.payload, serverNowUtc: new Date().toISOString() });
     } catch (error) {
       sendApiError(res, error);
     }
