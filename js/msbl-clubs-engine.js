@@ -2,8 +2,6 @@
   "use strict";
 
   var PROFILE_CACHE_TTL_MS = 30000;
-  var POPUP_CLOSE_BLOCK_MS = 500;
-  var lastPopupCloseAt = 0;
 
   var PROFILE_TEMPLATE_URL = "/pages/templates/club-profile-popup.html?v=20260602-equipment-row-v1";
   var POPUP_OPEN_CLASS = "popup-open";
@@ -488,14 +486,7 @@
       requestClose(event);
     });
 
-    if (!keydownHandlerBound) {
-      document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape" && popupState.isOpen) {
-          closePopup();
-        }
-      });
-      keydownHandlerBound = true;
-    }
+    bindPopupKeyboard();
 
     return popupRoot;
   }
@@ -507,7 +498,8 @@
 
     if (!templateLoadPromise) {
       templateLoadPromise = fetch(PROFILE_TEMPLATE_URL, {
-        headers: { Accept: "text/html" }
+        headers: { Accept: "text/html" },
+        cache: "no-cache"
       }).then(function (response) {
         if (!response.ok) {
           throw new Error("Failed to load club profile template.");
@@ -515,6 +507,9 @@
         return response.text();
       }).then(function (html) {
         return mountPopupTemplate(html);
+      }).catch(function (error) {
+        templateLoadPromise = null;
+        throw error;
       });
     }
 
@@ -534,35 +529,71 @@
 
     var closeButton = popupState.root.querySelector(".club-popup-close");
     if (closeButton) {
-      closeButton.focus();
+      closeButton.focus({ preventScroll: true });
     }
   }
 
-  function blockPostCloseInteraction() {
-    var timer;
-    var blockEvent = function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      if (typeof event.stopImmediatePropagation === "function") {
-        event.stopImmediatePropagation();
+  function bindPopupKeyboard() {
+    if (keydownHandlerBound) return;
+    keydownHandlerBound = true;
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && (popupState.isOpen || popupState.activeRequestToken)) {
+        event.preventDefault();
+        event.stopPropagation();
+        closePopup();
+        return;
       }
-    };
-    var cleanup = function () {
-      document.removeEventListener("click", blockEvent, true);
-      document.removeEventListener("pointerup", blockEvent, true);
-      document.removeEventListener("touchend", blockEvent, true);
-      clearTimeout(timer);
-    };
+      if (event.key !== "Tab" || !popupState.isOpen) return;
+      var card = popupState.root.querySelector(".popup-card");
+      var controls = Array.prototype.filter.call(
+        card.querySelectorAll("a[href], button, input, select, textarea, summary, [tabindex]"),
+        function (node) {
+          return !node.disabled && node.tabIndex >= 0 && node.getClientRects().length > 0 &&
+            window.getComputedStyle(node).visibility !== "hidden";
+        }
+      );
+      if (!controls.length) return;
+      var index = controls.indexOf(document.activeElement);
+      if (index === -1 || (event.shiftKey ? index === 0 : index === controls.length - 1)) {
+        event.preventDefault();
+        controls[event.shiftKey ? controls.length - 1 : 0].focus({ preventScroll: true });
+      }
+    });
+    document.addEventListener("focusin", function (event) {
+      if (!popupState.isOpen) return;
+      var card = popupState.root.querySelector(".popup-card");
+      if (!card.contains(event.target)) {
+        card.querySelector(".popup-close").focus({ preventScroll: true });
+      }
+    });
+  }
 
-    document.addEventListener("click", blockEvent, true);
-    document.addEventListener("pointerup", blockEvent, true);
-    document.addEventListener("touchend", blockEvent, true);
-    timer = setTimeout(cleanup, POPUP_CLOSE_BLOCK_MS);
+  function clearPopupError() {
+    var feedback = document.getElementById("club-profile-feedback");
+    if (feedback) feedback.remove();
+  }
+
+  function showPopupError(profileId, openerElement) {
+    clearPopupError();
+    var mount = document.getElementById("msbl-clubs-root");
+    if (!mount) return;
+    var feedback = document.createElement("p");
+    feedback.id = "club-profile-feedback";
+    feedback.className = "msbl-clubs-note msbl-clubs-note-error";
+    feedback.setAttribute("role", "alert");
+    feedback.textContent = "Could not open the club profile. ";
+    var retry = document.createElement("button");
+    retry.type = "button";
+    retry.className = "profile-action-button";
+    retry.textContent = "Retry";
+    retry.addEventListener("click", function () { openClubPopup(profileId, openerElement); });
+    feedback.appendChild(retry);
+    mount.insertAdjacentElement("beforebegin", feedback);
   }
 
   function closePopup() {
-    lastPopupCloseAt = Date.now();
-    blockPostCloseInteraction();
+    popupState.activeRequestToken = null;
+    clearPopupError();
 
     if (!popupState.root) {
       return;
@@ -571,11 +602,11 @@
     popupState.root.hidden = true;
     popupState.root.setAttribute("aria-hidden", "true");
     popupState.isOpen = false;
-    popupState.activeRequestToken = null;
     document.body.classList.remove(POPUP_OPEN_CLASS);
 
-    if (popupState.openerElement && typeof popupState.openerElement.focus === "function") {
-      popupState.openerElement.focus();
+    if (popupState.openerElement && popupState.openerElement.isConnected &&
+        typeof popupState.openerElement.focus === "function") {
+      popupState.openerElement.focus({ preventScroll: true });
     }
     popupState.openerElement = null;
   }
@@ -891,35 +922,37 @@
       return;
     }
 
-    await ensurePopup();
-    openPopup(openerElement);
-
-    setTextSlot("club-name", "");
-    renderClubInfo(null);
-    setTextSlot("created-date", "");
-    setClubEquipmentLine(null);
-    setClubActions(null);
-    var staleLogoBg = popupState.slots["club-logo-bg"];
-    if (staleLogoBg) {
-      staleLogoBg.hidden = true;
-      staleLogoBg.removeAttribute("src");
-    }
-
-    var cached = profileCache.get(normalizedClubId);
-    if (cached && Date.now() - cached.ts < PROFILE_CACHE_TTL_MS) {
-      renderProfile(cached.data);
-      renderPopupContent();
-      return;
-    } else if (cached) {
-      profileCache.delete(normalizedClubId);
-    }
-
-    renderPopupLoading("Loading...");
-
     var requestToken = Symbol("club-profile-request");
     popupState.activeRequestToken = requestToken;
+    clearPopupError();
+    bindPopupKeyboard();
 
     try {
+      await ensurePopup();
+      if (popupState.activeRequestToken !== requestToken) return;
+      openPopup(openerElement);
+
+      setTextSlot("club-name", "");
+      renderClubInfo(null);
+      setTextSlot("created-date", "");
+      setClubEquipmentLine(null);
+      setClubActions(null);
+      var staleLogoBg = popupState.slots["club-logo-bg"];
+      if (staleLogoBg) {
+        staleLogoBg.hidden = true;
+        staleLogoBg.removeAttribute("src");
+      }
+
+      var cached = profileCache.get(normalizedClubId);
+      if (cached && Date.now() - cached.ts < PROFILE_CACHE_TTL_MS) {
+        renderProfile(cached.data);
+        renderPopupContent();
+        return;
+      } else if (cached) {
+        profileCache.delete(normalizedClubId);
+      }
+      renderPopupLoading("Loading...");
+
       var profile = await fetchClubProfile(normalizedClubId);
       if (popupState.activeRequestToken !== requestToken || !popupState.isOpen) {
         return;
@@ -929,10 +962,9 @@
       renderProfile(profile);
       renderPopupContent();
     } catch (_error) {
-      if (popupState.activeRequestToken !== requestToken || !popupState.isOpen) {
-        return;
-      }
-      renderPopupError("Failed to load club profile.");
+      if (popupState.activeRequestToken !== requestToken) return;
+      if (popupState.isOpen) renderPopupError("Failed to load club profile.");
+      else showPopupError(normalizedClubId, openerElement);
     }
   }
 
@@ -971,7 +1003,6 @@
       createClubListLayoutController(mount, scaleAllClubNames);
 
       mount.addEventListener("click", function (event) {
-        if (Date.now() - lastPopupCloseAt < POPUP_CLOSE_BLOCK_MS) { return; }
         var row = event.target && typeof event.target.closest === "function"
           ? event.target.closest(".msbl-club-row[data-club-id]")
           : null;

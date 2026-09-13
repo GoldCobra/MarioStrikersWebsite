@@ -42,7 +42,9 @@ community events. Wiimmfi availability is retrieved through FlareSolverr.
 Public leaderboard, player-list, club-list and season responses use a refresh
 cache that persists snapshots under `backend/.cache/`. Club logos are cached
 there too. These are runtime caches, not source data; production stores them
-on a named Docker volume. Account/profile responses use `no-store`.
+on a named Docker volume. Account/profile responses use `no-store`. Season
+responses also use `no-store`: season data remains cached internally, but
+`serverNowUtc` is generated at response time for countdown synchronization.
 
 Discord OAuth requests `identify` and `guilds.members.read`, checks membership
 in the configured guild, and sets a signed HTTP-only session cookie.
