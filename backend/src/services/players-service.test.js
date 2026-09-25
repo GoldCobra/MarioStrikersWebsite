@@ -355,6 +355,110 @@ test("profile rating cards show an unranked icon for competitive rank zero", fun
   });
 });
 
+test("1v1 rating cards stay up for a legacy record without any rated match", function () {
+  const ratings = buildRatings({
+    MscRating: 1563,
+    MscRecord: "519-283"
+  }, [], [], []);
+
+  assert.equal(ratings.msc.rating, null);
+  assert.equal(ratings.msc.sets, "0-0");
+  assert.equal(ratings.msc.games, "519-283");
+  assert.equal(ratings.msc.whr, 1563);
+  assert.equal(ratings.msc.rank_icon_url, "");
+  assert.equal(ratings.msc.competitive_rank_number, null);
+  assert.deepEqual(ratings.msc.season_reward_level, {
+    order: 0,
+    name: "Unranked",
+    image_url: "/assets/players/rewardlevel/0-unranked.png?v=20260608-rank-crop-v1",
+    current_wins: 0,
+    required_wins: 5
+  });
+});
+
+test("1v1 rating cards show the rating carried into a season before its first match", function () {
+  const ratings = buildRatings({
+    BlRating: 1741,
+    BlRecord: "888-211"
+  }, [
+    {
+      GameType: 3,
+      Mode: "1v1",
+      Elo: 889.2,
+      RankNumber: 6,
+      RankName: "Silver III",
+      PlacementPlayed: 5,
+      PlacementComplete: true,
+      MatchWins: 0,
+      MatchLosses: 0
+    }
+  ], [], [
+    { GameType: 3, Mode: "1v1", TotalMatches: 24 }
+  ]);
+
+  assert.equal(ratings.msbl.rating, 889);
+  assert.equal(ratings.msbl.sets, "0-0");
+  assert.equal(ratings.msbl.games, "888-211");
+  assert.equal(ratings.msbl.competitive_rank, "Silver III");
+  assert.equal(ratings.msbl.rank_icon_url, "/assets/leaderboards/rankicons/2-silver-III.png?v=20260608-rank-crop-v1");
+});
+
+test("1v1 rating cards count rated matches from earlier seasons as history", function () {
+  const carriedRow = {
+    GameType: 2,
+    Mode: "1v1",
+    Elo: 600,
+    RankNumber: 0,
+    RankName: "Unranked",
+    MatchWins: 0,
+    MatchLosses: 0
+  };
+
+  const withHistory = buildRatings({}, [carriedRow], [], [
+    { GameType: 2, Mode: "1v1", TotalMatches: 3 }
+  ]);
+  assert.equal(withHistory.sms.rating, 600);
+  assert.equal(withHistory.sms.sets, "0-0");
+
+  const withoutHistory = buildRatings({}, [carriedRow], [], []);
+  assert.deepEqual(withoutHistory.sms, {});
+});
+
+test("a game the player has never played gets no rating card", function () {
+  const ratings = buildRatings({
+    SmsRecord: "0-0",
+    SmsRating: 1000,
+    MscRecord: null
+  }, [], [], [
+    { GameType: 3, Mode: "1v1", TotalMatches: 0 }
+  ]);
+
+  assert.deepEqual(ratings.sms, {});
+  assert.deepEqual(ratings.msc, {});
+  assert.deepEqual(ratings.msbl, {});
+});
+
+test("2v2 rating cards still need a rated match in the active season", function () {
+  const ratings = buildRatings({
+    BlRating2v2: 983,
+    BlRecord2v2: "8-3"
+  }, [
+    {
+      GameType: 3,
+      Mode: "2v2",
+      Elo: 1000,
+      RankNumber: 7,
+      RankName: "Gold I",
+      MatchWins: 0,
+      MatchLosses: 0
+    }
+  ], [], [
+    { GameType: 3, Mode: "2v2", TotalMatches: 5 }
+  ]);
+
+  assert.deepEqual(ratings.msbl2v2, {});
+});
+
 test("season reward level falls back to unranked and maps earned tiers", function () {
   assert.deepEqual(buildSeasonRewardLevel(null), {
     order: 0,
@@ -383,9 +487,14 @@ test("profile batch query reads all profile data in one multi-recordset batch", 
 
   assert.match(sql, /SELECT TOP 1\s+p\.ID AS player_id/s);
   assert.match(sql, /FROM FriendCodes fc/);
-  assert.match(sql, /FROM CompetitiveLeaderboard lb/);
-  assert.match(sql, /lb\.PlacementPlayed/);
-  assert.match(sql, /lb\.PlacementComplete/);
+  assert.match(sql, /FROM CompetitivePlayerRating rating INNER JOIN CompetitiveSeason season ON season\.Id = rating\.SeasonId/);
+  assert.match(sql, /LEFT JOIN CompetitiveRankThreshold threshold ON threshold\.RankNumber = rating\.RankNumber AND threshold\.IsActive = 1/);
+  assert.match(sql, /AND player\.HideStats = 0/);
+  assert.doesNotMatch(sql, /CompetitiveLeaderboard/);
+  assert.match(sql, /rating\.PlacementPlayed/);
+  assert.match(sql, /rating\.PlacementComplete/);
+  assert.match(sql, /SUM\(rating\.MatchWins \+ rating\.MatchLosses\) AS TotalMatches/);
+  assert.match(sql, /GROUP BY rating\.GameId, rating\.ModeCode;$/);
   assert.match(sql, /CompetitiveSeasonRewardProgress/);
   assert.match(sql, /progress\.GameId/);
   assert.match(sql, /progress\.ModeCode/);
@@ -496,6 +605,25 @@ test("profile batch recordsets map to the existing profile DTO shape", function 
   assert.equal(profile.ratings.msbl.season_reward_level.required_wins, 5);
   assert.equal(profile.season_reward_level.name, "Silver");
   assert.equal(profile.accolades[0].place_medal, "🥇");
+});
+
+test("profile batch recordsets pass the all-season rated history to the rating cards", function () {
+  const profile = buildPlayerProfileFromRecordsets([
+    [{ player_id: 64, name: "History Only" }],
+    [],
+    [{}],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [{ GameType: 3, Mode: "1v1", TotalMatches: 4 }]
+  ]);
+
+  assert.equal(profile.ratings.msbl.rating, null);
+  assert.equal(profile.ratings.msbl.sets, "0-0");
+  assert.equal(profile.ratings.msbl.games, "-");
+  assert.deepEqual(profile.ratings.msc, {});
 });
 
 test("profile accolades mapper handles all placements and keeps newest first", function () {

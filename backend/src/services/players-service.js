@@ -75,6 +75,11 @@ function normalizeRecordPair(value) {
   return match[1] + "-" + match[2];
 }
 
+function recordHasResults(value) {
+  const match = normalizeText(value).match(/^(\d+)\s*-\s*(\d+)$/);
+  return Boolean(match) && Number(match[1]) + Number(match[2]) > 0;
+}
+
 function normalizeResultsUrl(resultsValue, idStartGG) {
   const results = normalizeText(resultsValue);
   if (results) {
@@ -422,20 +427,29 @@ function getRewardProgress(rewardProgressByKey, gameType, mode) {
   return rewardProgressByKey.get(String(gameType) + ":" + String(mode || "").toLowerCase()) || null;
 }
 
+// A player has history in a game once they have a legacy result or a rated match in any season.
+function hasPlayedEver(options) {
+  return recordHasResults(options && options.games)
+    || toSafeCount(options && options.competitiveHistory && options.competitiveHistory.TotalMatches) > 0;
+}
+
+// A card normally needs a rated match in the active season. With alwaysShow (1v1) it stays up for
+// anyone with history in that game, showing the rating carried into the season; only a player who
+// has never played the game at all gets no card.
 function buildRatingBlock(options) {
   const competitive = options && options.competitive;
-  if (!hasCompetitiveMatches(competitive)) {
+  if (!hasCompetitiveMatches(competitive) && !(options && options.alwaysShow && hasPlayedEver(options))) {
     return {};
   }
 
   const metricName = String(options && options.metricName || "").trim();
   const metricValue = roundOrNull(options && options.metricValue);
-  const rankNumber = Number(competitive && competitive.RankNumber);
+  const rankNumber = competitive ? Number(competitive.RankNumber) : NaN;
   const wins = toSafeCount(competitive && competitive.MatchWins);
   const losses = toSafeCount(competitive && competitive.MatchLosses);
 
   const result = {
-    rating: roundOrNull(competitive && competitive.Elo),
+    rating: competitive ? roundOrNull(competitive.Elo) : null,
     sets: wins + "-" + losses,
     games: normalizeRecordPair(options && options.games),
     rank_emoji: "",
@@ -455,13 +469,16 @@ function buildRatingBlock(options) {
   return result;
 }
 
-function buildRatings(profile, competitiveRatings, rewardProgressRows) {
+function buildRatings(profile, competitiveRatings, rewardProgressRows, competitiveHistoryRows) {
   const competitiveRatingsByKey = buildCompetitiveRatingsByKey(competitiveRatings);
+  const competitiveHistoryByKey = buildCompetitiveRatingsByKey(competitiveHistoryRows);
   const rewardProgressByKey = buildRewardProgressByKey(rewardProgressRows);
   return {
     sms: buildRatingBlock({
       competitive: getCompetitiveRating(competitiveRatingsByKey, 2, "1v1"),
       rewardProgress: getRewardProgress(rewardProgressByKey, 2, "1v1"),
+      competitiveHistory: getCompetitiveRating(competitiveHistoryByKey, 2, "1v1"),
+      alwaysShow: true,
       games: profile && profile.SmsRecord,
       metricName: "whr",
       metricValue: profile && profile.SmsRating
@@ -469,6 +486,8 @@ function buildRatings(profile, competitiveRatings, rewardProgressRows) {
     msc: buildRatingBlock({
       competitive: getCompetitiveRating(competitiveRatingsByKey, 1, "1v1"),
       rewardProgress: getRewardProgress(rewardProgressByKey, 1, "1v1"),
+      competitiveHistory: getCompetitiveRating(competitiveHistoryByKey, 1, "1v1"),
+      alwaysShow: true,
       games: profile && profile.MscRecord,
       metricName: "whr",
       metricValue: profile && profile.MscRating
@@ -476,6 +495,8 @@ function buildRatings(profile, competitiveRatings, rewardProgressRows) {
     msbl: buildRatingBlock({
       competitive: getCompetitiveRating(competitiveRatingsByKey, 3, "1v1"),
       rewardProgress: getRewardProgress(rewardProgressByKey, 3, "1v1"),
+      competitiveHistory: getCompetitiveRating(competitiveHistoryByKey, 3, "1v1"),
+      alwaysShow: true,
       games: profile && profile.BlRecord,
       metricName: "whr",
       metricValue: profile && profile.BlRating
@@ -789,23 +810,28 @@ function buildPlayerProfileBatchQuery() {
     "  CASE fc.Region WHEN 'PAL' THEN 1 WHEN 'NTSC' THEN 2 WHEN 'JPN' THEN 3 WHEN 'KOR' THEN 4 ELSE 9 END,",
     "  fc.LineSeq;",
     buildPlayerProfileSummaryQuery(";"),
+    // Read the rating table, not the CompetitiveLeaderboard view: the view drops rows without a
+    // match this season, but a rating carried into the new season still belongs on the profile.
     "SELECT",
-    "  lb.GameType,",
-    "  lb.Mode,",
-    "  lb.Elo,",
-    "  lb.RankNumber,",
-    "  lb.RankName,",
-    "  lb.MatchWins,",
-    "  lb.MatchLosses,",
-    "  lb.PlacementPlayed,",
-    "  lb.PlacementComplete,",
-    "  lb.TotalMatches",
-    "FROM CompetitiveLeaderboard lb",
-    "INNER JOIN CompetitiveSeason season ON season.Id = lb.SeasonId",
+    "  rating.GameId AS GameType,",
+    "  rating.ModeCode AS Mode,",
+    "  rating.Elo,",
+    "  rating.RankNumber,",
+    "  threshold.Name AS RankName,",
+    "  rating.MatchWins,",
+    "  rating.MatchLosses,",
+    "  rating.PlacementPlayed,",
+    "  rating.PlacementComplete,",
+    "  rating.MatchWins + rating.MatchLosses AS TotalMatches",
+    "FROM CompetitivePlayerRating rating",
+    "INNER JOIN CompetitiveSeason season ON season.Id = rating.SeasonId",
+    "INNER JOIN Player player ON player.ID = rating.PlayerId",
+    "LEFT JOIN CompetitiveRankThreshold threshold ON threshold.RankNumber = rating.RankNumber AND threshold.IsActive = 1",
     "WHERE season.IsActive = 1",
     "  AND season.LifecycleStatus = 'active'",
-    "  AND lb.PlayerId = @playerId",
-    "ORDER BY lb.GameType ASC, lb.Mode ASC;",
+    "  AND rating.PlayerId = @playerId",
+    "  AND player.HideStats = 0",
+    "ORDER BY rating.GameId ASC, rating.ModeCode ASC;",
     "SELECT TOP 1",
     "  ISNULL(MAX(ISNULL(progress.HighestEarnedTierOrder, 0)), 0) AS RewardLevelOrder",
     "FROM CompetitiveSeason season",
@@ -842,7 +868,17 @@ function buildPlayerProfileBatchQuery() {
     ") placement(PlayerList, Place)",
     "WHERE (',' + REPLACE(placement.PlayerList, ' ', '') + ',') LIKE '%,' + @playerIdText + ',%'",
     "ORDER BY t.TournamentStartDate DESC, t.Name ASC;",
-    buildSeasonAwardsQuery()
+    buildSeasonAwardsQuery(),
+    // Rated matches over every season, so a card stays up for anyone who has ever played the game.
+    "SELECT",
+    "  rating.GameId AS GameType,",
+    "  rating.ModeCode AS Mode,",
+    "  SUM(rating.MatchWins + rating.MatchLosses) AS TotalMatches",
+    "FROM CompetitivePlayerRating rating",
+    "INNER JOIN Player player ON player.ID = rating.PlayerId",
+    "WHERE rating.PlayerId = @playerId",
+    "  AND player.HideStats = 0",
+    "GROUP BY rating.GameId, rating.ModeCode;"
   ].join(" ");
 }
 
@@ -886,7 +922,7 @@ function buildPlayerProfileFromRecordsets(recordsets) {
     friend_codes: buildFriendCodes(getRecordset(recordsets, 1)),
     season_awards: buildSeasonAwards(getRecordset(recordsets, 7)),
     accolades: buildAccolades(getRecordset(recordsets, 6)),
-    ratings: buildRatings(profileData, getRecordset(recordsets, 3), getRecordset(recordsets, 5)),
+    ratings: buildRatings(profileData, getRecordset(recordsets, 3), getRecordset(recordsets, 5), getRecordset(recordsets, 8)),
     season_reward_level: buildSeasonRewardLevel(rewardRow && rewardRow.RewardLevelOrder),
     highest_rank_banner_url: ""
   };

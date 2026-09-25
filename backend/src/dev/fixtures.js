@@ -52,7 +52,7 @@ function createFixtureProviders() {
       player: { ...player, id: player.player_id, results_url: "" },
       friend_codes: { switch: ["SW-0000-0000-0000"], msc: ["PAL (sample): 0000-0000-0000"],
         msc_pal: ["PAL (sample): 0000-0000-0000"], msc_ntsc: [], msc_jpn: [], msc_kor: [] },
-      ratings: { sms: { ...rating }, msc: { ...rating }, msbl: { ...rating }, msbl2v2: { ...rating, tst: 1750 }, sms2v2: {}, msc2v2: {} },
+      ratings: { sms: { ...rating }, msc: { ...rating, sets: "0-0" }, msbl: { ...rating }, msbl2v2: { ...rating, tst: 1750 }, sms2v2: {}, msc2v2: {} },
       season_awards: [{ season_name: "Sample Season", game_code: "MSBL", mode_code: "1v1",
         award_code: "top3", award_name: "Sample Top Three", rank_position: 3, metric_label: "ELO" }],
       accolades: [{ place_medal: "🥈", game_code: "MSBL", tournament_name: "Sample Training Cup",
