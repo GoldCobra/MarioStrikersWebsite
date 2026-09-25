@@ -78,7 +78,9 @@ All endpoints below use the same origin as the website.
 | GET | `/api/health` | Service health |
 
 Leaderboard games are `msbl`, `msc` and `sms`; modes are `elo1v1`,
-`elo2v2` and `whr`. The frontend offers all three for MSBL and
-`elo1v1`/`whr` for MSC and SMS.
+`elo2v2` and `whr`. The tab strip offers `elo1v1` and `whr` for all three
+games; the `msbl-elo2v2` page and route still exist but have no tab.
+WHR is the all-time 1v1 rating that futbot recalculates from every reported
+result; the backend only reads it.
 `backend/src/server.js`, service implementations and their tests define
 response fields and validation.
