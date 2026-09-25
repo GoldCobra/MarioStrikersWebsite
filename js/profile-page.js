@@ -236,7 +236,7 @@
       var metricValue = metricKey && Number.isFinite(rating[metricKey]) ? rating[metricKey] : null;
       var setsValue = String(rating.sets || "");
       var gamesValue = String(rating.games || "");
-      var cardClass = "profile-rating-card";
+      var cardClass = "profile-rating-card is-" + card.game + "-rating";
       var lines = [];
       var rankIconHtml = rating.rank_icon_url
         ? '<img class="profile-rank-icon" src="' + escapeHtml(rating.rank_icon_url) + '" alt="" aria-hidden="true" loading="lazy">'
@@ -278,14 +278,14 @@
   function buildRatings(ratings) {
     var data = ratings || {};
     var singles = buildRatingCards([
-      { title: "MSBL", rating: data.msbl || {}, metricKey: "whr", metricLabel: "WHR" },
-      { title: "MSC", rating: data.msc || {}, metricKey: "whr", metricLabel: "WHR" },
-      { title: "SMS", rating: data.sms || {}, metricKey: "whr", metricLabel: "WHR" }
+      { title: "MSBL", game: "msbl", rating: data.msbl || {}, metricKey: "whr", metricLabel: "WHR" },
+      { title: "MSC", game: "msc", rating: data.msc || {}, metricKey: "whr", metricLabel: "WHR" },
+      { title: "SMS", game: "sms", rating: data.sms || {}, metricKey: "whr", metricLabel: "WHR" }
     ]);
     var doubles = buildRatingCards([
-      { title: "MSBL 2v2", rating: data.msbl2v2 || {}, metricKey: "tst", metricLabel: "TST" },
-      { title: "MSC 2v2", rating: data.msc2v2 || {}, metricKey: "tst", metricLabel: "TST" },
-      { title: "SMS 2v2", rating: data.sms2v2 || {}, metricKey: "tst", metricLabel: "TST" }
+      { title: "MSBL 2v2", game: "msbl", rating: data.msbl2v2 || {}, metricKey: "tst", metricLabel: "TST" },
+      { title: "MSC 2v2", game: "msc", rating: data.msc2v2 || {}, metricKey: "tst", metricLabel: "TST" },
+      { title: "SMS 2v2", game: "sms", rating: data.sms2v2 || {}, metricKey: "tst", metricLabel: "TST" }
     ]);
 
     if (!singles && !doubles) {

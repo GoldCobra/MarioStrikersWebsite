@@ -3220,7 +3220,8 @@ body[data-page="msl-schedule"] .msl-schedule-meta a {
   background: rgba(0, 0, 0, 0.32);
 }
 
-.profile-rating-card.is-inactive-rating {
+/* Dim the content, not the card, so the game-coloured border stays at full strength. */
+.profile-rating-card.is-inactive-rating > * {
   opacity: 0.55;
 }
 
@@ -4025,6 +4026,22 @@ body.player-popup-open {
 .player-popup-rating-card.is-sms-rating .player-popup-rating-title,
 .player-popup-rating-card.is-sms-rating .player-popup-rating-value {
   color: #b4e9ff;
+}
+
+/* Every rating card, on the profile page and in the popup, is framed in its game's colour. */
+.profile-rating-card.is-msbl-rating,
+.player-popup-rating-card.is-msbl-rating {
+  border: 1px solid #ffb5b5;
+}
+
+.profile-rating-card.is-msc-rating,
+.player-popup-rating-card.is-msc-rating {
+  border: 1px solid #ffd8b8;
+}
+
+.profile-rating-card.is-sms-rating,
+.player-popup-rating-card.is-sms-rating {
+  border: 1px solid #b4e9ff;
 }
 
 .player-popup-rating-card .player-popup-rating-value.is-muted-stat-value {
