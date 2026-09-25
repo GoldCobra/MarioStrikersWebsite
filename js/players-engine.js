@@ -355,10 +355,6 @@
     return text !== "" && text !== "-";
   }
 
-  function isZeroRecord(value) {
-    return /^0\s*-\s*0$/.test(String(value || "").trim());
-  }
-
   function renderCodeLines(listKey, lines) {
     var mount = popupState.lists[listKey];
     if (!mount) {
@@ -423,123 +419,6 @@
       .concat(prefixLegacyMscLines(data.msc_ntsc, "NTSC-U"))
       .concat(prefixLegacyMscLines(data.msc_jpn, "NTSC-J"))
       .concat(prefixLegacyMscLines(data.msc_kor, "NTSC-K"));
-  }
-
-  function buildRatingLine(label, value, leadingHtml, trailingHtml, valueClassName) {
-    var valueClass = "player-popup-rating-value" + (valueClassName ? " " + valueClassName : "");
-    return [
-      '<p class="player-popup-rating-line">',
-      '<span class="player-popup-rating-label">', escapeHtml(label), ':</span>',
-      leadingHtml || "",
-      '<span class="' + valueClass + '">', escapeHtml(String(value)), "</span>",
-      trailingHtml || "",
-      "</p>"
-    ].join("");
-  }
-
-  function toRewardWins(value, fallback) {
-    if (value === null || value === undefined || value === "") {
-      return fallback;
-    }
-    var parsed = Number(value);
-    if (!Number.isFinite(parsed)) {
-      return fallback;
-    }
-    return Math.max(0, Math.floor(parsed));
-  }
-
-  function buildRatingRewardMarkup(rewardLevel) {
-    var reward = rewardLevel || {};
-    var imageUrl = String(reward.image_url || "").trim();
-    var name = String(reward.name || "Unranked").trim() || "Unranked";
-    var requiredWins = Math.max(1, toRewardWins(reward.required_wins, 5));
-    var currentWins = Math.min(requiredWins, toRewardWins(reward.current_wins, 0));
-    var tierOrder = Number(reward.order);
-    var normalizedTierOrder = Number.isFinite(tierOrder) ? Math.max(0, Math.min(7, Math.floor(tierOrder))) : 0;
-    var tierClass = " is-reward-tier-" + normalizedTierOrder;
-    if (normalizedTierOrder > 0 && currentWins >= requiredWins) {
-      tierClass += " is-reward-complete";
-    }
-    var progressLabel = normalizedTierOrder > 0 ? "Season Reward Level" : "Matches";
-    if (!imageUrl) {
-      return "";
-    }
-
-    return [
-      '<div class="player-popup-rating-reward', tierClass, '">',
-      '<div class="player-popup-rating-reward-main">',
-      '<span class="player-popup-rating-reward-icon-wrap">',
-      '<img class="player-popup-rating-reward-icon" src="', escapeHtml(imageUrl), '" alt="', escapeHtml(name), '" title="', escapeHtml(name), '" loading="lazy">',
-      '</span>',
-      '<span class="player-popup-rating-reward-name">', escapeHtml(name), "</span>",
-      "</div>",
-      '<div class="player-popup-rating-reward-rule" aria-hidden="true"></div>',
-      '<p class="player-popup-rating-reward-progress">',
-      '<span>', escapeHtml(progressLabel), '</span>',
-      '<strong>', escapeHtml(currentWins + "/" + requiredWins), "</strong>",
-      "</p>",
-      "</div>"
-    ].join("");
-  }
-
-  function buildRatingsMarkup(cards) {
-    return cards.map(function (card) {
-      var ratingValue = card && card.rating && Number.isFinite(card.rating.rating) ? card.rating.rating : null;
-      var setsValue = card && card.rating ? String(card.rating.sets || "") : "";
-      var gamesValue = card && card.rating ? String(card.rating.games || "") : "";
-      var metricKey = card && card.metricKey ? String(card.metricKey) : "";
-      var title = card && card.title ? String(card.title) : "";
-      var titleLower = title.toLowerCase();
-      var cardClass = "player-popup-rating-card";
-      if (titleLower.indexOf("msbl") !== -1) {
-        cardClass += " is-msbl-rating";
-      } else if (titleLower.indexOf("msc") !== -1) {
-        cardClass += " is-msc-rating";
-      } else if (titleLower.indexOf("sms") !== -1) {
-        cardClass += " is-sms-rating";
-      }
-      if (isZeroRecord(setsValue) || isZeroRecord(gamesValue)) {
-        cardClass += " is-inactive-rating";
-      }
-      var metricValue = null;
-      if (card && card.rating && metricKey && Number.isFinite(card.rating[metricKey])) {
-        metricValue = card.rating[metricKey];
-      }
-
-      var rankIconHtml = card && card.rating && card.rating.rank_icon_url
-        ? '<img class="player-popup-rank-icon" src="' + escapeHtml(card.rating.rank_icon_url) + '" alt="" loading="lazy" aria-hidden="true">'
-        : "";
-      var lines = [];
-
-      if (ratingValue !== null) {
-        lines.push(buildRatingLine("Rating", ratingValue, rankIconHtml));
-      } else if (rankIconHtml) {
-        lines.push(buildRatingLine("Rank", "", rankIconHtml));
-      }
-      if (hasDisplayText(setsValue)) {
-        lines.push(buildRatingLine("Matches", setsValue));
-      }
-      if (metricValue !== null) {
-        lines.push(buildRatingLine(card.metricLabel, metricValue, "", "", "is-muted-stat-value"));
-      }
-      if (hasDisplayText(gamesValue)) {
-        lines.push(buildRatingLine("Games", gamesValue, "", "", "is-muted-stat-value"));
-      }
-
-      if (!lines.length) {
-        return "";
-      }
-
-      return [
-        '<div class="player-popup-rating-unit">',
-        '<article class="' + cardClass + '">',
-        '<h4 class="player-popup-rating-title">', escapeHtml(title), "</h4>",
-        lines.join(""),
-        "</article>",
-        buildRatingRewardMarkup(card && card.rating && card.rating.season_reward_level),
-        "</div>"
-      ].join("");
-    }).filter(Boolean).join("");
   }
 
   function renderSeasonAwards(awards) {
@@ -685,14 +564,12 @@
     renderSeasonAwards(data.season_awards || []);
     renderAccolades(data.accolades || []);
 
+    var ratingCards = window.MSCRatingCards;
+
     var singlesMount = popupState.slots["ratings-grid-singles"];
     var singlesMarkup = "";
     if (singlesMount) {
-      singlesMarkup = buildRatingsMarkup([
-        { title: "MSBL", rating: ratings.msbl || {}, metricKey: "whr", metricLabel: "WHR" },
-        { title: "MSC", rating: ratings.msc || {}, metricKey: "whr", metricLabel: "WHR" },
-        { title: "SMS", rating: ratings.sms || {}, metricKey: "whr", metricLabel: "WHR" }
-      ]);
+      singlesMarkup = ratingCards ? ratingCards.buildSingles(ratings, "player-popup") : "";
       singlesMount.innerHTML = singlesMarkup;
       singlesMount.hidden = !singlesMarkup;
     }
@@ -700,11 +577,7 @@
     var doublesMount = popupState.slots["ratings-grid-doubles"];
     var doublesMarkup = "";
     if (doublesMount) {
-      doublesMarkup = buildRatingsMarkup([
-        { title: "MSBL 2v2", rating: ratings.msbl2v2 || {}, metricKey: "tst", metricLabel: "TST" },
-        { title: "MSC 2v2", rating: ratings.msc2v2 || {}, metricKey: "tst", metricLabel: "TST" },
-        { title: "SMS 2v2", rating: ratings.sms2v2 || {}, metricKey: "tst", metricLabel: "TST" }
-      ]);
+      doublesMarkup = ratingCards ? ratingCards.buildDoubles(ratings, "player-popup") : "";
       doublesMount.innerHTML = doublesMarkup;
       doublesMount.hidden = !doublesMarkup;
     }

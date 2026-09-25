@@ -1,0 +1,75 @@
+{
+  "note": "Classic rating card markup (profile prefix) as the engines rendered it before js/rating-cards.js existed.",
+  "ratings": {
+    "msbl": {
+      "rating": 1020,
+      "sets": "7-0",
+      "games": "549-121",
+      "whr": 2131,
+      "rank_icon_url": "/assets/leaderboards/rankicons/3-gold-I.png?v=1",
+      "competitive_rank": "Gold I",
+      "season_reward_level": {
+        "order": 2,
+        "name": "Silver",
+        "image_url": "/assets/players/rewardlevel/2-silver.png?v=1",
+        "current_wins": 2,
+        "required_wins": 5
+      }
+    },
+    "msc": {
+      "rating": null,
+      "sets": "0-0",
+      "games": "61-40",
+      "whr": 1520,
+      "rank_icon_url": "",
+      "competitive_rank": "",
+      "season_reward_level": {
+        "order": 0,
+        "name": "Unranked",
+        "image_url": "/assets/players/rewardlevel/0-unranked.png?v=1",
+        "current_wins": 0,
+        "required_wins": 5
+      }
+    },
+    "sms": {
+      "rating": 655,
+      "sets": "0-0",
+      "games": "267-159",
+      "whr": 1641,
+      "rank_icon_url": "/assets/players/rewardlevel/0-unranked.png?v=1",
+      "competitive_rank": "Unranked",
+      "season_reward_level": {
+        "order": 0,
+        "name": "Unranked",
+        "image_url": "/assets/players/rewardlevel/0-unranked.png?v=1",
+        "current_wins": 0,
+        "required_wins": 5
+      }
+    },
+    "msbl2v2": {
+      "rating": 1029,
+      "sets": "3-0",
+      "games": "8-3",
+      "tst": 983,
+      "rank_icon_url": "/assets/leaderboards/rankicons/3-gold-II.png?v=1",
+      "competitive_rank": "Gold II",
+      "season_reward_level": {
+        "order": 1,
+        "name": "Bronze",
+        "image_url": "/assets/players/rewardlevel/1-bronze.png?v=1",
+        "current_wins": 5,
+        "required_wins": 5
+      }
+    },
+    "msc2v2": {},
+    "sms2v2": {
+      "rating": null,
+      "sets": "",
+      "games": "",
+      "rank_icon_url": "/assets/players/rewardlevel/0-unranked.png?v=1",
+      "competitive_rank": "Unranked"
+    }
+  },
+  "singles": "<div class=\"profile-rating-unit\"><article class=\"profile-rating-card is-msbl-rating\"><h4 class=\"profile-rating-title\">MSBL</h4><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">Rating:</span><img class=\"profile-rank-icon\" src=\"/assets/leaderboards/rankicons/3-gold-I.png?v=1\" alt=\"\" aria-hidden=\"true\" loading=\"lazy\"><span class=\"profile-rating-value\">1020</span></p><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">Matches:</span><span class=\"profile-rating-value\">7-0</span></p><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">WHR:</span><span class=\"profile-rating-value is-muted-stat-value\">2131</span></p><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">Games:</span><span class=\"profile-rating-value is-muted-stat-value\">549-121</span></p></article><div class=\"profile-rating-reward is-reward-tier-2\"><div class=\"profile-rating-reward-main\"><span class=\"profile-rating-reward-icon-wrap\"><img class=\"profile-rating-reward-icon\" src=\"/assets/players/rewardlevel/2-silver.png?v=1\" alt=\"Silver\" title=\"Silver\" loading=\"lazy\"></span><span class=\"profile-rating-reward-name\">Silver</span></div><div class=\"profile-rating-reward-rule\" aria-hidden=\"true\"></div><p class=\"profile-rating-reward-progress\"><span>Season Reward Level</span><strong>2/5</strong></p></div></div><div class=\"profile-rating-unit\"><article class=\"profile-rating-card is-msc-rating is-inactive-rating\"><h4 class=\"profile-rating-title\">MSC</h4><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">Matches:</span><span class=\"profile-rating-value\">0-0</span></p><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">WHR:</span><span class=\"profile-rating-value is-muted-stat-value\">1520</span></p><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">Games:</span><span class=\"profile-rating-value is-muted-stat-value\">61-40</span></p></article><div class=\"profile-rating-reward is-reward-tier-0\"><div class=\"profile-rating-reward-main\"><span class=\"profile-rating-reward-icon-wrap\"><img class=\"profile-rating-reward-icon\" src=\"/assets/players/rewardlevel/0-unranked.png?v=1\" alt=\"Unranked\" title=\"Unranked\" loading=\"lazy\"></span><span class=\"profile-rating-reward-name\">Unranked</span></div><div class=\"profile-rating-reward-rule\" aria-hidden=\"true\"></div><p class=\"profile-rating-reward-progress\"><span>Matches</span><strong>0/5</strong></p></div></div><div class=\"profile-rating-unit\"><article class=\"profile-rating-card is-sms-rating is-inactive-rating\"><h4 class=\"profile-rating-title\">SMS</h4><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">Rating:</span><img class=\"profile-rank-icon\" src=\"/assets/players/rewardlevel/0-unranked.png?v=1\" alt=\"\" aria-hidden=\"true\" loading=\"lazy\"><span class=\"profile-rating-value\">655</span></p><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">Matches:</span><span class=\"profile-rating-value\">0-0</span></p><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">WHR:</span><span class=\"profile-rating-value is-muted-stat-value\">1641</span></p><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">Games:</span><span class=\"profile-rating-value is-muted-stat-value\">267-159</span></p></article><div class=\"profile-rating-reward is-reward-tier-0\"><div class=\"profile-rating-reward-main\"><span class=\"profile-rating-reward-icon-wrap\"><img class=\"profile-rating-reward-icon\" src=\"/assets/players/rewardlevel/0-unranked.png?v=1\" alt=\"Unranked\" title=\"Unranked\" loading=\"lazy\"></span><span class=\"profile-rating-reward-name\">Unranked</span></div><div class=\"profile-rating-reward-rule\" aria-hidden=\"true\"></div><p class=\"profile-rating-reward-progress\"><span>Matches</span><strong>0/5</strong></p></div></div>",
+  "doubles": "<div class=\"profile-rating-unit\"><article class=\"profile-rating-card is-msbl-rating\"><h4 class=\"profile-rating-title\">MSBL 2v2</h4><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">Rating:</span><img class=\"profile-rank-icon\" src=\"/assets/leaderboards/rankicons/3-gold-II.png?v=1\" alt=\"\" aria-hidden=\"true\" loading=\"lazy\"><span class=\"profile-rating-value\">1029</span></p><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">Matches:</span><span class=\"profile-rating-value\">3-0</span></p><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">TST:</span><span class=\"profile-rating-value is-muted-stat-value\">983</span></p><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">Games:</span><span class=\"profile-rating-value is-muted-stat-value\">8-3</span></p></article><div class=\"profile-rating-reward is-reward-tier-1 is-reward-complete\"><div class=\"profile-rating-reward-main\"><span class=\"profile-rating-reward-icon-wrap\"><img class=\"profile-rating-reward-icon\" src=\"/assets/players/rewardlevel/1-bronze.png?v=1\" alt=\"Bronze\" title=\"Bronze\" loading=\"lazy\"></span><span class=\"profile-rating-reward-name\">Bronze</span></div><div class=\"profile-rating-reward-rule\" aria-hidden=\"true\"></div><p class=\"profile-rating-reward-progress\"><span>Season Reward Level</span><strong>5/5</strong></p></div></div><div class=\"profile-rating-unit\"><article class=\"profile-rating-card is-sms-rating\"><h4 class=\"profile-rating-title\">SMS 2v2</h4><p class=\"profile-rating-line\"><span class=\"profile-rating-label\">Rank:</span><img class=\"profile-rank-icon\" src=\"/assets/players/rewardlevel/0-unranked.png?v=1\" alt=\"\" aria-hidden=\"true\" loading=\"lazy\"><span class=\"profile-rating-value\"></span></p></article></div>"
+}

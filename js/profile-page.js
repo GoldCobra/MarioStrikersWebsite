@@ -47,10 +47,6 @@
     return text !== "" && text !== "-";
   }
 
-  function isZeroRecord(value) {
-    return /^0\s*-\s*0$/.test(String(value || "").trim());
-  }
-
   function normalizeDateText(value) {
     var text = String(value || "").trim();
     if (!text) {
@@ -171,122 +167,14 @@
     return sections.join("");
   }
 
-  function buildRatingLine(label, value, leadingHtml, trailingHtml, valueClassName) {
-    var valueClass = "profile-rating-value" + (valueClassName ? " " + valueClassName : "");
-    return [
-      '<p class="profile-rating-line">',
-      '<span class="profile-rating-label">', escapeHtml(label), ':</span>',
-      leadingHtml || "",
-      '<span class="' + valueClass + '">', escapeHtml(String(value)), "</span>",
-      trailingHtml || "",
-      "</p>"
-    ].join("");
-  }
-
-  function toRewardWins(value, fallback) {
-    if (value === null || value === undefined || value === "") {
-      return fallback;
-    }
-    var parsed = Number(value);
-    if (!Number.isFinite(parsed)) {
-      return fallback;
-    }
-    return Math.max(0, Math.floor(parsed));
-  }
-
-  function buildRatingReward(rewardLevel) {
-    var reward = rewardLevel || {};
-    var imageUrl = String(reward.image_url || "").trim();
-    var name = String(reward.name || "Unranked").trim() || "Unranked";
-    var requiredWins = Math.max(1, toRewardWins(reward.required_wins, 5));
-    var currentWins = Math.min(requiredWins, toRewardWins(reward.current_wins, 0));
-    var tierOrder = Number(reward.order);
-    var normalizedTierOrder = Number.isFinite(tierOrder) ? Math.max(0, Math.min(7, Math.floor(tierOrder))) : 0;
-    var tierClass = " is-reward-tier-" + normalizedTierOrder;
-    if (normalizedTierOrder > 0 && currentWins >= requiredWins) {
-      tierClass += " is-reward-complete";
-    }
-    var progressLabel = normalizedTierOrder > 0 ? "Season Reward Level" : "Matches";
-    if (!imageUrl) {
+  function buildRatings(ratings) {
+    var ratingCards = window.MSCRatingCards;
+    if (!ratingCards) {
       return "";
     }
-
-    return [
-      '<div class="profile-rating-reward', tierClass, '">',
-      '<div class="profile-rating-reward-main">',
-      '<span class="profile-rating-reward-icon-wrap">',
-      '<img class="profile-rating-reward-icon" src="', escapeHtml(imageUrl), '" alt="', escapeHtml(name), '" title="', escapeHtml(name), '" loading="lazy">',
-      '</span>',
-      '<span class="profile-rating-reward-name">', escapeHtml(name), "</span>",
-      "</div>",
-      '<div class="profile-rating-reward-rule" aria-hidden="true"></div>',
-      '<p class="profile-rating-reward-progress">',
-      '<span>', escapeHtml(progressLabel), '</span>',
-      '<strong>', escapeHtml(currentWins + "/" + requiredWins), "</strong>",
-      "</p>",
-      "</div>"
-    ].join("");
-  }
-
-  function buildRatingCards(cards) {
-    return cards.map(function (card) {
-      var rating = card && card.rating ? card.rating : {};
-      var ratingValue = Number.isFinite(rating.rating) ? rating.rating : null;
-      var metricKey = String(card && card.metricKey || "");
-      var metricValue = metricKey && Number.isFinite(rating[metricKey]) ? rating[metricKey] : null;
-      var setsValue = String(rating.sets || "");
-      var gamesValue = String(rating.games || "");
-      var cardClass = "profile-rating-card is-" + card.game + "-rating";
-      var lines = [];
-      var rankIconHtml = rating.rank_icon_url
-        ? '<img class="profile-rank-icon" src="' + escapeHtml(rating.rank_icon_url) + '" alt="" aria-hidden="true" loading="lazy">'
-        : "";
-
-      if (isZeroRecord(setsValue) || isZeroRecord(gamesValue)) {
-        cardClass += " is-inactive-rating";
-      }
-      if (ratingValue !== null) {
-        lines.push(buildRatingLine("Rating", ratingValue, rankIconHtml));
-      } else if (rankIconHtml) {
-        lines.push(buildRatingLine("Rank", "", rankIconHtml));
-      }
-      if (hasDisplayText(setsValue)) {
-        lines.push(buildRatingLine("Matches", setsValue));
-      }
-      if (metricValue !== null) {
-        lines.push(buildRatingLine(card.metricLabel, metricValue, "", "", "is-muted-stat-value"));
-      }
-      if (hasDisplayText(gamesValue)) {
-        lines.push(buildRatingLine("Games", gamesValue, "", "", "is-muted-stat-value"));
-      }
-      if (!lines.length) {
-        return "";
-      }
-
-      return [
-        '<div class="profile-rating-unit">',
-        '<article class="', cardClass, '">',
-        '<h4 class="profile-rating-title">', escapeHtml(card.title), "</h4>",
-        lines.join(""),
-        "</article>",
-        buildRatingReward(rating.season_reward_level),
-        "</div>"
-      ].join("");
-    }).filter(Boolean).join("");
-  }
-
-  function buildRatings(ratings) {
     var data = ratings || {};
-    var singles = buildRatingCards([
-      { title: "MSBL", game: "msbl", rating: data.msbl || {}, metricKey: "whr", metricLabel: "WHR" },
-      { title: "MSC", game: "msc", rating: data.msc || {}, metricKey: "whr", metricLabel: "WHR" },
-      { title: "SMS", game: "sms", rating: data.sms || {}, metricKey: "whr", metricLabel: "WHR" }
-    ]);
-    var doubles = buildRatingCards([
-      { title: "MSBL 2v2", game: "msbl", rating: data.msbl2v2 || {}, metricKey: "tst", metricLabel: "TST" },
-      { title: "MSC 2v2", game: "msc", rating: data.msc2v2 || {}, metricKey: "tst", metricLabel: "TST" },
-      { title: "SMS 2v2", game: "sms", rating: data.sms2v2 || {}, metricKey: "tst", metricLabel: "TST" }
-    ]);
+    var singles = ratingCards.buildSingles(data, "profile");
+    var doubles = ratingCards.buildDoubles(data, "profile");
 
     if (!singles && !doubles) {
       return "";
