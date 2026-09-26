@@ -4070,26 +4070,32 @@ body.player-popup-open {
 /* Compact rating card layout (js/rating-cards.js switches between it and the classic list).
    Two equal rows split the card at its vertical middle: the rank icon sits top right, the game
    code starts just below the middle, and the rating and WHR/TST share a baseline at the bottom.
-   The text size is each surface's classic value size, so the rating reads the same in both. */
+   The text size is each surface's classic value size, so the rating reads the same in both.
+   The digit height is measured per font (ITC Grizzly 0.74em, Reporter 0.73em; the cap unit is
+   0.05em short in ITC Grizzly), so the ELO icon ends flush with the digits' top and baseline. */
 .profile-rating-card {
   --rating-card-text-size: 16px;
+  --rating-card-digit-height: 0.74em;
 }
 
 .player-popup-rating-card {
   --rating-card-text-size: 15px;
+  --rating-card-digit-height: 0.73em;
 }
 
 :is(.profile-rating-card, .player-popup-rating-card).is-compact-layout {
   --rating-compact-rank-size: calc(var(--profile-rank-icon-height) * 2);
   --rating-compact-title-size: calc(var(--rating-card-text-size) + 4px);
   --rating-compact-title-gap: 2px;
-  --rating-compact-metric-size: calc(var(--rating-card-text-size) - 2px);
+  --rating-compact-metric-size: calc(var(--rating-card-text-size) - 3px);
   --rating-compact-metric-color: rgba(255, 255, 255, 0.7);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-rows: 1fr 1fr;
   column-gap: 0.4rem;
   min-height: 108px;
+  /* Tighter than the classic card, so the ELO icon, rating and WHR fit the 130px profile cards. */
+  padding: 0.3rem 0.25rem;
 }
 
 .player-popup-rating-card.is-compact-layout {
@@ -4127,6 +4133,16 @@ body.player-popup-open {
   font-size: var(--rating-card-text-size);
   font-weight: 700;
   white-space: nowrap;
+}
+
+/* The ELO icon (216x200) sits on the baseline and is exactly as tall as the digits. */
+:is(.profile-rating-compact-value, .player-popup-rating-compact-value)::before {
+  content: "";
+  display: inline-block;
+  height: var(--rating-card-digit-height);
+  aspect-ratio: 216 / 200;
+  margin-right: 0.3em;
+  background: url("../assets/players/elo.png?v=20260926-elo-icon-v1") center / contain no-repeat;
 }
 
 :is(.profile-rating-compact-metric, .player-popup-rating-compact-metric) {
