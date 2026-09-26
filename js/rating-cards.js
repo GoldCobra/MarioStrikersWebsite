@@ -7,9 +7,9 @@
 //
 // Two layouts exist. To switch, change RATING_CARD_LAYOUT, bump this file's ?v= in every
 // loader and release:
-//   "compact" - rank icon top right, game code just below the middle, rating bottom left,
-//               WHR/TST bottom right.
-//   "classic" - the label/value list: Rating, Matches, WHR/TST, Games.
+//   "compact" - season reward level above the card; in the card the rank icon top right and,
+//               stacked bottom left, game code, rank name and ELO rating; WHR/TST bottom right.
+//   "classic" - the label/value list: Rating, Matches, WHR/TST, Games; reward level below.
 (function () {
   "use strict";
 
@@ -123,13 +123,13 @@
     var parts = [];
 
     if (card.rankIconUrl) {
-      // The icon stands alone here, so it carries the rank name itself.
-      var rankLabel = card.rankName
-        ? ' alt="' + escapeHtml(card.rankName) + '" title="' + escapeHtml(card.rankName) + '"'
-        : ' alt="" aria-hidden="true"';
-      parts.push('<img class="' + prefix + '-rating-compact-rank" src="' + escapeHtml(card.rankIconUrl) + '"' + rankLabel + ' loading="lazy">');
+      // Decorative: the rank name is written out below the game code.
+      parts.push('<img class="' + prefix + '-rating-compact-rank" src="' + escapeHtml(card.rankIconUrl) + '" alt="" aria-hidden="true" loading="lazy">');
     }
     parts.push('<h4 class="' + prefix + '-rating-compact-title">' + escapeHtml(card.definition.title) + "</h4>");
+    if (card.rankName) {
+      parts.push('<p class="' + prefix + '-rating-compact-rank-name">' + escapeHtml(card.rankName) + "</p>");
+    }
     if (card.ratingValue !== null) {
       parts.push([
         '<p class="', prefix, '-rating-compact-value">',
@@ -200,12 +200,17 @@
         cardClass += " is-inactive-rating";
       }
 
-      return [
-        '<div class="', prefix, '-rating-unit">',
+      var reward = buildRatingReward(prefix, card.rewardLevel);
+      var article = [
         '<article class="', cardClass, '">',
         isCompact ? buildCompactBody(prefix, card) : buildClassicBody(prefix, card),
-        "</article>",
-        buildRatingReward(prefix, card.rewardLevel),
+        "</article>"
+      ].join("");
+
+      // The compact layout puts the season reward level above the card, the classic one below.
+      return [
+        '<div class="', prefix, '-rating-unit">',
+        isCompact ? reward + article : article + reward,
         "</div>"
       ].join("");
     }).join("");

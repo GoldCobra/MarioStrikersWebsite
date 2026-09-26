@@ -4068,11 +4068,12 @@ body.player-popup-open {
 }
 
 /* Compact rating card layout (js/rating-cards.js switches between it and the classic list).
-   Two equal rows split the card at its vertical middle: the rank icon sits top right, the game
-   code starts just below the middle, and the rating and WHR/TST share a baseline at the bottom.
+   The rank icon sits alone top right. Bottom left, rows of fixed height stack the game code, the
+   rank name and the ELO rating, so the game code sits at the same height in every card of a row
+   even when a rank name or rating is missing; WHR/TST shares the rating's baseline bottom right.
    The text size is each surface's classic value size, so the rating reads the same in both.
    The digit height is measured per font (ITC Grizzly 0.74em, Reporter 0.73em; the cap unit is
-   0.05em short in ITC Grizzly), so the ELO icon ends flush with the digits' top and baseline. */
+   0.05em short in ITC Grizzly); the ELO icon is sized and centred on it. */
 .profile-rating-card {
   --rating-card-text-size: 16px;
   --rating-card-digit-height: 0.74em;
@@ -4086,13 +4087,16 @@ body.player-popup-open {
 :is(.profile-rating-card, .player-popup-rating-card).is-compact-layout {
   --rating-compact-rank-size: calc(var(--profile-rank-icon-height) * 2);
   --rating-compact-title-size: calc(var(--rating-card-text-size) + 4px);
-  --rating-compact-title-gap: 2px;
+  --rating-compact-line: calc(var(--rating-card-text-size) * 1.25);
   --rating-compact-metric-size: calc(var(--rating-card-text-size) - 3px);
+  --rating-compact-metric-label-size: calc(var(--rating-compact-metric-size) - 2px);
   --rating-compact-metric-color: rgba(255, 255, 255, 0.7);
+  --rating-compact-elo-scale: 1.15;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 1fr auto var(--rating-compact-line) var(--rating-compact-line);
   column-gap: 0.4rem;
+  row-gap: 2px;
   min-height: 108px;
   /* Tighter than the classic card, so the ELO icon, rating and WHR fit the 130px profile cards. */
   padding: 0.3rem 0.25rem;
@@ -4115,16 +4119,28 @@ body.player-popup-open {
 
 :is(.profile-rating-compact-title, .player-popup-rating-compact-title) {
   grid-area: 2 / 1 / 3 / 3;
-  align-self: start;
-  margin: var(--rating-compact-title-gap) 0 0;
+  align-self: end;
+  margin: 0;
   color: var(--rating-game-color, #fff);
   font-size: var(--rating-compact-title-size);
   font-weight: 700;
   line-height: 1;
+  white-space: nowrap;
+}
+
+:is(.profile-rating-compact-rank-name, .player-popup-rating-compact-rank-name) {
+  grid-area: 3 / 1 / 4 / 3;
+  align-self: center;
+  margin: 0;
+  color: #fff;
+  font-size: var(--rating-card-text-size);
+  font-weight: 400;
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
 :is(.profile-rating-compact-value, .player-popup-rating-compact-value) {
-  grid-area: 2 / 1;
+  grid-area: 4 / 1;
   align-self: end;
   align-self: last baseline;
   justify-self: start;
@@ -4132,21 +4148,23 @@ body.player-popup-open {
   color: #fff;
   font-size: var(--rating-card-text-size);
   font-weight: 700;
+  line-height: 1.25;
   white-space: nowrap;
 }
 
-/* The ELO icon (216x200) sits on the baseline and is exactly as tall as the digits. */
+/* The ELO icon (230x200) is a little larger than the digits and centred on them. */
 :is(.profile-rating-compact-value, .player-popup-rating-compact-value)::before {
   content: "";
   display: inline-block;
-  height: var(--rating-card-digit-height);
-  aspect-ratio: 216 / 200;
+  height: calc(var(--rating-card-digit-height) * var(--rating-compact-elo-scale));
+  aspect-ratio: 230 / 200;
   margin-right: 0.3em;
-  background: url("../assets/players/elo.png?v=20260926-elo-icon-v1") center / contain no-repeat;
+  vertical-align: calc(var(--rating-card-digit-height) * (1 - var(--rating-compact-elo-scale)) / 2);
+  background: url("../assets/players/elo.png?v=20260926-elo-icon-v2") center / contain no-repeat;
 }
 
 :is(.profile-rating-compact-metric, .player-popup-rating-compact-metric) {
-  grid-area: 2 / 2;
+  grid-area: 4 / 2;
   align-self: end;
   align-self: last baseline;
   justify-self: end;
@@ -4154,7 +4172,12 @@ body.player-popup-open {
   color: var(--rating-compact-metric-color);
   font-size: var(--rating-compact-metric-size);
   font-weight: 400;
+  line-height: 1.25;
   white-space: nowrap;
+}
+
+:is(.profile-rating-compact-metric-label, .player-popup-rating-compact-metric-label) {
+  font-size: var(--rating-compact-metric-label-size);
 }
 
 :is(.profile-rating-compact-metric-value, .player-popup-rating-compact-metric-value) {
