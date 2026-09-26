@@ -16,13 +16,14 @@ function loadRatingCards() {
 
 const ratingCards = loadRatingCards();
 
+// The <article> of the compact card with the given title.
 function compactCard(markup, title) {
-  const cards = markup.split('<div class="profile-rating-unit">').slice(1);
-  const card = cards.find(function (entry) {
+  const units = markup.split('<div class="profile-rating-unit">').slice(1);
+  const unit = units.find(function (entry) {
     return entry.includes('-rating-compact-title">' + title + "</h4>");
   });
-  assert.ok(card, "no card titled " + title);
-  return card.slice(0, card.indexOf("</article>"));
+  assert.ok(unit, "no card titled " + title);
+  return unit.slice(unit.indexOf("<article"), unit.indexOf("</article>"));
 }
 
 test("the compact layout is the default", function () {
@@ -45,14 +46,18 @@ test("the popup gets the same classic cards under its own class prefix", functio
   );
 });
 
-test("a compact card shows the rank icon, game code, rating and WHR only", function () {
+test("a compact card shows the rank icon, game code, rank name, rating and WHR only", function () {
   const card = compactCard(ratingCards.buildSingles(golden.ratings, "profile"), "MSBL");
 
-  assert.match(card, /^<article class="profile-rating-card is-msbl-rating is-compact-layout">/);
-  assert.match(card, /<img class="profile-rating-compact-rank" src="[^"]+3-gold-I\.png[^"]*" alt="Gold I" title="Gold I" loading="lazy">/);
-  assert.match(card, /<h4 class="profile-rating-compact-title">MSBL<\/h4>/);
-  assert.match(card, /<p class="profile-rating-compact-value"><span class="visually-hidden">Rating <\/span>1020<\/p>/);
-  assert.match(card, /<span class="profile-rating-compact-metric-label">WHR<\/span> <span class="profile-rating-compact-metric-value">2131<\/span>/);
+  assert.equal(card, [
+    '<article class="profile-rating-card is-msbl-rating is-compact-layout">',
+    '<img class="profile-rating-compact-rank" src="/assets/leaderboards/rankicons/3-gold-I.png?v=1" alt="" aria-hidden="true" loading="lazy">',
+    '<h4 class="profile-rating-compact-title">MSBL</h4>',
+    '<p class="profile-rating-compact-rank-name">Gold I</p>',
+    '<p class="profile-rating-compact-value"><span class="visually-hidden">Rating </span>1020</p>',
+    '<p class="profile-rating-compact-metric"><span class="profile-rating-compact-metric-label">WHR</span> ',
+    '<span class="profile-rating-compact-metric-value">2131</span></p>'
+  ].join(""));
   assert.doesNotMatch(card, /Matches|Games|7-0|549-121/);
 });
 
@@ -65,12 +70,21 @@ test("a compact card leaves out what the player does not have", function () {
   assert.match(card, /-rating-compact-metric-value">1520</);
 });
 
-test("a compact rank icon without a rank name is hidden from screen readers", function () {
+test("a compact card without a rank name keeps the icon and leaves the rank name out", function () {
   const markup = ratingCards.buildSingles({
     sms: { rating: 700, sets: "1-0", rank_icon_url: "/icon.png" }
   }, "profile");
 
   assert.match(markup, /<img class="profile-rating-compact-rank" src="\/icon\.png" alt="" aria-hidden="true" loading="lazy">/);
+  assert.doesNotMatch(markup, /-rating-compact-rank-name/);
+});
+
+test("the season reward level sits above a compact card and below a classic one", function () {
+  const compact = ratingCards.buildSingles(golden.ratings, "profile", "compact");
+  const classic = ratingCards.buildSingles(golden.ratings, "profile", "classic");
+
+  assert.ok(compact.indexOf('<div class="profile-rating-reward ') < compact.indexOf("<article"));
+  assert.ok(classic.indexOf("<article") < classic.indexOf('<div class="profile-rating-reward '));
 });
 
 test("compact 2v2 cards keep the full title and show TST", function () {
