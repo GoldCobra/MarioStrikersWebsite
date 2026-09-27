@@ -189,8 +189,8 @@
           </tr>
         </tbody>
       </table>
-      <p class="wiimmfi-last-updated" id="wiimmfi-last-updated">
-        #text "Updated: 12:00:00"
+      <p class="wiimmfi-last-updated" id="wiimmfi-last-updated" data-base-text="Updated: 12:00:00">
+        #text "Updated: 12:00:00 – next update in 58s"
       </p>
     </div>
     #text "\n  "

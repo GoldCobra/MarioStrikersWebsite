@@ -5,6 +5,7 @@
 //   node run.ts routes [--update]                               status/Location probes vs golden (ROUTES_URL)
 // The reference commit is read from visual-reference.sha; "self" compares the working tree with itself.
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
+import { createRequire } from "node:module";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { FIXTURE_NOW } from "./lib/site.ts";
@@ -24,10 +25,19 @@ interface RunningStack {
 const E2E_DIR = dirname(import.meta.filename);
 const REPO_ROOT = resolve(E2E_DIR, "../..");
 const CACHE_DIR = join(E2E_DIR, ".cache");
-const PLAYWRIGHT_CLI = join(E2E_DIR, "node_modules", "@playwright", "test", "cli.js");
+// Resolved like a normal import, so it works with a local or a hoisted workspace install.
+const PLAYWRIGHT_CLI = resolvePlaywrightCli();
 const IS_WINDOWS = process.platform === "win32";
 const REFERENCE_PORT = 8791;
 const CANDIDATE_PORT = 8792;
+
+function resolvePlaywrightCli(): string {
+  try {
+    return join(dirname(createRequire(import.meta.url).resolve("@playwright/test/package.json")), "cli.js");
+  } catch {
+    return "";
+  }
+}
 
 function fail(message: string): never {
   console.error("[e2e] " + message);
@@ -117,7 +127,7 @@ function stopStack(stack: RunningStack | undefined): void {
 }
 
 function runPlaywright(args: string[], env: Record<string, string>): number {
-  if (!existsSync(PLAYWRIGHT_CLI)) fail("Run `npm ci` in tests/e2e first.");
+  if (!PLAYWRIGHT_CLI || !existsSync(PLAYWRIGHT_CLI)) fail("Install dependencies first (npm ci).");
   const result = spawnSync(process.execPath, [PLAYWRIGHT_CLI, "test", ...args], {
     cwd: E2E_DIR, stdio: "inherit", env: { ...process.env, ...env }
   });

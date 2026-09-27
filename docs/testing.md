@@ -26,8 +26,10 @@ npm run routes      # status and Location of all URL shapes vs golden (needs ROU
   deterministic). `run.ts` exports the reference into `tests/e2e/.cache/` and
   starts it the way that commit describes in its own `tests/e2e/stack.json`.
 - **Deterministic data.** Both stacks run the invented fixtures with
-  `MSC_FIXTURE_NOW` pinned; the browser clock is frozen to the same moment and
-  all third-party requests are blocked.
+  `MSC_FIXTURE_NOW` pinned. Pages run on a virtual clock: timers and animation
+  frames fire only when a check advances time in fixed steps, so countdowns and
+  debounced layout code render the same moment every run. Third-party requests
+  are blocked.
 - **Visual.** 42 pages at 320, 390, 768, 1024, 1280 and 1440 px (first screen
   and full length), plus popups, login, error and Gear Builder states. No pixel
   may move; colour deltas up to 2/255 are software raster noise and ignored.

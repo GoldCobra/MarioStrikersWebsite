@@ -1,15 +1,35 @@
 import type { Page } from "@playwright/test";
 import { FIXTURE_NOW } from "./site.ts";
 
+// Pages run on a virtual clock: timers, intervals and animation frames only fire when a check
+// advances time, in fixed steps with network work drained in between. Every run therefore
+// renders the same moment, including second-by-second countdowns.
+
 const BLANK_DOCUMENT = '<!doctype html><title>blocked</title><body style="margin:0;background:#000"></body>';
+const STEP_MS = 250;
+const QUIET_MS = 150;
+const inFlight = new WeakMap<Page, { count: number }>();
 
 function isLocal(url: URL): boolean {
   return url.hostname === "127.0.0.1" || url.hostname === "localhost";
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((done) => setTimeout(done, ms));
+}
+
 // Freezes the clock and keeps every request on the local stack, so both stacks render identically.
 export async function preparePage(page: Page, options: { failApi?: boolean } = {}): Promise<void> {
-  await page.clock.setFixedTime(new Date(FIXTURE_NOW));
+  const tracker = { count: 0 };
+  inFlight.set(page, tracker);
+  page.on("request", () => { tracker.count += 1; });
+  page.on("requestfinished", () => { tracker.count -= 1; });
+  page.on("requestfailed", () => { tracker.count -= 1; });
+
+  const now = Date.parse(FIXTURE_NOW);
+  await page.clock.install({ time: new Date(now - 1000) });
+  await page.clock.pauseAt(new Date(now));
+
   await page.route("**/*", async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -29,14 +49,45 @@ export async function preparePage(page: Page, options: { failApi?: boolean } = {
   });
 }
 
+// Waits (in real time) until no request has been in flight for QUIET_MS.
+async function drainNetwork(page: Page): Promise<void> {
+  const tracker = inFlight.get(page);
+  if (!tracker) throw new Error("preparePage() must run before settle().");
+  const deadline = Date.now() + 30_000;
+  let quietSince = Date.now();
+  while (Date.now() < deadline) {
+    if (tracker.count > 0) quietSince = Date.now();
+    else if (Date.now() - quietSince >= QUIET_MS) return;
+    await sleep(25);
+  }
+  throw new Error("Network did not become idle within 30 s.");
+}
+
+// Moves the page clock forward in fixed steps, letting triggered requests finish between steps.
+export async function advance(page: Page, totalMs: number): Promise<void> {
+  await drainNetwork(page);
+  for (let elapsed = 0; elapsed < totalMs; elapsed += STEP_MS) {
+    await page.clock.runFor(STEP_MS);
+    await drainNetwork(page);
+  }
+}
+
+async function waitInPage(page: Page, predicate: () => boolean, what: string): Promise<void> {
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    if (await page.evaluate(predicate)) return;
+    await advance(page, STEP_MS);
+  }
+  throw new Error("Timed out waiting for " + what + ".");
+}
+
 // Waits until fonts, images, API calls and the account widget are finished.
 export async function settle(page: Page, options: { eagerImages?: boolean } = {}): Promise<void> {
   await page.waitForLoadState("load");
-  await page.waitForFunction(() => {
+  await advance(page, 1000);
+  await waitInPage(page, () => {
     const account = document.querySelector("[data-auth-state]");
     return !account || account.getAttribute("data-auth-state") !== "loading";
-  });
-  await page.waitForLoadState("networkidle");
+  }, "the account widget");
   await page.evaluate(async (eager) => {
     await document.fonts.ready;
     const images = Array.from(document.images);
@@ -53,7 +104,7 @@ export async function settle(page: Page, options: { eagerImages?: boolean } = {}
       })));
   }, Boolean(options.eagerImages));
   // Tab strips measure themselves on resize; their first measurement can run before the web fonts
-  // arrive, so the final scroll position would depend on timing. One resize pass settles them.
+  // arrive. One resize pass after the fonts settles them.
   await page.evaluate(() => window.dispatchEvent(new Event("resize")));
   // The embedded Gear Builder colours its sliders from window.onload, but it is injected after the
   // load event, so whether that runs depends on timing. Run it once so the final state is defined.
@@ -61,9 +112,7 @@ export async function settle(page: Page, options: { eagerImages?: boolean } = {}
     const fillColor = (window as unknown as { fillColor?: () => void }).fillColor;
     if (typeof fillColor === "function") fillColor();
   });
-  await page.waitForTimeout(300);
-  await page.waitForLoadState("networkidle");
-  await page.evaluate(() => new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => done()))));
+  await advance(page, 1000);
 }
 
 // Chromium leaves parts of very tall full-page captures unrastered, so full-length shots grow
