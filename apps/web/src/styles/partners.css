@@ -1,0 +1,178 @@
+.partner-guide-card {
+  --partner-card-media-width: 220px;
+  --partner-card-media-height: calc(var(--partner-card-media-width) * 147 / 262);
+  --partner-card-media-offset-x: 14px;
+  --partner-card-media-offset-y: -6px;
+  --partner-card-title-indent: 300px;
+  --partner-card-title-top: 8px;
+  --partner-card-copy-top: 92px;
+  --partner-card-copy-left: 100px;
+  --partner-card-copy-max-width: 70ch;
+}
+
+.partner-guide-card-flex {
+  display: flex;
+  position: relative;
+  z-index: 1;
+}
+
+.partner-guide-card-media {
+  position: absolute;
+  left: var(--partner-card-media-offset-x);
+  top: var(--partner-card-media-offset-y);
+  z-index: 2;
+  width: var(--partner-card-media-width);
+  height: var(--partner-card-media-height);
+  margin: 0;
+  background-image: url("../assets/text-boxes/ImageBoxBg.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: left top;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.partner-guide-card-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+}
+
+.partner-guide-card-title-wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 0;
+}
+
+.partner-guide-card-title {
+  position: relative;
+  top: 22%;
+  margin: var(--partner-card-title-top) 0 10px;
+  padding-left: var(--partner-card-title-indent);
+  max-width: calc(100% - var(--partner-card-title-indent));
+  color: #ece8d0;
+  font-family: "ITC Grizzly", sans-serif;
+  font-size: calc(clamp(1.12rem, 1.7vw, 1.52rem) + 2px);
+  line-height: 1.02;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  -webkit-text-stroke: 1.6px #000;
+  text-stroke: 1.6px #000;
+  paint-order: stroke fill;
+  text-shadow: none;
+  filter: drop-shadow(-4px 3px 0 #000);
+}
+
+.partner-guide-card-description-wrap {
+  margin-top: var(--partner-card-copy-top);
+  position: relative;
+  z-index: 1;
+}
+
+.partner-guide-card-description {
+  margin: 0 0 0 var(--partner-card-copy-left);
+  max-width: min(var(--partner-card-copy-max-width), calc(100% - var(--partner-card-copy-left)));
+  color: #ffffff;
+}
+
+@media (max-width: 980px) {
+  .partner-guide-card {
+    --partner-card-title-indent: clamp(190px, 24vw, 252px);
+    --partner-card-copy-top: clamp(58px, 7.4vw, 82px);
+    --partner-card-copy-left: clamp(48px, 7vw, 72px);
+  }
+}
+
+@media (max-width: 760px) {
+  .partners-root {
+    width: min(780px, 100%);
+  }
+
+  .content-box {
+    width: 100%;
+    --content-box-top-height: clamp(22px, 5vw, 34px);
+    --content-box-bottom-height: clamp(20px, 4vw, 30px);
+    --content-box-bottom-bg-size: 100% 100%;
+  }
+
+  .content-box-top {
+    display: block;
+    width: 100%;
+  }
+
+  .content-box-top-left {
+    display: none;
+  }
+
+  .content-box-center {
+    width: auto;
+    min-height: 0;
+    margin-left: 0;
+    padding: 0;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
+
+  .content-box-top-main,
+  .content-box-bottom {
+    width: 100%;
+    background-size: 100% 100%;
+  }
+
+  .content-box-texture {
+    left: 0;
+    top: 0;
+    width: min(140px, 44vw);
+    height: auto;
+    aspect-ratio: 308 / 235;
+  }
+
+  .partner-guide-card {
+    --partner-card-media-width: min(262px, 74vw);
+    --partner-card-media-height: calc(var(--partner-card-media-width) * 147 / 262);
+    --partner-card-media-offset-x: 0px;
+    --partner-card-media-offset-y: 0px;
+  }
+
+  .partner-guide-card > .content-box-center {
+    padding: 0.7rem 0.9rem 0.95rem;
+  }
+
+  .partner-guide-card-flex {
+    display: block;
+  }
+
+  .partner-guide-card-media {
+    position: relative;
+    margin: 0 auto 0.7rem;
+  }
+
+  .partner-guide-card-title-wrap {
+    height: auto;
+  }
+
+  .partner-guide-card-title {
+    top: 0;
+    margin: 0;
+    padding-left: 0;
+    max-width: none;
+    font-size: calc(clamp(1rem, 4.8vw, 1.28rem) + 2px);
+    white-space: normal;
+  }
+
+  .partner-guide-card-description-wrap {
+    margin-top: 0.8rem;
+  }
+
+  .partner-guide-card-description {
+    margin: 0;
+    max-width: none;
+  }
+}
+

@@ -1,0 +1,23 @@
+.tier-list-page {
+  padding-bottom: clamp(1.5rem, 4vw, 3rem);
+}
+
+.tier-list-figure {
+  margin: 0 auto;
+  width: 100%;
+}
+
+.tier-list-image {
+  display: block;
+  width: 100%;
+  max-width: min(100%, var(--tier-list-max-width, 784px));
+  height: auto;
+  margin-inline: auto;
+  filter: drop-shadow(-3px 3px 0 rgba(0, 0, 0, 0.7));
+}
+
+.tier-list-figure--scale65 .tier-list-image {
+  width: var(--tier-list-display-width);
+  max-width: 100%;
+}
+

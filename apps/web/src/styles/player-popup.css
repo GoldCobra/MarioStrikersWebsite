@@ -1,0 +1,242 @@
+/* See body.popup-open above - the effective scroll lock lives on .popup-overlay. */
+body.player-popup-open {
+  overflow: hidden;
+}
+
+.player-popup-header-title {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.45rem;
+  max-width: calc(100% - 1.8rem);
+}
+
+/* Username uses the full popup width and only wraps at the right edge.
+   (Removes the compounding max-width reserve inherited from .popup-title.) */
+.player-popup-name.popup-title {
+  max-width: none;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.player-popup-flag {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 19px;
+  object-fit: cover;
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  box-shadow: -1px 1px 0 rgba(0, 0, 0, 0.7);
+  transform: translateY(-3px);
+}
+
+.player-popup-body {
+  min-height: 0;
+  padding: 0 0.9rem 0.95rem;
+}
+
+.player-popup-status {
+  margin: 0.2rem 0 0;
+  color: #fff;
+}
+
+.player-popup-status.is-error {
+  color: #ffb6b6;
+}
+
+.player-popup-content {
+  max-height: min(68vh, 720px);
+  overflow-y: auto;
+  width: calc(100% + var(--profile-rating-reward-glow-gutter));
+  margin-left: calc(-1 * var(--profile-rating-reward-glow-gutter));
+  padding-left: var(--profile-rating-reward-glow-gutter);
+  padding-right: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.player-popup-content::-webkit-scrollbar,
+.player-popup-accolades::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.player-popup-section {
+  margin-top: 0.7rem;
+}
+
+.player-popup-section-title {
+  margin: 0;
+  color: #d7d8de;
+}
+
+.player-popup-code-list {
+  margin-top: 0.42rem;
+  display: grid;
+  gap: 0.26rem;
+}
+
+.player-popup-code-row {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.38rem 0.55rem;
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+}
+
+.player-popup-code-row.is-empty {
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.player-popup-code-prefix {
+  flex: 0 0 auto;
+  color: #f4f4f4;
+}
+
+.player-popup-code-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-popup-results-line {
+  margin: 0.45rem 0 0;
+}
+
+.player-popup-results-link {
+  color: #7ab6ff;
+  text-decoration: none;
+}
+
+.player-popup-results-link:hover,
+.player-popup-results-link:focus-visible {
+  text-decoration: underline;
+}
+
+.player-popup-accolades {
+  /* This list is a scroll container, so it clips on every side - a glowing title scrolled to the
+     top or bottom edge would lose its halo. Pad the box, then take the same amount back off the
+     surrounding margins and add it to max-height: the rows do not move and the popup does not
+     grow, but the clip box has room for the glow. */
+  margin: calc(0.42rem - var(--accolade-glow-room)) 0 calc(-1 * var(--accolade-glow-room));
+  padding: var(--accolade-glow-room) 0;
+  list-style: none;
+  max-height: calc(min(32vh, 300px) + (var(--accolade-glow-room) * 2));
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.player-popup-accolade-item {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 0.3rem;
+  color: #f2f2f2;
+}
+
+.player-popup-accolade-item.is-empty {
+  display: block;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.player-popup-accolade-ball {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.player-popup-accolade-medal {
+  width: 1.25em;
+  text-align: center;
+}
+
+.player-popup-accolade-date {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.92em;
+}
+
+.player-popup-ratings-grid {
+  margin-top: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.player-popup-rating-unit {
+  min-width: 0;
+  display: grid;
+  gap: 0.32rem;
+  overflow: visible;
+}
+
+.player-popup-rating-card {
+  min-height: 108px;
+  padding: 0.38rem 0.34rem;
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.player-popup-rating-title {
+  margin: 0 0 0.24rem;
+  color: #fff;
+}
+
+.player-popup-rating-line {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: #f2f2f2;
+}
+
+#player-profile-popup :is(
+  .player-popup-close,
+  .player-popup-status,
+  .player-popup-section-title,
+  .player-popup-code-row,
+  .player-popup-results-link,
+  .player-popup-accolade-item,
+  .player-popup-season-award-item,
+  .player-popup-rating-title,
+  .player-popup-rating-line,
+  .player-popup-rating-reward-main,
+  .player-popup-season-reward-line
+) {
+  font-size: var(--reporter-font-size-sm);
+}
+
+#player-profile-popup :is(
+  .player-popup-status,
+  .player-popup-section-title,
+  .player-popup-code-row,
+  .player-popup-results-link,
+  .player-popup-accolade-item,
+  .player-popup-season-award-item,
+  .player-popup-rating-title,
+  .player-popup-rating-line,
+  .player-popup-rating-reward-main,
+  .player-popup-season-reward-line
+) {
+  font-size: 15px;
+  line-height: 1.22;
+  text-shadow: none;
+}
+
+.player-popup-rating-label {
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 400;
+}
+
+.player-popup-rating-value {
+  color: #ffffff;
+  font-weight: 700;
+}
+

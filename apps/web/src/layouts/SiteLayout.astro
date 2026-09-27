@@ -7,6 +7,7 @@
 import { escapeHtml } from "@ms/shared/html";
 import { breadcrumbItems, pageLabel, resolvePageState } from "@ms/shared/site/page-state";
 import { canonicalUrl, findPage } from "@ms/shared/site/pages";
+import { GLOBAL_CSS_PATH } from "../styles/global.ts";
 import { SCRIPTS, STYLESHEETS, type ScriptName, type StylesheetName } from "./assets.ts";
 import { renderContentTabs, renderFaviconLinks, renderFooter, renderMainNav, renderSubNav } from "./site-shell.ts";
 
@@ -66,7 +67,7 @@ const bodyEnd =
       set:html={JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: breadcrumbs }, null, 2)}
     />
   )}
-  <link rel="stylesheet" href={STYLESHEETS.global}>
+  <link rel="stylesheet" href={GLOBAL_CSS_PATH}>
   {stylesheets.map((name) => <link rel="stylesheet" href={STYLESHEETS[name]}>)}
 </head>
 <body data-page={slug} data-subnav={subNav ? "on" : "off"}>

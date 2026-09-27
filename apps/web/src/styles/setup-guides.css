@@ -1,0 +1,149 @@
+.cr-subsection {
+  margin-top: 0.1rem;
+}
+
+.cr-link {
+  color: #ffc800;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  text-shadow: none;
+  filter: drop-shadow(-1px 1px 0 #000);
+}
+
+.cr-link:hover,
+.cr-link:focus-visible {
+  color: #ffc800;
+}
+
+.cr-link::after {
+  content: none;
+}
+
+.cr-link-preserve-case {
+  text-transform: none;
+}
+
+.cr-note {
+  margin-top: 0.4rem;
+  color: #ffdca1;
+}
+
+.content-box-list > .cr-note {
+  margin-top: -0.34rem;
+  padding-left: var(--rules-header-offset-left);
+  padding-right: var(--rules-header-offset-right);
+  transform: none;
+}
+
+.setup-guide-page #msc-setup-guide-root,
+.setup-guide-page #sms-setup-guide-root {
+  display: block;
+  padding-top: 0;
+}
+
+body[data-subnav="off"] .setup-guide-page #msc-setup-guide-root,
+body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
+  padding-top: 0;
+}
+
+@supports (content-visibility: auto) {
+  .setup-guide-page .setup-guide-section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 1080px;
+  }
+
+  .partners-page .partner-guide-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 420px;
+  }
+}
+
+.setup-guide-media {
+  margin: clamp(0.55rem, 1.25vw, 0.9rem) 0;
+}
+
+.setup-guide-media img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.setup-guide-media .setup-guide-image-half {
+  width: 50%;
+  max-width: 50%;
+}
+
+.setup-guide-video-frame {
+  width: min(100%, 960px);
+  margin: 0 auto;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.setup-guide-video-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+body[data-page="sms-setup-guide"] .setup-guide-video-frame {
+  width: min(100%, 640px);
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.setup-guide-code {
+  margin: 0.45rem 0 0.75rem;
+  padding: 0.58rem 0.72rem;
+  border-left: 3px solid #c77603;
+  background: rgba(0, 0, 0, 0.34);
+  color: #f4f4f4;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: clamp(0.7rem, 0.88vw, 0.85rem);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.setup-guide-warning {
+  color: #ffdca1;
+}
+
+.setup-guide-warning-icon {
+  width: 0.50em;
+  height: auto;
+  margin-right: 0.38em;
+  vertical-align: -0.28em;
+}
+
+.setup-guide-note {
+  font-size: calc(1em - 4px);
+  font-style: normal;
+}
+
+.setup-guide-meta-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-top: -0.34rem;
+  padding-left: var(--rules-header-offset-left);
+  padding-right: var(--rules-header-offset-right);
+}
+
+.setup-guide-meta-line .cr-note {
+  margin: 0;
+  transform: none;
+}
+
+.setup-guide-meta-line .setup-guide-credits {
+  margin: 0 0 0 auto;
+  text-align: right;
+  color: #ffffff;
+  transform: translateX(12px);
+}
+

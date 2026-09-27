@@ -1,0 +1,151 @@
+@media (min-width: 601px) and (max-width: 1024px) {
+  :root {
+    --nav-shell-height: 92px;
+  }
+
+  .main-nav-text {
+    max-width: min(980px, calc(100vw - 24px));
+  }
+
+  .nav-top-link {
+    padding: 0;
+  }
+
+  .nav-top-icon {
+    width: clamp(100px, 12.8vw, 172px);
+  }
+
+  .global-tabs-shell {
+    --tabs-tab-height: 40px;
+    --tabs-tab-width: 142px;
+    --tabs-panel-height: 50px;
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --nav-shell-height: 92px;
+    --nav-main-offset-y: clamp(-0.4rem, -0.4vw, -0.24rem);
+    --subnav-reserve-height: 42px;
+  }
+
+  #\32 {
+    padding-inline: 0.32rem;
+  }
+
+  .nav-brand {
+    top: 0.16rem;
+    left: 0.28rem;
+    width: clamp(50px, 13vw, 68px);
+  }
+
+  .main-nav-text {
+    max-width: min(840px, calc(100vw - 36px));
+    gap: 0.01rem;
+  }
+
+  .nav-top-link {
+    padding: 0;
+  }
+
+  .nav-top-icon {
+    width: clamp(82px, 21vw, 142px);
+  }
+
+  .sub-nav {
+    --sub-skew-deg: 11deg;
+    margin-top: 0.2rem;
+    gap: 0.26rem;
+    padding-inline: 0.15rem;
+  }
+
+  .sub-link-text {
+    min-height: 27px;
+    padding: 0.14rem 0.46rem;
+    font-size: clamp(0.5rem, 2vw, 0.66rem);
+  }
+
+  .global-tabs-list {
+    gap: 0.3rem;
+    padding: 0 0.2rem;
+  }
+
+  .global-tabs-shell {
+    --tabs-panel-height: 44px;
+  }
+
+  .global-tabs-shell {
+    --tabs-tab-height: 38px;
+    --tabs-tab-width: 136px;
+    --tabs-tab-font-size: calc(0.76rem - 2px);
+  }
+
+  .clubs-page .global-tabs-shell {
+    --tabs-suppress-panel: 1;
+  }
+
+  .landing-club {
+    width: min(780px, 92vw);
+  }
+
+  .landing-club-label {
+    top: 27.5%;
+  }
+
+  .landing-club-text-block {
+    margin-top: clamp(0.45rem, 4vw, 1.2rem);
+    padding-left: clamp(3.9rem, 10.5vw, 6.2rem);
+    transform: translate(clamp(-78px, -12.5vw, -50px), clamp(-5px, -0.8vw, -3px));
+  }
+
+  .landing-club-countdown.landing-season-countdown {
+    margin: clamp(0.62rem, 2.6vw, 1rem) 0 0 clamp(1.1rem, 3.9vw, 2.2rem);
+  }
+
+  .competitive-rules-page {
+    padding: 0 var(--content-inline-pad) 1.65rem;
+  }
+
+  .competitive-rules-page #competitive-rules-root {
+    padding-top: 0;
+  }
+
+  .competitive-rules-header {
+    margin-bottom: -0.14rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.2rem;
+    padding-top: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .cr-page-revised {
+    text-align: right;
+    align-self: flex-end;
+  }
+
+  .competitive-rules {
+    padding: 0;
+  }
+
+  .content-box-content {
+    padding-left: 1.45rem;
+    padding-right: 1.45rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  :root {
+    --nav-shell-height: 100px;
+  }
+
+  .players-list .players-name-text {
+    transform: translateY(1px);
+  }
+
+  .players-list .players-flag-slot {
+    transform: translateX(clamp(8px, 0.95vw, 13px)) translateY(-2px);
+  }
+}
+

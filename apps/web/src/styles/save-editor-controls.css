@@ -1,0 +1,74 @@
+.save-editor-description {
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  line-height: 0.92;
+  letter-spacing: var(--reporter-letter-spacing);
+  text-shadow: none;
+  font-size: 14px;
+  color: #111111;
+}
+
+.save-editor-mode-btn,
+.save-editor-mode-separator,
+.online-editor-field > span,
+.online-editor-profile-trigger,
+.online-editor-profile-option,
+.msbl-save-editor-field > input,
+.online-editor-popup-close,
+.online-editor-popup-field > input,
+.online-editor-popup-field > textarea,
+.online-editor-popup-error,
+.online-editor-delete-list,
+.online-editor-table,
+.online-editor-empty {
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  letter-spacing: var(--reporter-letter-spacing);
+}
+
+.save-editor-mode-btn,
+.save-editor-mode-separator {
+  line-height: 1;
+  text-shadow: none;
+  font-size: 16px;
+}
+
+.online-editor-field > span,
+.online-editor-profile-trigger,
+.online-editor-profile-option,
+.msbl-save-editor-field > input,
+.online-editor-popup-close,
+.online-editor-popup-field > input,
+.online-editor-popup-field > textarea,
+.online-editor-popup-error,
+.online-editor-delete-list,
+.online-editor-table,
+.online-editor-empty {
+  line-height: var(--reporter-line-height);
+  text-shadow: none;
+  filter: var(--reporter-text-drop-shadow);
+  font-size: var(--reporter-font-size-xs);
+}
+
+.msbl-save-editor-field > #msbl-save-editor-coins {
+  font-family: "ITC Grizzly", sans-serif !important;
+  font-weight: 400 !important;
+}
+
+.save-editor-btn {
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  line-height: var(--reporter-line-height);
+  letter-spacing: var(--reporter-letter-spacing);
+  text-shadow: none;
+  filter: var(--reporter-text-drop-shadow);
+  font-size: var(--reporter-font-size-xs);
+  color: #fac402;
+}
+
+.save-editor-btn:hover,
+.save-editor-btn:focus-visible {
+  color: #fac402;
+  filter: var(--reporter-text-drop-shadow) brightness(1.05);
+}
+

@@ -1,0 +1,310 @@
+/* Navigation */
+
+#\31 {
+  display: block;
+  padding: 0;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  overflow-x: hidden;
+}
+
+#\32 {
+  position: relative;
+  width: var(--full-bleed-width);
+  margin-left: calc(50% - (var(--full-bleed-width) / 2));
+  height: var(--nav-shell-height);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-inline: var(--shell-inline-pad);
+  background-image: var(--global-nav-bar-bg-image);
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: 100% 100%;
+}
+
+/* Reserve the nav shell height on the always-present wrapper so the slot keeps its
+   height from the very first paint, before global-nav.js injects <header id="2">.
+   Prevents the content below (e.g. leaderboards) from shifting down on cached
+   reloads where an early paint can occur before the deferred scripts run. */
+#global-nav {
+  display: block;
+  min-height: var(--nav-shell-height);
+}
+
+.main-nav {
+  position: relative;
+  z-index: 3;
+  width: auto;
+  margin: 0 auto;
+  transform: translateY(var(--nav-main-offset-y));
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.01rem;
+  padding-inline: 0;
+  overflow: visible;
+}
+
+.nav-brand {
+  position: absolute;
+  top: 0.18rem;
+  left: clamp(0.42rem, 1.2vw, 0.85rem);
+  z-index: 6;
+  width: clamp(62px, 6vw, 98px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.nav-brand-logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(-2px 2px 0 #000);
+}
+
+.nav-brand-est {
+  margin-top: -0.08rem;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.sub-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.main-nav-text {
+  max-width: min(1240px, calc(100vw - 24px));
+  width: 100%;
+  justify-content: center;
+}
+
+.nav-top-link {
+  display: inline-block;
+  width: max-content;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  border-radius: 0;
+  background: transparent;
+  line-height: 0;
+  text-decoration: none;
+}
+
+.nav-top-icon {
+  display: block;
+  width: clamp(112px, 12vw, 198px);
+  height: auto;
+}
+
+.nav-top-link.is-active {
+  filter: none;
+}
+
+.global-account {
+  position: absolute;
+  top: clamp(0.45rem, 1vw, 0.75rem);
+  right: clamp(0.42rem, 1.2vw, 0.85rem);
+  z-index: 8;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  min-width: 44px;
+}
+
+.global-account-button {
+  min-width: 42px;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.38rem;
+  padding: 0.2rem 0.55rem;
+  border: 2px solid #c77603;
+  border-radius: 0;
+  background: #280101;
+  color: #f5c300;
+  font: inherit;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.global-account-button:hover,
+.global-account-button:focus-visible {
+  background: #c77603;
+  color: #280101;
+}
+
+.global-account-button:focus-visible,
+.global-account-menu-item:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.global-account-icon,
+.global-account-avatar {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.global-account-icon {
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 16px;
+}
+
+.global-account-avatar {
+  object-fit: cover;
+  border: 1px solid rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+}
+
+.global-account-label,
+.global-account-name {
+  display: inline-block;
+  max-width: 116px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.84rem;
+  letter-spacing: 0.02em;
+}
+
+.global-account[data-auth-state="loading"] .global-account-label {
+  display: none;
+}
+
+.global-account-menu {
+  position: absolute;
+  top: calc(100% + 0.36rem);
+  right: 0;
+  width: 168px;
+  padding: 0.28rem;
+  border: 2px solid #c77603;
+  background: rgba(10, 4, 4, 0.96);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.45);
+}
+
+.global-account-menu[hidden] {
+  display: none;
+}
+
+.global-account-menu-item {
+  width: 100%;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  padding: 0.28rem 0.45rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 0.82rem;
+  line-height: 1;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.global-account-menu-item:hover,
+.global-account-menu-item:focus-visible {
+  color: #f5c300;
+  background: rgba(199, 118, 3, 0.18);
+}
+
+.global-account-menu-item:disabled {
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+}
+
+.sub-nav {
+  position: relative;
+  z-index: 2;
+  --sub-skew-deg: 14deg;
+  margin-top: 0.26rem;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.38rem;
+  padding-inline: 0.25rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.sub-nav.is-overflowing {
+  justify-content: flex-start;
+}
+
+#global-subnav {
+  min-height: var(--subnav-reserve-height);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+body[data-subnav="off"] #global-subnav,
+#global-subnav:empty {
+  min-height: 0;
+}
+
+/* When a page statically declares it has a subnav (data-subnav="on" in the HTML),
+   keep the reserved height even while #global-subnav is still empty (before
+   global-nav.js fills it). Specificity (0,2,1) beats #global-subnav:empty (0,1,1),
+   so the subnav slot does not collapse-then-expand on cached reloads — the content
+   below stays put. */
+body[data-subnav="on"] #global-subnav {
+  min-height: var(--subnav-reserve-height);
+}
+
+.sub-link-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 31px;
+  padding: 0.22rem 0.86rem;
+  border: 2px solid #c77603;
+  background: #280101;
+  color: #f5c300;
+  font-family: "ITC Grizzly", sans-serif;
+  font-size: clamp(0.6rem, 0.96vw, 0.88rem);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transform: skewX(calc(var(--sub-skew-deg) * -1));
+  border-radius: 0;
+}
+
+.sub-link-label {
+  display: inline-block;
+  transform: skewX(var(--sub-skew-deg));
+  position: relative;
+  top: 0;
+  font-size: calc(1em + 1px);
+  text-shadow: none;
+}
+
+.sub-link-text.is-active {
+  border-color: #c77603;
+  background: #c77603;
+  color: #280101;
+}
+

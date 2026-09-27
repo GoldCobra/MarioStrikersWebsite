@@ -1,0 +1,144 @@
+/* Base */
+
+@font-face {
+  font-family: "ITC Grizzly";
+  src: url("../assets/fonts/itc-grizzly.woff") format("woff");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Reporter";
+  src: url("../assets/fonts/MLSBY.woff") format("woff");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  overflow-x: hidden;
+  font-family: "ITC Grizzly";
+  background-color: #000;
+}
+
+:root {
+  --global-landing-bg-image: image-set(
+    url("../assets/backgrounds/landing/landing-page-bg-hq.webp") type("image/webp"),
+    url("../assets/backgrounds/landing/landing-page-bg.png") type("image/png")
+  );
+  --global-nav-bar-bg-image: url("../assets/backgrounds/navigation/nav-bar-bg.png");
+  --global-nav-footer-image: url("../assets/backgrounds/footer/navFooter.png");
+  --global-tabs-bg-image: url("../assets/nav-buttons/sub/tabs.png");
+  --global-tabs-bg-image: image-set(
+    url("../assets/nav-buttons/sub/tabs.webp") type("image/webp"),
+    url("../assets/nav-buttons/sub/tabs.png") type("image/png")
+  );
+  --global-tabs-bg-height: 92px;
+  --full-bleed-width: 100vw;
+  --shell-inline-pad: clamp(0.35rem, 1.3vw, 0.8rem);
+  --content-inline-pad: clamp(0.55rem, 1.8vw, 1.1rem);
+  --space-1: clamp(0.2rem, 0.45vw, 0.38rem);
+  --space-2: clamp(0.36rem, 0.72vw, 0.62rem);
+  --space-3: clamp(0.55rem, 1vw, 0.9rem);
+  --space-4: clamp(0.8rem, 1.5vw, 1.25rem);
+  --space-5: clamp(1.1rem, 2.2vw, 1.8rem);
+  --nav-shell-height: clamp(84px, 7.3vw, 100px);
+  --nav-main-offset-y: clamp(-0.48rem, -0.7vw, -0.32rem);
+  --tabs-head-height-fluid: clamp(38px, 3.2vw, 42px);
+  --tabs-panel-height-fluid: clamp(44px, 4.2vw, 54px);
+  --tabs-tab-width-fluid: clamp(136px, 11.4vw, 152px);
+  --tabs-tab-font-size-fluid: clamp(0.84rem, 0.95vw, 1rem);
+  --profile-rank-icon-height: 21px;
+  --profile-rating-reward-icon-height: 23px;
+  --profile-rating-reward-glow-gutter: 0.46rem;
+  /* Each game's colour, used by the rating cards and the tourney winner names. */
+  --game-color-msbl: #ffb5b5;
+  --game-color-msc: #ffd8b8;
+  --game-color-sms: #b4e9ff;
+  /* One definition of the world champion glow, shared by the title (text-shadow) and its medal
+     (drop-shadow), so the two can never drift apart. The far radius doubles as the breathing
+     room the surrounding boxes have to reserve, which is why --accolade-glow-room derives
+     from it instead of repeating the number. */
+  --accolade-champion-glow-near: 2px;
+  --accolade-champion-glow-mid: 5px;
+  --accolade-champion-glow-far: 10px;
+  --accolade-champion-tint-near: rgba(255, 224, 70, 0.98);
+  --accolade-champion-tint-mid: rgba(255, 205, 40, 0.85);
+  --accolade-champion-tint-far: rgba(255, 170, 20, 0.62);
+  --accolade-glow-room: var(--accolade-champion-glow-far);
+  --tab-content-start-gap: 0.56rem;
+  --subnav-reserve-height: 48px;
+  --content-box-shell-max-width: 1154px;
+  --rules-header-offset-top: 0px;
+  --rules-header-offset-left: 53px;
+  --rules-header-offset-right: 18px;
+  --rules-header-bottom-gap: -0.18rem;
+  --reporter-font-stack: "Reporter", "ITC Grizzly", sans-serif;
+  --reporter-font-weight: 700;
+  --reporter-font-size: 19px;
+  --reporter-font-size-sm: 17px;
+  --reporter-font-size-xs: 15px;
+  --reporter-line-height: 1.5;
+  --reporter-letter-spacing: 1pt;
+  --reporter-text-drop-shadow: drop-shadow(-2px 2px 0 #000);
+}
+
+html {
+  height: 100%;
+  background-color: #000;
+  overflow-y: auto;
+  scrollbar-width: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: "ITC Grizzly";
+}
+
+body {
+  min-height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: auto;
+  -ms-overflow-style: auto;
+  background: transparent;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: #000;
+  background-image: var(--global-landing-bg-image);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  pointer-events: none;
+}
+
