@@ -142,7 +142,7 @@
   #text "\n  "
   #text "\n  "
   #text "\n  "
-  #text "\n  \n\n\n"
+  #text "\n\n\n"
   <footer id="global-footer">
     <p class="global-footer-disclaimer">
       #text "This website is not affiliated with Nintendo. All product names, logos, and brands are property of their respective owners."

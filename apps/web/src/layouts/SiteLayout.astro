@@ -1,0 +1,80 @@
+---
+// The document around every page: head metadata from the page registry, the navigation, the content
+// tabs, the page's scripts and the footer. The page supplies the rest of <main> as its slot.
+//
+// Whitespace in <body> is part of the rendered layout (text nodes between inline elements take space)
+// and must stay as the hand-written pages had it; the parts Astro would reflow are inserted as strings.
+import { escapeHtml } from "@ms/shared/html";
+import { breadcrumbItems, pageLabel, resolvePageState } from "@ms/shared/site/page-state";
+import { canonicalUrl, findPage } from "@ms/shared/site/pages";
+import { SCRIPTS, STYLESHEETS, type ScriptName, type StylesheetName } from "./assets.ts";
+import { renderContentTabs, renderFaviconLinks, renderFooter, renderMainNav, renderSubNav } from "./site-shell.ts";
+
+interface Props {
+  slug: string;
+  /** Classes on <main> after "page-content". */
+  mainClass?: string;
+  mainLabel?: string;
+  /** In load order; all are deferred. */
+  scripts: readonly ScriptName[];
+  /** Loaded after the global stylesheet. */
+  stylesheets?: readonly StylesheetName[];
+}
+
+const { slug, mainClass, mainLabel, scripts, stylesheets = [] } = Astro.props;
+const page = findPage(slug);
+if (!page) throw new Error(`Page "${slug}" is not in the page registry.`);
+
+const state = resolvePageState(slug);
+const subNav = renderSubNav(state);
+const breadcrumbs = breadcrumbItems(state, pageLabel(page.title));
+const canonical = canonicalUrl(slug);
+
+// The content tabs follow the hidden page heading, or open <main> when the page has none.
+const heading = page.hiddenHeading ? `\n    <h1 class="visually-hidden">${escapeHtml(page.hiddenHeading)}</h1>` : "";
+const mainStart = `${heading}<div id="global-content-tabs">${renderContentTabs(state)}</div>`;
+// The footer follows the scripts, after the line breaks that close the hand-written documents.
+const bodyEnd =
+  scripts.map((name) => `<script src="${SCRIPTS[name]}" defer></script>`).join("\n  ") + "\n\n\n" + renderFooter();
+---
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preload" href="/assets/fonts/itc-grizzly.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="/assets/fonts/MLSBY.woff" as="font" type="font/woff" crossorigin>
+  <title>{page.title}</title>
+  <meta name="description" content={page.description}>
+  {page.robots && <meta name="robots" content={page.robots}>}
+  <link rel="canonical" href={canonical}>
+  <meta property="og:title" content={page.title}>
+  <meta property="og:description" content={page.description}>
+  <meta property="og:url" content={canonical}>
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@MarioStrikersGG">
+  <meta name="twitter:title" content={page.title}>
+  <meta name="twitter:description" content={page.description}>
+  {(page.jsonLd ?? []).map((data) => <script is:inline type="application/ld+json" set:html={JSON.stringify(data, null, 2)} />)}
+  <Fragment set:html={renderFaviconLinks().join("\n  ")} />
+  {breadcrumbs && (
+    <script
+      is:inline
+      id="global-breadcrumb-jsonld"
+      type="application/ld+json"
+      set:html={JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: breadcrumbs }, null, 2)}
+    />
+  )}
+  <link rel="stylesheet" href={STYLESHEETS.global}>
+  {stylesheets.map((name) => <link rel="stylesheet" href={STYLESHEETS[name]}>)}
+</head>
+<body data-page={slug} data-subnav={subNav ? "on" : "off"}>
+  <div id="1">
+    <div id="global-nav"><Fragment set:html={renderMainNav(state)} /></div>
+    <div id="global-subnav"><Fragment set:html={subNav} /></div>
+  </div>
+
+  <main class={mainClass ? `page-content ${mainClass}` : "page-content"} aria-label={mainLabel}><Fragment set:html={mainStart} /><slot /></main>
+
+  <Fragment set:html={bodyEnd} /></body></html>

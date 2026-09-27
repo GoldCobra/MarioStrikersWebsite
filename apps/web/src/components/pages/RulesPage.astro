@@ -1,0 +1,18 @@
+---
+// Competitive rules pages; competitive-rules-config.js holds the rules of each game.
+import SiteLayout from "../../layouts/SiteLayout.astro";
+
+interface Props {
+  slug: string;
+  game: "MSBL" | "MSC" | "SMS";
+}
+
+const { slug, game } = Astro.props;
+---
+<SiteLayout
+  slug={slug}
+  mainClass="competitive-rules-page"
+  scripts={["competitiveRulesConfig", "competitiveRulesEngine", "globalTabsEngine", "globalNav"]}
+>
+    <section id="competitive-rules-root" aria-label={`${game} competitive rules`}></section>
+  </SiteLayout>

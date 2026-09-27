@@ -1,0 +1,11 @@
+---
+// Section overview pages: navigation and tabs only.
+import SiteLayout from "../../layouts/SiteLayout.astro";
+
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+---
+<SiteLayout slug={slug} scripts={["globalTabsEngine", "globalNav"]}><Fragment set:html={"\n  "} /></SiteLayout>

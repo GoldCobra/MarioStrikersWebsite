@@ -15,8 +15,6 @@ export interface PageDefinition {
   readonly hiddenHeading?: string;
   /** Omitted for indexable pages. */
   readonly robots?: Robots;
-  /** Static data-subnav attribute that reserves the sub-navigation height before scripts run. */
-  readonly subnav?: "on" | "off";
   readonly jsonLd?: readonly JsonLd[];
 }
 
@@ -63,7 +61,6 @@ export const PAGES: readonly PageDefinition[] = [
     title: "About Us | Mario Strikers Community",
     description:
       "Learn about the fan-run Mario Strikers Community, regular matches, events, tournaments, and the Mario Strikers League.",
-    subnav: "off",
     jsonLd: [
       {
         "@context": "https://schema.org",
@@ -102,7 +99,6 @@ export const PAGES: readonly PageDefinition[] = [
     description: "Choose a Mario Strikers leaderboard by tab.",
     hiddenHeading: "Competitive Leaderboards",
     robots: "noindex, follow",
-    subnav: "on",
   },
   {
     slug: "competitive-rules",
@@ -301,7 +297,6 @@ export const PAGES: readonly PageDefinition[] = [
     description: "View Mario Strikers League leaderboards and competitive standings.",
     hiddenHeading: "MSL Leaderboards",
     robots: "noindex, follow",
-    subnav: "on",
   },
   {
     slug: "msl-league-rules",
@@ -341,7 +336,6 @@ export const PAGES: readonly PageDefinition[] = [
     description:
       "Read the Mario Strikers Community privacy policy for website data, analytics, and contact information.",
     hiddenHeading: "Privacy Policy",
-    subnav: "off",
   },
   {
     slug: "profile",

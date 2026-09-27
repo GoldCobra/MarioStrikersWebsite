@@ -2,15 +2,33 @@
 
 ## Pages and browser code
 
-The site uses static HTML, shared CSS and browser JavaScript in
-`apps/web/public/`, the web root; paths in this section are relative to it. Page
-shells live in `index.html` and `pages/`; fetched fragments live in `pages/templates/`.
-Use a configured local server because templates and API calls use `fetch()`.
+Astro renders every page at build time into static HTML; live data is still
+loaded in the browser. In `apps/web/`:
 
-Each page sets `body data-page="..."`. `js/global-nav.js` uses it to build
-navigation and the footer; `js/global-tabs-engine.js` manages page tabs.
-Shared popup classes in `css/global.css` are `popup-overlay`, `popup-card`,
-`popup-header`, `popup-title` and `popup-close`.
+| Location | Purpose |
+| --- | --- |
+| `src/layouts/SiteLayout.astro` | The document around every page: head metadata from the page registry, navigation, content tabs, footer, scripts |
+| `src/layouts/site-shell.ts` | Markup of the navigation, tabs and footer, rendered from the navigation model |
+| `src/layouts/assets.ts` | Every browser script and stylesheet with its cache tag, in one place |
+| `src/pages/index.astro`, `src/pages/pages/<slug>.astro` | One file per page; built to `/index.html` and `/pages/<slug>.html`, served at `/` and `/<slug>` |
+| `src/components/pages/` | Page families: section overviews, leaderboards, rules and tier lists |
+| `public/` | Web root: `css/`, browser `js/`, `assets/`, fetched fragments in `pages/templates/` |
+
+Navigation, tabs, breadcrumbs (JSON-LD) and favicons are static markup, so
+search engines see every internal link. The layout keeps the whitespace of the
+former hand-written pages exactly, because text between inline elements takes
+space; the DOM goldens check it. `js/global-nav.js` adds the behaviour: the
+account widget, the tab strip (`js/global-tabs-engine.js`), centring of
+overflowing navigation, link prefetching and redirects of old `?tabs=` and
+`?submenu=` links. Shared popup classes in `css/global.css` are
+`popup-overlay`, `popup-card`, `popup-header`, `popup-title` and `popup-close`.
+
+**Adding a page:** add it to `packages/shared/src/site/pages.ts` (title,
+description, hidden heading, robots), place it in the navigation model
+(`navigation.ts`) if it needs a menu entry or tab, create
+`src/pages/pages/<slug>.astro` with `SiteLayout` (or a family component), and
+list its scripts by name from `assets.ts`. A unit test fails when the registry
+and the page files disagree.
 
 Leaderboard and competitive-rules modules pair a `*-config.js` with a shared
 `*-engine.js`. Players, clubs and account profiles have their own engines.
@@ -35,8 +53,9 @@ test replays every URL shape recorded against production through
 with public URLs.
 The private `/profile` page is excluded from indexing.
 
-Browser-loaded script and style URLs use `?v=...` cache tags. Update every
-applicable reference when changing an asset, including scripts loaded by JS.
+Browser-loaded script and style URLs use `?v=...` cache tags. Pages take them
+from `apps/web/src/layouts/assets.ts`; scripts that load other files by URL
+keep their own tags until they move to bundled modules.
 PNG/WebP pairs in the Gear Builder include intentional fallback behavior.
 
 ## Backend and data

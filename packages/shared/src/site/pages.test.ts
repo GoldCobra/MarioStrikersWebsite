@@ -1,21 +1,11 @@
 import assert from "node:assert/strict";
-import { existsSync, readdirSync } from "node:fs";
-import { join } from "node:path";
 import { test } from "node:test";
 import { PAGE_CONTEXT_MAP, SECTION_MODELS, TOP_NAV_ITEMS } from "./navigation.ts";
 import { PAGES, canonicalUrl, findPage, isIndexable, pagePath } from "./pages.ts";
-import { pageFile } from "./routes.ts";
 
-const publicRoot = join(import.meta.dirname, "../../../../apps/web/public");
-
-test("the registry lists every page file exactly once", () => {
+test("slugs are unique", () => {
   const slugs = PAGES.map((page) => page.slug);
   assert.equal(new Set(slugs).size, slugs.length, "duplicate slug");
-  const files = readdirSync(join(publicRoot, "pages"))
-    .filter((file) => file.endsWith(".html"))
-    .map((file) => file.slice(0, -".html".length));
-  assert.deepEqual([...slugs].filter((slug) => slug !== "index").sort(), files.sort());
-  for (const slug of slugs) assert.ok(existsSync(join(publicRoot, pageFile(slug))), slug);
 });
 
 test("every page has a title and a description, and no two pages share them", () => {

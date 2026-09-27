@@ -64,7 +64,7 @@
   </div>
   #text "\n\n  "
   <main class="page-content">
-    #text "\n  "
+    #text "\n    "
     <h1 class="visually-hidden">
       #text "Events"
     </h1>

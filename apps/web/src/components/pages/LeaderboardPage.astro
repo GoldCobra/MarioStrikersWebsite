@@ -1,0 +1,26 @@
+---
+// Leaderboard pages; leaderboards-config.js picks the game and mode from the page slug.
+import SiteLayout from "../../layouts/SiteLayout.astro";
+
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+---
+<SiteLayout
+  slug={slug}
+  scripts={[
+    "runtimeConfig",
+    "publicDataPreload",
+    "leaderboardsConfig",
+    "globalTabsEngine",
+    "globalNav",
+    "leaderboardsEngine",
+    "flagUtils",
+    "ratingCards",
+    "playersEngine",
+  ]}
+>
+    <section id="leaderboards-root" aria-label="Leaderboards"></section>
+  </SiteLayout>

@@ -1,15 +1,29 @@
 import assert from "node:assert/strict";
 import { once } from "node:events";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, test } from "node:test";
-import { REPO_ROOT } from "./processes.ts";
 import { createSiteServer } from "./site-server.ts";
 
 let api: Server;
 let site: Server;
 let base = "";
+let root = "";
+
+/** A minimal built site: the files a build writes for two pages, a stylesheet and an asset folder. */
+function writeSite(): string {
+  const dir = mkdtempSync(join(tmpdir(), "strikers-site-"));
+  for (const folder of ["pages", "css", "assets"]) mkdirSync(join(dir, folder));
+  writeFileSync(join(dir, "index.html"), '<!doctype html><body data-page="index"></body>');
+  for (const slug of ["msc-tierlist", "players"]) {
+    writeFileSync(join(dir, "pages", `${slug}.html`), `<!doctype html><body data-page="${slug}"></body>`);
+  }
+  writeFileSync(join(dir, "css", "global.css"), "body{}");
+  return dir;
+}
 
 async function listen(server: Server): Promise<string> {
   server.listen(0, "127.0.0.1");
@@ -28,13 +42,15 @@ before(async () => {
     });
   });
   const apiOrigin = await listen(api);
-  site = createSiteServer({ root: join(REPO_ROOT, "apps", "web", "public"), apiOrigin });
+  root = writeSite();
+  site = createSiteServer({ root, apiOrigin });
   base = await listen(site);
 });
 
 after(() => {
   site.close();
   api.close();
+  rmSync(root, { recursive: true, force: true });
 });
 
 test("pages, assets and redirects follow the production routes", async () => {
