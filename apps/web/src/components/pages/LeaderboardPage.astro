@@ -10,15 +10,7 @@ const { slug } = Astro.props;
 ---
 <SiteLayout
   slug={slug}
-  scripts={[
-    "runtimeConfig",
-    "publicDataPreload",
-    "leaderboardsConfig",
-    "leaderboardsEngine",
-    "flagUtils",
-    "ratingCards",
-    "playersEngine",
-  ]}
+  scripts={["leaderboardsConfig", "leaderboardsEngine"]}
 >
     <section id="leaderboards-root" aria-label="Leaderboards"></section>
-  </SiteLayout>
+  <Fragment slot="scripts"><script src="../../entries/leaderboard-page.ts"></script></Fragment></SiteLayout>

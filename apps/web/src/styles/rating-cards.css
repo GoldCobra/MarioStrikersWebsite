@@ -48,7 +48,7 @@
   margin-right: 0.1rem;
 }
 
-/* Compact rating card layout (js/rating-cards.js switches between it and the classic list).
+/* Compact rating card layout (src/features/rating-cards switches between it and the classic list).
    The rank icon sits alone top right. Bottom left, rows of fixed height stack the game code, the
    rank name and the ELO rating, so the game code sits at the same height in every card of a row
    even when a rank name or rating is missing; WHR/TST shares the rating's baseline bottom right.

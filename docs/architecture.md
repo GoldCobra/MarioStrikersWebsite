@@ -37,15 +37,17 @@ list its scripts by name from `assets.ts`. A unit test fails when the registry
 and the page files disagree. Page modules go into the layout's `scripts` slot
 (`<Fragment slot="scripts"><script src="…"></script></Fragment>`).
 
-Leaderboard and competitive-rules modules pair a `*-config.js` with a shared
-`*-engine.js`. Players, clubs and account profiles have their own engines.
-The player popup is loaded from `/pages/templates/player-profile-popup.html`.
+The players list, the player popup (`src/features/players/`), the profile page
+(`src/features/profile/`) and the rating cards (`src/features/rating-cards/`)
+are modules; `src/lib/` holds the shared API fetch and country helpers. The
+leaderboards and clubs are still legacy engines in `public/js/`: the
+leaderboards pair `leaderboards-config.js` with `leaderboards-engine.js`, as the
+competitive rules do. The player popup is loaded from
+`/pages/templates/player-profile-popup.html`.
 The Gear Builder loads `/pages/templates/msbl-gear-builder.html` and its assets
 under `assets/gear-builder/`.
 
-`js/runtime-config.js` sets `window.APP_RUNTIME_CONFIG.leaderboardsApiBase`.
-Its empty default means same-origin `/api/...` requests. A separate API host
-requires an explicit base URL and matching server configuration.
+Browser code calls the API on the same origin (`/api/...`).
 
 ## Routing and caching
 

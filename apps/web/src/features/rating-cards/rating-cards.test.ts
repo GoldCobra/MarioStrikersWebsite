@@ -4,16 +4,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import vm from "node:vm";
-
-type Layout = "classic" | "compact";
-type Ratings = Readonly<Record<string, unknown>>;
-
-interface RatingCards {
-  readonly layout: Layout;
-  buildSingles(ratings: Ratings, prefix: string, layout?: Layout): string;
-  buildDoubles(ratings: Ratings, prefix: string, layout?: Layout): string;
-}
+import * as ratingCardsModule from "./rating-cards.ts";
+import type { Ratings } from "./rating-cards.ts";
 
 interface Golden {
   readonly ratings: Ratings;
@@ -25,16 +17,7 @@ const golden = JSON.parse(
   fs.readFileSync(path.join(import.meta.dirname, "rating-cards-classic.golden.json"), "utf8"),
 ) as Golden;
 
-// public/js/rating-cards.js is a browser script that registers window.MSCRatingCards.
-function loadRatingCards(): RatingCards {
-  const source = fs.readFileSync(path.join(import.meta.dirname, "../../../public/js/rating-cards.js"), "utf8");
-  const context = vm.createContext({ window: {} }) as { window: { MSCRatingCards?: RatingCards } };
-  vm.runInContext(source, context);
-  assert.ok(context.window.MSCRatingCards);
-  return context.window.MSCRatingCards;
-}
-
-const ratingCards = loadRatingCards();
+const ratingCards = { ...ratingCardsModule, layout: ratingCardsModule.RATING_CARD_LAYOUT };
 
 // The <article> of the compact card with the given title.
 function compactCard(markup: string, title: string): string {

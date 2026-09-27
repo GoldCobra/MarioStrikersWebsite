@@ -1,6 +1,6 @@
 ---
 import SiteLayout from "../../layouts/SiteLayout.astro";
 ---
-<SiteLayout slug="msbl-striker-clubs" mainClass="clubs-page" mainLabel="MSBL clubs" scripts={["runtimeConfig", "publicDataPreload", "countryDisplayNames", "flagUtils", "msblClubsEngine"]}>
+<SiteLayout slug="msbl-striker-clubs" mainClass="clubs-page" mainLabel="MSBL clubs" scripts={["msblClubsEngine"]}>
     <section id="msbl-clubs-root" class="msbl-clubs-root"></section>
-  </SiteLayout>
+  <Fragment slot="scripts"><script src="../../entries/clubs-page.ts"></script></Fragment></SiteLayout>
