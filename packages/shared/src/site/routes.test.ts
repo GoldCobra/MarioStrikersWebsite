@@ -2,11 +2,11 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
-import { createStaticFiles } from "./node-static-files.ts";
+import { createSourceSiteFiles } from "./node-static-files.ts";
 import { resolveRoute, type Route } from "./routes.ts";
 
 const repoRoot = join(import.meta.dirname, "../../../..");
-const site = createStaticFiles(join(repoRoot, "apps/web/public"));
+const site = createSourceSiteFiles(join(repoRoot, "apps/web/public"));
 
 interface RecordedRoute {
   path: string;

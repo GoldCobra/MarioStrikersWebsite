@@ -26,10 +26,10 @@ Agree on the task before editing shared navigation, global CSS or the same PSD.
 - Keep one purpose per pull request and preserve the surrounding code style.
 - Use existing navigation, tabs, popup styles and config/engine patterns.
 - Keep browser links canonical, for example `/msc-save-editor`.
-- Bump relevant `?v=...` tags wherever changed browser scripts or styles
-  are loaded, including dynamically loaded scripts.
+- Bump the `?v=...` tag of a changed browser script or style in
+  `apps/web/src/layouts/assets.ts`, and in scripts that load it themselves.
 - Add meaningful coverage for changed behavior. Fixtures belong in
-  `apps/api/src/dev/fixtures.js`; use invented data, never production exports.
+  `apps/api/src/fixtures/data-source.ts`; use invented data, never production exports.
 - Update the relevant short document when setup, behavior or operations change.
 - Keep design sources in `docs/source-assets/` and exported runtime files in
   `assets/`. Coordinate binary edits; avoid unrelated asset conversions.
@@ -41,7 +41,8 @@ Run from the repository root:
 
 ```sh
 npm run check
-npm run check:frontend
+npm run build
+npm run check:frontend   # checks the built site
 npm test
 npm run test:smoke
 git diff --check

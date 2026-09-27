@@ -25,7 +25,5 @@ services:
         && exec nginx -g 'daemon off;'
     ports:
       - "127.0.0.1:8080:8080"
-    volumes:
-      - ./apps/web/public:/usr/share/nginx/html:ro
     depends_on:
       - backend

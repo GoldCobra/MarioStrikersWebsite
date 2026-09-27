@@ -1,0 +1,19 @@
+---
+// Tier list pages: the current tier list image of one game.
+import SiteLayout from "../../layouts/SiteLayout.astro";
+import { TIER_LISTS, displayWidth, type TierListGame } from "../../content/tier-lists.ts";
+
+interface Props {
+  slug: string;
+  game: TierListGame;
+}
+
+const { slug, game } = Astro.props;
+const image = TIER_LISTS[game];
+const label = game.toUpperCase();
+---
+<SiteLayout slug={slug} mainClass="tier-list-page" mainLabel={`${label} tier lists`} scripts={["globalTabsEngine", "globalNav"]}>
+    <figure class="tier-list-figure tier-list-figure--scale65" style={`--tier-list-display-width: ${displayWidth(image)}px;`}>
+      <img class="tier-list-image" src={image.src} width={image.width} height={image.height} alt={`${label} tier list`} decoding="async">
+    </figure>
+  </SiteLayout>

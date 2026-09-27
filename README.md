@@ -55,7 +55,8 @@ Run these commands from the repository root before opening a pull request:
 
 ```sh
 npm run check
-npm run check:frontend
+npm run build
+npm run check:frontend   # checks the built site
 npm test
 npm run test:smoke
 git diff --check
@@ -70,7 +71,7 @@ stay identical to a reference commit.
 
 | Location | Purpose |
 | --- | --- |
-| `apps/web/` | Astro site; `public/` holds page shells, styles, browser scripts and assets |
+| `apps/web/` | Astro site: layout, page files and page families in `src/`; styles, browser scripts and assets in `public/` |
 | `apps/api/` | Fastify API in TypeScript: one module per domain, integrations, fixtures and tests |
 | `packages/shared/` | Page registry, navigation model, URL routing and helpers shared by site and API |
 | `tools/` | Local servers, the nginx route generator and their tests |
@@ -79,8 +80,9 @@ stay identical to a reference commit.
 | `docs/` | Development notes, tool formats and design sources |
 
 The repository is an npm workspace; one `npm ci` at the root installs everything.
-The pages are still plain HTML, CSS and JavaScript, built with Astro. One
-shared routing function serves clean URLs locally; production nginx mirrors it.
+Astro renders the pages to static HTML at build time; browser scripts load the
+live data. One shared routing function serves clean URLs locally; production
+nginx mirrors it.
 Production uses Caddy, Nginx and the Fastify API;
 MSSQL provides community data, with local caches for public data and club logos.
 
