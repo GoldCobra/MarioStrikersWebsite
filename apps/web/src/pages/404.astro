@@ -1,0 +1,28 @@
+---
+// Served by nginx (status 404) for every unknown URL; built to /404.html.
+import SiteLayout from "../layouts/SiteLayout.astro";
+---
+<SiteLayout slug="404" mainClass="partners-page" scripts={["globalTabsEngine", "globalNav"]}>
+    <section class="partners-root" aria-label="Page not found">
+      <article class="content-box">
+        <div class="content-box-top" aria-hidden="true">
+          <div class="content-box-top-left"></div>
+          <div class="content-box-top-main"></div>
+        </div>
+        <div class="content-box-center">
+          <div class="content-box-texture" aria-hidden="true"></div>
+          <div class="content-box-content competitive-rules">
+            <p>This page does not exist or has moved.</p>
+            <ul>
+              <li><a class="cr-link" href="/">Home</a></li>
+              <li><a class="cr-link" href="/msbl-elo1v1">Leaderboards</a></li>
+              <li><a class="cr-link" href="/msbl-tierlist">Tier lists</a></li>
+              <li><a class="cr-link" href="/msc-setup-guide">MSC setup guide</a></li>
+              <li><a class="cr-link" href="/msbl-gear-builder">MSBL gear builder</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="content-box-bottom" aria-hidden="true"></div>
+      </article>
+    </section>
+  </SiteLayout>

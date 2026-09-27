@@ -38,5 +38,30 @@ test("URLs are clean and canonical", () => {
   assert.equal(pagePath("msc-tierlist"), "/msc-tierlist");
   assert.equal(canonicalUrl("index"), "https://mariostrikers.gg/");
   assert.equal(canonicalUrl("msc-tierlist"), "https://mariostrikers.gg/msc-tierlist");
-  assert.equal(PAGES.filter(isIndexable).length, 26);
+  assert.equal(PAGES.filter(isIndexable).length, 24);
+});
+
+const GAME_NAMES: Readonly<Record<string, string>> = {
+  msbl: "Mario Strikers: Battle League",
+  msc: "Mario Strikers Charged",
+  sms: "Super Mario Strikers",
+};
+
+test("indexable pages have search-result sized titles and descriptions", () => {
+  for (const page of PAGES.filter(isIndexable)) {
+    assert.ok(page.title.length <= 60, `${page.slug}: title ${page.title.length} characters`);
+    assert.ok(
+      page.description.length >= 120 && page.description.length <= 160,
+      `${page.slug}: description ${page.description.length} characters`,
+    );
+  }
+});
+
+test("game pages name their game in full in the title and the description", () => {
+  for (const page of PAGES.filter(isIndexable)) {
+    const game = GAME_NAMES[page.slug.split("-")[0] ?? ""];
+    if (!game) continue;
+    assert.ok(page.title.includes(game), `${page.slug}: title`);
+    assert.ok(page.description.includes(game), `${page.slug}: description`);
+  }
 });

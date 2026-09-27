@@ -6,7 +6,8 @@
 // and must stay as the hand-written pages had it; the parts Astro would reflow are inserted as strings.
 import { escapeHtml } from "@ms/shared/html";
 import { breadcrumbItems, pageLabel, resolvePageState } from "@ms/shared/site/page-state";
-import { canonicalUrl, findPage } from "@ms/shared/site/pages";
+import { NOT_FOUND_PAGE, canonicalUrl, findPage } from "@ms/shared/site/pages";
+import { SITE_NAME } from "@ms/shared/site/site";
 import { GLOBAL_CSS_PATH } from "../styles/global.ts";
 import { SCRIPTS, STYLESHEETS, type ScriptName, type StylesheetName } from "./assets.ts";
 import { renderContentTabs, renderFaviconLinks, renderFooter, renderMainNav, renderSubNav } from "./site-shell.ts";
@@ -23,13 +24,14 @@ interface Props {
 }
 
 const { slug, mainClass, mainLabel, scripts, stylesheets = [] } = Astro.props;
-const page = findPage(slug);
+const page = slug === NOT_FOUND_PAGE.slug ? NOT_FOUND_PAGE : findPage(slug);
 if (!page) throw new Error(`Page "${slug}" is not in the page registry.`);
 
 const state = resolvePageState(slug);
 const subNav = renderSubNav(state);
-const breadcrumbs = breadcrumbItems(state, pageLabel(page.title));
-const canonical = canonicalUrl(slug);
+const breadcrumbs = breadcrumbItems(state, page.breadcrumbName ?? pageLabel(page.title));
+// The not-found page is served at every unknown URL, so it has no URL of its own.
+const canonical = page === NOT_FOUND_PAGE ? undefined : canonicalUrl(slug);
 
 // The content tabs follow the hidden page heading, or open <main> when the page has none.
 const heading = page.hiddenHeading ? `\n    <h1 class="visually-hidden">${escapeHtml(page.hiddenHeading)}</h1>` : "";
@@ -48,10 +50,13 @@ const bodyEnd =
   <title>{page.title}</title>
   <meta name="description" content={page.description}>
   {page.robots && <meta name="robots" content={page.robots}>}
-  <link rel="canonical" href={canonical}>
+  {canonical && <link rel="canonical" href={canonical}>}
+  <meta name="theme-color" content="#000000">
+  <meta property="og:site_name" content={SITE_NAME}>
+  <meta property="og:locale" content="en_US">
   <meta property="og:title" content={page.title}>
   <meta property="og:description" content={page.description}>
-  <meta property="og:url" content={canonical}>
+  {canonical && <meta property="og:url" content={canonical}>}
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@MarioStrikersGG">

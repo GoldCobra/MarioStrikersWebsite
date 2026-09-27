@@ -69,7 +69,14 @@
     "tag": "meta",
     "attributes": {
       "name": "description",
-      "content": "Check the Mario Strikers League schedule and league site resources."
+      "content": "Dates and sign-ups of the Mario Strikers League (MSL) 2026: the Spring, Summer and Fall splits and the World Championship, with registration on start.gg."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "theme-color",
+      "content": "#000000"
     }
   },
   {
@@ -83,7 +90,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:description",
-      "content": "Check the Mario Strikers League schedule and league site resources."
+      "content": "Dates and sign-ups of the Mario Strikers League (MSL) 2026: the Spring, Summer and Fall splits and the World Championship, with registration on start.gg."
     }
   },
   {
@@ -97,7 +104,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:title",
-      "content": "MSL Schedule | Mario Strikers Community"
+      "content": "Mario Strikers League Schedule (MSL)"
     }
   },
   {
@@ -111,14 +118,28 @@
     "tag": "meta",
     "attributes": {
       "property": "og:description",
-      "content": "Check the Mario Strikers League schedule and league site resources."
+      "content": "Dates and sign-ups of the Mario Strikers League (MSL) 2026: the Spring, Summer and Fall splits and the World Championship, with registration on start.gg."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:locale",
+      "content": "en_US"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:site_name",
+      "content": "Mario Strikers Community"
     }
   },
   {
     "tag": "meta",
     "attributes": {
       "property": "og:title",
-      "content": "MSL Schedule | Mario Strikers Community"
+      "content": "Mario Strikers League Schedule (MSL)"
     }
   },
   {
@@ -170,6 +191,6 @@
   },
   {
     "tag": "title",
-    "text": "MSL Schedule | Mario Strikers Community"
+    "text": "Mario Strikers League Schedule (MSL)"
   }
 ]

@@ -19,6 +19,8 @@ test("pages resolve to their place in the navigation", () => {
   assert.deepEqual(path("players-profiles"), ["players", "-", "-"]);
   // Pages outside every section fall back to home, as the runtime script did.
   assert.deepEqual(path("about-us"), ["home", "-", "-"]);
+  // The not-found page marks no navigation entry.
+  assert.deepEqual(path("404"), ["", "-", "-"]);
   for (const page of PAGES) assert.notEqual(resolvePageState(page.slug).topKey, "", page.slug);
 });
 

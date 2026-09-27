@@ -33,9 +33,13 @@ export function siteRoutes(): AstroIntegration {
           } else if (route.kind === "file") {
             request.url = (PAGE_FILES.has(route.path) ? astroRoute(route.path) : route.path) + url.search;
             next();
+          } else if (route.kind === "not-found") {
+            // Astro renders src/pages/404.astro with status 404 for a path no route matches.
+            request.url = "/__not-found";
+            next();
           } else {
-            response.writeHead(route.kind === "forbidden" ? 403 : 404, { "Content-Type": "text/plain" });
-            response.end(route.kind === "forbidden" ? "Forbidden." : "Not found.");
+            response.writeHead(403, { "Content-Type": "text/plain" });
+            response.end("Forbidden.");
           }
         });
       },

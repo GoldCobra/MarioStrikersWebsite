@@ -68,9 +68,8 @@ for (const file of scripts) {
   }
 }
 
-const htmlFiles = [path.join(root, "index.html"), ...walk(path.join(root, "pages"))].filter((file) =>
-  file.endsWith(".html"),
-);
+const rootPages = fs.readdirSync(root).map((name) => path.join(root, name));
+const htmlFiles = [...rootPages, ...walk(path.join(root, "pages"))].filter((file) => file.endsWith(".html"));
 const cssFiles = [...walk(path.join(root, "css")), ...walk(path.join(root, "assets/gear-builder"))].filter((file) =>
   file.endsWith(".css"),
 );

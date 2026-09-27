@@ -69,7 +69,21 @@
     "tag": "meta",
     "attributes": {
       "name": "description",
-      "content": "Find Mario Strikers Charged Wiimmfi information for online community play."
+      "content": "See who is playing Mario Strikers Charged (MSC) online on Wiimmfi right now."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "robots",
+      "content": "noindex, follow"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "theme-color",
+      "content": "#000000"
     }
   },
   {
@@ -83,7 +97,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:description",
-      "content": "Find Mario Strikers Charged Wiimmfi information for online community play."
+      "content": "See who is playing Mario Strikers Charged (MSC) online on Wiimmfi right now."
     }
   },
   {
@@ -97,7 +111,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:title",
-      "content": "WIIMMFI | Mario Strikers Community"
+      "content": "Mario Strikers Charged Online Players | Mario Strikers Community"
     }
   },
   {
@@ -111,14 +125,28 @@
     "tag": "meta",
     "attributes": {
       "property": "og:description",
-      "content": "Find Mario Strikers Charged Wiimmfi information for online community play."
+      "content": "See who is playing Mario Strikers Charged (MSC) online on Wiimmfi right now."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:locale",
+      "content": "en_US"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:site_name",
+      "content": "Mario Strikers Community"
     }
   },
   {
     "tag": "meta",
     "attributes": {
       "property": "og:title",
-      "content": "WIIMMFI | Mario Strikers Community"
+      "content": "Mario Strikers Charged Online Players | Mario Strikers Community"
     }
   },
   {
@@ -136,40 +164,7 @@
     }
   },
   {
-    "tag": "script",
-    "json": {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://mariostrikers.gg/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Games",
-          "item": "https://mariostrikers.gg/games"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "MSC",
-          "item": "https://mariostrikers.gg/msc"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
-          "name": "WIIMMFI",
-          "item": "https://mariostrikers.gg/msc-wiimmfi"
-        }
-      ]
-    }
-  },
-  {
     "tag": "title",
-    "text": "WIIMMFI | Mario Strikers Community"
+    "text": "Mario Strikers Charged Online Players | Mario Strikers Community"
   }
 ]

@@ -25,7 +25,9 @@ overflowing navigation, link prefetching and redirects of old `?tabs=` and
 `popup-overlay`, `popup-card`, `popup-header`, `popup-title` and `popup-close`.
 
 **Adding a page:** add it to `packages/shared/src/site/pages.ts` (title,
-description, hidden heading, robots), place it in the navigation model
+description, hidden heading, robots; an indexable page needs a title of at most
+60 characters and a description of 120–160, a game page the game's full name in
+both), place it in the navigation model
 (`navigation.ts`) if it needs a menu entry or tab, create
 `src/pages/pages/<slug>.astro` with `SiteLayout` (or a family component), and
 list its scripts by name from `assets.ts`. A unit test fails when the registry
@@ -52,7 +54,10 @@ the nginx configuration, and `npm run check` fails when it is stale. A unit
 test replays every URL shape recorded against production through
 `resolveRoute()`. Canonical metadata, navigation and sitemap entries must agree
 with public URLs.
-The private `/profile` page is excluded from indexing.
+The private `/profile` page is excluded from indexing. `/sitemap.xml` is
+generated from the indexable pages of the registry. Unknown URLs get the site's
+own not-found page (`src/pages/404.astro`) with status 404, and API responses
+carry `X-Robots-Tag: noindex`.
 
 The global stylesheet is delivered as one file named by its content hash
 (`/css/global.<hash>.css`), so browsers cache it for a year and a change

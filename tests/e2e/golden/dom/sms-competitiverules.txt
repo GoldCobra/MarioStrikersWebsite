@@ -66,7 +66,7 @@
   <main class="page-content competitive-rules-page">
     #text "\n    "
     <h1 class="visually-hidden">
-      #text "SMS Competitive Rules"
+      #text "Super Mario Strikers Competitive Rules"
     </h1>
     <div id="global-content-tabs">
       <section class="global-tabs-shell" aria-label="Rules tabs">

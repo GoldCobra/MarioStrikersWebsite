@@ -69,7 +69,21 @@
     "tag": "meta",
     "attributes": {
       "name": "description",
-      "content": "Read Mario Strikers League rules for structured competitive league play."
+      "content": "Rules of the Mario Strikers League (MSL), currently under review."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "robots",
+      "content": "noindex, follow"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "theme-color",
+      "content": "#000000"
     }
   },
   {
@@ -83,7 +97,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:description",
-      "content": "Read Mario Strikers League rules for structured competitive league play."
+      "content": "Rules of the Mario Strikers League (MSL), currently under review."
     }
   },
   {
@@ -111,7 +125,21 @@
     "tag": "meta",
     "attributes": {
       "property": "og:description",
-      "content": "Read Mario Strikers League rules for structured competitive league play."
+      "content": "Rules of the Mario Strikers League (MSL), currently under review."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:locale",
+      "content": "en_US"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:site_name",
+      "content": "Mario Strikers Community"
     }
   },
   {
@@ -133,39 +161,6 @@
     "attributes": {
       "property": "og:url",
       "content": "https://mariostrikers.gg/msl-league-rules"
-    }
-  },
-  {
-    "tag": "script",
-    "json": {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://mariostrikers.gg/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Competitive",
-          "item": "https://mariostrikers.gg/competitive"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "MSL",
-          "item": "https://mariostrikers.gg/msl"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
-          "name": "League Rules",
-          "item": "https://mariostrikers.gg/msl-league-rules"
-        }
-      ]
     }
   },
   {

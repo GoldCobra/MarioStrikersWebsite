@@ -56,7 +56,7 @@
   <main class="page-content save-editor-page msbl-save-editor-page" aria-label="MSBL save editor">
     #text "\n    "
     <h1 class="visually-hidden">
-      #text "MSBL Save Editor"
+      #text "Mario Strikers: Battle League Save Editor"
     </h1>
     <div id="global-content-tabs">
       <section class="global-tabs-shell" aria-label="MSBL tabs">

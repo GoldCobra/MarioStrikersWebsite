@@ -1811,7 +1811,7 @@
   },
   {
     "path": "/favicon.ico",
-    "status": 404,
+    "status": 200,
     "location": null
   },
   {

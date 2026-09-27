@@ -69,7 +69,14 @@
     "tag": "meta",
     "attributes": {
       "name": "description",
-      "content": "Build and compare Mario Strikers Battle League gear setups with the MSBL Gear Builder."
+      "content": "Build and compare gear setups for every character in Mario Strikers: Battle League (MSBL) and see how each piece of gear changes their stats."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "theme-color",
+      "content": "#000000"
     }
   },
   {
@@ -83,7 +90,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:description",
-      "content": "Build and compare Mario Strikers Battle League gear setups with the MSBL Gear Builder."
+      "content": "Build and compare gear setups for every character in Mario Strikers: Battle League (MSBL) and see how each piece of gear changes their stats."
     }
   },
   {
@@ -97,7 +104,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:title",
-      "content": "MSBL Gear Builder | Mario Strikers Community"
+      "content": "Mario Strikers: Battle League Gear Builder (MSBL)"
     }
   },
   {
@@ -111,14 +118,28 @@
     "tag": "meta",
     "attributes": {
       "property": "og:description",
-      "content": "Build and compare Mario Strikers Battle League gear setups with the MSBL Gear Builder."
+      "content": "Build and compare gear setups for every character in Mario Strikers: Battle League (MSBL) and see how each piece of gear changes their stats."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:locale",
+      "content": "en_US"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:site_name",
+      "content": "Mario Strikers Community"
     }
   },
   {
     "tag": "meta",
     "attributes": {
       "property": "og:title",
-      "content": "MSBL Gear Builder | Mario Strikers Community"
+      "content": "Mario Strikers: Battle League Gear Builder (MSBL)"
     }
   },
   {
@@ -175,7 +196,7 @@
       "@type": "SoftwareApplication",
       "name": "MSBL Gear Builder",
       "url": "https://mariostrikers.gg/msbl-gear-builder",
-      "description": "Build and compare Mario Strikers Battle League gear setups with the MSBL Gear Builder.",
+      "description": "Build and compare gear setups for every character in Mario Strikers: Battle League (MSBL) and see how each piece of gear changes their stats.",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "Web",
       "isAccessibleForFree": true,
@@ -188,6 +209,6 @@
   },
   {
     "tag": "title",
-    "text": "MSBL Gear Builder | Mario Strikers Community"
+    "text": "Mario Strikers: Battle League Gear Builder (MSBL)"
   }
 ]

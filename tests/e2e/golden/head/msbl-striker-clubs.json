@@ -69,7 +69,14 @@
     "tag": "meta",
     "attributes": {
       "name": "description",
-      "content": "Explore MSBL clubs and player groups in the Mario Strikers Battle League community."
+      "content": "Browse the community's Striker Clubs for Mario Strikers: Battle League (MSBL): members, regions, club codes, join conditions and which clubs are open."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "theme-color",
+      "content": "#000000"
     }
   },
   {
@@ -83,7 +90,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:description",
-      "content": "Explore MSBL clubs and player groups in the Mario Strikers Battle League community."
+      "content": "Browse the community's Striker Clubs for Mario Strikers: Battle League (MSBL): members, regions, club codes, join conditions and which clubs are open."
     }
   },
   {
@@ -97,7 +104,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:title",
-      "content": "MSBL Clubs | Mario Strikers Community"
+      "content": "Mario Strikers: Battle League Striker Clubs (MSBL)"
     }
   },
   {
@@ -111,14 +118,28 @@
     "tag": "meta",
     "attributes": {
       "property": "og:description",
-      "content": "Explore MSBL clubs and player groups in the Mario Strikers Battle League community."
+      "content": "Browse the community's Striker Clubs for Mario Strikers: Battle League (MSBL): members, regions, club codes, join conditions and which clubs are open."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:locale",
+      "content": "en_US"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:site_name",
+      "content": "Mario Strikers Community"
     }
   },
   {
     "tag": "meta",
     "attributes": {
       "property": "og:title",
-      "content": "MSBL Clubs | Mario Strikers Community"
+      "content": "Mario Strikers: Battle League Striker Clubs (MSBL)"
     }
   },
   {
@@ -170,6 +191,6 @@
   },
   {
     "tag": "title",
-    "text": "MSBL Clubs | Mario Strikers Community"
+    "text": "Mario Strikers: Battle League Striker Clubs (MSBL)"
   }
 ]

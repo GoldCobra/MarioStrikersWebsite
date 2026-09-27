@@ -66,7 +66,7 @@
   <main class="page-content">
     #text "\n    "
     <h1 class="visually-hidden">
-      #text "MSC WHR"
+      #text "Mario Strikers Charged WHR Rankings"
     </h1>
     <div id="global-content-tabs"/>
     #text "\n    "

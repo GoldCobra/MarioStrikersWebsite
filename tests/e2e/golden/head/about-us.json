@@ -69,7 +69,14 @@
     "tag": "meta",
     "attributes": {
       "name": "description",
-      "content": "Learn about the fan-run Mario Strikers Community, regular matches, events, tournaments, and the Mario Strikers League."
+      "content": "Learn about the fan-run Mario Strikers Community: regular matches, events and tournaments across all Mario Strikers games, and the Mario Strikers League."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "theme-color",
+      "content": "#000000"
     }
   },
   {
@@ -83,7 +90,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:description",
-      "content": "Learn about the fan-run Mario Strikers Community, regular matches, events, tournaments, and the Mario Strikers League."
+      "content": "Learn about the fan-run Mario Strikers Community: regular matches, events and tournaments across all Mario Strikers games, and the Mario Strikers League."
     }
   },
   {
@@ -97,7 +104,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:title",
-      "content": "About Us | Mario Strikers Community"
+      "content": "About the Mario Strikers Community"
     }
   },
   {
@@ -111,14 +118,28 @@
     "tag": "meta",
     "attributes": {
       "property": "og:description",
-      "content": "Learn about the fan-run Mario Strikers Community, regular matches, events, tournaments, and the Mario Strikers League."
+      "content": "Learn about the fan-run Mario Strikers Community: regular matches, events and tournaments across all Mario Strikers games, and the Mario Strikers League."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:locale",
+      "content": "en_US"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:site_name",
+      "content": "Mario Strikers Community"
     }
   },
   {
     "tag": "meta",
     "attributes": {
       "property": "og:title",
-      "content": "About Us | Mario Strikers Community"
+      "content": "About the Mario Strikers Community"
     }
   },
   {
@@ -175,6 +196,6 @@
   },
   {
     "tag": "title",
-    "text": "About Us | Mario Strikers Community"
+    "text": "About the Mario Strikers Community"
   }
 ]
