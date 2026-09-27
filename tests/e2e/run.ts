@@ -13,6 +13,8 @@ import { FIXTURE_NOW } from "./lib/site.ts";
 interface StackConfig {
   install: string[][];
   installedMarker: string;
+  /** Commands run before every start, e.g. building the site. */
+  build?: string[][];
   start: string[];
   env?: Record<string, string>;
 }
@@ -111,6 +113,11 @@ async function waitForHealth(url: string, child: ChildProcess): Promise<void> {
 async function startStack(root: string, port: number, label: string): Promise<RunningStack> {
   const config = readStackConfig(root);
   installStack(root, config);
+  for (const [buildCommand, ...buildArgs] of config.build ?? []) {
+    if (!buildCommand) continue;
+    console.log(`[e2e] ${buildCommand} ${buildArgs.join(" ")} (${label})`);
+    runSync(buildCommand, buildArgs, { cwd: root });
+  }
   const [command, ...args] = config.start;
   if (!command) fail(`Empty start command in ${root}.`);
   const env = { ...process.env, ...config.env, PORT: String(port), MSC_FIXTURE_NOW: FIXTURE_NOW };

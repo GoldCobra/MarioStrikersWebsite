@@ -6,7 +6,15 @@ import tseslint from "typescript-eslint";
 // Lints TypeScript and the root configs. Legacy JavaScript under apps/ is ignored
 // until each part is rewritten in TypeScript.
 export default defineConfig([
-  globalIgnores(["**/node_modules/", "**/.cache/", "apps/api/", "apps/web/public/", "docs/"]),
+  globalIgnores([
+    "**/node_modules/",
+    "**/.cache/",
+    "apps/api/",
+    "apps/web/public/",
+    "apps/web/dist/",
+    "apps/web/.astro/",
+    "docs/",
+  ]),
   {
     files: ["*.js"],
     extends: [js.configs.recommended],
@@ -22,5 +30,10 @@ export default defineConfig([
       "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
     },
+  },
+  {
+    // node:test registers tests through returned promises that the runner awaits itself.
+    files: ["**/*.test.ts"],
+    rules: { "@typescript-eslint/no-floating-promises": "off" },
   },
 ]);

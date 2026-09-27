@@ -25,6 +25,8 @@ node tests/e2e/run.ts routes   # status and Location of all URL shapes (needs RO
   SHA, or `self` to compare the working tree with itself (proves the checks are
   deterministic). `run.ts` exports the reference into `tests/e2e/.cache/` and
   starts it the way that commit describes in its own `tests/e2e/stack.json`.
+  The working tree runs as the production build (`npm run build`) behind
+  `tools/src/fixture-stack.ts`, which routes exactly like nginx.
 - **Deterministic data.** Both stacks run the invented fixtures with
   `MSC_FIXTURE_NOW` pinned. Pages run on a virtual clock: timers and animation
   frames fire only when a check advances time in fixed steps, so countdowns and

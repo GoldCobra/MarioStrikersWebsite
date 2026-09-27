@@ -5,26 +5,32 @@
   "description": "Community guides, rankings and tools for Mario Strikers.",
   "workspaces": [
     "apps/api",
+    "apps/web",
+    "packages/shared",
+    "tools",
     "tests/e2e"
   ],
   "engines": {
     "node": "24.x"
   },
   "scripts": {
-    "dev": "npm run dev --workspace=@ms/api",
-    "dev:live": "npm run dev:live --workspace=@ms/api",
+    "dev": "node tools/src/dev.ts",
+    "dev:live": "node tools/src/dev.ts --live",
+    "build": "npm run build --workspace=@ms/web",
+    "preview": "npm run build && node tools/src/fixture-stack.ts",
     "start": "npm start --workspace=@ms/api",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm run check --workspace=@ms/api",
+    "check": "npm run typecheck && npm run lint && npm run format:check && node tools/src/generate-nginx-routes.ts --check && npm run check --workspace=@ms/api",
     "check:frontend": "npm run check:frontend --workspace=@ms/api",
-    "typecheck": "tsc -p tests/e2e",
+    "typecheck": "tsc -p packages/shared && tsc -p tools && tsc -p tests/e2e && npm run check --workspace=@ms/web",
     "lint": "eslint --max-warnings=0 .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "npm test --workspace=@ms/api",
+    "generate:nginx": "node tools/src/generate-nginx-routes.ts",
+    "test": "npm test --workspaces --if-present",
     "test:smoke": "npm run test:smoke --workspace=@ms/api",
-    "test:visual": "npm run visual --workspace=@ms/e2e",
-    "test:dom": "npm run dom --workspace=@ms/e2e",
-    "test:contract": "npm run contract --workspace=@ms/e2e"
+    "test:visual": "node tests/e2e/run.ts visual",
+    "test:dom": "node tests/e2e/run.ts dom",
+    "test:contract": "node tests/e2e/run.ts contract"
   },
   "type": "module",
   "devDependencies": {
@@ -35,5 +41,8 @@
     "prettier": "3.9.9",
     "typescript": "6.0.3",
     "typescript-eslint": "8.70.1"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
   }
 }

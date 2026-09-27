@@ -36,7 +36,7 @@ before(async function () {
     child.stderr.on("data", function (chunk) { output += chunk; });
     child.stdout.on("data", function (chunk) {
       output += chunk;
-      const match = output.match(/http:\/\/localhost:(\d+)/);
+      const match = output.match(/on port (\d+)/);
       if (match) { clearTimeout(timer); resolve("http://127.0.0.1:" + match[1]); }
     });
   });
@@ -57,8 +57,6 @@ test("fixture startup ignores .env and serves clearly marked sample data", async
   assert.equal(response.headers.get("access-control-allow-origin"), "*");
   assert.equal(response.headers.get("x-data-source"), "fixtures");
   assert.deepEqual(await response.json(), { status: "ok", source: "fixtures" });
-  const page = await fetch(base + "/");
-  assert.match(await page.text(), /synthetic sample data/);
 });
 
 test("all public API families return populated fixture contracts", async function () {
@@ -132,17 +130,12 @@ test("sample login and logout use local callbacks and isolated signed cookies", 
   assert.equal(safeCallback.headers.get("location"), "/profile?auth=success");
 });
 
-test("static serving permits public assets and clean routes, and hides repository files", async function () {
-  for (const route of ["/players", "/msbl-elo1v1", "/msbl-striker-clubs", "/profile", "/msbl-save-editor",
-    "/msc-save-editor", "/css/global.css", "/js/global-nav.js", "/pages/templates/player-profile-popup.html", "/robots.txt", "/sitemap.xml"]) {
-    assert.equal((await fetch(base + route)).status, 200, route);
-  }
-  const legacy = await fetch(base + "/pages/players.html?sample=1", { redirect: "manual" });
-  assert.equal(legacy.status, 301);
-  assert.equal(legacy.headers.get("location"), "/players?sample=1");
-  for (const route of ["/apps/api/package.json", "/apps/api/src/config.js", "/package.json", "/README.md", "/.env", "/.git/config",
-    "/docs/development.md", "/docker-compose.prod.yml", "/css/../../../api/package.json", "/css/../index.html/../../package.json"]) {
-    assert.equal((await fetch(base + route)).status, 404, route);
+test("the API serves only /api routes, never pages or repository files", async function () {
+  for (const route of ["/", "/players", "/pages/players.html", "/css/global.css", "/robots.txt", "/package.json",
+    "/apps/api/package.json", "/src/config.js", "/.env", "/.git/config", "/docker-compose.prod.yml"]) {
+    const response = await fetch(base + route, { redirect: "manual" });
+    assert.equal(response.status, 404, route);
+    assert.deepEqual(await response.json(), { error: "Not found." }, route);
   }
 });
 

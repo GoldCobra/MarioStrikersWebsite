@@ -1,5 +1,3 @@
-const path = require("path");
-const fs = require("fs");
 const compression = require("compression");
 const express = require("express");
 const cors = require("cors");
@@ -29,30 +27,7 @@ function createLiveProviders() {
   };
 }
 
-// Development only: the static site lives in apps/web/public (production serves it with nginx).
-const STATIC_ROOT = path.join(__dirname, "../../web/public");
-const STATIC_PAGES_ROOT = path.join(STATIC_ROOT, "pages");
-const LEGACY_PAGE_ROUTE = /^\/pages\/([a-z0-9-]+)\.html$/i;
-const CLEAN_PAGE_ROUTE = /^\/([a-z0-9-]+)$/i;
-const CLEAN_PAGE_TRAILING_SLASH_ROUTE = /^\/([a-z0-9-]+)\/$/i;
-const PAGE_ROUTE_ALIASES = {
-  "msl-league-site": "msl-schedule"
-};
 const PUBLIC_DATA_CACHE_CONTROL = "public, max-age=30, stale-while-revalidate=60";
-const LEGACY_SUBMENU_ROUTE_MAP = {
-  games: {
-    msbl: "msbl",
-    msc: "msc",
-    sms: "sms"
-  },
-  competitive: {
-    rules: "competitive-rules",
-    leaderboards: "competitive-leaderboards",
-    "tier-lists": "competitive-tier-lists",
-    msl: "msl",
-    tournaments: "competitive-tournaments"
-  }
-};
 
 function buildCorsOptions() {
   if (config.corsOrigin === "*") {
@@ -68,123 +43,6 @@ function buildCorsOptions() {
   };
 }
 
-function getOriginalQuery(req) {
-  const queryIndex = req.originalUrl.indexOf("?");
-  return queryIndex === -1 ? "" : req.originalUrl.slice(queryIndex);
-}
-
-function redirectToCleanPage(req, res, pageSlug) {
-  res.redirect(301, `/${pageSlug}${getOriginalQuery(req)}`);
-}
-
-function buildFilteredQuery(req) {
-  const params = new URLSearchParams();
-  const query = req.query || {};
-  Object.keys(query).forEach(function (key) {
-    if (key === "submenu" || key === "tabs") {
-      return;
-    }
-
-    const rawValue = query[key];
-    if (Array.isArray(rawValue)) {
-      rawValue.forEach(function (entry) {
-        if (entry !== undefined && entry !== null) {
-          params.append(key, String(entry));
-        }
-      });
-      return;
-    }
-
-    if (rawValue !== undefined && rawValue !== null) {
-      params.append(key, String(rawValue));
-    }
-  });
-
-  const serialized = params.toString();
-  return serialized ? `?${serialized}` : "";
-}
-
-function toCanonicalPageSlug(pageSlug) {
-  const normalizedSlug = String(pageSlug || "").toLowerCase();
-  return PAGE_ROUTE_ALIASES[normalizedSlug] || normalizedSlug;
-}
-
-function pageFileExists(pageSlug) {
-  return fs.existsSync(path.join(STATIC_PAGES_ROOT, `${pageSlug}.html`));
-}
-
-function resolveExistingPageSlug(pageSlug) {
-  const canonicalPageSlug = toCanonicalPageSlug(pageSlug);
-  return pageFileExists(canonicalPageSlug) ? canonicalPageSlug : "";
-}
-
-function redirectLegacyQueryRoute(req, res, pageSlug) {
-  const normalizedPageSlug = String(pageSlug || "").toLowerCase();
-  const submenuRaw = req.query && req.query.submenu;
-  const tabsRaw = req.query && req.query.tabs;
-  const submenu = Array.isArray(submenuRaw) ? String(submenuRaw[0] || "").trim().toLowerCase() : String(submenuRaw || "").trim().toLowerCase();
-  const tabs = Array.isArray(tabsRaw) ? String(tabsRaw[0] || "").trim().toLowerCase() : String(tabsRaw || "").trim().toLowerCase();
-  const routeMap = LEGACY_SUBMENU_ROUTE_MAP[normalizedPageSlug];
-
-  let targetPageSlug = "";
-  if (submenu && routeMap && routeMap[submenu]) {
-    targetPageSlug = routeMap[submenu];
-  } else if (submenu || tabs === "none") {
-    targetPageSlug = normalizedPageSlug;
-  }
-
-  if (!targetPageSlug) {
-    return false;
-  }
-
-  const resolvedTargetPageSlug = resolveExistingPageSlug(targetPageSlug);
-  if (!resolvedTargetPageSlug) {
-    return false;
-  }
-
-  res.redirect(301, `/${resolvedTargetPageSlug}${buildFilteredQuery(req)}`);
-  return true;
-}
-
-function redirectToResolvedPage(req, res, pageSlug) {
-  const resolvedPageSlug = resolveExistingPageSlug(pageSlug);
-  if (!resolvedPageSlug) {
-    return false;
-  }
-
-  redirectToCleanPage(req, res, resolvedPageSlug);
-  return true;
-}
-
-function sendStaticPage(res, absolutePath, next) {
-  if (res.locals.fixtureMode) {
-    fs.readFile(absolutePath, "utf8", function (error, html) {
-      if (error) {
-        if (typeof next === "function") next();
-        else res.status(404).end();
-        return;
-      }
-      const notice = '<div id="dev-data-notice" role="status" style="position:fixed;bottom:12px;left:12px;right:12px;z-index:2147483647;padding:8px 12px;background:#fff2bd;color:#252015;font:14px system-ui;border:1px solid #796421;border-radius:6px;text-align:center">Local development: synthetic sample data. Discord login is simulated.</div>';
-      res.type("html").send(html.replace(/<body\b[^>]*>/i, function (body) { return body + notice; }));
-    });
-    return;
-  }
-  res.sendFile(absolutePath, function (error) {
-    if (!error) {
-      return;
-    }
-
-    if (typeof next === "function") {
-      next();
-      return;
-    }
-
-    if (!res.headersSent) {
-      res.status(error.statusCode || 404).end();
-    }
-  });
-}
-
 function createApp(options) {
   const opts = options || {};
   const providers = opts.providers || createLiveProviders();
@@ -196,11 +54,9 @@ function createApp(options) {
     getMsblClubProfile, defaultClubLogoCache, communityEventsCache, publicDataCache } = providers;
   const { appendQuery, buildDiscordAuthorizeUrl, completeDiscordLogin, createClearSessionCookie,
     createSessionCookie, readSessionFromRequest, toAuthMeResponse, verifyOAuthState } = providers.auth;
-  const serveStatic = opts.serveStatic === undefined ? process.env.SERVE_STATIC === "true" : opts.serveStatic;
   const app = express();
   if (fixtureMode) {
     app.use(function (_req, res, next) {
-      res.locals.fixtureMode = true;
       res.set("X-Data-Source", "fixtures");
       next();
     });
@@ -208,67 +64,6 @@ function createApp(options) {
   app.use(compression());
   app.use(cors(buildCorsOptions()));
   app.use(express.json({ limit: "1mb" }));
-
-  if (serveStatic) {
-    app.use(function (req, res, next) {
-      if (req.method !== "GET" && req.method !== "HEAD") {
-        next();
-        return;
-      }
-
-      if (req.path === "/index.html") {
-        res.redirect(301, `/${getOriginalQuery(req)}`);
-        return;
-      }
-
-      const legacyPageMatch = req.path.match(LEGACY_PAGE_ROUTE);
-      if (legacyPageMatch && redirectToResolvedPage(req, res, legacyPageMatch[1])) {
-        return;
-      }
-
-      const rootHtmlPageMatch = req.path.match(/^\/([a-z0-9-]+)\.html$/i);
-      if (rootHtmlPageMatch && redirectToResolvedPage(req, res, rootHtmlPageMatch[1])) {
-        return;
-      }
-
-      const legacyExtensionlessPageMatch = req.path.match(/^\/pages\/([a-z0-9-]+)\/?$/i);
-      if (legacyExtensionlessPageMatch && redirectToResolvedPage(req, res, legacyExtensionlessPageMatch[1])) {
-        return;
-      }
-
-      const cleanPageMatch = req.path.match(CLEAN_PAGE_ROUTE);
-      if (cleanPageMatch) {
-        const pageSlug = cleanPageMatch[1].toLowerCase();
-        if (redirectLegacyQueryRoute(req, res, pageSlug)) {
-          return;
-        }
-        const canonicalPageSlug = toCanonicalPageSlug(pageSlug);
-        if (canonicalPageSlug !== pageSlug && pageFileExists(canonicalPageSlug)) {
-          redirectToCleanPage(req, res, canonicalPageSlug);
-          return;
-        }
-        if (pageFileExists(canonicalPageSlug)) {
-          sendStaticPage(res, path.join(STATIC_PAGES_ROOT, `${canonicalPageSlug}.html`), next);
-          return;
-        }
-      }
-
-      const trailingSlashMatch = req.path.match(CLEAN_PAGE_TRAILING_SLASH_ROUTE);
-      if (trailingSlashMatch && redirectToResolvedPage(req, res, trailingSlashMatch[1])) {
-        return;
-      }
-
-      next();
-    });
-
-    // Serve only public directories; the repository also contains backend code and config.
-    for (const directory of ["assets", "css", "js", "pages/templates"]) {
-      app.use("/" + directory, express.static(path.join(STATIC_ROOT, directory), { dotfiles: "deny", index: false }));
-    }
-    for (const file of ["robots.txt", "sitemap.xml"]) {
-      app.get("/" + file, function (_req, res) { res.sendFile(path.join(STATIC_ROOT, file)); });
-    }
-  }
 
   function sendApiError(res, error) {
     const message = error && error.message ? error.message : "Request failed.";
@@ -605,17 +400,6 @@ function createApp(options) {
       });
     }
   });
-
-  if (serveStatic) {
-    app.get("/", function (_req, res) {
-      sendStaticPage(res, path.join(STATIC_ROOT, "index.html"));
-    });
-
-    app.get(CLEAN_PAGE_ROUTE, function (req, res, next) {
-      const pageSlug = String(req.params[0] || "").toLowerCase();
-      sendStaticPage(res, path.join(STATIC_PAGES_ROOT, `${pageSlug}.html`), next);
-    });
-  }
 
   app.use(function (_req, res) {
     res.status(404).json({ error: "Not found." });

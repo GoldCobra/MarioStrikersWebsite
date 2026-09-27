@@ -1,0 +1,39 @@
+// Development server routing: the same resolveRoute() that production nginx mirrors, so clean URLs,
+// legacy redirects and 404s behave locally exactly as they do on the live site.
+
+import { fileURLToPath } from "node:url";
+import type { AstroIntegration } from "astro";
+import { createStaticFiles } from "@ms/shared/site/node-static-files";
+import { resolveRoute } from "@ms/shared/site/routes";
+
+// Requests the dev server itself answers (Vite client, modules, the API proxy).
+const PASS_THROUGH = /^\/(?:api\/|@|__|node_modules\/|src\/)/;
+
+export function siteRoutes(): AstroIntegration {
+  return {
+    name: "ms:site-routes",
+    hooks: {
+      "astro:server:setup": ({ server }) => {
+        const files = createStaticFiles(fileURLToPath(new URL("../public", import.meta.url)));
+        server.middlewares.use((request, response, next) => {
+          const url = new URL(request.url ?? "/", "http://localhost");
+          if (PASS_THROUGH.test(url.pathname)) {
+            next();
+            return;
+          }
+          const route = resolveRoute(url.pathname, url.search, files);
+          if (route.kind === "redirect") {
+            response.writeHead(301, { Location: route.location });
+            response.end();
+          } else if (route.kind === "file") {
+            request.url = route.path + url.search;
+            next();
+          } else {
+            response.writeHead(route.kind === "forbidden" ? 403 : 404, { "Content-Type": "text/plain" });
+            response.end(route.kind === "forbidden" ? "Forbidden." : "Not found.");
+          }
+        });
+      },
+    },
+  };
+}

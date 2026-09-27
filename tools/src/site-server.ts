@@ -1,0 +1,102 @@
+// Serves a built site exactly as production nginx routes it and forwards /api to the API.
+// Used for local previews and by the comparison checks; never exposed publicly.
+
+import { createReadStream } from "node:fs";
+import {
+  createServer,
+  request as httpRequest,
+  type IncomingMessage,
+  type Server,
+  type ServerResponse,
+} from "node:http";
+import { extname, join } from "node:path";
+import { createStaticFiles } from "@ms/shared/site/node-static-files";
+import { resolveRoute } from "@ms/shared/site/routes";
+
+const CONTENT_TYPES: Readonly<Record<string, string>> = {
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".mjs": "text/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".xml": "application/xml; charset=utf-8",
+  ".txt": "text/plain; charset=utf-8",
+  ".webmanifest": "application/manifest+json",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".avif": "image/avif",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".mp4": "video/mp4",
+};
+
+export interface SiteServerOptions {
+  /** Directory of the built site. */
+  readonly root: string;
+  /** Origin of the API that /api requests are forwarded to, e.g. "http://127.0.0.1:8788". */
+  readonly apiOrigin: string;
+}
+
+function sendStatus(response: ServerResponse, status: number): void {
+  response.writeHead(status, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+  response.end(status === 404 ? "Not found." : status === 403 ? "Forbidden." : "Method not allowed.");
+}
+
+function forwardToApi(request: IncomingMessage, response: ServerResponse, apiOrigin: string): void {
+  const target = new URL(request.url ?? "/", apiOrigin);
+  const upstream = httpRequest(
+    target,
+    { method: request.method, headers: { ...request.headers, host: target.host } },
+    (apiResponse) => {
+      response.writeHead(apiResponse.statusCode ?? 502, apiResponse.headers);
+      apiResponse.pipe(response);
+    },
+  );
+  upstream.on("error", () => {
+    if (!response.headersSent) sendStatus(response, 502);
+    response.end();
+  });
+  request.pipe(upstream);
+}
+
+export function createSiteServer(options: SiteServerOptions): Server {
+  const files = createStaticFiles(options.root);
+  return createServer((request, response) => {
+    const url = new URL(request.url ?? "/", "http://localhost");
+    if (url.pathname.startsWith("/api/")) {
+      forwardToApi(request, response, options.apiOrigin);
+      return;
+    }
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      sendStatus(response, 405);
+      return;
+    }
+    const route = resolveRoute(url.pathname, url.search, files);
+    switch (route.kind) {
+      case "redirect":
+        response.writeHead(301, { Location: route.location, "Cache-Control": "no-store" });
+        response.end();
+        return;
+      case "forbidden":
+        sendStatus(response, 403);
+        return;
+      case "not-found":
+        sendStatus(response, 404);
+        return;
+      case "file": {
+        const type = CONTENT_TYPES[extname(route.path).toLowerCase()] ?? "application/octet-stream";
+        response.writeHead(200, { "Content-Type": type, "Cache-Control": "no-store" });
+        if (request.method === "HEAD") {
+          response.end();
+          return;
+        }
+        createReadStream(join(options.root, decodeURIComponent(route.path))).pipe(response);
+      }
+    }
+  });
+}

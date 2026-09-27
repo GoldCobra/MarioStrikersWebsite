@@ -12,3 +12,5 @@ docs/archive/
 # Documentation and CI files are formatted by hand.
 *.md
 *.yml
+apps/web/dist/
+apps/web/.astro/
