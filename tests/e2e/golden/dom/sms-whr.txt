@@ -592,13 +592,6 @@
   </main>
   #text "\n\n  "
   #text "\n  "
-  #text "\n  "
-  #text "\n  "
-  #text "\n  "
-  #text "\n  "
-  #text "\n  "
-  #text "\n  "
-  #text "\n  "
   #text "\n\n\n"
   <footer id="global-footer">
     <p class="global-footer-disclaimer">

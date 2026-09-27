@@ -9,19 +9,22 @@ loaded in the browser. In `apps/web/`:
 | --- | --- |
 | `src/layouts/SiteLayout.astro` | The document around every page: head metadata from the page registry, navigation, content tabs, footer, scripts |
 | `src/layouts/site-shell.ts` | Markup of the navigation, tabs and footer, rendered from the navigation model |
-| `src/layouts/assets.ts` | Every browser script and page-specific stylesheet with its cache tag, in one place |
+| `src/entries/`, `src/features/<name>/` | Browser code in TypeScript, bundled by Vite with content-hashed file names: one entry per page type, one folder per feature |
+| `src/layouts/assets.ts` | Every legacy browser script and page-specific stylesheet with its cache tag, in one place |
 | `src/styles/` | The global stylesheet as partials named after the components they style; `global.ts` fixes their order |
 | `src/pages/index.astro`, `src/pages/pages/<slug>.astro` | One file per page; built to `/index.html` and `/pages/<slug>.html`, served at `/` and `/<slug>` |
 | `src/components/pages/` | Page families: section overviews, leaderboards, rules and tier lists |
-| `public/` | Web root: browser `js/`, `assets/`, fetched fragments in `pages/templates/` |
+| `public/` | Web root: legacy browser `js/` (moving to `src/features/`), `assets/`, fetched fragments in `pages/templates/` |
 
 Navigation, tabs, breadcrumbs (JSON-LD) and favicons are static markup, so
 search engines see every internal link. The layout keeps the whitespace of the
 former hand-written pages exactly, because text between inline elements takes
-space; the DOM goldens check it. `js/global-nav.js` adds the behaviour: the
-account widget, the tab strip (`js/global-tabs-engine.js`), centring of
-overflowing navigation, link prefetching and redirects of old `?tabs=` and
-`?submenu=` links. Shared popup classes in `src/styles/popups.css` are
+space; the DOM goldens check it. `src/entries/site.ts`, loaded on every page,
+adds the behaviour (`src/features/nav/`): the account widget, the tab strip
+(`src/features/tabs/`), centring of overflowing navigation, link prefetching and
+redirects of old `?tabs=` and `?submenu=` links. Modules run before the legacy
+scripts; while a legacy script still reads a global (such as
+`window.GlobalTabsEngine`), the module that replaced its provider sets it. Shared popup classes in `src/styles/popups.css` are
 `popup-overlay`, `popup-card`, `popup-header`, `popup-title` and `popup-close`.
 
 **Adding a page:** add it to `packages/shared/src/site/pages.ts` (title,
@@ -31,17 +34,20 @@ both), place it in the navigation model
 (`navigation.ts`) if it needs a menu entry or tab, create
 `src/pages/pages/<slug>.astro` with `SiteLayout` (or a family component), and
 list its scripts by name from `assets.ts`. A unit test fails when the registry
-and the page files disagree.
+and the page files disagree. Page modules go into the layout's `scripts` slot
+(`<Fragment slot="scripts"><script src="…"></script></Fragment>`).
 
-Leaderboard and competitive-rules modules pair a `*-config.js` with a shared
-`*-engine.js`. Players, clubs and account profiles have their own engines.
-The player popup is loaded from `/pages/templates/player-profile-popup.html`.
+The players list, the player popup (`src/features/players/`), the profile page
+(`src/features/profile/`) and the rating cards (`src/features/rating-cards/`)
+are modules; `src/lib/` holds the shared API fetch and country helpers. The
+leaderboards and clubs are still legacy engines in `public/js/`: the
+leaderboards pair `leaderboards-config.js` with `leaderboards-engine.js`, as the
+competitive rules do. The player popup is loaded from
+`/pages/templates/player-profile-popup.html`.
 The Gear Builder loads `/pages/templates/msbl-gear-builder.html` and its assets
 under `assets/gear-builder/`.
 
-`js/runtime-config.js` sets `window.APP_RUNTIME_CONFIG.leaderboardsApiBase`.
-Its empty default means same-origin `/api/...` requests. A separate API host
-requires an explicit base URL and matching server configuration.
+Browser code calls the API on the same origin (`/api/...`).
 
 ## Routing and caching
 

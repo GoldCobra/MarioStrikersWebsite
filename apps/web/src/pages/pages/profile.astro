@@ -1,6 +1,6 @@
 ---
 import SiteLayout from "../../layouts/SiteLayout.astro";
 ---
-<SiteLayout slug="profile" mainClass="profile-page" mainLabel="My Profile" scripts={["globalTabsEngine", "globalNav", "countryDisplayNames", "flagUtils", "ratingCards", "profilePage"]}>
+<SiteLayout slug="profile" mainClass="profile-page" mainLabel="My Profile">
     <section id="profile-root" class="profile-root"></section>
-  </SiteLayout>
+  <Fragment slot="scripts"><script src="../../entries/profile-page.ts"></script></Fragment></SiteLayout>

@@ -1,6 +1,6 @@
 ---
 import SiteLayout from "../../layouts/SiteLayout.astro";
 ---
-<SiteLayout slug="players" mainClass="players-page" mainLabel="Players" scripts={["runtimeConfig", "publicDataPreload", "globalTabsEngine", "globalNav", "countryDisplayNames", "flagUtils", "ratingCards", "playersEngine"]}>
+<SiteLayout slug="players" mainClass="players-page" mainLabel="Players">
     <section id="players-root" class="players-root"></section>
-  </SiteLayout>
+  <Fragment slot="scripts"><script src="../../entries/players-page.ts"></script></Fragment></SiteLayout>
