@@ -10,7 +10,7 @@ const port = readPort("PORT", 8787);
 const apiPort = port + 1000;
 const apiOrigin = `http://127.0.0.1:${apiPort}`;
 
-const api = startProcess("api", process.execPath, ["apps/api/src/dev.js"], {
+const api = startProcess("api", process.execPath, ["apps/api/src/dev.ts"], {
   PORT: String(apiPort),
   DEV_HOST: "127.0.0.1",
 });

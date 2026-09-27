@@ -9,10 +9,13 @@ WORKDIR /app
 # Workspace manifests first, so the dependency layer is reused until they change.
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/
+COPY packages/shared/package.json packages/shared/
 RUN npm ci --omit=dev --workspace=@ms/api --no-audit --no-fund
 
+# Node runs the TypeScript sources directly (type stripping); there is no build step.
+COPY packages/shared/src/ packages/shared/src/
 COPY apps/api/ apps/api/
 
 EXPOSE 8787
 
-CMD ["node", "apps/api/src/index.js"]
+CMD ["node", "apps/api/src/main.ts"]

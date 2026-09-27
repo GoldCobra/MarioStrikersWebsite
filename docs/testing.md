@@ -43,3 +43,28 @@ node tests/e2e/run.ts routes   # status and Location of all URL shapes (needs RO
 
 Screenshots and reports stay in the ignored `tests/e2e/.cache/`; CI uploads the
 report when a check fails.
+
+## Live API comparison
+
+Fixtures cannot show whether an API rewrite reads the real database the same
+way. Before releasing one, start the previous and the new API side by side
+against the same database (`npm run dev:live` settings, read-only use,
+coordinated with GoldCobra) and compare them:
+
+```sh
+node tools/src/api-diff.ts compare http://127.0.0.1:9801 http://127.0.0.1:9802
+```
+
+It requests every endpoint variant, every player profile and every club profile
+and logo, retries differences once (live data may change in between), and
+prints the JSON paths that still differ.
+
+Production can be checked the same way through its public API: record it just
+before a release and compare the released API with the recording. `--pace`
+sends one request at a time and keeps production below its rate limits:
+
+```sh
+node tools/src/api-diff.ts record https://mariostrikers.gg before.json --pace=700
+# release
+node tools/src/api-diff.ts compare before.json https://mariostrikers.gg --pace=700
+```

@@ -65,7 +65,7 @@ test("repository files outside the site are never served", async () => {
     "/package.json",
     "/../package.json",
     "/%2e%2e/package.json",
-    "/apps/api/src/config.js",
+    "/apps/api/src/config.ts",
     "/.env",
   ]) {
     assert.equal((await fetch(`${base}${path}`)).status, 404, path);

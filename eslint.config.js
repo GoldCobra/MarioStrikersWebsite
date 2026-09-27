@@ -3,18 +3,10 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-// Lints TypeScript and the root configs. Legacy JavaScript under apps/ is ignored
-// until each part is rewritten in TypeScript.
+// Lints TypeScript and the root configs. The legacy browser JavaScript under apps/web/public is ignored
+// until it is rewritten in TypeScript.
 export default defineConfig([
-  globalIgnores([
-    "**/node_modules/",
-    "**/.cache/",
-    "apps/api/",
-    "apps/web/public/",
-    "apps/web/dist/",
-    "apps/web/.astro/",
-    "docs/",
-  ]),
+  globalIgnores(["**/node_modules/", "**/.cache/", "apps/web/public/", "apps/web/dist/", "apps/web/.astro/", "docs/"]),
   {
     files: ["*.js"],
     extends: [js.configs.recommended],
@@ -29,6 +21,8 @@ export default defineConfig([
     rules: {
       "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
+      // An empty string means "not set" (environment, database columns), so `text || fallback` is intended.
+      "@typescript-eslint/prefer-nullish-coalescing": ["error", { ignorePrimitives: { string: true } }],
     },
   },
   {

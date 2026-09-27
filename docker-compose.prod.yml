@@ -19,6 +19,8 @@ services:
     environment:
       - NODE_ENV=production
       - FLARESOLVERR_URL=http://flaresolverr:8191
+      # Caddy and nginx sit in front; the client address is the third X-Forwarded-For hop.
+      - TRUST_PROXY_HOPS=2
     env_file:
       - ${BACKEND_ENV_FILE:-./backend/.env}
     volumes:

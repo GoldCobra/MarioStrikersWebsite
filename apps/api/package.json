@@ -2,29 +2,32 @@
   "name": "@ms/api",
   "version": "1.0.0",
   "private": true,
-  "description": "Express API for the Mario Strikers website: MSSQL data, Discord login and community events.",
-  "main": "src/index.js",
-  "scripts": {
-    "start": "node src/index.js",
-    "start:api": "node src/index.js",
-    "dev": "node --watch src/dev.js",
-    "dev:live": "node --watch src/dev-live.js",
-    "sync:mssql:once": "node src/scripts/mssql-sync-once.js",
-    "club-logos:cache": "node src/scripts/cache-club-logos-once.js",
-    "profile:index": "node src/scripts/apply-profile-performance-index.js",
-    "check": "node src/scripts/check-syntax.js",
-    "check:frontend": "node src/scripts/check-frontend.js",
-    "test": "node --require ./src/test-support/isolate.js --test",
-    "test:smoke": "node --require ./src/test-support/isolate.js --test src/dev-smoke.test.js"
-  },
+  "description": "Fastify API for the Mario Strikers website: MSSQL data, Discord login and community events.",
+  "type": "module",
   "engines": {
     "node": "24.x"
   },
+  "scripts": {
+    "start": "node src/main.ts",
+    "dev": "node --watch src/dev.ts",
+    "dev:live": "node --watch src/dev-live.ts",
+    "ops:check-db": "node src/ops/check-database.ts",
+    "ops:club-logos": "node src/ops/cache-club-logos.ts",
+    "ops:profile-index": "node src/ops/apply-profile-index.ts",
+    "test": "node --import ./src/test-support/isolate.ts --test \"src/**/*.test.ts\"",
+    "test:smoke": "node --import ./src/test-support/isolate.ts --test src/dev-smoke.test.ts"
+  },
   "dependencies": {
-    "compression": "^1.8.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "mssql": "^11.0.1"
+    "@fastify/cors": "11.3.0",
+    "@fastify/etag": "6.2.0",
+    "@fastify/rate-limit": "11.2.0",
+    "@ms/shared": "*",
+    "fastify": "5.12.5",
+    "lru-cache": "11.5.3",
+    "mssql": "11.0.1",
+    "pino": "10.3.1"
+  },
+  "devDependencies": {
+    "@types/mssql": "9.1.11"
   }
 }

@@ -41,7 +41,8 @@ PNG/WebP pairs in the Gear Builder include intentional fallback behavior.
 
 ## Backend and data
 
-Express provides the API. In live mode, MSSQL supplies rankings, players, clubs
+The API is a Fastify application written in TypeScript; Node runs the sources
+directly, without a build step. In live mode, MSSQL supplies rankings, players, clubs
 and competitive-season data. Discord supplies authentication, member names and
 community events. Wiimmfi availability is retrieved through FlareSolverr.
 
@@ -60,6 +61,37 @@ enables Discord name lookups and event discovery.
 
 Local development uses synthetic fixtures through the same public route
 shapes; see [development](development.md) for simulated versus live behavior.
+
+### API code layout
+
+Everything lives under `apps/api/src/`:
+
+| Location | Purpose |
+| --- | --- |
+| `main.ts`, `dev.ts`, `dev-live.ts` | Entry points: production, fixtures, local live services |
+| `app.ts` | Builds the Fastify app: plugins, error handling and every route module |
+| `config.ts` | Typed configuration; `.env.example` lists every variable |
+| `data-source.ts` | The `DataSource` interface the routes read from, and its live implementation |
+| `fixtures/` | The invented `DataSource` of local development and tests |
+| `modules/<domain>/` | `routes.ts`, `service.ts`, `repository.ts` (SQL), `mappers.ts` and their tests |
+| `cache/`, `db/`, `http/`, `integrations/`, `lib/` | Public data cache, MSSQL pool, reply helpers and errors, Discord REST, small utilities |
+| `ops/` | One-off maintenance commands (`npm run ops:*` in `apps/api`) |
+
+A new endpoint goes into the module of its domain: SQL in `repository.ts`,
+shaping in `service.ts`/`mappers.ts`, the HTTP contract in `routes.ts`, which
+`app.ts` registers. Data the routes need is added to `DataSource` and to both
+implementations, so fixtures keep covering it.
+
+### Errors and security
+
+Every error answers `{ "error": "...", "code": "..." }` with `Cache-Control:
+no-store`, sometimes with extra fields (the profile routes add `account`).
+Unexpected errors are logged with the request id and answered as a generic
+`500 INTERNAL`; database and configuration details never reach clients.
+Uncached routes (profiles, login) are rate-limited per client address in
+production. The Discord login binds its OAuth state to the browser with a
+short-lived `msc_oauth_state` cookie, logout refuses cross-site requests, and
+club logos are only downloaded from public HTTPS addresses.
 
 ## API reference
 
@@ -89,5 +121,5 @@ Leaderboard games are `msbl`, `msc` and `sms`; modes are `elo1v1`,
 games; the `msbl-elo2v2` page and route still exist but have no tab.
 WHR is the all-time 1v1 rating that futbot recalculates from every reported
 result; the backend only reads it.
-`apps/api/src/server.js`, service implementations and their tests define
-response fields and validation.
+The route modules in `apps/api/src/modules/` and their tests define response
+fields and validation.
