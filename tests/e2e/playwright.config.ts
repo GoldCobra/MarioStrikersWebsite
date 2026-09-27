@@ -10,7 +10,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: 0,
-  workers: process.env.CI ? 2 : undefined,
+  // GitHub-hosted Linux runners have four cores.
+  workers: process.env.CI ? 4 : undefined,
   timeout: 120_000,
   reporter: process.env.CI ? [["list"], ["html", { outputFolder: "./.cache/report", open: "never" }]] : [["list"]],
   expect: {

@@ -6,8 +6,8 @@ import { FIXTURE_NOW } from "./site.ts";
 // renders the same moment, including second-by-second countdowns.
 
 const BLANK_DOCUMENT = '<!doctype html><title>blocked</title><body style="margin:0;background:#000"></body>';
-const STEP_MS = 250;
-const QUIET_MS = 150;
+const STEP_MS = 500;
+const QUIET_MS = 100;
 const inFlight = new WeakMap<Page, { count: number }>();
 
 function isLocal(url: URL): boolean {
