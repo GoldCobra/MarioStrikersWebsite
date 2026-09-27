@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { execFileSync } = require("node:child_process");
 
-const root = path.resolve(__dirname, "../../..");
+const root = path.resolve(__dirname, "../../../web/public");
 const errors = [];
 
 function walk(directory) {

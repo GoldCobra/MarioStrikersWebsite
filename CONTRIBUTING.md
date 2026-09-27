@@ -29,7 +29,7 @@ Agree on the task before editing shared navigation, global CSS or the same PSD.
 - Bump relevant `?v=...` tags wherever changed browser scripts or styles
   are loaded, including dynamically loaded scripts.
 - Add meaningful coverage for changed behavior. Fixtures belong in
-  `backend/src/dev/fixtures.js`; use invented data, never production exports.
+  `apps/api/src/dev/fixtures.js`; use invented data, never production exports.
 - Update the relevant short document when setup, behavior or operations change.
 - Keep design sources in `docs/source-assets/` and exported runtime files in
   `assets/`. Coordinate binary edits; avoid unrelated asset conversions.
@@ -37,7 +37,7 @@ Agree on the task before editing shared navigation, global CSS or the same PSD.
 
 ## Check and submit
 
-Run from `backend/`:
+Run from the repository root:
 
 ```sh
 npm run check

@@ -29,6 +29,7 @@ Caddyfile text eol=lf
 .gitignore text eol=lf
 .gitattributes text eol=lf
 .editorconfig text eol=lf
+.prettierignore text eol=lf
 .env.example text eol=lf
 CODEOWNERS text eol=lf
 .node-version text eol=lf

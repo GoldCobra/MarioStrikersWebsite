@@ -8,7 +8,7 @@ const golden = require("./test-support/rating-cards-classic.golden.json");
 
 // js/rating-cards.js is a browser script that registers window.MSCRatingCards.
 function loadRatingCards() {
-  const source = fs.readFileSync(path.join(__dirname, "..", "..", "js", "rating-cards.js"), "utf8");
+  const source = fs.readFileSync(path.join(__dirname, "..", "..", "web", "public", "js", "rating-cards.js"), "utf8");
   const context = vm.createContext({ window: {} });
   vm.runInContext(source, context);
   return context.window.MSCRatingCards;

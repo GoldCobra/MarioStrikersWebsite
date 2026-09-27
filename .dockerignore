@@ -3,11 +3,12 @@
 .vscode
 .idea
 
-backend/node_modules
-backend/.cache
-backend/reports
-backend/.env
-backend/.env.*
+**/node_modules
+**/.cache
+**/reports
+backend
+apps/api/.env
+apps/api/.env.*
 
 .env
 .env.*

@@ -28,10 +28,22 @@ async function openGearBuilderPane(page: Page, which: "first" | "last"): Promise
 }
 
 const STATES: VisualState[] = [
-  { name: "players-popup", path: "/players", act: (page) => clickAndSettle(page, ".players-name-trigger[data-player-id]") },
-  { name: "leaderboard-popup", path: "/msbl-elo1v1", act: (page) => clickAndSettle(page, ".lb-player-trigger[data-player-id]") },
+  {
+    name: "players-popup",
+    path: "/players",
+    act: (page) => clickAndSettle(page, ".players-name-trigger[data-player-id]"),
+  },
+  {
+    name: "leaderboard-popup",
+    path: "/msbl-elo1v1",
+    act: (page) => clickAndSettle(page, ".lb-player-trigger[data-player-id]"),
+  },
   { name: "whr-popup", path: "/msc-whr", act: (page) => clickAndSettle(page, ".lb-player-trigger[data-player-id]") },
-  { name: "club-popup", path: "/msbl-striker-clubs", act: (page) => clickAndSettle(page, ".msbl-club-row[data-club-id]") },
+  {
+    name: "club-popup",
+    path: "/msbl-striker-clubs",
+    act: (page) => clickAndSettle(page, ".msbl-club-row[data-club-id]"),
+  },
   { name: "account-menu", path: "/", login: "linked", act: (page) => clickAndSettle(page, ".global-account-trigger") },
   { name: "profile-linked", path: "/profile", login: "linked", fullPage: true },
   { name: "profile-unlinked", path: "/profile", login: "unlinked", fullPage: true },
@@ -41,18 +53,39 @@ const STATES: VisualState[] = [
   { name: "error-home", path: "/", failApi: true, fullPage: true },
   { name: "error-events", path: "/community-tournaments", failApi: true, fullPage: true },
   { name: "error-wiimmfi", path: "/msc-wiimmfi", failApi: true, fullPage: true },
-  { name: "error-profile-popup", path: "/players", act: async (page) => {
-    await page.route("**/api/players/*/profile", (route) => route.fulfill({ status: 500, contentType: "application/json", body: '{"error":"Simulated failure."}' }));
-    await clickAndSettle(page, ".players-name-trigger[data-player-id]");
-  } },
-  { name: "gear-builder-first-pane", path: "/msbl-gear-builder", fullPage: true, act: (page) => openGearBuilderPane(page, "first") },
-  { name: "gear-builder-last-pane", path: "/msbl-gear-builder", fullPage: true, act: (page) => openGearBuilderPane(page, "last") },
+  {
+    name: "error-profile-popup",
+    path: "/players",
+    act: async (page) => {
+      await page.route("**/api/players/*/profile", (route) =>
+        route.fulfill({ status: 500, contentType: "application/json", body: '{"error":"Simulated failure."}' }),
+      );
+      await clickAndSettle(page, ".players-name-trigger[data-player-id]");
+    },
+  },
+  {
+    name: "gear-builder-first-pane",
+    path: "/msbl-gear-builder",
+    fullPage: true,
+    act: (page) => openGearBuilderPane(page, "first"),
+  },
+  {
+    name: "gear-builder-last-pane",
+    path: "/msbl-gear-builder",
+    fullPage: true,
+    act: (page) => openGearBuilderPane(page, "last"),
+  },
   { name: "placeholder-construction", path: "/tab-placeholder?state=construction", fullPage: true },
   { name: "placeholder-tba", path: "/tab-placeholder?state=tba", fullPage: true },
-  { name: "nav-hover", path: "/competitive-rules", widths: [1280], act: async (page) => {
-    await page.locator(".nav-top-link").nth(2).hover();
-    await settle(page);
-  } }
+  {
+    name: "nav-hover",
+    path: "/competitive-rules",
+    widths: [1280],
+    act: async (page) => {
+      await page.locator(".nav-top-link").nth(2).hover();
+      await settle(page);
+    },
+  },
 ];
 
 for (const state of STATES) {

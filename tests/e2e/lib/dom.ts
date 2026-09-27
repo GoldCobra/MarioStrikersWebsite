@@ -25,7 +25,9 @@ export function snapshotDocument(): DocumentSnapshot {
   }
 
   const body = document.body.cloneNode(true) as HTMLElement;
-  body.querySelectorAll(REMOVED_ELEMENTS).forEach((node) => node.remove());
+  body.querySelectorAll(REMOVED_ELEMENTS).forEach((node) => {
+    node.remove();
+  });
   body.querySelectorAll("svg.global-tabs-line-overlay").forEach((svg) => {
     svg.replaceChildren();
     for (const attribute of Array.from(svg.attributes)) {
@@ -46,8 +48,13 @@ export function snapshotDocument(): DocumentSnapshot {
     if (element.getAttribute("class") === "") element.removeAttribute("class");
     const attributes = Array.from(element.attributes)
       .filter((attribute) => !LAYOUT_ATTRIBUTES.has(attribute.name))
-      .map((attribute) => " " + attribute.name + "="
-        + JSON.stringify(URL_ATTRIBUTES.has(attribute.name) ? toPath(attribute.value) : attribute.value))
+      .map(
+        (attribute) =>
+          " " +
+          attribute.name +
+          "=" +
+          JSON.stringify(URL_ATTRIBUTES.has(attribute.name) ? toPath(attribute.value) : attribute.value),
+      )
       .join("");
     const tag = element.localName;
     if (!element.childNodes.length) {
@@ -55,7 +62,9 @@ export function snapshotDocument(): DocumentSnapshot {
       return;
     }
     lines.push(pad + "<" + tag + attributes + ">");
-    element.childNodes.forEach((child) => serialize(child, depth + 1));
+    element.childNodes.forEach((child) => {
+      serialize(child, depth + 1);
+    });
     lines.push(pad + "</" + tag + ">");
   }
   serialize(body, 0);
@@ -70,7 +79,8 @@ export function snapshotDocument(): DocumentSnapshot {
       return true;
     })
     .map((element) => {
-      if (element.localName === "script") return { tag: "script", json: JSON.parse(element.textContent || "null") as unknown };
+      if (element.localName === "script")
+        return { tag: "script", json: JSON.parse(element.textContent || "null") as unknown };
       if (element.localName === "title") return { tag: "title", text: element.textContent };
       const attributes: Record<string, string> = {};
       for (const attribute of Array.from(element.attributes)) {

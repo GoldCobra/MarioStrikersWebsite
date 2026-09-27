@@ -1,7 +1,7 @@
 {
   "$comment": "How run.ts starts this commit's fixture stack. Each commit carries its own copy, so a reference commit always starts the way it was built.",
-  "install": [["npm", "ci", "--prefix", "backend", "--no-audit", "--no-fund"]],
-  "installedMarker": "backend/node_modules/.package-lock.json",
-  "start": ["node", "backend/src/dev.js"],
+  "install": [["npm", "ci", "--no-audit", "--no-fund"]],
+  "installedMarker": "node_modules/.package-lock.json",
+  "start": ["node", "apps/api/src/dev.js"],
   "env": { "DEV_HOST": "127.0.0.1" }
 }

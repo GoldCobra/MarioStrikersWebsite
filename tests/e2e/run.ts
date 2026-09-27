@@ -69,7 +69,8 @@ function installStack(root: string, config: StackConfig): void {
 
 function readReferenceSha(): string {
   const value = readFileSync(join(E2E_DIR, "visual-reference.sha"), "utf8").trim();
-  if (value !== "self" && !/^[0-9a-f]{40}$/.test(value)) fail("visual-reference.sha must hold a full commit SHA or 'self'.");
+  if (value !== "self" && !/^[0-9a-f]{40}$/.test(value))
+    fail("visual-reference.sha must hold a full commit SHA or 'self'.");
   return value;
 }
 
@@ -113,23 +114,30 @@ async function startStack(root: string, port: number, label: string): Promise<Ru
   const [command, ...args] = config.start;
   if (!command) fail(`Empty start command in ${root}.`);
   const env = { ...process.env, ...config.env, PORT: String(port), MSC_FIXTURE_NOW: FIXTURE_NOW };
-  const child = spawn(command, args, { cwd: root, env, stdio: ["ignore", "pipe", "pipe"], shell: IS_WINDOWS && command === "npm" });
-  child.stdout?.on("data", (chunk: Buffer) => process.stdout.write(`[${label}] ${chunk}`));
-  child.stderr?.on("data", (chunk: Buffer) => process.stderr.write(`[${label}] ${chunk}`));
-  const url = "http://127.0.0.1:" + port;
+  const child = spawn(command, args, {
+    cwd: root,
+    env,
+    stdio: ["ignore", "pipe", "pipe"],
+    shell: IS_WINDOWS && command === "npm",
+  });
+  child.stdout.on("data", (chunk: Buffer) => process.stdout.write(`[${label}] ${chunk.toString()}`));
+  child.stderr.on("data", (chunk: Buffer) => process.stderr.write(`[${label}] ${chunk.toString()}`));
+  const url = `http://127.0.0.1:${port}`;
   await waitForHealth(url, child);
   console.log(`[e2e] ${label} stack ready at ${url} (${root})`);
   return { url, process: child };
 }
 
 function stopStack(stack: RunningStack | undefined): void {
-  if (stack && stack.process.exitCode === null) stack.process.kill();
+  if (stack?.process.exitCode === null) stack.process.kill();
 }
 
 function runPlaywright(args: string[], env: Record<string, string>): number {
   if (!PLAYWRIGHT_CLI || !existsSync(PLAYWRIGHT_CLI)) fail("Install dependencies first (npm ci).");
   const result = spawnSync(process.execPath, [PLAYWRIGHT_CLI, "test", ...args], {
-    cwd: E2E_DIR, stdio: "inherit", env: { ...process.env, ...env }
+    cwd: E2E_DIR,
+    stdio: "inherit",
+    env: { ...process.env, ...env },
   });
   return result.status ?? 1;
 }
@@ -137,12 +145,18 @@ function runPlaywright(args: string[], env: Record<string, string>): number {
 async function withStacks(
   needReference: boolean,
   selfCheck: boolean,
-  body: (urls: { reference?: string; candidate: string }) => number
+  body: (urls: { reference?: string; candidate: string }) => number,
 ): Promise<number> {
   let reference: RunningStack | undefined;
   let candidate: RunningStack | undefined;
-  const stopAll = (): void => { stopStack(reference); stopStack(candidate); };
-  process.once("SIGINT", () => { stopAll(); process.exit(130); });
+  const stopAll = (): void => {
+    stopStack(reference);
+    stopStack(candidate);
+  };
+  process.once("SIGINT", () => {
+    stopAll();
+    process.exit(130);
+  });
   try {
     candidate = await startStack(REPO_ROOT, CANDIDATE_PORT, "candidate");
     if (needReference) {
@@ -179,17 +193,23 @@ async function main(): Promise<void> {
     }
     case "dom": {
       status = await withStacks(false, false, ({ candidate }) =>
-        runPlaywright(["--project=golden", ...(update ? ["--update-snapshots=all"] : []), ...passThrough], { CAND_URL: candidate }));
+        runPlaywright(["--project=golden", ...(update ? ["--update-snapshots=all"] : []), ...passThrough], {
+          CAND_URL: candidate,
+        }),
+      );
       break;
     }
     case "contract": {
       status = await withStacks(true, selfCheck, ({ reference, candidate }) =>
-        runPlaywright(["--project=contract", ...passThrough], { REF_URL: reference ?? "", CAND_URL: candidate }));
+        runPlaywright(["--project=contract", ...passThrough], { REF_URL: reference ?? "", CAND_URL: candidate }),
+      );
       break;
     }
     case "routes": {
-      const routesUrl = process.env.ROUTES_URL || "http://127.0.0.1:8080";
-      status = runPlaywright(["--project=routes", ...(update ? ["--update-snapshots=all"] : []), ...passThrough], { ROUTES_URL: routesUrl });
+      const routesUrl = process.env.ROUTES_URL ?? "http://127.0.0.1:8080";
+      status = runPlaywright(["--project=routes", ...(update ? ["--update-snapshots=all"] : []), ...passThrough], {
+        ROUTES_URL: routesUrl,
+      });
       break;
     }
     default:

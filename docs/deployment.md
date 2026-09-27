@@ -13,7 +13,8 @@ server from the repository root; they require Python 3.12+, Git and Docker Compo
 After the collaboration setup is merged, update the existing server checkout on
 `gc-updates` with `git pull --ff-only origin gc-updates`. The working tree must
 be clean. Keep the existing `backend/.env`, Caddy configuration and Docker
-volumes; do not copy secrets into Git.
+volumes; do not copy secrets into Git. The server keeps its credentials at
+`backend/.env` (ignored by Git) even though the API source lives in `apps/api/`.
 
 Confirm the existing Compose project name using `docker compose ls`.
 The script defaults to `mario-strikers-website`. If the existing project name
