@@ -48,8 +48,10 @@ git diff --check
 ```
 
 For UI work, check desktop and mobile layouts, affected navigation and browser
-console errors. For editor work, also verify file length, validation and export
-behavior described in [save tools](docs/save-tools.md).
+console errors. Refactoring must keep the [comparison checks](docs/testing.md)
+green; an intended visual or markup change updates the goldens in the same PR.
+For editor work, also verify file length, validation and export behavior
+described in [save tools](docs/save-tools.md).
 
 Review `git diff`, stage only intended files, commit and publish your branch:
 

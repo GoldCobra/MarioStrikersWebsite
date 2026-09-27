@@ -23,5 +23,6 @@ tmp
 .deploy
 reports
 scripts
+tests
 Thumbs.db
 .DS_Store

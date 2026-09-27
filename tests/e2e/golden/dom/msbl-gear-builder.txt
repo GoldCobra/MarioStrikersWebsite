@@ -1,0 +1,743 @@
+<body data-page="msbl-gear-builder" data-subnav="on">
+  #text "\n  "
+  <div id="1">
+    #text "\n    "
+    <div id="global-nav">
+      <header id="2">
+        <a class="nav-brand" href="/" aria-label="Mario Strikers Community home">
+          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src='./assets/logo/logo.png'"/>
+          <span class="nav-brand-est">
+            #text "EST. 2017"
+          </span>
+        </a>
+        <nav class="main-nav main-nav-text" aria-label="Main navigation">
+          <a class="nav-top-link" href="/" data-top-key="home" aria-label="Home">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-home.png'"/>
+          </a>
+          <a class="nav-top-link is-active" href="/games" data-top-key="games" aria-label="Games">
+            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-games-active.webp" width="733" height="198" alt="Games" onerror="this.onerror=null;this.src='./assets/nav-buttons/active/nav-games-active.png'"/>
+          </a>
+          <a class="nav-top-link" href="/competitive" data-top-key="competitive" aria-label="Competitive">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-competitive.webp" width="733" height="198" alt="Competitive" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-competitive.png'"/>
+          </a>
+          <a class="nav-top-link" href="/players" data-top-key="players" aria-label="Players">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-players.webp" width="733" height="198" alt="Players" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-players.png'"/>
+          </a>
+          <a class="nav-top-link" href="/partners" data-top-key="partners" aria-label="Partners">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-partners.png'"/>
+          </a>
+        </nav>
+        <div id="global-account" class="global-account" data-auth-state="logged-out"/>
+      </header>
+    </div>
+    #text "\n    "
+    <div id="global-subnav">
+      <nav class="sub-nav sub-nav-level2" aria-label="Games navigation">
+        <a class="sub-link sub-link-text is-active" href="/msbl" aria-label="STRIKERS: BATTLE LEAGUE">
+          <span class="sub-link-label">
+            #text "STRIKERS: BATTLE LEAGUE"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/msc" aria-label="STRIKERS CHARGED">
+          <span class="sub-link-label">
+            #text "STRIKERS CHARGED"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/sms" aria-label="SUPER MARIO STRIKERS">
+          <span class="sub-link-label">
+            #text "SUPER MARIO STRIKERS"
+          </span>
+        </a>
+      </nav>
+    </div>
+    #text "\n  "
+  </div>
+  #text "\n\n  "
+  <main class="page-content gear-builder-page" aria-label="MSBL Gear Builder">
+    #text "\n    "
+    <h1 class="visually-hidden">
+      #text "MSBL Gear Builder"
+    </h1>
+    <div id="global-content-tabs">
+      <section class="global-tabs-shell" aria-label="MSBL tabs">
+        <div class="global-tabs-list">
+          <a class="global-tab" href="/msbl-striker-clubs" aria-label="Striker Clubs">
+            #text "STRIKER CLUBS"
+          </a>
+          <a class="global-tab is-active" href="/msbl-gear-builder" aria-label="Gear Builder" aria-current="page">
+            #text "GEAR BUILDER"
+          </a>
+          <a class="global-tab" href="/msbl-save-editor" aria-label="Save Editor">
+            #text "SAVE EDITOR"
+          </a>
+          <svg class="global-tabs-line-overlay"/>
+        </div>
+      </section>
+    </div>
+    #text "\n    "
+    <section id="msbl-gear-builder-host">
+      <section class="section">
+        #text "\n      "
+        <div class="tabs">
+          #text "\n        "
+          <div class="bar-area">
+            #text "\n        "
+            <div class="scrollbar">
+              #text "\n        "
+              <ul class="tab-list tab-list-icons" role="tablist">
+                #text "\n          "
+                <li class="tab-item builder-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link builder-tab-link" id="tab-b-link" role="tab" aria-controls="tab-b" aria-selected="true" aria-label="Builder">
+                    #text "BUILDER"
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-01-link" role="tab" aria-controls="tab-01" aria-selected="false" aria-label="Mario">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/mario.webp" alt="Mario"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-02-link" role="tab" aria-controls="tab-02" aria-selected="false" aria-label="Luigi">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/luigi.webp" alt="Luigi"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-03-link" role="tab" aria-controls="tab-03" aria-selected="false" aria-label="Bowser">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/bowser.webp" alt="Bowser"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-04-link" role="tab" aria-controls="tab-04" aria-selected="false" aria-label="Peach">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/peach.webp" alt="Peach"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-05-link" role="tab" aria-controls="tab-05" aria-selected="false" aria-label="Rosalina">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/rosalina.webp" alt="Rosalina"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-06-link" role="tab" aria-controls="tab-06" aria-selected="false" aria-label="Toad">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/toad.webp" alt="Toad"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-07-link" role="tab" aria-controls="tab-07" aria-selected="false" aria-label="Yoshi">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/yoshi.webp" alt="Yoshi"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-08-link" role="tab" aria-controls="tab-08" aria-selected="false" aria-label="Donkey Kong">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/dk.webp" alt="Donkey Kong"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-09-link" role="tab" aria-controls="tab-09" aria-selected="false" aria-label="Wario">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/wario.webp" alt="Wario"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-10-link" role="tab" aria-controls="tab-10" aria-selected="false" aria-label="Waluigi">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/waluigi.webp" alt="Waluigi"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-11-link" role="tab" aria-controls="tab-11" aria-selected="false" aria-label="Shy Guy">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/shyguy.webp" alt="Shy Guy"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-12-link" role="tab" aria-controls="tab-12" aria-selected="false" aria-label="Daisy">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/daisy.webp" alt="Daisy"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-13-link" role="tab" aria-controls="tab-13" aria-selected="false" aria-label="Pauline">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/pauline.webp" alt="Pauline"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-14-link" role="tab" aria-controls="tab-14" aria-selected="false" aria-label="Diddy Kong">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/diddy.webp" alt="Diddy Kong"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-15-link" role="tab" aria-controls="tab-15" aria-selected="false" aria-label="Bowser Jr">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/bowserjr.webp" alt="Bowser Jr"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n          "
+                <li class="tab-item icon-tab-item tab-item-last" role="presentation">
+                  #text "\n            "
+                  <button class="tab-link tab-link-icon" id="tab-16-link" role="tab" aria-controls="tab-16" aria-selected="false" aria-label="Birdo">
+                    <img class="tab-char-icon" src="/assets/gear-builder/images/characters-icons/birdo.webp" alt="Birdo"/>
+                  </button>
+                  #text "\n          "
+                </li>
+                #text "\n        "
+              </ul>
+              #text "\n        "
+            </div>
+            #text "\n        "
+          </div>
+          #text "\n        "
+          <div class="tab-content">
+            #text "\n          "
+            <div class="tab-pane" id="tab-b" role="tabpanel" aria-labelledby="tab-b-link">
+              #text "\n            "
+              <div class="container">
+                #text "\n              "
+                <div class="build-grid">
+                  #text "\n                  "
+                  <div class="form-group col-sm-8">
+                    #text "\n                    "
+                    <div id="myMultiselect" class="multiselect">
+                      #text "\n                      "
+                      <div id="mySelectLabel" class="selectBox" onclick="toggleCheckboxArea()">
+                        #text "\n                        "
+                        <select class="form-select">
+                          #text "\n                          "
+                          <option>
+                            #text "Select Character"
+                          </option>
+                          #text "\n                        "
+                        </select>
+                        #text "\n                        "
+                        <div class="overSelect"/>
+                        #text "\n                      "
+                      </div>
+                      #text "\n                      "
+                      <div id="mySelectOptions">
+                        #text "\n                        "
+                        <label for="selectall">
+                          <input type="checkbox" id="selectall" class="selectall" onchange="checkboxStatusChange()" value="none"/>
+                          #text "Select All"
+                        </label>
+                        #text "\n                        "
+                        <label for="one">
+                          <input type="checkbox" id="one" class="checkbox" onchange="checkboxStatusChange()" value="Mario"/>
+                          #text "Mario"
+                        </label>
+                        #text "\n                        "
+                        <label for="two">
+                          <input type="checkbox" id="two" class="checkbox" onchange="checkboxStatusChange()" value="Luigi"/>
+                          #text "Luigi"
+                        </label>
+                        #text "\n                        "
+                        <label for="three">
+                          <input type="checkbox" id="three" class="checkbox" onchange="checkboxStatusChange()" value="Bowser"/>
+                          #text "Bowser"
+                        </label>
+                        #text "\n                        "
+                        <label for="four">
+                          <input type="checkbox" id="four" class="checkbox" onchange="checkboxStatusChange()" value="Peach"/>
+                          #text "Peach"
+                        </label>
+                        #text "\n                        "
+                        <label for="five">
+                          <input type="checkbox" id="five" class="checkbox" onchange="checkboxStatusChange()" value="Rosalina"/>
+                          #text "Rosalina"
+                        </label>
+                        #text "\n                        "
+                        <label for="six">
+                          <input type="checkbox" id="six" class="checkbox" onchange="checkboxStatusChange()" value="Toad"/>
+                          #text "Toad"
+                        </label>
+                        #text "\n                        "
+                        <label for="seven">
+                          <input type="checkbox" id="seven" class="checkbox" onchange="checkboxStatusChange()" value="Yoshi"/>
+                          #text "Yoshi"
+                        </label>
+                        #text "\n                        "
+                        <label for="eight">
+                          <input type="checkbox" id="eight" class="checkbox" onchange="checkboxStatusChange()" value="DK"/>
+                          #text "DK"
+                        </label>
+                        #text "\n                        "
+                        <label for="nine">
+                          <input type="checkbox" id="nine" class="checkbox" onchange="checkboxStatusChange()" value="Wario"/>
+                          #text "Wario"
+                        </label>
+                        #text "\n                        "
+                        <label for="ten">
+                          <input type="checkbox" id="ten" class="checkbox" onchange="checkboxStatusChange()" value="Waluigi"/>
+                          #text "Waluigi"
+                        </label>
+                        #text "\n                        "
+                        <label for="eleven">
+                          <input type="checkbox" id="eleven" class="checkbox" onchange="checkboxStatusChange()" value="Shy Guy"/>
+                          #text "Shy Guy"
+                        </label>
+                        #text "\n                        "
+                        <label for="twelve">
+                          <input type="checkbox" id="twelve" class="checkbox" onchange="checkboxStatusChange()" value="Daisy"/>
+                          #text "Daisy"
+                        </label>
+                        #text "\n                        "
+                        <label for="thirteen">
+                          <input type="checkbox" id="thirteen" class="checkbox" onchange="checkboxStatusChange()" value="Pauline"/>
+                          #text "Pauline"
+                        </label>
+                        #text "\n                        "
+                        <label for="fourteen">
+                          <input type="checkbox" id="fourteen" class="checkbox" onchange="checkboxStatusChange()" value="Diddy Kong"/>
+                          #text "Diddy Kong"
+                        </label>
+                        #text "\n                        "
+                        <label for="fifteen">
+                          <input type="checkbox" id="fifteen" class="checkbox" onchange="checkboxStatusChange()" value="Bowser Jr"/>
+                          #text "Bowser Jr."
+                        </label>
+                        #text "\n                        "
+                        <label for="sixteen">
+                          <input type="checkbox" id="sixteen" class="checkbox" onchange="checkboxStatusChange()" value="Birdo"/>
+                          #text "Birdo"
+                        </label>
+                        #text "\n                      "
+                      </div>
+                      #text "\n                    "
+                    </div>
+                    #text "\n                  "
+                  </div>
+                  #text "\n                  "
+                  <div class="wrapper">
+                    #text "\n                    "
+                    <div class="stat-input">
+                      #text "\n                      "
+                      <div class="field min">
+                        #text "\n                        "
+                        <div/>
+                        #text "\n                        "
+                        <input type="number" class="input-min" value="1" id="range1"/>
+                        #text "\n                      "
+                      </div>
+                      #text "\n                      "
+                      <img class="pic" src="/assets/gear-builder/images/icons/strength.png"/>
+                      #text "\n                      "
+                      <div class="field max">
+                        #text "\n                        "
+                        <div/>
+                        #text "\n                        "
+                        <input type="number" class="input-max" value="25" id="range2"/>
+                        #text "\n                      "
+                      </div>
+                      #text "\n                    "
+                    </div>
+                    #text "\n                    "
+                    <div class="slider">
+                      #text "\n                      "
+                      <div class="progress"/>
+                      #text "\n                    "
+                    </div>
+                    #text "\n                    "
+                    <div class="range-input" id="strslider">
+                      #text "\n                      "
+                      <input type="range" class="sliders" min="1" max="25" value="1" id="strmin"/>
+                      #text "\n                      "
+                      <input type="range" class="sliders" min="1" max="25" value="25" id="strmax"/>
+                      #text "\n                    "
+                    </div>
+                    #text "\n                  "
+                  </div>
+                  #text "\n                  "
+                  <div class="wrapper">
+                    #text "\n                    "
+                    <div class="stat-input">
+                      #text "\n                      "
+                      <div class="field min">
+                        #text "\n                        "
+                        <div/>
+                        #text "\n                        "
+                        <input type="number" class="input-min" value="1" id="range3"/>
+                        #text "\n                      "
+                      </div>
+                      #text "\n                      "
+                      <img class="pic" src="/assets/gear-builder/images/icons/speed.png"/>
+                      #text "\n                      "
+                      <div class="field max">
+                        #text "\n                        "
+                        <div/>
+                        #text "\n                        "
+                        <input type="number" class="input-max" value="25" id="range4"/>
+                        #text "\n                      "
+                      </div>
+                      #text "\n                    "
+                    </div>
+                    #text "\n                    "
+                    <div class="slider">
+                      #text "\n                      "
+                      <div class="progress"/>
+                      #text "\n                    "
+                    </div>
+                    #text "\n                    "
+                    <div class="range-input" id="spdslider">
+                      #text "\n                      "
+                      <input type="range" class="sliders" min="1" max="25" value="1" id="spdmin"/>
+                      #text "\n                      "
+                      <input type="range" class="sliders" min="1" max="25" value="25" id="spdmax"/>
+                      #text "\n                    "
+                    </div>
+                    #text "\n                  "
+                  </div>
+                  #text "\n              "
+                </div>
+                #text "\n              "
+                <div class="build-grid">
+                  #text "\n                "
+                  <div class="wrapper">
+                    #text "\n                  "
+                    <div class="stat-input">
+                      #text "\n                    "
+                      <div class="field min">
+                        #text "\n                      "
+                        <div/>
+                        #text "\n                      "
+                        <input type="number" class="input-min" value="1" id="range5"/>
+                        #text "\n                    "
+                      </div>
+                      #text "\n                    "
+                      <img class="pic" src="/assets/gear-builder/images/icons/shot.png"/>
+                      #text "\n                    "
+                      <div class="field max">
+                        #text "\n                      "
+                        <div/>
+                        #text "\n                      "
+                        <input type="number" class="input-max" value="25" id="range6"/>
+                        #text "\n                    "
+                      </div>
+                      #text "\n                  "
+                    </div>
+                    #text "\n                  "
+                    <div class="slider">
+                      #text "\n                    "
+                      <div class="progress"/>
+                      #text "\n                  "
+                    </div>
+                    #text "\n                  "
+                    <div class="range-input" id="shotslider">
+                      #text "\n                    "
+                      <input type="range" class="sliders" min="1" max="25" value="1" id="shotmin"/>
+                      #text "\n                    "
+                      <input type="range" class="sliders" min="1" max="25" value="25" id="shotmax"/>
+                      #text "\n                  "
+                    </div>
+                    #text "\n                "
+                  </div>
+                  #text "\n                "
+                  <div class="wrapper">
+                    #text "\n                  "
+                    <div class="stat-input">
+                      #text "\n                    "
+                      <div class="field min">
+                        #text "\n                      "
+                        <div/>
+                        #text "\n                      "
+                        <input type="number" class="input-min" value="1" id="range7"/>
+                        #text "\n                    "
+                      </div>
+                      #text "\n                    "
+                      <img class="pic" src="/assets/gear-builder/images/icons/pass.png"/>
+                      #text "\n                    "
+                      <div class="field max">
+                        #text "\n                      "
+                        <div/>
+                        #text "\n                      "
+                        <input type="number" class="input-max" value="25" id="range8"/>
+                        #text "\n                    "
+                      </div>
+                      #text "\n                  "
+                    </div>
+                    #text "\n                  "
+                    <div class="slider">
+                      #text "\n                    "
+                      <div class="progress"/>
+                      #text "\n                  "
+                    </div>
+                    #text "\n                  "
+                    <div class="range-input" id="passslider">
+                      #text "\n                    "
+                      <input type="range" class="sliders" min="1" max="25" value="1" id="passmin"/>
+                      #text "\n                    "
+                      <input type="range" class="sliders" min="1" max="25" value="25" id="passmax"/>
+                      #text "\n                  "
+                    </div>
+                    #text "\n                "
+                  </div>
+                  #text "\n                "
+                  <div class="wrapper">
+                    #text "\n                  "
+                    <div class="stat-input">
+                      #text "\n                    "
+                      <div class="field min">
+                        #text "\n                      "
+                        <div/>
+                        #text "\n                      "
+                        <input type="number" class="input-min" value="1" id="range9"/>
+                        #text "\n                    "
+                      </div>
+                      #text "\n                    "
+                      <img class="pic" src="/assets/gear-builder/images/icons/tech.png"/>
+                      #text "\n                    "
+                      <div class="field max">
+                        #text "\n                      "
+                        <div/>
+                        #text "\n                      "
+                        <input type="number" class="input-max" value="25" id="range10"/>
+                        #text "\n                    "
+                      </div>
+                      #text "\n                  "
+                    </div>
+                    #text "\n                  "
+                    <div class="slider">
+                      #text "\n                    "
+                      <div class="progress"/>
+                      #text "\n                  "
+                    </div>
+                    #text "\n                  "
+                    <div class="range-input" id="techslider">
+                      #text "\n                    "
+                      <input type="range" class="sliders" min="1" max="25" value="1" id="techmin"/>
+                      #text "\n                    "
+                      <input type="range" class="sliders" min="1" max="25" value="25" id="techmax"/>
+                      #text "\n                  "
+                    </div>
+                    #text "\n                "
+                  </div>
+                  #text "\n              "
+                </div>
+                #text "\n              "
+                <button class="submit">
+                  #text "Find Builds"
+                </button>
+                #text "\n              "
+                <div class="table">
+                  #text "\n                "
+                  <table class="build-table" id="table-b">
+                    #text "\n                  "
+                    <colgroup>
+                      #text "\n                    "
+                      <col width="25%"/>
+                      #text "\n                    "
+                      <col width="15%"/>
+                      #text "\n                    "
+                      <col width="12%"/>
+                      #text "\n                    "
+                      <col width="12%"/>
+                      #text "\n                    "
+                      <col width="12%"/>
+                      #text "\n                    "
+                      <col width="12%"/>
+                      #text "\n                    "
+                      <col width="12%"/>
+                      #text "\n                  "
+                    </colgroup>
+                    #text "\n                  "
+                    <thead class="table-header">
+                      #text "\n                    "
+                      <tr>
+                        #text "\n                      "
+                        <th class="cell">
+                          #text "Character"
+                        </th>
+                        #text "\n                      "
+                        <th class="cell">
+                          #text "Build"
+                        </th>
+                        #text "\n                      "
+                        <th class="cell strcell"/>
+                        #text "\n                      "
+                        <th class="cell spdcell"/>
+                        #text "\n                      "
+                        <th class="cell shotcell"/>
+                        #text "\n                      "
+                        <th class="cell passcell"/>
+                        #text "\n                      "
+                        <th class="cell techcell"/>
+                        #text "\n                    "
+                      </tr>
+                      #text "\n                  "
+                    </thead>
+                    #text "\n                  "
+                    <tbody class="table-body">
+                      #text "\n                    "
+                      <tr>
+                        #text "\n                    "
+                      </tr>
+                      #text "\n                  "
+                    </tbody>
+                    #text "\n                "
+                  </table>
+                  #text "\n              "
+                </div>
+                #text "\n              "
+                <div class="menu">
+                  #text "\n                "
+                  <div class="menubutton"/>
+                  #text "\n                "
+                  <div class="menu-options">
+                    #text "\n                  "
+                    <c>
+                      #text "Use this menu to save builds you create on character tabs"
+                    </c>
+                    #text "\n                  "
+                    #text "\n                  "
+                    #text "\n                  "
+                    #text "\n                "
+                    <button class="gear-preset-menu-button" type="button" data-gear-preset-export="true">
+                      #text "Export Gear Preset"
+                    </button>
+                    <button class="gear-preset-menu-button" type="button">
+                      #text "Clear Gear Preset Draft"
+                    </button>
+                  </div>
+                  #text "\n              "
+                </div>
+                #text "\n              "
+                <a id="results" class="results"/>
+                #text "\n            "
+              </div>
+              #text "\n          "
+            </div>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-01" role="tabpanel" aria-labelledby="tab-01-link" data-pane-load-state="idle" data-character-id="1"/>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-02" role="tabpanel" aria-labelledby="tab-02-link" data-pane-load-state="idle" data-character-id="2"/>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-03" role="tabpanel" aria-labelledby="tab-03-link" data-pane-load-state="idle" data-character-id="3"/>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-04" role="tabpanel" aria-labelledby="tab-04-link" data-pane-load-state="idle" data-character-id="4"/>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-05" role="tabpanel" aria-labelledby="tab-05-link" data-pane-load-state="idle" data-character-id="5"/>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-06" role="tabpanel" aria-labelledby="tab-06-link" data-pane-load-state="idle" data-character-id="6"/>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-07" role="tabpanel" aria-labelledby="tab-07-link" data-pane-load-state="idle" data-character-id="7"/>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-08" role="tabpanel" aria-labelledby="tab-08-link" data-pane-load-state="idle" data-character-id="8"/>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-09" role="tabpanel" aria-labelledby="tab-09-link" data-pane-load-state="idle" data-character-id="9"/>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-10" role="tabpanel" aria-labelledby="tab-10-link" data-pane-load-state="idle" data-character-id="10"/>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-11" role="tabpanel" aria-labelledby="tab-11-link" data-pane-load-state="idle" data-character-id="11"/>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-12" role="tabpanel" aria-labelledby="tab-12-link" data-pane-load-state="idle" data-character-id="12"/>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-13" role="tabpanel" aria-labelledby="tab-13-link" data-pane-load-state="idle" data-character-id="13"/>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-14" role="tabpanel" aria-labelledby="tab-14-link" data-pane-load-state="idle" data-character-id="14"/>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-15" role="tabpanel" aria-labelledby="tab-15-link" data-pane-load-state="idle" data-character-id="15"/>
+            #text "\n          "
+            <div class="tab-pane hidden msbl-gear-pane-placeholder" id="tab-16" role="tabpanel" aria-labelledby="tab-16-link" data-pane-load-state="idle" data-character-id="16"/>
+            #text "\n\n        "
+          </div>
+          #text "\n      "
+        </div>
+        #text "\n    "
+      </section>
+      #text "\n"
+    </section>
+    #text "\n    "
+    <div class="gear-builder-credit-line">
+      #text "\n      "
+      <p class="gear-builder-credits">
+        #text "Credits @wo0k"
+      </p>
+      #text "\n    "
+    </div>
+    #text "\n  "
+  </main>
+  #text "\n\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n\n\n"
+  <footer id="global-footer">
+    <p class="global-footer-disclaimer">
+      #text "This website is not affiliated with Nintendo. All product names, logos, and brands are property of their respective owners."
+    </p>
+    <p class="global-footer-links">
+      <a href="https://discord.gg/de2YaWg" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "DISCORD"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://x.com/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "X"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://www.youtube.com/@MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "YOUTUBE"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://twitch.tv/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "TWITCH"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/about-us" class="global-footer-link">
+        #text "ABOUT US"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/privacy-policy" class="global-footer-link">
+        #text "PRIVACY POLICY"
+      </a>
+    </p>
+  </footer>
+</body>

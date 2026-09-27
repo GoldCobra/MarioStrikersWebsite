@@ -1,0 +1,268 @@
+<body data-page="privacy-policy" data-subnav="off">
+  #text "\n  "
+  <div id="1">
+    #text "\n    "
+    <div id="global-nav">
+      <header id="2">
+        <a class="nav-brand" href="/" aria-label="Mario Strikers Community home">
+          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src='./assets/logo/logo.png'"/>
+          <span class="nav-brand-est">
+            #text "EST. 2017"
+          </span>
+        </a>
+        <nav class="main-nav main-nav-text" aria-label="Main navigation">
+          <a class="nav-top-link is-active" href="/" data-top-key="home" aria-label="Home">
+            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-home-active.webp" width="733" height="198" alt="Home" onerror="this.onerror=null;this.src='./assets/nav-buttons/active/nav-home-active.png'"/>
+          </a>
+          <a class="nav-top-link" href="/games" data-top-key="games" aria-label="Games">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-games.webp" width="733" height="198" alt="Games" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-games.png'"/>
+          </a>
+          <a class="nav-top-link" href="/competitive" data-top-key="competitive" aria-label="Competitive">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-competitive.webp" width="733" height="198" alt="Competitive" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-competitive.png'"/>
+          </a>
+          <a class="nav-top-link" href="/players" data-top-key="players" aria-label="Players">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-players.webp" width="733" height="198" alt="Players" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-players.png'"/>
+          </a>
+          <a class="nav-top-link" href="/partners" data-top-key="partners" aria-label="Partners">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-partners.png'"/>
+          </a>
+        </nav>
+        <div id="global-account" class="global-account" data-auth-state="logged-out"/>
+      </header>
+    </div>
+    #text "\n    "
+    <div id="global-subnav"/>
+    #text "\n  "
+  </div>
+  #text "\n\n  "
+  <main class="page-content partners-page">
+    #text "\n    "
+    <h1 class="visually-hidden">
+      #text "Privacy Policy"
+    </h1>
+    <div id="global-content-tabs"/>
+    #text "\n    "
+    <section class="partners-root privacy-policy-root" aria-label="Privacy Policy">
+      #text "\n      "
+      <article class="content-box">
+        #text "\n        "
+        <div class="content-box-top" aria-hidden="true">
+          #text "\n          "
+          <div class="content-box-top-left"/>
+          #text "\n          "
+          <div class="content-box-top-main"/>
+          #text "\n        "
+        </div>
+        #text "\n        "
+        <div class="content-box-center">
+          #text "\n          "
+          <div class="content-box-texture" aria-hidden="true"/>
+          #text "\n          "
+          <div class="content-box-content competitive-rules">
+            #text "\n\n            "
+            <h2>
+              #text "Privacy Policy"
+            </h2>
+            #text "\n            "
+            <p>
+              #text "This Privacy Policy explains what data Mario Strikers Community collects, how we use it, and your rights. Questions? Reach out via our "
+              <a class="cr-link cr-link-preserve-case" href="https://discord.gg/de2YaWg" target="_blank" rel="noopener noreferrer">
+                #text "Discord"
+              </a>
+              #text "."
+            </p>
+            #text "\n\n            "
+            <h3>
+              #text "What We Display Publicly"
+            </h3>
+            #text "\n            "
+            <ul>
+              #text "\n              "
+              <li>
+                <strong>
+                  #text "Usernames"
+                </strong>
+                #text " - shown on leaderboards and player profiles. Your username may be your real name; please be mindful when choosing it."
+              </li>
+              #text "\n              "
+              <li>
+                <strong>
+                  #text "Country flag"
+                </strong>
+                #text " - shown if you choose to set one. Entirely optional."
+              </li>
+              #text "\n              "
+              <li>
+                <strong>
+                  #text "Competitive stats"
+                </strong>
+                #text " - ratings, match records, and tournament results linked to your username."
+              </li>
+              #text "\n            "
+            </ul>
+            #text "\n\n            "
+            <h3>
+              #text "What We Collect Internally"
+            </h3>
+            #text "\n            "
+            <p>
+              #text "Beyond publicly visible data, we may process the following for security and operational purposes:"
+            </p>
+            #text "\n            "
+            <ul>
+              #text "\n              "
+              <li>
+                #text "Your IP address and basic browser information - never publicly visible. Used solely to detect and prevent abuse."
+              </li>
+              #text "\n            "
+            </ul>
+            #text "\n            "
+            <p>
+              #text "We do not sell your data or use it for advertising."
+            </p>
+            #text "\n\n            "
+            <h3>
+              #text "Why We Process Your Data"
+            </h3>
+            #text "\n            "
+            <ul>
+              #text "\n              "
+              <li>
+                #text "To operate leaderboards, player profiles, and community features."
+              </li>
+              #text "\n              "
+              <li>
+                #text "To detect and prevent abuse, cheating, and ban circumvention."
+              </li>
+              #text "\n              "
+              <li>
+                #text "To maintain accurate historical tournament and rating records."
+              </li>
+              #text "\n            "
+            </ul>
+            #text "\n\n            "
+            <h3>
+              #text "Legal Basis (GDPR)"
+            </h3>
+            #text "\n            "
+            <p>
+              #text "For users in the EU/EEA and UK, we process data under:"
+            </p>
+            #text "\n            "
+            <ul>
+              #text "\n              "
+              <li>
+                <strong>
+                  #text "Art. 6(1)(b) GDPR"
+                </strong>
+                #text " - necessary to provide the service."
+              </li>
+              #text "\n              "
+              <li>
+                <strong>
+                  #text "Art. 6(1)(f) GDPR"
+                </strong>
+                #text " - legitimate interest in maintaining security and community integrity."
+              </li>
+              #text "\n            "
+            </ul>
+            #text "\n\n            "
+            <h3>
+              #text "Data Retention & Deletion"
+            </h3>
+            #text "\n            "
+            <p>
+              #text "You may request removal of your data at any time via Discord. We reserve the right to retain:"
+            </p>
+            #text "\n            "
+            <ul>
+              #text "\n              "
+              <li>
+                #text "Data necessary to enforce bans and prevent circumvention."
+              </li>
+              #text "\n              "
+              <li>
+                #text "Historical tournament results and rating records, which form part of shared community history."
+              </li>
+              #text "\n            "
+            </ul>
+            #text "\n\n            "
+            <h3>
+              #text "Your Rights"
+            </h3>
+            #text "\n            "
+            <p>
+              #text "You have the right to access, correct, or request deletion of your personal data. Contact us via Discord to exercise these rights."
+            </p>
+            #text "\n\n            "
+            <h3>
+              #text "Cookies"
+            </h3>
+            #text "\n            "
+            <p>
+              #text "We use only strictly necessary cookies for session management and security. No advertising or third-party tracking cookies are used."
+            </p>
+            #text "\n\n            "
+            <h3>
+              #text "Changes"
+            </h3>
+            #text "\n            "
+            <p>
+              #text "We may update this policy occasionally. Continued use of the site constitutes acceptance of the current version."
+            </p>
+            #text "\n\n          "
+          </div>
+          #text "\n        "
+        </div>
+        #text "\n        "
+        <div class="content-box-bottom" aria-hidden="true"/>
+        #text "\n      "
+      </article>
+      #text "\n    "
+    </section>
+    #text "\n  "
+  </main>
+  #text "\n\n  "
+  #text "\n  "
+  #text "\n\n\n"
+  <footer id="global-footer">
+    <p class="global-footer-disclaimer">
+      #text "This website is not affiliated with Nintendo. All product names, logos, and brands are property of their respective owners."
+    </p>
+    <p class="global-footer-links">
+      <a href="https://discord.gg/de2YaWg" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "DISCORD"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://x.com/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "X"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://www.youtube.com/@MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "YOUTUBE"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://twitch.tv/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "TWITCH"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/about-us" class="global-footer-link">
+        #text "ABOUT US"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/privacy-policy" class="global-footer-link">
+        #text "PRIVACY POLICY"
+      </a>
+    </p>
+  </footer>
+</body>

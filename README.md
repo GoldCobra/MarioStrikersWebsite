@@ -59,7 +59,9 @@ git diff --check
 ```
 
 The checks and smoke tests use local fixtures and require no production secrets.
-For visual changes, also check the affected page on desktop and mobile.
+For visual changes, also check the affected page on desktop and mobile. The
+[comparison checks](docs/testing.md) prove that pages, markup and API responses
+stay identical to a reference commit.
 
 ## Project layout
 
@@ -83,6 +85,7 @@ to it. **GoldCobra reviews and merges changes.** Merging does not deploy the sit
 - [Contribution workflow](CONTRIBUTING.md)
 - [Architecture and API](docs/architecture.md)
 - [Save tools and formats](docs/save-tools.md)
+- [Testing and comparison checks](docs/testing.md)
 - [Deployment and rollback](docs/deployment.md)
 - [Gear Builder maintenance](docs/msbl-gear-builder-snapshot.md)
 

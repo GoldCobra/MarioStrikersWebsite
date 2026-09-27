@@ -513,7 +513,9 @@ function createApp(options) {
       const cached = await publicDataCache.get(COMPETITIVE_SEASON_KEY);
       res.set("X-Data-Cache", cached.cacheStatus);
       res.set("X-Data-Generated-At", cached.generatedAt);
-      res.json({ ...cached.payload, serverNowUtc: new Date().toISOString() });
+      // Fixtures may pin the clock (MSC_FIXTURE_NOW); live providers always use the real time.
+      const serverNow = typeof providers.now === "function" ? providers.now() : Date.now();
+      res.json({ ...cached.payload, serverNowUtc: new Date(serverNow).toISOString() });
     } catch (error) {
       sendApiError(res, error);
     }

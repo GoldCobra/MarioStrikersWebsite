@@ -1,0 +1,1837 @@
+[
+  {
+    "path": "/",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/index.html",
+    "status": 301,
+    "location": "/"
+  },
+  {
+    "path": "/?utm_source=test",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/robots.txt",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/sitemap.xml",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/about-us",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/about-us/",
+    "status": 301,
+    "location": "/about-us"
+  },
+  {
+    "path": "/pages/about-us.html",
+    "status": 301,
+    "location": "/about-us"
+  },
+  {
+    "path": "/pages/about-us",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/about-us/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/about-us.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/ABOUT-US",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/about-us?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/community-tournaments",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/community-tournaments/",
+    "status": 301,
+    "location": "/community-tournaments"
+  },
+  {
+    "path": "/pages/community-tournaments.html",
+    "status": 301,
+    "location": "/community-tournaments"
+  },
+  {
+    "path": "/pages/community-tournaments",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/community-tournaments/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/community-tournaments.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/COMMUNITY-TOURNAMENTS",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/community-tournaments?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/competitive",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/competitive/",
+    "status": 301,
+    "location": "/competitive"
+  },
+  {
+    "path": "/pages/competitive.html",
+    "status": 301,
+    "location": "/competitive"
+  },
+  {
+    "path": "/pages/competitive",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/competitive/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/competitive.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/COMPETITIVE",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/competitive?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/competitive-leaderboards",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/competitive-leaderboards/",
+    "status": 301,
+    "location": "/competitive-leaderboards"
+  },
+  {
+    "path": "/pages/competitive-leaderboards.html",
+    "status": 301,
+    "location": "/competitive-leaderboards"
+  },
+  {
+    "path": "/pages/competitive-leaderboards",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/competitive-leaderboards/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/competitive-leaderboards.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/COMPETITIVE-LEADERBOARDS",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/competitive-leaderboards?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/competitive-rules",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/competitive-rules/",
+    "status": 301,
+    "location": "/competitive-rules"
+  },
+  {
+    "path": "/pages/competitive-rules.html",
+    "status": 301,
+    "location": "/competitive-rules"
+  },
+  {
+    "path": "/pages/competitive-rules",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/competitive-rules/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/competitive-rules.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/COMPETITIVE-RULES",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/competitive-rules?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/competitive-tier-lists",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/competitive-tier-lists/",
+    "status": 301,
+    "location": "/competitive-tier-lists"
+  },
+  {
+    "path": "/pages/competitive-tier-lists.html",
+    "status": 301,
+    "location": "/competitive-tier-lists"
+  },
+  {
+    "path": "/pages/competitive-tier-lists",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/competitive-tier-lists/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/competitive-tier-lists.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/COMPETITIVE-TIER-LISTS",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/competitive-tier-lists?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/competitive-tournaments",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/competitive-tournaments/",
+    "status": 301,
+    "location": "/competitive-tournaments"
+  },
+  {
+    "path": "/pages/competitive-tournaments.html",
+    "status": 301,
+    "location": "/competitive-tournaments"
+  },
+  {
+    "path": "/pages/competitive-tournaments",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/competitive-tournaments/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/competitive-tournaments.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/COMPETITIVE-TOURNAMENTS",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/competitive-tournaments?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/games",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/games/",
+    "status": 301,
+    "location": "/games"
+  },
+  {
+    "path": "/pages/games.html",
+    "status": 301,
+    "location": "/games"
+  },
+  {
+    "path": "/pages/games",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/games/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/games.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/GAMES",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/games?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl/",
+    "status": 301,
+    "location": "/msbl"
+  },
+  {
+    "path": "/pages/msbl.html",
+    "status": 301,
+    "location": "/msbl"
+  },
+  {
+    "path": "/pages/msbl",
+    "status": 301,
+    "location": "/msbl"
+  },
+  {
+    "path": "/pages/msbl/",
+    "status": 301,
+    "location": "/msbl"
+  },
+  {
+    "path": "/msbl.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSBL",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-competitiverules",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-competitiverules/",
+    "status": 301,
+    "location": "/msbl-competitiverules"
+  },
+  {
+    "path": "/pages/msbl-competitiverules.html",
+    "status": 301,
+    "location": "/msbl-competitiverules"
+  },
+  {
+    "path": "/pages/msbl-competitiverules",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msbl-competitiverules/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-competitiverules.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSBL-COMPETITIVERULES",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-competitiverules?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-elo1v1",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-elo1v1/",
+    "status": 301,
+    "location": "/msbl-elo1v1"
+  },
+  {
+    "path": "/pages/msbl-elo1v1.html",
+    "status": 301,
+    "location": "/msbl-elo1v1"
+  },
+  {
+    "path": "/pages/msbl-elo1v1",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msbl-elo1v1/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-elo1v1.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSBL-ELO1V1",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-elo1v1?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-elo2v2",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-elo2v2/",
+    "status": 301,
+    "location": "/msbl-elo2v2"
+  },
+  {
+    "path": "/pages/msbl-elo2v2.html",
+    "status": 301,
+    "location": "/msbl-elo2v2"
+  },
+  {
+    "path": "/pages/msbl-elo2v2",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msbl-elo2v2/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-elo2v2.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSBL-ELO2V2",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-elo2v2?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-gear-builder",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-gear-builder/",
+    "status": 301,
+    "location": "/msbl-gear-builder"
+  },
+  {
+    "path": "/pages/msbl-gear-builder.html",
+    "status": 301,
+    "location": "/msbl-gear-builder"
+  },
+  {
+    "path": "/pages/msbl-gear-builder",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msbl-gear-builder/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-gear-builder.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSBL-GEAR-BUILDER",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-gear-builder?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-save-editor",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-save-editor/",
+    "status": 301,
+    "location": "/msbl-save-editor"
+  },
+  {
+    "path": "/pages/msbl-save-editor.html",
+    "status": 301,
+    "location": "/msbl-save-editor"
+  },
+  {
+    "path": "/pages/msbl-save-editor",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msbl-save-editor/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-save-editor.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSBL-SAVE-EDITOR",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-save-editor?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-striker-clubs",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-striker-clubs/",
+    "status": 301,
+    "location": "/msbl-striker-clubs"
+  },
+  {
+    "path": "/pages/msbl-striker-clubs.html",
+    "status": 301,
+    "location": "/msbl-striker-clubs"
+  },
+  {
+    "path": "/pages/msbl-striker-clubs",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msbl-striker-clubs/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-striker-clubs.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSBL-STRIKER-CLUBS",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-striker-clubs?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-tierlist",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-tierlist/",
+    "status": 301,
+    "location": "/msbl-tierlist"
+  },
+  {
+    "path": "/pages/msbl-tierlist.html",
+    "status": 301,
+    "location": "/msbl-tierlist"
+  },
+  {
+    "path": "/pages/msbl-tierlist",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msbl-tierlist/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-tierlist.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSBL-TIERLIST",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-tierlist?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-whr",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msbl-whr/",
+    "status": 301,
+    "location": "/msbl-whr"
+  },
+  {
+    "path": "/pages/msbl-whr.html",
+    "status": 301,
+    "location": "/msbl-whr"
+  },
+  {
+    "path": "/pages/msbl-whr",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msbl-whr/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-whr.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSBL-WHR",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msbl-whr?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc/",
+    "status": 301,
+    "location": "/msc"
+  },
+  {
+    "path": "/pages/msc.html",
+    "status": 301,
+    "location": "/msc"
+  },
+  {
+    "path": "/pages/msc",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msc/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSC",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc-competitiverules",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc-competitiverules/",
+    "status": 301,
+    "location": "/msc-competitiverules"
+  },
+  {
+    "path": "/pages/msc-competitiverules.html",
+    "status": 301,
+    "location": "/msc-competitiverules"
+  },
+  {
+    "path": "/pages/msc-competitiverules",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msc-competitiverules/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-competitiverules.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSC-COMPETITIVERULES",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-competitiverules?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc-elo1v1",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc-elo1v1/",
+    "status": 301,
+    "location": "/msc-elo1v1"
+  },
+  {
+    "path": "/pages/msc-elo1v1.html",
+    "status": 301,
+    "location": "/msc-elo1v1"
+  },
+  {
+    "path": "/pages/msc-elo1v1",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msc-elo1v1/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-elo1v1.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSC-ELO1V1",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-elo1v1?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc-save-editor",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc-save-editor/",
+    "status": 301,
+    "location": "/msc-save-editor"
+  },
+  {
+    "path": "/pages/msc-save-editor.html",
+    "status": 301,
+    "location": "/msc-save-editor"
+  },
+  {
+    "path": "/pages/msc-save-editor",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msc-save-editor/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-save-editor.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSC-SAVE-EDITOR",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-save-editor?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc-setup-guide",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc-setup-guide/",
+    "status": 301,
+    "location": "/msc-setup-guide"
+  },
+  {
+    "path": "/pages/msc-setup-guide.html",
+    "status": 301,
+    "location": "/msc-setup-guide"
+  },
+  {
+    "path": "/pages/msc-setup-guide",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msc-setup-guide/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-setup-guide.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSC-SETUP-GUIDE",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-setup-guide?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc-tierlist",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc-tierlist/",
+    "status": 301,
+    "location": "/msc-tierlist"
+  },
+  {
+    "path": "/pages/msc-tierlist.html",
+    "status": 301,
+    "location": "/msc-tierlist"
+  },
+  {
+    "path": "/pages/msc-tierlist",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msc-tierlist/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-tierlist.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSC-TIERLIST",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-tierlist?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc-whr",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc-whr/",
+    "status": 301,
+    "location": "/msc-whr"
+  },
+  {
+    "path": "/pages/msc-whr.html",
+    "status": 301,
+    "location": "/msc-whr"
+  },
+  {
+    "path": "/pages/msc-whr",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msc-whr/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-whr.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSC-WHR",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-whr?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc-wiimmfi",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc-wiimmfi/",
+    "status": 301,
+    "location": "/msc-wiimmfi"
+  },
+  {
+    "path": "/pages/msc-wiimmfi.html",
+    "status": 301,
+    "location": "/msc-wiimmfi"
+  },
+  {
+    "path": "/pages/msc-wiimmfi",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msc-wiimmfi/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-wiimmfi.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSC-WIIMMFI",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-wiimmfi?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msl",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msl/",
+    "status": 301,
+    "location": "/msl"
+  },
+  {
+    "path": "/pages/msl.html",
+    "status": 301,
+    "location": "/msl"
+  },
+  {
+    "path": "/pages/msl",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msl/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msl.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSL",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msl?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msl-leaderboards",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msl-leaderboards/",
+    "status": 301,
+    "location": "/msl-leaderboards"
+  },
+  {
+    "path": "/pages/msl-leaderboards.html",
+    "status": 301,
+    "location": "/msl-leaderboards"
+  },
+  {
+    "path": "/pages/msl-leaderboards",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msl-leaderboards/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msl-leaderboards.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSL-LEADERBOARDS",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msl-leaderboards?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msl-league-rules",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msl-league-rules/",
+    "status": 301,
+    "location": "/msl-league-rules"
+  },
+  {
+    "path": "/pages/msl-league-rules.html",
+    "status": 301,
+    "location": "/msl-league-rules"
+  },
+  {
+    "path": "/pages/msl-league-rules",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msl-league-rules/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msl-league-rules.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSL-LEAGUE-RULES",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msl-league-rules?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msl-schedule",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msl-schedule/",
+    "status": 301,
+    "location": "/msl-schedule"
+  },
+  {
+    "path": "/pages/msl-schedule.html",
+    "status": 301,
+    "location": "/msl-schedule"
+  },
+  {
+    "path": "/pages/msl-schedule",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msl-schedule/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msl-schedule.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSL-SCHEDULE",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msl-schedule?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/partners",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/partners/",
+    "status": 301,
+    "location": "/partners"
+  },
+  {
+    "path": "/pages/partners.html",
+    "status": 301,
+    "location": "/partners"
+  },
+  {
+    "path": "/pages/partners",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/partners/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/partners.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/PARTNERS",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/partners?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/players",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/players/",
+    "status": 301,
+    "location": "/players"
+  },
+  {
+    "path": "/pages/players.html",
+    "status": 301,
+    "location": "/players"
+  },
+  {
+    "path": "/pages/players",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/players/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/players.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/PLAYERS",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/players?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/players-profiles",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/players-profiles/",
+    "status": 301,
+    "location": "/players-profiles"
+  },
+  {
+    "path": "/pages/players-profiles.html",
+    "status": 301,
+    "location": "/players-profiles"
+  },
+  {
+    "path": "/pages/players-profiles",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/players-profiles/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/players-profiles.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/PLAYERS-PROFILES",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/players-profiles?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/privacy-policy",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/privacy-policy/",
+    "status": 301,
+    "location": "/privacy-policy"
+  },
+  {
+    "path": "/pages/privacy-policy.html",
+    "status": 301,
+    "location": "/privacy-policy"
+  },
+  {
+    "path": "/pages/privacy-policy",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/privacy-policy/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/privacy-policy.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/PRIVACY-POLICY",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/privacy-policy?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/profile",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/profile/",
+    "status": 301,
+    "location": "/profile"
+  },
+  {
+    "path": "/pages/profile.html",
+    "status": 301,
+    "location": "/profile"
+  },
+  {
+    "path": "/pages/profile",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/profile/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/profile.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/PROFILE",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/profile?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/sms",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/sms/",
+    "status": 301,
+    "location": "/sms"
+  },
+  {
+    "path": "/pages/sms.html",
+    "status": 301,
+    "location": "/sms"
+  },
+  {
+    "path": "/pages/sms",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/sms/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/sms.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/SMS",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/sms?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/sms-competitiverules",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/sms-competitiverules/",
+    "status": 301,
+    "location": "/sms-competitiverules"
+  },
+  {
+    "path": "/pages/sms-competitiverules.html",
+    "status": 301,
+    "location": "/sms-competitiverules"
+  },
+  {
+    "path": "/pages/sms-competitiverules",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/sms-competitiverules/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/sms-competitiverules.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/SMS-COMPETITIVERULES",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/sms-competitiverules?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/sms-elo1v1",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/sms-elo1v1/",
+    "status": 301,
+    "location": "/sms-elo1v1"
+  },
+  {
+    "path": "/pages/sms-elo1v1.html",
+    "status": 301,
+    "location": "/sms-elo1v1"
+  },
+  {
+    "path": "/pages/sms-elo1v1",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/sms-elo1v1/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/sms-elo1v1.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/SMS-ELO1V1",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/sms-elo1v1?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/sms-setup-guide",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/sms-setup-guide/",
+    "status": 301,
+    "location": "/sms-setup-guide"
+  },
+  {
+    "path": "/pages/sms-setup-guide.html",
+    "status": 301,
+    "location": "/sms-setup-guide"
+  },
+  {
+    "path": "/pages/sms-setup-guide",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/sms-setup-guide/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/sms-setup-guide.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/SMS-SETUP-GUIDE",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/sms-setup-guide?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/sms-tierlist",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/sms-tierlist/",
+    "status": 301,
+    "location": "/sms-tierlist"
+  },
+  {
+    "path": "/pages/sms-tierlist.html",
+    "status": 301,
+    "location": "/sms-tierlist"
+  },
+  {
+    "path": "/pages/sms-tierlist",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/sms-tierlist/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/sms-tierlist.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/SMS-TIERLIST",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/sms-tierlist?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/sms-whr",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/sms-whr/",
+    "status": 301,
+    "location": "/sms-whr"
+  },
+  {
+    "path": "/pages/sms-whr.html",
+    "status": 301,
+    "location": "/sms-whr"
+  },
+  {
+    "path": "/pages/sms-whr",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/sms-whr/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/sms-whr.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/SMS-WHR",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/sms-whr?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/tab-placeholder",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/tab-placeholder/",
+    "status": 301,
+    "location": "/tab-placeholder"
+  },
+  {
+    "path": "/pages/tab-placeholder.html",
+    "status": 301,
+    "location": "/tab-placeholder"
+  },
+  {
+    "path": "/pages/tab-placeholder",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/tab-placeholder/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/tab-placeholder.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/TAB-PLACEHOLDER",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/tab-placeholder?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/pages/msl-league-site.html",
+    "status": 301,
+    "location": "/msl-schedule"
+  },
+  {
+    "path": "/pages/msl-league-site",
+    "status": 301,
+    "location": "/msl-schedule"
+  },
+  {
+    "path": "/msl-league-site",
+    "status": 301,
+    "location": "/msl-schedule"
+  },
+  {
+    "path": "/msl-league-site/",
+    "status": 301,
+    "location": "/msl-schedule"
+  },
+  {
+    "path": "/games?submenu=msbl",
+    "status": 301,
+    "location": "/msbl?submenu=msbl"
+  },
+  {
+    "path": "/games?submenu=msc",
+    "status": 301,
+    "location": "/msc?submenu=msc"
+  },
+  {
+    "path": "/games?submenu=sms",
+    "status": 301,
+    "location": "/sms?submenu=sms"
+  },
+  {
+    "path": "/games?submenu=unknown",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/games?tabs=none",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/competitive?submenu=rules",
+    "status": 301,
+    "location": "/competitive-rules?submenu=rules"
+  },
+  {
+    "path": "/competitive?submenu=leaderboards",
+    "status": 301,
+    "location": "/competitive-leaderboards?submenu=leaderboards"
+  },
+  {
+    "path": "/competitive?submenu=tier-lists",
+    "status": 301,
+    "location": "/competitive-tier-lists?submenu=tier-lists"
+  },
+  {
+    "path": "/competitive?submenu=msl",
+    "status": 301,
+    "location": "/msl?submenu=msl"
+  },
+  {
+    "path": "/competitive?submenu=tournaments",
+    "status": 301,
+    "location": "/competitive-tournaments?submenu=tournaments"
+  },
+  {
+    "path": "/competitive?submenu=rules&x=1",
+    "status": 301,
+    "location": "/competitive-rules?submenu=rules&x=1"
+  },
+  {
+    "path": "/msc?submenu=msbl",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/pages/players-msbl-clubs.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msbl-tier-lists.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msc-tier-lists.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/sms-tier-lists.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/unknown-page.html",
+    "status": 301,
+    "location": "/unknown-page"
+  },
+  {
+    "path": "/does-not-exist",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/does-not-exist/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/assets/",
+    "status": 403,
+    "location": null
+  },
+  {
+    "path": "/pages/",
+    "status": 403,
+    "location": null
+  },
+  {
+    "path": "/pages/templates/player-profile-popup.html",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/pages/templates/club-profile-popup.html",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/css/global.css",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/js/global-nav.js",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/favicon.ico",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/assets/logo/logo.webp",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/.env",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/backend/package.json",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/Dockerfile.backend",
+    "status": 404,
+    "location": null
+  }
+]

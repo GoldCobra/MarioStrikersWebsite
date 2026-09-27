@@ -1,0 +1,740 @@
+<body data-page="msc-competitiverules" data-subnav="on">
+  #text "\n  "
+  <div id="1">
+    #text "\n    "
+    <div id="global-nav">
+      <header id="2">
+        <a class="nav-brand" href="/" aria-label="Mario Strikers Community home">
+          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src='./assets/logo/logo.png'"/>
+          <span class="nav-brand-est">
+            #text "EST. 2017"
+          </span>
+        </a>
+        <nav class="main-nav main-nav-text" aria-label="Main navigation">
+          <a class="nav-top-link" href="/" data-top-key="home" aria-label="Home">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-home.png'"/>
+          </a>
+          <a class="nav-top-link" href="/games" data-top-key="games" aria-label="Games">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-games.webp" width="733" height="198" alt="Games" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-games.png'"/>
+          </a>
+          <a class="nav-top-link is-active" href="/competitive" data-top-key="competitive" aria-label="Competitive">
+            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-competitive-active.webp" width="733" height="198" alt="Competitive" onerror="this.onerror=null;this.src='./assets/nav-buttons/active/nav-competitive-active.png'"/>
+          </a>
+          <a class="nav-top-link" href="/players" data-top-key="players" aria-label="Players">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-players.webp" width="733" height="198" alt="Players" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-players.png'"/>
+          </a>
+          <a class="nav-top-link" href="/partners" data-top-key="partners" aria-label="Partners">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-partners.png'"/>
+          </a>
+        </nav>
+        <div id="global-account" class="global-account" data-auth-state="logged-out"/>
+      </header>
+    </div>
+    #text "\n    "
+    <div id="global-subnav">
+      <nav class="sub-nav sub-nav-level2" aria-label="Competitive navigation">
+        <a class="sub-link sub-link-text is-active" href="/competitive-rules" aria-label="Rules">
+          <span class="sub-link-label">
+            #text "Rules"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/msl" aria-label="MSL">
+          <span class="sub-link-label">
+            #text "MSL"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/competitive-tournaments" aria-label="Events">
+          <span class="sub-link-label">
+            #text "Events"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/competitive-leaderboards" aria-label="Leaderboards">
+          <span class="sub-link-label">
+            #text "Leaderboards"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/competitive-tier-lists" aria-label="Tier Lists">
+          <span class="sub-link-label">
+            #text "Tier Lists"
+          </span>
+        </a>
+      </nav>
+    </div>
+    #text "\n  "
+  </div>
+  #text "\n\n  "
+  <main class="page-content competitive-rules-page">
+    #text "\n    "
+    <h1 class="visually-hidden">
+      #text "MSC Competitive Rules"
+    </h1>
+    <div id="global-content-tabs">
+      <section class="global-tabs-shell" aria-label="Rules tabs">
+        <div class="global-tabs-list">
+          <a class="global-tab" href="/msbl-competitiverules" aria-label="MSBL">
+            #text "MSBL"
+          </a>
+          <a class="global-tab is-active" href="/msc-competitiverules" aria-label="MSC" aria-current="page">
+            #text "MSC"
+          </a>
+          <a class="global-tab" href="/sms-competitiverules" aria-label="SMS">
+            #text "SMS"
+          </a>
+          <svg class="global-tabs-line-overlay"/>
+        </div>
+      </section>
+    </div>
+    #text "\n    "
+    <section id="competitive-rules-root" aria-label="MSC competitive rules">
+      <header class="competitive-rules-header" aria-label="MSC rules header">
+        <h1 class="cr-page-title">
+          #text "The MARIO STRIKERS CHARGED (Football) Competitive Ruleset"
+        </h1>
+        <p class="cr-page-revised">
+          #text "Last revised April 17, 2026"
+        </p>
+      </header>
+      <article class="competitive-rules content-box-list" aria-label="MSC competitive rules">
+        <section class="content-box cr-section" id="msc-rules-1">
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          <div class="content-box-center">
+            <div class="content-box-texture" aria-hidden="true"/>
+            <div class="content-box-content">
+              <h2>
+                #text "1. Introduction"
+              </h2>
+              <section class="cr-subsection" id="msc-rules-1-1">
+                <h3>
+                  #text "1.1 Purpose"
+                </h3>
+                <p>
+                  #text "These rules establish a Competition Committee and a standardized competitive ruleset."
+                </p>
+              </section>
+              <section class="cr-subsection" id="msc-rules-1-2">
+                <h3>
+                  #text "1.2 Scope and Rule Priority"
+                </h3>
+                <p>
+                  #text "These rules apply by default to Mario Strikers League (MSL) competitions and community-organized tournaments."
+                </p>
+                <p>
+                  #text "If a tournament publishes explicit event-specific rule changes, those rules apply only to that event."
+                </p>
+                <p>
+                  #text "Where game-specific rules conflict with universal rules, game-specific rules take precedence."
+                </p>
+                <p>
+                  #text "For unresolved disputes, Tournament Staff decisions are final for the current event."
+                </p>
+              </section>
+            </div>
+          </div>
+          <div class="content-box-bottom" aria-hidden="true"/>
+        </section>
+        <section class="content-box cr-section" id="msc-rules-2">
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          <div class="content-box-center">
+            <div class="content-box-texture" aria-hidden="true"/>
+            <div class="content-box-content">
+              <h2>
+                #text "2. Universal Competitive Rules"
+              </h2>
+              <section class="cr-subsection" id="msc-rules-2-1">
+                <h3>
+                  #text "2.1 Match Administration"
+                </h3>
+                <p>
+                  #text "Before a set starts, players must confirm host setup, match settings, and any organizer requirements."
+                </p>
+                <p>
+                  #text "If players cannot agree before the set starts, involve Tournament Staff before gameplay. If staff is unavailable, postpone the set until a ruling is possible."
+                </p>
+                <p>
+                  #text "Once players explicitly agree before match start, the agreement is binding unless a material technical or competitive issue occurs."
+                </p>
+              </section>
+              <section class="cr-subsection" id="msc-rules-2-2">
+                <h3>
+                  #text "2.2 Competitive Integrity"
+                </h3>
+                <p>
+                  #text "All games must use organizer-approved settings and versions. Unapproved gameplay-altering methods are prohibited unless explicitly listed as legal in game-specific rules."
+                </p>
+                <p>
+                  #text "Wired Ethernet is strongly recommended for the most stable competitive match quality and lower latency. It is not mandatory."
+                </p>
+                <p>
+                  #text "Players should use a connection that avoids avoidable disruptions."
+                </p>
+                <p>
+                  #text "Players must cooperate with staff requests for evidence, testing, and match-state reconstruction during disputes."
+                </p>
+                <p>
+                  #text "Players must communicate clearly and act in good faith during setup, gameplay, and dispute resolution."
+                </p>
+              </section>
+              <section class="cr-subsection" id="msc-rules-2-3">
+                <h3>
+                  #text "2.3 Dispute Escalation"
+                </h3>
+                <p>
+                  #text "When a dispute occurs (for example stalling or integrity concerns), players must pause at the next legal point and request staff review."
+                </p>
+                <p>
+                  #text "Provide video evidence whenever possible. If staff is unavailable, record exact details and suspend the set until review."
+                </p>
+                <p>
+                  #text "Players should not continue play before official review is completed. If they do, retroactive staff action may be limited by available evidence and tournament policy."
+                </p>
+              </section>
+            </div>
+          </div>
+          <div class="content-box-bottom" aria-hidden="true"/>
+        </section>
+        <section class="content-box cr-section" id="msc-rules-3">
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          <div class="content-box-center">
+            <div class="content-box-texture" aria-hidden="true"/>
+            <div class="content-box-content">
+              <h2>
+                #text "3. Game-Specific Rules & Settings"
+              </h2>
+              <section class="cr-subsection" id="msc-rules-3-1">
+                <h3>
+                  #text "3.1 Game Version and Platform"
+                </h3>
+                <p>
+                  #text "Official version: PAL (RQ4P01) on Nintendo Wii or Nintendo Wii U."
+                </p>
+                <p>
+                  #text "Most current players use PAL. Matchmaking between PAL and NTSC is technically impossible because of region lock."
+                </p>
+                <p>
+                  #text "Console and Dolphin Emulator are permitted. Players must be able to play via "
+                  <a class="cr-link" href="https://wiimmfi.de/" target="_blank" rel="noopener noreferrer">
+                    #text "Wiimmfi"
+                  </a>
+                  #text ". Netplay is not feasible due to technical limitations."
+                </p>
+                <p>
+                  #text "As of Dolphin version 2603a or newer, Dolphin natively supports Wiimmfi matchmaking between Dolphin Emulator and console (Wii or Wii U), without additional mods or Cheat Codes."
+                </p>
+                <p>
+                  #text "Players using emulator must use Dolphin 2603a or newer for official cross-platform play."
+                </p>
+              </section>
+              <section class="cr-subsection" id="msc-rules-3-2">
+                <h3>
+                  #text "3.2 Match Settings and Stadium Rules"
+                </h3>
+                <ul class="cr-list">
+                  <li>
+                    #text "Skill Level: ANY"
+                  </li>
+                  <li>
+                    #text "Game Type: 10 GOALS"
+                  </li>
+                  <li>
+                    #text "Environment Cheats: SECURE STADIA"
+                  </li>
+                  <li>
+                    #text "Power Up Cheats: NONE"
+                  </li>
+                  <li>
+                    #text "Player Cheats: NONE"
+                  </li>
+                </ul>
+                <p>
+                  #text "Default stadium is BOWSER STADIUM. By mutual agreement, players may choose any stadium except THE SAND TOMB or THUNDER ISLAND."
+                </p>
+                <p>
+                  #text "Once a player clicks the \"accept\" button of an online invitation, both players agree to the selected stadium for that game. Selecting the wrong stadium is not a valid restart reason unless the stadium is illegal."
+                </p>
+                <p>
+                  #text "If players are not using the fast terrain Cheat Code, stadium selection is restricted to: BOWSER STADIUM, THE CLASSROOM, THE LAVA PIT, CRYSTAL CANYON."
+                </p>
+              </section>
+              <section class="cr-subsection" id="msc-rules-3-3">
+                <h3>
+                  #text "3.3 Match Procedure and Side Selection"
+                </h3>
+                <p>
+                  #text "Match procedure:"
+                </p>
+                <ol>
+                  <li>
+                    #text "Players decide Home and Away for Game 1 using the criteria below. The Away player decides whether to pick captain first or second."
+                  </li>
+                  <li>
+                    #text "Players play the first game of the set."
+                  </li>
+                  <li>
+                    #text "The loser of the previous game picks Home or Away for the next game. The Away player decides whether to pick captain first or second."
+                  </li>
+                  <li>
+                    #text "Play the next game."
+                  </li>
+                  <li>
+                    #text "Repeat for all subsequent games until the set is complete."
+                  </li>
+                  <li>
+                    #text "When a set is complete, repeat the same process for the next set, starting from Step 1."
+                  </li>
+                  <li>
+                    #text "The match ends when a player reaches the required number of set wins. In most cases, one set wins the match, but this may vary by tournament rules."
+                  </li>
+                </ol>
+                <p>
+                  #text "Game 1 side selection priority:"
+                </p>
+                <ol>
+                  <li>
+                    #text "In best-of-X sets, the player who lost the previous set picks side for Game 1 of the next set (not applicable to Set 1)."
+                  </li>
+                  <li>
+                    #text "If a tournament has multiple stages, Stage 1 determines seeding; in later stages, higher seed picks side."
+                  </li>
+                  <li>
+                    #text "In the MSL World Championship, the player with the most MSL points gets side pick."
+                  </li>
+                  <li>
+                    #text "If none apply, players flip a coin (for example in "
+                    <a class="cr-link" href="https://discord.gg/de2YaWg" target="_blank" rel="noopener noreferrer">
+                      #text "our Discord"
+                    </a>
+                    #text "), and the winner gets side pick."
+                  </li>
+                </ol>
+              </section>
+              <section class="cr-subsection" id="msc-rules-3-4">
+                <h3>
+                  #text "3.4 Gameplay Restrictions"
+                </h3>
+                <p>
+                  <strong>
+                    <a class="cr-link" href="https://youtu.be/-eOGLyFTQ_k" target="_blank" rel="noopener noreferrer">
+                      #text "NK-BUG"
+                    </a>
+                  </strong>
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "NK-Bug in any form is prohibited due to game-breaking behavior. It results in disqualification from the current tournament and the next seasonal tournament."
+                  </li>
+                  <li>
+                    #text "If a player unintentionally scores an NK-Bug goal while more than one goal away from victory, that player must score an own goal."
+                  </li>
+                  <li>
+                    #text "If the accidental NK-Bug goal is the final goal, it does not count and the match must be replayed from the prior score."
+                  </li>
+                </ul>
+                <p>
+                  <strong>
+                    <a class="cr-link" href="https://youtu.be/8kwlHBl0Koo" target="_blank" rel="noopener noreferrer">
+                      #text "INSTA CHIP / MIDCOURT CHIP"
+                    </a>
+                  </strong>
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Insta Chip or Midcourt Chip after kickoff is prohibited and results in an automatic game loss."
+                  </li>
+                  <li>
+                    #text "To avoid Insta Chip, the kickoff player must lose contact with the ball at least once before executing a Midcourt Chip."
+                  </li>
+                  <li>
+                    #text "The following do not count as Midcourt Chip examples: "
+                    <a class="cr-link" href="https://youtu.be/Crll-G6IXgk?list=PLLAlWhwo9P26CQhRR7yaSblmea687HiWE&t=473" target="_blank" rel="noopener noreferrer">
+                      #text "WALL-LUIGI boosted chips"
+                    </a>
+                    #text ", "
+                    <a class="cr-link" href="https://youtu.be/hHvTNRLzpcA?list=PLLAlWhwo9P26CQhRR7yaSblmea687HiWE" target="_blank" rel="noopener noreferrer">
+                      #text "Shroom Chips"
+                    </a>
+                    #text ", and "
+                    <a class="cr-link" href="https://youtu.be/WdNDgyVwgzs" target="_blank" rel="noopener noreferrer">
+                      #text "Bowser Shuttle"
+                    </a>
+                    #text "."
+                  </li>
+                </ul>
+                <p>
+                  <strong>
+                    <a class="cr-link" href="https://youtu.be/fbg_jURR2wA" target="_blank" rel="noopener noreferrer">
+                      #text "BOO DEKE GOALS"
+                    </a>
+                  </strong>
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Boo deking through the opposing goalkeeper is prohibited and results in an automatic game loss."
+                  </li>
+                </ul>
+                <p>
+                  <strong>
+                    <a class="cr-link" href="https://youtu.be/89qCjtLSNlg" target="_blank" rel="noopener noreferrer">
+                      #text "HITSPAM"
+                    </a>
+                  </strong>
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Excessive hitspam is prohibited and results in an automatic game loss."
+                  </li>
+                </ul>
+                <p>
+                  <strong>
+                    #text "MEGA STRIKE"
+                  </strong>
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Mega Strike is prohibited. If used accidentally, any goal from the Mega Strike does not count and the match must be replayed from the score before the Mega Strike."
+                  </li>
+                </ul>
+                <p>
+                  <strong>
+                    #text "CHEAT CODES"
+                  </strong>
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Cheat codes are strictly forbidden, including any code-based modifications that create unfair advantages or disrupt gameplay (for example lag generators)."
+                  </li>
+                  <li>
+                    #text "Exception (only if both players agree before match start): the Terrain Code that sets all terrains to the default BOWSER STADIUM terrain, and the code that disables Mega Strike. Without pre-match agreement, both codes are prohibited."
+                  </li>
+                </ul>
+              </section>
+            </div>
+          </div>
+          <div class="content-box-bottom" aria-hidden="true"/>
+        </section>
+        <section class="content-box cr-section" id="msc-rules-4">
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          <div class="content-box-center">
+            <div class="content-box-texture" aria-hidden="true"/>
+            <div class="content-box-content">
+              <h2>
+                #text "4. Match Disruptions & Technical Issues"
+              </h2>
+              <section class="cr-subsection" id="msc-rules-4-1">
+                <h3>
+                  #text "4.1 Disconnections"
+                </h3>
+                <p>
+                  #text "A disconnect may result in an automatic game loss, but if intent is unclear, match state should be reconstructed as accurately as possible."
+                </p>
+                <p>
+                  #text "If players cannot agree on reconstruction details, staff should decide the official restart procedure."
+                </p>
+                <p>
+                  #text "When reconstruction is approved, restore score, key state conditions, and possession as closely as possible."
+                </p>
+                <p>
+                  #text "If a game-specific disconnection rule exists, that game-specific rule overrides this baseline."
+                </p>
+              </section>
+              <section class="cr-subsection" id="msc-rules-4-2">
+                <h3>
+                  #text "4.2 Restarts and Misconfiguration"
+                </h3>
+                <p>
+                  #text "Tournament organizers may approve restarts in exceptional circumstances (for example infrastructure or power interruptions)."
+                </p>
+                <p>
+                  #text "If settings are misconfigured in a way that could affect the result, request review immediately after that game. Once the next game starts, the prior game is normally locked."
+                </p>
+                <p>
+                  #text "Repeated misconfiguration may result in escalating penalties."
+                </p>
+              </section>
+              <section class="cr-subsection" id="msc-rules-4-3">
+                <h3>
+                  #text "4.3 Stalling Review"
+                </h3>
+                <p>
+                  #text "Stalling or excessive delay may result in game or set forfeiture at organizer discretion."
+                </p>
+                <p>
+                  #text "If a player believes stalling occurred, formally call it, preserve evidence, and request staff review before continuing."
+                </p>
+                <p>
+                  #text "Without sufficient evidence, staff action may be limited. If staff is unavailable, suspend the set and resume after review."
+                </p>
+              </section>
+              <section class="cr-subsection" id="msc-rules-4-4">
+                <h3>
+                  #text "4.4 Pause Protocol"
+                </h3>
+                <p>
+                  #text "Mid-game pauses are allowed only for urgent technical issues or real-life emergencies, preferably in non-contested states."
+                </p>
+                <p>
+                  #text "Unauthorized pauses may result in automatic game forfeiture unless both players agree to a resolution or a true emergency is confirmed."
+                </p>
+              </section>
+              <section class="cr-subsection" id="msc-rules-4-5">
+                <h3>
+                  #text "4.5 Penalty Ladder"
+                </h3>
+                <p>
+                  #text "Rules violations are subject to penalties including, but not limited to:"
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Game restart"
+                  </li>
+                  <li>
+                    #text "Loss of a game"
+                  </li>
+                  <li>
+                    #text "Loss of a match"
+                  </li>
+                  <li>
+                    #text "Tournament forfeiture"
+                  </li>
+                </ul>
+                <p>
+                  #text "Any imposed penalty may be made public at organizer discretion."
+                </p>
+              </section>
+              <section class="cr-subsection" id="msc-rules-4-6">
+                <h3>
+                  #text "4.6 Disconnection Reconstruction"
+                </h3>
+                <p>
+                  #text "If a disconnect is unintentional, restart and recreate score until match state matches the point before disconnect."
+                </p>
+                <p>
+                  #text "Once score is restored, the player who had possession before the disconnect passes the ball to goalie, and gameplay resumes."
+                </p>
+              </section>
+              <section class="cr-subsection" id="msc-rules-4-7">
+                <h3>
+                  #text "4.7 Restart and Stalling Notes"
+                </h3>
+                <p>
+                  #text "Tournament organizers may approve a game restart in exceptional circumstances, such as a power outage."
+                </p>
+                <p>
+                  #text "Stalling or excessive delay may result in game or match forfeiture at organizer discretion."
+                </p>
+              </section>
+            </div>
+          </div>
+          <div class="content-box-bottom" aria-hidden="true"/>
+        </section>
+        <section class="content-box cr-section" id="msc-rules-5">
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          <div class="content-box-center">
+            <div class="content-box-texture" aria-hidden="true"/>
+            <div class="content-box-content">
+              <h2>
+                #text "5. Scheduling & Matchmaking Conduct"
+              </h2>
+              <section class="cr-subsection" id="msc-rules-5-1">
+                <h3>
+                  #text "5.1 Scheduling Expectations"
+                </h3>
+                <p>
+                  #text "Scheduling with your opponent is part of competitive play. Communicate early and often."
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Players have real-life responsibilities; respect scheduled set times."
+                  </li>
+                  <li>
+                    #text "If you cannot make a scheduled time, notify your opponent as early as possible."
+                  </li>
+                </ul>
+              </section>
+              <section class="cr-subsection" id="msc-rules-5-2">
+                <h3>
+                  #text "5.2 Delay and No-Show Penalties"
+                </h3>
+                <p>
+                  #text "When players mutually agree on an official set time, late arrival or no-show without communication triggers these penalties:"
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "0-10 minutes late: No penalty"
+                  </li>
+                  <li>
+                    #text "10-20 minutes late: Loss of 1 pick (opponent gets first two picks in Game 1 setup)"
+                  </li>
+                  <li>
+                    #text "20-40 minutes late: Forfeit of Game 1"
+                  </li>
+                  <li>
+                    #text "40-60 minutes late: Forfeit of Games 1 and 2"
+                  </li>
+                  <li>
+                    #text "More than 60 minutes late or no-show: Forfeit of the set"
+                  </li>
+                </ul>
+              </section>
+              <section class="cr-subsection" id="msc-rules-5-3">
+                <h3>
+                  #text "5.3 Emergency Clause"
+                </h3>
+                <p>
+                  #text "Tournament Staff may rescind penalties and allow rescheduling for valid emergencies that prevented prior communication."
+                </p>
+                <p>
+                  #text "Abuse of this clause is prohibited. Repeated emergency claims may be denied at staff discretion."
+                </p>
+              </section>
+              <section class="cr-subsection" id="msc-rules-5-4">
+                <h3>
+                  #text "5.4 Pressuring"
+                </h3>
+                <p>
+                  #text "Set times must be mutually agreed. Short-notice play is allowed only by mutual agreement."
+                </p>
+                <p>
+                  #text "Players must not pressure opponents into playing. Staff may penalize pressuring behavior."
+                </p>
+                <p>
+                  #text "Examples include:"
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Excessive pinging."
+                  </li>
+                  <li>
+                    #text "Demanding immediate play by claiming your schedule cannot otherwise meet the deadline."
+                  </li>
+                </ul>
+              </section>
+            </div>
+          </div>
+          <div class="content-box-bottom" aria-hidden="true"/>
+        </section>
+        <section class="content-box cr-section" id="msc-rules-6">
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          <div class="content-box-center">
+            <div class="content-box-texture" aria-hidden="true"/>
+            <div class="content-box-content">
+              <h2>
+                #text "6. Code of Conduct"
+              </h2>
+              <section class="cr-subsection" id="msc-rules-6-1">
+                <h3>
+                  #text "6.1 Behavior Standards"
+                </h3>
+                <p>
+                  #text "Players must show good sportsmanship and respect toward opponents and tournament organizers. Players must compete in good faith and avoid behavior inconsistent with honesty and fair play. Inappropriate behavior includes, but is not limited to:"
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Interfering with tournament operation"
+                  </li>
+                  <li>
+                    #text "Acting in an unsportsmanlike or disruptive manner, or annoying, abusing, threatening, or harassing others"
+                  </li>
+                  <li>
+                    #text "Engaging in collusion (for example any agreement to predetermine outcomes)"
+                  </li>
+                  <li>
+                    #text "Cheating by any means"
+                  </li>
+                  <li>
+                    #text "Intentionally delaying or tampering with gameplay"
+                  </li>
+                  <li>
+                    #text "Offensive, vulgar, or obscene gamertags"
+                  </li>
+                  <li>
+                    #text "Sexism, ageism, racism, or any other form of prejudice or bigotry"
+                  </li>
+                  <li>
+                    #text "Engaging in violence or behavior deemed immoral, unethical, disgraceful, or indecent by tournament owners"
+                  </li>
+                  <li>
+                    #text "Offering gifts or rewards to gain competitive advantage or create competitive disadvantage for opponents"
+                  </li>
+                  <li>
+                    #text "Otherwise violating these rules"
+                  </li>
+                </ul>
+              </section>
+            </div>
+          </div>
+          <div class="content-box-bottom" aria-hidden="true"/>
+        </section>
+        <p class="cr-note">
+          #text "Source document: "
+          <a class="cr-link" href="https://docs.google.com/document/d/e/2PACX-1vRQgUz-inFiaOJVnVDWLITqM6g3vm89lI_GstwX7cQl3Pj-Tb8QtAk5mH-HDlPbNnqKyqw4PyZaOxwX/pub" target="_blank" rel="noopener noreferrer">
+            #text "Published MSC Rules"
+          </a>
+        </p>
+      </article>
+    </section>
+    #text "\n  "
+  </main>
+  #text "\n\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n\n\n"
+  <footer id="global-footer">
+    <p class="global-footer-disclaimer">
+      #text "This website is not affiliated with Nintendo. All product names, logos, and brands are property of their respective owners."
+    </p>
+    <p class="global-footer-links">
+      <a href="https://discord.gg/de2YaWg" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "DISCORD"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://x.com/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "X"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://www.youtube.com/@MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "YOUTUBE"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://twitch.tv/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "TWITCH"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/about-us" class="global-footer-link">
+        #text "ABOUT US"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/privacy-policy" class="global-footer-link">
+        #text "PRIVACY POLICY"
+      </a>
+    </p>
+  </footer>
+</body>

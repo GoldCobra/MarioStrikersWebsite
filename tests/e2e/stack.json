@@ -1,0 +1,7 @@
+{
+  "$comment": "How run.ts starts this commit's fixture stack. Each commit carries its own copy, so a reference commit always starts the way it was built.",
+  "install": [["npm", "ci", "--prefix", "backend", "--no-audit", "--no-fund"]],
+  "installedMarker": "backend/node_modules",
+  "start": ["node", "backend/src/dev.js"],
+  "env": { "DEV_HOST": "127.0.0.1" }
+}

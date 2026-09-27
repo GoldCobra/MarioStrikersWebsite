@@ -1,0 +1,242 @@
+<body data-page="msc-wiimmfi" data-subnav="on">
+  #text "\n  "
+  <div id="1">
+    #text "\n    "
+    <div id="global-nav">
+      <header id="2">
+        <a class="nav-brand" href="/" aria-label="Mario Strikers Community home">
+          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src='./assets/logo/logo.png'"/>
+          <span class="nav-brand-est">
+            #text "EST. 2017"
+          </span>
+        </a>
+        <nav class="main-nav main-nav-text" aria-label="Main navigation">
+          <a class="nav-top-link" href="/" data-top-key="home" aria-label="Home">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-home.png'"/>
+          </a>
+          <a class="nav-top-link is-active" href="/games" data-top-key="games" aria-label="Games">
+            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-games-active.webp" width="733" height="198" alt="Games" onerror="this.onerror=null;this.src='./assets/nav-buttons/active/nav-games-active.png'"/>
+          </a>
+          <a class="nav-top-link" href="/competitive" data-top-key="competitive" aria-label="Competitive">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-competitive.webp" width="733" height="198" alt="Competitive" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-competitive.png'"/>
+          </a>
+          <a class="nav-top-link" href="/players" data-top-key="players" aria-label="Players">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-players.webp" width="733" height="198" alt="Players" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-players.png'"/>
+          </a>
+          <a class="nav-top-link" href="/partners" data-top-key="partners" aria-label="Partners">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-partners.png'"/>
+          </a>
+        </nav>
+        <div id="global-account" class="global-account" data-auth-state="logged-out"/>
+      </header>
+    </div>
+    #text "\n    "
+    <div id="global-subnav">
+      <nav class="sub-nav sub-nav-level2" aria-label="Games navigation">
+        <a class="sub-link sub-link-text" href="/msbl" aria-label="STRIKERS: BATTLE LEAGUE">
+          <span class="sub-link-label">
+            #text "STRIKERS: BATTLE LEAGUE"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text is-active" href="/msc" aria-label="STRIKERS CHARGED">
+          <span class="sub-link-label">
+            #text "STRIKERS CHARGED"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/sms" aria-label="SUPER MARIO STRIKERS">
+          <span class="sub-link-label">
+            #text "SUPER MARIO STRIKERS"
+          </span>
+        </a>
+      </nav>
+    </div>
+    #text "\n  "
+  </div>
+  #text "\n\n  "
+  <main class="page-content msc-wiimmfi-page" aria-label="Wiimmfi - MSC online players">
+    #text "\n    "
+    <h1 class="visually-hidden">
+      #text "MSC WIIMMFI"
+    </h1>
+    <div id="global-content-tabs">
+      <section class="global-tabs-shell" aria-label="MSC tabs">
+        <div class="global-tabs-list">
+          <a class="global-tab" href="/msc-setup-guide" aria-label="Setup Guide">
+            #text "SETUP GUIDE"
+          </a>
+          <a class="global-tab" href="/msc-save-editor" aria-label="Save Editor">
+            #text "SAVE EDITOR"
+          </a>
+          <svg class="global-tabs-line-overlay"/>
+        </div>
+      </section>
+    </div>
+    #text "\n    "
+    <div id="wiimmfi-results" class="online-editor-results wiimmfi-results" aria-live="polite">
+      <table class="online-editor-table">
+        <thead>
+          <tr>
+            <th>
+              <span class="online-editor-roster-name">
+                <span class="online-editor-roster-header-muted">
+                  #text "Online Now "
+                </span>
+                <span class="online-editor-roster-count">
+                  #text "4"
+                </span>
+              </span>
+            </th>
+            <th>
+              <span class="online-editor-roster-code online-editor-roster-header-muted">
+                #text "Friend Code"
+              </span>
+            </th>
+            <th>
+              <span class="wiimmfi-region-head online-editor-roster-header-muted">
+                #text "Region"
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="online-editor-separator-row" aria-hidden="true">
+            <td colspan="3">
+              <span class="online-editor-row-separator"/>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="online-editor-roster-name">
+                #text "Sample Player"
+              </span>
+            </td>
+            <td>
+              <span class="online-editor-roster-code">
+                #text "0000-0000-0001"
+              </span>
+            </td>
+            <td>
+              <span class="wiimmfi-region">
+                #text "PAL"
+              </span>
+            </td>
+          </tr>
+          <tr class="online-editor-separator-row" aria-hidden="true">
+            <td colspan="3">
+              <span class="online-editor-row-separator"/>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="online-editor-roster-name">
+                #text "Pixel Piranha"
+              </span>
+            </td>
+            <td>
+              <span class="online-editor-roster-code">
+                #text "0000-0000-0002"
+              </span>
+            </td>
+            <td>
+              <span class="wiimmfi-region">
+                #text "NTSC-U"
+              </span>
+            </td>
+          </tr>
+          <tr class="online-editor-separator-row" aria-hidden="true">
+            <td colspan="3">
+              <span class="online-editor-row-separator"/>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="online-editor-roster-name">
+                #text "サンプル"
+              </span>
+            </td>
+            <td>
+              <span class="online-editor-roster-code">
+                #text "0000-0000-0003"
+              </span>
+            </td>
+            <td>
+              <span class="wiimmfi-region">
+                #text "NTSC-J"
+              </span>
+            </td>
+          </tr>
+          <tr class="online-editor-separator-row" aria-hidden="true">
+            <td colspan="3">
+              <span class="online-editor-row-separator"/>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="online-editor-roster-name">
+                #text "Turbo Shell"
+              </span>
+            </td>
+            <td>
+              <span class="online-editor-roster-code">
+                #text "0000-0000-0004"
+              </span>
+            </td>
+            <td>
+              <span class="wiimmfi-region">
+                #text "NTSC-K"
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="wiimmfi-last-updated" id="wiimmfi-last-updated">
+        #text "Updated: 12:00:00"
+      </p>
+    </div>
+    #text "\n  "
+  </main>
+  #text "\n\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n\n\n"
+  <footer id="global-footer">
+    <p class="global-footer-disclaimer">
+      #text "This website is not affiliated with Nintendo. All product names, logos, and brands are property of their respective owners."
+    </p>
+    <p class="global-footer-links">
+      <a href="https://discord.gg/de2YaWg" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "DISCORD"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://x.com/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "X"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://www.youtube.com/@MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "YOUTUBE"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://twitch.tv/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "TWITCH"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/about-us" class="global-footer-link">
+        #text "ABOUT US"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/privacy-policy" class="global-footer-link">
+        #text "PRIVACY POLICY"
+      </a>
+    </p>
+  </footer>
+</body>

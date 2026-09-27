@@ -1,0 +1,383 @@
+<body data-page="msbl-striker-clubs" data-subnav="on">
+  #text "\n  "
+  <div id="1">
+    #text "\n    "
+    <div id="global-nav">
+      <header id="2">
+        <a class="nav-brand" href="/" aria-label="Mario Strikers Community home">
+          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src='./assets/logo/logo.png'"/>
+          <span class="nav-brand-est">
+            #text "EST. 2017"
+          </span>
+        </a>
+        <nav class="main-nav main-nav-text" aria-label="Main navigation">
+          <a class="nav-top-link" href="/" data-top-key="home" aria-label="Home">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-home.png'"/>
+          </a>
+          <a class="nav-top-link is-active" href="/games" data-top-key="games" aria-label="Games">
+            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-games-active.webp" width="733" height="198" alt="Games" onerror="this.onerror=null;this.src='./assets/nav-buttons/active/nav-games-active.png'"/>
+          </a>
+          <a class="nav-top-link" href="/competitive" data-top-key="competitive" aria-label="Competitive">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-competitive.webp" width="733" height="198" alt="Competitive" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-competitive.png'"/>
+          </a>
+          <a class="nav-top-link" href="/players" data-top-key="players" aria-label="Players">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-players.webp" width="733" height="198" alt="Players" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-players.png'"/>
+          </a>
+          <a class="nav-top-link" href="/partners" data-top-key="partners" aria-label="Partners">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-partners.png'"/>
+          </a>
+        </nav>
+        <div id="global-account" class="global-account" data-auth-state="logged-out"/>
+      </header>
+    </div>
+    #text "\n    "
+    <div id="global-subnav">
+      <nav class="sub-nav sub-nav-level2" aria-label="Games navigation">
+        <a class="sub-link sub-link-text is-active" href="/msbl" aria-label="STRIKERS: BATTLE LEAGUE">
+          <span class="sub-link-label">
+            #text "STRIKERS: BATTLE LEAGUE"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/msc" aria-label="STRIKERS CHARGED">
+          <span class="sub-link-label">
+            #text "STRIKERS CHARGED"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/sms" aria-label="SUPER MARIO STRIKERS">
+          <span class="sub-link-label">
+            #text "SUPER MARIO STRIKERS"
+          </span>
+        </a>
+      </nav>
+    </div>
+    #text "\n  "
+  </div>
+  #text "\n\n  "
+  <main class="page-content clubs-page" aria-label="MSBL clubs">
+    #text "\n    "
+    <h1 class="visually-hidden">
+      #text "MSBL Clubs"
+    </h1>
+    <div id="global-content-tabs">
+      <section class="global-tabs-shell" aria-label="MSBL tabs">
+        <div class="global-tabs-list">
+          <a class="global-tab is-active" href="/msbl-striker-clubs" aria-label="Striker Clubs" aria-current="page">
+            #text "STRIKER CLUBS"
+          </a>
+          <a class="global-tab" href="/msbl-gear-builder" aria-label="Gear Builder">
+            #text "GEAR BUILDER"
+          </a>
+          <a class="global-tab" href="/msbl-save-editor" aria-label="Save Editor">
+            #text "SAVE EDITOR"
+          </a>
+          <svg class="global-tabs-line-overlay"/>
+        </div>
+      </section>
+    </div>
+    #text "\n    "
+    <section id="msbl-clubs-root" class="msbl-clubs-root">
+      <section class="msbl-clubs-list" role="list" aria-label="MSBL clubs list">
+        <article class="msbl-club-row" role="listitem" data-club-id="9" tabindex="0" aria-label="Open profile for Dummy Dynamos">
+          <div class="msbl-club-logo-slot">
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/9/logo" alt="Dummy Dynamos club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+          </div>
+          <div class="msbl-club-main">
+            <div class="msbl-club-primary">
+              <span class="msbl-club-name">
+                #text "Dummy Dynamos"
+              </span>
+            </div>
+            <div class="msbl-club-meta">
+              <span class="msbl-club-meta-item msbl-club-tag-meta">
+                #text "DUM"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-status is-open-to-anyone">
+                <span class="msbl-club-status-text">
+                  #text "Open to Anyone"
+                </span>
+              </span>
+              <span class="msbl-club-meta-item msbl-club-extra">
+                #text "NA"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-members">
+                <img class="msbl-club-members-icon" src="/assets/clubs/members.png" alt="" aria-hidden="true"/>
+                <span class="msbl-club-members-text">
+                  #text "4"
+                </span>
+              </span>
+            </div>
+          </div>
+        </article>
+        <article class="msbl-club-row" role="listitem" data-club-id="3" tabindex="0" aria-label="Open profile for Fixture FC">
+          <div class="msbl-club-logo-slot">
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/3/logo" alt="Fixture FC club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+          </div>
+          <div class="msbl-club-main">
+            <div class="msbl-club-primary">
+              <span class="msbl-club-name">
+                #text "Fixture FC"
+              </span>
+            </div>
+            <div class="msbl-club-meta">
+              <span class="msbl-club-meta-item msbl-club-tag-meta">
+                #text "FIX"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-status is-open-to-anyone">
+                <span class="msbl-club-status-text">
+                  #text "Open to Anyone"
+                </span>
+              </span>
+              <span class="msbl-club-meta-item msbl-club-extra">
+                #text "NA | EU | SA"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-members">
+                <img class="msbl-club-members-icon" src="/assets/clubs/members.png" alt="" aria-hidden="true"/>
+                <span class="msbl-club-members-text">
+                  #text "4"
+                </span>
+              </span>
+            </div>
+          </div>
+        </article>
+        <article class="msbl-club-row" role="listitem" data-club-id="1" tabindex="0" aria-label="Open profile for Sample Strikers">
+          <div class="msbl-club-logo-slot">
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/1/logo" alt="Sample Strikers club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+          </div>
+          <div class="msbl-club-main">
+            <div class="msbl-club-primary">
+              <span class="msbl-club-name">
+                #text "Sample Strikers"
+              </span>
+            </div>
+            <div class="msbl-club-meta">
+              <span class="msbl-club-meta-item msbl-club-tag-meta">
+                #text "SMP"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-status is-open-to-anyone">
+                <span class="msbl-club-status-text">
+                  #text "Open to Anyone"
+                </span>
+              </span>
+              <span class="msbl-club-meta-item msbl-club-extra">
+                #text "EU"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-members">
+                <img class="msbl-club-members-icon" src="/assets/clubs/members.png" alt="" aria-hidden="true"/>
+                <span class="msbl-club-members-text">
+                  #text "4"
+                </span>
+              </span>
+            </div>
+          </div>
+        </article>
+        <article class="msbl-club-row" role="listitem" data-club-id="11" tabindex="0" aria-label="Open profile for Stub Stars">
+          <div class="msbl-club-logo-slot">
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/11/logo" alt="Stub Stars club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+          </div>
+          <div class="msbl-club-main">
+            <div class="msbl-club-primary">
+              <span class="msbl-club-name">
+                #text "Stub Stars"
+              </span>
+            </div>
+            <div class="msbl-club-meta">
+              <span class="msbl-club-meta-item msbl-club-tag-meta">
+                #text "STB"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-status is-invite-only">
+                <img class="msbl-club-status-icon" src="/assets/clubs/invite-only.png" alt="" aria-hidden="true"/>
+                <span class="msbl-club-status-text">
+                  #text "Invite Only"
+                </span>
+              </span>
+              <span class="msbl-club-meta-item msbl-club-extra">
+                #text "NA"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-members">
+                <img class="msbl-club-members-icon" src="/assets/clubs/members.png" alt="" aria-hidden="true"/>
+                <span class="msbl-club-members-text">
+                  #text "4"
+                </span>
+              </span>
+            </div>
+          </div>
+        </article>
+        <article class="msbl-club-row" role="listitem" data-club-id="7" tabindex="0" aria-label="Open profile for Test Toads">
+          <div class="msbl-club-logo-slot">
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/7/logo" alt="Test Toads club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+          </div>
+          <div class="msbl-club-main">
+            <div class="msbl-club-primary">
+              <span class="msbl-club-name">
+                #text "Test Toads"
+              </span>
+            </div>
+            <div class="msbl-club-meta">
+              <span class="msbl-club-meta-item msbl-club-tag-meta">
+                #text "TST"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-status is-open-to-anyone">
+                <span class="msbl-club-status-text">
+                  #text "Open to Anyone"
+                </span>
+              </span>
+              <span class="msbl-club-meta-item msbl-club-extra">
+                #text "SA | NA"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-members">
+                <img class="msbl-club-members-icon" src="/assets/clubs/members.png" alt="" aria-hidden="true"/>
+                <span class="msbl-club-members-text">
+                  #text "4"
+                </span>
+              </span>
+            </div>
+          </div>
+        </article>
+        <article class="msbl-club-row" role="listitem" data-club-id="2" tabindex="0" aria-label="Open profile for Demo United">
+          <div class="msbl-club-logo-slot">
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/2/logo" alt="Demo United club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+          </div>
+          <div class="msbl-club-main">
+            <div class="msbl-club-primary">
+              <span class="msbl-club-name">
+                #text "Demo United"
+              </span>
+            </div>
+            <div class="msbl-club-meta">
+              <span class="msbl-club-meta-item msbl-club-tag-meta">
+                #text "DEMO"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-status is-invite-only">
+                <img class="msbl-club-status-icon" src="/assets/clubs/invite-only.png" alt="" aria-hidden="true"/>
+                <span class="msbl-club-status-text">
+                  #text "Invite Only"
+                </span>
+              </span>
+              <span class="msbl-club-meta-item msbl-club-extra">
+                #text "NA"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-members">
+                <img class="msbl-club-members-icon" src="/assets/clubs/members.png" alt="" aria-hidden="true"/>
+                <span class="msbl-club-members-text">
+                  #text "1"
+                </span>
+              </span>
+            </div>
+          </div>
+        </article>
+        <article class="msbl-club-row" role="listitem" data-club-id="4" tabindex="0" aria-label="Open profile for Placeholder Athletic">
+          <div class="msbl-club-logo-slot">
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/4/logo" alt="Placeholder Athletic club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+          </div>
+          <div class="msbl-club-main">
+            <div class="msbl-club-primary">
+              <span class="msbl-club-name">
+                #text "Placeholder Athletic"
+              </span>
+            </div>
+            <div class="msbl-club-meta">
+              <span class="msbl-club-meta-item msbl-club-tag-meta">
+                #text "PLH"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-status is-invite-only">
+                <img class="msbl-club-status-icon" src="/assets/clubs/invite-only.png" alt="" aria-hidden="true"/>
+                <span class="msbl-club-status-text">
+                  #text "Invite Only"
+                </span>
+              </span>
+              <span class="msbl-club-meta-item msbl-club-extra">
+                #text "EU"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-members">
+                <img class="msbl-club-members-icon" src="/assets/clubs/members.png" alt="" aria-hidden="true"/>
+                <span class="msbl-club-members-text">
+                  #text "1"
+                </span>
+              </span>
+            </div>
+          </div>
+        </article>
+        <article class="msbl-club-row is-inactive" role="listitem" data-club-id="5" tabindex="0" aria-label="Open profile for Mock Mushrooms">
+          <div class="msbl-club-logo-slot">
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/5/logo" alt="Mock Mushrooms club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+          </div>
+          <div class="msbl-club-main">
+            <div class="msbl-club-primary">
+              <span class="msbl-club-name">
+                #text "Mock Mushrooms"
+              </span>
+            </div>
+            <div class="msbl-club-meta">
+              <span class="msbl-club-meta-item msbl-club-tag-meta">
+                #text "MOCK"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-status is-open-to-anyone">
+                <span class="msbl-club-status-text">
+                  #text "Open to Anyone"
+                </span>
+              </span>
+              <span class="msbl-club-meta-item msbl-club-extra">
+                #text "JP"
+              </span>
+              <span class="msbl-club-meta-item msbl-club-members">
+                <img class="msbl-club-members-icon" src="/assets/clubs/inactive-members.png" alt="" aria-hidden="true"/>
+                <span class="msbl-club-members-text">
+                  #text "4"
+                </span>
+              </span>
+            </div>
+          </div>
+        </article>
+      </section>
+    </section>
+    #text "\n  "
+  </main>
+  #text "\n\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n\n\n"
+  <footer id="global-footer">
+    <p class="global-footer-disclaimer">
+      #text "This website is not affiliated with Nintendo. All product names, logos, and brands are property of their respective owners."
+    </p>
+    <p class="global-footer-links">
+      <a href="https://discord.gg/de2YaWg" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "DISCORD"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://x.com/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "X"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://www.youtube.com/@MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "YOUTUBE"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://twitch.tv/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "TWITCH"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/about-us" class="global-footer-link">
+        #text "ABOUT US"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/privacy-policy" class="global-footer-link">
+        #text "PRIVACY POLICY"
+      </a>
+    </p>
+  </footer>
+</body>

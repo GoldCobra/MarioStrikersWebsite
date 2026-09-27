@@ -1,0 +1,181 @@
+[
+  {
+    "tag": "link",
+    "attributes": {
+      "rel": "apple-touch-icon",
+      "href": "/assets/favicon/blball.png",
+      "type": "image/png"
+    }
+  },
+  {
+    "tag": "link",
+    "attributes": {
+      "rel": "canonical",
+      "href": "https://mariostrikers.gg/msbl-whr"
+    }
+  },
+  {
+    "tag": "link",
+    "attributes": {
+      "rel": "icon",
+      "href": "/assets/favicon/blball.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    }
+  },
+  {
+    "tag": "link",
+    "attributes": {
+      "rel": "icon",
+      "href": "/assets/favicon/favicon.ico",
+      "type": "image/x-icon"
+    }
+  },
+  {
+    "tag": "link",
+    "attributes": {
+      "rel": "preload",
+      "href": "/assets/fonts/MLSBY.woff",
+      "as": "font",
+      "type": "font/woff",
+      "crossorigin": ""
+    }
+  },
+  {
+    "tag": "link",
+    "attributes": {
+      "rel": "preload",
+      "href": "/assets/fonts/itc-grizzly.woff",
+      "as": "font",
+      "type": "font/woff",
+      "crossorigin": ""
+    }
+  },
+  {
+    "tag": "link",
+    "attributes": {
+      "rel": "shortcut icon",
+      "href": "/assets/favicon/favicon.ico",
+      "type": "image/x-icon"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "charset": "utf-8"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "description",
+      "content": "View MSBL WHR rankings for Mario Strikers Battle League community competition."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "twitter:card",
+      "content": "summary"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "twitter:description",
+      "content": "View MSBL WHR rankings for Mario Strikers Battle League community competition."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "twitter:site",
+      "content": "@MarioStrikersGG"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "twitter:title",
+      "content": "MSBL WHR | Mario Strikers Community"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "viewport",
+      "content": "width=device-width, initial-scale=1"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:description",
+      "content": "View MSBL WHR rankings for Mario Strikers Battle League community competition."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:title",
+      "content": "MSBL WHR | Mario Strikers Community"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:type",
+      "content": "website"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:url",
+      "content": "https://mariostrikers.gg/msbl-whr"
+    }
+  },
+  {
+    "tag": "script",
+    "json": {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://mariostrikers.gg/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Competitive",
+          "item": "https://mariostrikers.gg/competitive"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Leaderboards",
+          "item": "https://mariostrikers.gg/competitive-leaderboards"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "MSBL",
+          "item": "https://mariostrikers.gg/msbl-elo1v1"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "MSBL WHR",
+          "item": "https://mariostrikers.gg/msbl-whr"
+        }
+      ]
+    }
+  },
+  {
+    "tag": "title",
+    "text": "MSBL WHR | Mario Strikers Community"
+  }
+]

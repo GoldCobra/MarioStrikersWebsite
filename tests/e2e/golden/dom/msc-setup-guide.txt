@@ -1,0 +1,1764 @@
+<body data-page="msc-setup-guide" data-subnav="on">
+  #text "\n  "
+  <div id="1">
+    #text "\n    "
+    <div id="global-nav">
+      <header id="2">
+        <a class="nav-brand" href="/" aria-label="Mario Strikers Community home">
+          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src='./assets/logo/logo.png'"/>
+          <span class="nav-brand-est">
+            #text "EST. 2017"
+          </span>
+        </a>
+        <nav class="main-nav main-nav-text" aria-label="Main navigation">
+          <a class="nav-top-link" href="/" data-top-key="home" aria-label="Home">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-home.png'"/>
+          </a>
+          <a class="nav-top-link is-active" href="/games" data-top-key="games" aria-label="Games">
+            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-games-active.webp" width="733" height="198" alt="Games" onerror="this.onerror=null;this.src='./assets/nav-buttons/active/nav-games-active.png'"/>
+          </a>
+          <a class="nav-top-link" href="/competitive" data-top-key="competitive" aria-label="Competitive">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-competitive.webp" width="733" height="198" alt="Competitive" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-competitive.png'"/>
+          </a>
+          <a class="nav-top-link" href="/players" data-top-key="players" aria-label="Players">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-players.webp" width="733" height="198" alt="Players" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-players.png'"/>
+          </a>
+          <a class="nav-top-link" href="/partners" data-top-key="partners" aria-label="Partners">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-partners.png'"/>
+          </a>
+        </nav>
+        <div id="global-account" class="global-account" data-auth-state="logged-out"/>
+      </header>
+    </div>
+    #text "\n    "
+    <div id="global-subnav">
+      <nav class="sub-nav sub-nav-level2" aria-label="Games navigation">
+        <a class="sub-link sub-link-text" href="/msbl" aria-label="STRIKERS: BATTLE LEAGUE">
+          <span class="sub-link-label">
+            #text "STRIKERS: BATTLE LEAGUE"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text is-active" href="/msc" aria-label="STRIKERS CHARGED">
+          <span class="sub-link-label">
+            #text "STRIKERS CHARGED"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/sms" aria-label="SUPER MARIO STRIKERS">
+          <span class="sub-link-label">
+            #text "SUPER MARIO STRIKERS"
+          </span>
+        </a>
+      </nav>
+    </div>
+    #text "\n  "
+  </div>
+  #text "\n\n  "
+  <main class="page-content competitive-rules-page setup-guide-page">
+    <div id="global-content-tabs">
+      <section class="global-tabs-shell" aria-label="MSC tabs">
+        <div class="global-tabs-list">
+          <a class="global-tab is-active" href="/msc-setup-guide" aria-label="Setup Guide" aria-current="page">
+            #text "SETUP GUIDE"
+          </a>
+          <a class="global-tab" href="/msc-save-editor" aria-label="Save Editor">
+            #text "SAVE EDITOR"
+          </a>
+          <svg class="global-tabs-line-overlay"/>
+        </div>
+      </section>
+    </div>
+    #text "\n    "
+    <section id="msc-setup-guide-root" aria-label="MSC setup guide">
+      #text "\n    "
+      <header class="competitive-rules-header" aria-label="MSC setup guide header">
+        #text "\n    "
+        <h1 class="cr-page-title">
+          #text "The Ultimate Guide for MARIO STRIKERS CHARGED Online (Wii & Dolphin)"
+        </h1>
+        #text "\n    "
+        <p class="cr-page-revised">
+          #text "Last revised April 19, 2026"
+        </p>
+        #text "\n    "
+      </header>
+      #text "\n    "
+      <article class="competitive-rules setup-guide-article content-box-list" aria-label="MSC setup guide">
+        #text "\n    "
+        <section class="content-box cr-section setup-guide-section">
+          #text "\n    "
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          #text "\n    "
+          <div class="content-box-center">
+            #text "\n    "
+            <div class="content-box-texture" aria-hidden="true"/>
+            #text "\n    "
+            <div class="content-box-content">
+              #text "\n    "
+              <h2>
+                #text "TABLE OF CONTENTS"
+              </h2>
+              #text "\n    "
+              <ul class="cr-list">
+                #text "\n    "
+                <li>
+                  <a class="cr-link" href="#msc-setup-section-1">
+                    #text "1. Terms and Definitions"
+                  </a>
+                </li>
+                #text "\n    "
+                <li>
+                  <a class="cr-link" href="#msc-setup-section-2">
+                    #text "2. A: Wii/Wii U Setup"
+                  </a>
+                </li>
+                #text "\n    "
+                <li>
+                  <a class="cr-link" href="#msc-setup-section-3">
+                    #text "3. B: Dolphin Setup"
+                  </a>
+                </li>
+                #text "\n    "
+                <li>
+                  <a class="cr-link" href="#msc-setup-section-4">
+                    #text "4. In-Game Optimization and Competitive Stability"
+                  </a>
+                </li>
+                #text "\n    "
+                <li>
+                  <a class="cr-link" href="#msc-setup-section-5">
+                    #text "5. Troubleshooting and References"
+                  </a>
+                </li>
+                #text "\n    "
+              </ul>
+              #text "\n    "
+            </div>
+            #text "\n    "
+          </div>
+          #text "\n    "
+          <div class="content-box-bottom" aria-hidden="true"/>
+          #text "\n    "
+        </section>
+        #text "\n    "
+        <section class="content-box cr-section setup-guide-section">
+          #text "\n    "
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          #text "\n    "
+          <div class="content-box-center">
+            #text "\n    "
+            <div class="content-box-texture" aria-hidden="true"/>
+            #text "\n    "
+            <div class="content-box-content">
+              #text "\n    "
+              <h2 id="msc-setup-section-1">
+                #text "1. Terms and Definitions"
+              </h2>
+              #text "\n    "
+              <p>
+                #text "NINTENDO WFC: Nintendo's original online service for Nintendo Wii and DS games. It was terminated in 2014."
+              </p>
+              #text "\n    "
+              <p>
+                #text "WIIMMFI: A community-run online service that replaces Nintendo WFC for supported games."
+              </p>
+              #text "\n    "
+              <p>
+                #text "DOLPHIN: An emulator for Nintendo GameCube and Wii games that can run on PC."
+              </p>
+              #text "\n    "
+              <p>
+                #text "NETPLAY: A Dolphin feature that lets players host or join an online room using a shared code."
+              </p>
+              #text "\n    "
+              <p>
+                #text "HOMEBREW: Unofficial software/tools for Wii or Wii U, commonly used to run apps and game loaders (for example USB Loader GX)."
+              </p>
+              #text "\n    "
+              <p>
+                #text "WI-FI (WLAN): A wireless local network connection used by devices to connect to a router without a cable."
+              </p>
+              #text "\n    "
+              <p>
+                #text "ROUTER: The network device in your home that connects your devices to the internet (often your Wi-Fi box)."
+              </p>
+              #text "\n    "
+              <p>
+                #text "ETHERNET: A wired network connection standard (LAN). In this guide, it means using a cable instead of Wi-Fi for a more stable connection."
+              </p>
+              #text "\n    "
+              <p>
+                #text "MOBILE ROUTER OR HOTSPOT: A phone or mobile device feature that shares mobile data as a Wi-Fi network."
+              </p>
+              #text "\n    "
+              <p>
+                #text "SSID: The name of a Wi-Fi network."
+              </p>
+              #text "\n    "
+              <p>
+                #text "DNS: Domain Name System. In this context, custom DNS settings can redirect game network requests from Nintendo WFC endpoints to Wiimmfi endpoints."
+              </p>
+              #text "\n    "
+              <p>
+                #text "REGION-LOCK: A restriction where games/services only connect between matching regions. For MARIO STRIKERS CHARGED online, players must use the same game region."
+              </p>
+              #text "\n    "
+              <p>
+                #text "PORT: A network endpoint used by apps/services to send and receive traffic. If required ports are blocked, online services may fail to connect."
+              </p>
+              #text "\n    "
+              <p>
+                #text "FIREWALL: A security system that filters incoming and outgoing network traffic based on rules. You may need to allow Dolphin through your firewall for online play."
+              </p>
+              #text "\n    "
+              <p class="cr-note">
+                #text "Choose your path: use Section 2 for Wii setup or Section 3 for Dolphin setup."
+              </p>
+              #text "\n    "
+            </div>
+            #text "\n    "
+          </div>
+          #text "\n    "
+          <div class="content-box-bottom" aria-hidden="true"/>
+          #text "\n    "
+        </section>
+        #text "\n    "
+        <section class="content-box cr-section setup-guide-section">
+          #text "\n    "
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          #text "\n    "
+          <div class="content-box-center">
+            #text "\n    "
+            <div class="content-box-texture" aria-hidden="true"/>
+            #text "\n    "
+            <div class="content-box-content">
+              #text "\n    "
+              <h2 id="msc-setup-section-2">
+                #text "2. A: Wii/Wii U Setup"
+              </h2>
+              #text "\n    "
+              <p>
+                #text "Requirements:"
+              </p>
+              #text "\n    "
+              <p>
+                #text "Wii or Wii U with vWii mode (eShop game version is not supported)"
+              </p>
+              #text "\n    "
+              <p>
+                #text "A copy of MARIO STRIKERS CHARGED"
+              </p>
+              #text "\n    "
+              <p>
+                #text "Homebrew (loads the game through USB/SD card) or the DNS method (loads the game directly from the disc for a non-modded console)"
+              </p>
+              #text "\n    "
+              <h3>
+                #text "2.1 Homebrew Method"
+              </h3>
+              #text "\n    "
+              <p>
+                #text "The Homebrew method lets you mod your Wii or Wii U console. This allows you to launch MARIO STRIKERS CHARGED, cross-play with Dolphin users, and play without a physical copy through a USB loader."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Follow these links if you cannot use a valid copy or if you need cross-play with the PAL version of the game (competitions use the PAL version, and Homebrew allows region loading on NTSC consoles):"
+              </p>
+              #text "\n    "
+              <p>
+                #text "Homebrew Wii: "
+                <a class="cr-link" href="https://wii.guide/" target="_blank" rel="noopener noreferrer">
+                  #text "Wii Guide"
+                </a>
+              </p>
+              #text "\n    "
+              <p>
+                #text "Homebrew Wii U: "
+                <a class="cr-link" href="https://wiiu.hacks.guide/#/introduction" target="_blank" rel="noopener noreferrer">
+                  #text "Wii U Hacks Guide"
+                </a>
+              </p>
+              #text "\n    "
+              <h3>
+                #text "2.2 DNS Method (Wii Only)"
+              </h3>
+              #text "\n    "
+              <p>
+                #text "This DNS method is supported on Nintendo Wii only and is not supported on Wii U."
+              </p>
+              #text "\n    "
+              <p>
+                #text "To use Wiimmfi (required for non-modded Wii online play in MARIO STRIKERS CHARGED), configure your Wii internet DNS settings as follows:"
+              </p>
+              #text "\n    "
+              <ol>
+                #text "\n    "
+                <li>
+                  #text "Go into your Wii Options"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Wii Settings > Page 2"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Internet"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Connection Settings"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Select your active Connection from the list"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Change settings"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Click the right arrow button until you reach the screen where you can change DNS settings"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Select No and then Advanced Settings"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Set Primary DNS to 95.217.77.181 and Secondary DNS to 8.8.8.8"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Confirm and start a Connection Test"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "If the connection test fails, make sure your Wii has Internet access and double-check your settings (see Section 5.1)."
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image57.webp" alt="MSC setup guide image image57.png"/>
+              </figure>
+              #text "\n    "
+              <h3>
+                #text "2.3 Connection Quality for Wii"
+              </h3>
+              #text "\n    "
+              <h4>
+                #text "2.3.1 LAN Adapter"
+              </h4>
+              #text "\n    "
+              <p>
+                #text "To ensure the best possible connection speed on Wii, it is highly recommended to use a "
+                <a class="cr-link" href="https://www.amazon.com/UGREEN-Ethernet-Compatible-Nintendo-Chromebook/dp/B08DRKYKMM" target="_blank" rel="noopener noreferrer">
+                  #text "Wii LAN Adapter"
+                </a>
+                #text ", which allows a wired connection from your Wii to your router."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img class="setup-guide-image-half" loading="lazy" decoding="async" src="/assets/setup-guides/msc/image8.webp" alt="MSC setup guide image image8.png"/>
+              </figure>
+              #text "\n    "
+              <h4>
+                #text "2.3.2 Latency and Speed"
+              </h4>
+              #text "\n    "
+              <p>
+                #text "For online play, stability matters more than raw internet speed."
+              </p>
+              #text "\n    "
+              <p class="setup-guide-warning">
+                <img class="setup-guide-warning-icon" src="/assets/text-boxes/ex-mark.png" alt="Warning"/>
+                #text "Download/upload speed is not the main factor for match quality. Ping is the most important factor."
+              </p>
+              #text "\n    "
+              <ul class="cr-list">
+                #text "\n    "
+                <li>
+                  #text "What is ping?"
+                </li>
+                #text "\n    "
+              </ul>
+              #text "\n    "
+              <p>
+                #text "Ping is the delay between your input and the game response. Lower ping means smoother control."
+              </p>
+              #text "\n    "
+              <ul class="cr-list">
+                #text "\n    "
+                <li>
+                  #text "What ping is good?"
+                </li>
+                #text "\n    "
+              </ul>
+              #text "\n    "
+              <p>
+                #text "40-60 ms or lower is a good competitive target. Under 30 ms is ideal. Above 100 ms causes clear delay, and above 170 ms some matches may fail to connect."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Example: 10 ms usually feels much smoother than 100 ms."
+              </p>
+              #text "\n    "
+              <ul class="cr-list">
+                #text "\n    "
+                <li>
+                  #text "What is lag?"
+                </li>
+                #text "\n    "
+              </ul>
+              #text "\n    "
+              <p>
+                #text "Lag means delayed or unstable gameplay. Inputs can feel late, the game may freeze briefly, then catch up, or disconnect."
+              </p>
+              #text "\n    "
+              <h4>
+                #text "2.3.3 Ping Optimization"
+              </h4>
+              #text "\n    "
+              <ol>
+                #text "\n    "
+                <li>
+                  #text "Check your ping before playing. Wii ping is often higher than PC ping."
+                  <br/>
+                  #text "\n    "
+                  <a class="cr-link" href="http://www.speedtest.net/" target="_blank" rel="noopener noreferrer">
+                    #text "OOKLA SPEEDTEST"
+                  </a>
+                  <br/>
+                  #text "\n    "
+                  <a class="cr-link" href="http://internethealthtest.org/" target="_blank" rel="noopener noreferrer">
+                    #text "INTERNET HEALTH TEST"
+                  </a>
+                  <br/>
+                  #text "\n    "
+                  <a class="cr-link" href="https://speedof.me/" target="_blank" rel="noopener noreferrer">
+                    #text "SPEEDOF.ME"
+                  </a>
+                </li>
+                #text "\n    "
+                <li>
+                  #text "If you use Wi-Fi, stay close to your router."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Use a wired connection when possible (Wii LAN Adapter)."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "A powerline adapter can improve connection stability."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "During matches, avoid heavy network use (YouTube, Netflix, Twitch, large downloads)."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Disconnect unused devices from your network when possible."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "If available, use fiber or a higher-quality internet plan."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "If issues continue, check for outages with your internet provider."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Advanced users: prioritize your Wii or Wii U in router settings (QoS/device priority)."
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image26.webp" alt="MSC setup guide image image26.png"/>
+              </figure>
+              #text "\n    "
+            </div>
+            #text "\n    "
+          </div>
+          #text "\n    "
+          <div class="content-box-bottom" aria-hidden="true"/>
+          #text "\n    "
+        </section>
+        #text "\n    "
+        <section class="content-box cr-section setup-guide-section">
+          #text "\n    "
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          #text "\n    "
+          <div class="content-box-center">
+            #text "\n    "
+            <div class="content-box-texture" aria-hidden="true"/>
+            #text "\n    "
+            <div class="content-box-content">
+              #text "\n    "
+              <h2 id="msc-setup-section-3">
+                #text "3. B: Dolphin Setup"
+              </h2>
+              #text "\n    "
+              <p>
+                #text "This section explains how to get started with Dolphin Emulator."
+              </p>
+              #text "\n    "
+              <h3>
+                #text "3.1 Requirements and Specs"
+              </h3>
+              #text "\n    "
+              <p>
+                <a class="cr-link" href="https://dolphin-emu.org/download/?ref=btn" target="_blank" rel="noopener noreferrer">
+                  #text "Dolphin version 2603"
+                  <span class="cr-link-preserve-case">
+                    #text "a"
+                  </span>
+                </a>
+                #text " or newer"
+              </p>
+              #text "\n    "
+              <p>
+                #text "Requirements:"
+              </p>
+              #text "\n    "
+              <ul>
+                #text "\n    "
+                <li>
+                  #text "MARIO STRIKERS CHARGED (R4QP01) game file (ISO, WBFS, RVZ, ...). NKit should be avoided whenever possible."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "A NAND backup for Dolphin Wiimmfi to enable cross-play with Wii players (see Section 3.4.1)."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Any controller or Wii Remote with MotionPlus (emulates an IR pointer through motion sensors)."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "A computer/laptop with Bluetooth or a Bluetooth USB dongle (for wireless controllers)."
+                </li>
+                #text "\n    "
+                <li>
+                  <a class="cr-link" href="https://drive.google.com/file/d/10WiwobQaAyv__KCLKtbW3CYtlMDa4Qzq/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+                    #text "Wii Remote MotionPlus Profile for Dolphin"
+                  </a>
+                  #text " or "
+                  <a class="cr-link" href="https://drive.google.com/file/d/10X8IYytPqs2lUQX5AcRalLRIhdq5pbmM/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+                    #text "Customizable Profile with Mouse Used as IR Pointer"
+                  </a>
+                  #text "."
+                </li>
+                #text "\n    "
+                <li>
+                  <strong>
+                    #text "Recommended PC Specifications"
+                  </strong>
+                  <br/>
+                  #text "OS: Windows 11"
+                  <br/>
+                  #text "CPU: Intel Core i5 or better"
+                  <br/>
+                  #text "GPU: Intel HD 520 / NVIDIA GTX 950 / AMD Radeon RX 470 or better"
+                  <br/>
+                  #text "Memory: 8GB"
+                  <br/>
+                  <span class="setup-guide-note">
+                    #text "*Windows 10 is no longer recommended because Microsoft support has ended."
+                  </span>
+                </li>
+                #text "\n    "
+              </ul>
+              #text "\n    "
+              <h3>
+                #text "3.2 Graphics and Core Emulator Settings"
+              </h3>
+              #text "\n    "
+              <ol>
+                #text "\n    "
+                <li>
+                  #text "Go to Options > Graphics Settings."
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image51.png" alt="MSC setup guide image image51.png"/>
+              </figure>
+              #text "\n    "
+              <ol start="2">
+                #text "\n    "
+                <li>
+                  #text "This opens the graphics configuration window."
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image48.png" alt="MSC setup guide image image48.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Under the General tab, select Direct3D 12 if you have a relatively recent computer (2018+)."
+              </p>
+              #text "\n    "
+              <p>
+                #text "On low-end computers, you may need to use Direct3D 11 if Direct3D 12 stutters."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image64.png" alt="MSC setup guide image image64.png"/>
+              </figure>
+              #text "\n    "
+              <ol start="3">
+                #text "\n    "
+                <li>
+                  #text "The adapter below Backend must be your gaming graphics card."
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <p class="setup-guide-warning">
+                <img class="setup-guide-warning-icon" src="/assets/text-boxes/ex-mark.png" alt="Warning"/>
+                #text "If you're using a laptop on Windows 10, you may need to manually select your high-performance graphics card instead of Intel HD Graphics."
+              </p>
+              #text "\n    "
+              <ol start="4">
+                #text "\n    "
+                <li>
+                  #text "Click the Enhancements tab."
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image60.png" alt="MSC setup guide image image60.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "There you can select the resolution in which MARIO STRIKERS CHARGED will be emulated."
+              </p>
+              #text "\n    "
+              <p>
+                #text "The higher the internal resolution is, the more it demands a powerful computer to run smoothly."
+              </p>
+              #text "\n    "
+              <p>
+                #text "In general, 2x Native (1280x1056) for 720p should run well on any modern, average computer. High-end computers should be able to handle 3x Native (1920x1584) for 1080p. But if your device is low end, you might be stuck with the default: Native (640x528)."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Anti-aliasing:"
+              </p>
+              #text "\n    "
+              <p>
+                #text "For Wii games, only high-end computers can reliably handle anti-aliasing. Unless you are very particular about rendering quality, you likely will not notice a major difference."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Full Screen:"
+              </p>
+              #text "\n    "
+              <p>
+                #text "By default, Dolphin loads games in a window. Press Alt+Enter to enter full screen. Press Alt+Enter again to go back to window mode. You can also click on Full Screen to enter full screen."
+              </p>
+              #text "\n    "
+              <ol start="5">
+                #text "\n    "
+                <li>
+                  #text "Go to the 'Hacks' tab and tick 'GPU Texture Decoding' if you have a good graphics card."
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image39.png" alt="MSC setup guide image image39.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                <a class="cr-link" href="https://youtu.be/KzvMOgCw6p4?t=140" target="_blank" rel="noopener noreferrer">
+                  #text "This 'SUPER SMASH BROS. MELEE' tutorial for optimizing Dolphin graphics card settings also applies to MARIO STRIKERS CHARGED"
+                </a>
+                #text " if you still have issues running the game."
+              </p>
+              #text "\n    "
+              <h4>
+                #text "3.2.1 Core System Settings"
+              </h4>
+              #text "\n    "
+              <p>
+                #text "To ensure you have the smoothest Dolphin experience on MARIO STRIKERS CHARGED, you need to do the following."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Go to Settings and, under the General tab, make sure 'Enable Dual Core' is ticked."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image3.png" alt="MSC setup guide image image3.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Go to the Paths tab and select your games folder and Wii NAND root folder (if you have one)."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image61.png" alt="MSC setup guide image image61.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Then, under the Wii tab, tick 'Use PAL 60 Mode' so the game can run smoothly at 60 FPS."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image41.png" alt="MSC setup guide image image41.png"/>
+              </figure>
+              #text "\n"
+              <h3>
+                #text "3.3 Controller Setup (Core)"
+              </h3>
+              #text "\n    "
+              <ol>
+                #text "\n    "
+                <li>
+                  #text "If you want to use a Wii Remote + Nunchuk on Dolphin, first download the 'Wii Remote MotionPlus' profile (see requirements above)."
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <p>
+                #text "Drag the .ini file to the folder below."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image13.png" alt="MSC setup guide image image13.png"/>
+              </figure>
+              #text "\n    "
+              <ol start="2">
+                #text "\n    "
+                <li>
+                  #text "Go to Options > Controller settings."
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image32.webp" alt="MSC setup guide image image32.png"/>
+              </figure>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image54.png" alt="MSC setup guide image image54.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "In the controller settings window, configure Dolphin exactly as shown above, with all four ports set to \"Emulated Wii Remote.\""
+              </p>
+              #text "\n    "
+              <ol start="3">
+                #text "\n    "
+                <li>
+                  #text "For Wii Remote users, activate Bluetooth first. Tick the 'Continuous scanning' and 'Connect Wii remotes for Emulated Controllers' boxes. Then press the red button on the back of your Wii Remote to sync with Dolphin, and configure Wii Remote 1 by loading the Wii Remote profile."
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image40.png" alt="MSC setup guide image image40.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "If you encounter problems with your Wii Remote, here is a "
+                <a class="cr-link" href="https://www.youtube.com/watch?v=iF6mQv3cUos" target="_blank" rel="noopener noreferrer">
+                  #text "YouTube tutorial"
+                </a>
+                #text "."
+              </p>
+              #text "\n    "
+              <ol start="4">
+                #text "\n    "
+                <li>
+                  #text "For non-Wii Remote users, map your controls using the information below."
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image22.jpg" alt="MSC setup guide image image22.jpg"/>
+              </figure>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image29.webp" alt="MSC setup guide image image29.png"/>
+              </figure>
+              #text "\n    "
+              <p class="setup-guide-warning">
+                <img class="setup-guide-warning-icon" src="/assets/text-boxes/ex-mark.png" alt="Warning"/>
+                #text "The IR Pointer is the only way to move the cursor/hand in in-game menus."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Use the Customizable Profile that uses Mouse as IR Pointer (see requirements)."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image23.webp" alt="MSC setup guide image image23.png"/>
+              </figure>
+              #text "\n    "
+              <ol start="5">
+                #text "\n    "
+                <li>
+                  #text "For non-Wii Remote controllers, make sure Extension is set to 'Nunchuk' under the 'General and Options' tab."
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image21.webp" alt="MSC setup guide image image21.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Configure the Motion Simulation tab as follows:"
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image45.webp" alt="MSC setup guide image image45.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Also make sure your virtual Nunchuk stick is calibrated under the 'Extension' tab."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image52.webp" alt="MSC setup guide image image52.png"/>
+              </figure>
+              #text "\n    \n    "
+              <h3>
+                #text "3.4 Online Setup: Wiimmfi & Netplay"
+              </h3>
+              #text "\n    "
+              <p>
+                #text "Wiimmfi is currently the recommended way to play MARIO STRIKERS CHARGED online."
+              </p>
+              #text "\n    "
+              <h4>
+                #text "3.4.1 Use Wiimmfi with Dolphin"
+              </h4>
+              #text "\n    "
+              <p>
+                #text "To use Wiimmfi servers with Dolphin, you need a NAND backup from a Wii. This gives you a Mii account with a friend code on Dolphin, which enables cross-play with Wii friend codes."
+              </p>
+              #text "\n    "
+              <p>
+                #text "This "
+                <a class="cr-link" href="https://wiki.dolphin-emu.org/index.php?title=NAND_Usage_Guide" target="_blank" rel="noopener noreferrer">
+                  #text "link"
+                </a>
+                #text " explains how to dump a NAND with BootMii. You can also import the community NAND."
+              </p>
+              #text "\n    "
+              <p>
+                <a class="cr-link" href="https://www.youtube.com/watch?v=6JSFCsTg27g" target="_blank" rel="noopener noreferrer">
+                  #text "How to Import the Mario Strikers Community NAND"
+                </a>
+              </p>
+              #text "\n    "
+              <p>
+                #text "At this point, you should have nand.bin + key.bin files on your PC and have selected your NAND path as explained previously (Go to Settings > Path > Wii NAND Root folder)."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Now in Dolphin, you should see Tools > Load Wii System Menu."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image27.webp" alt="MSC setup guide image image27.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Click it to boot the Wii Menu. From there, go to the Mii Channel and create a new Mii so Wiimmfi can register a new profile."
+              </p>
+              #text "\n    "
+              <p>
+                #text "PS: If needed, you can follow this tutorial to add a Mii in Dolphin."
+              </p>
+              #text "\n    "
+              <p>
+                <a class="cr-link" href="https://www.youtube.com/watch?v=n1Cg6Sjvg08" target="_blank" rel="noopener noreferrer">
+                  #text "How To Add Your Mii To Dolphin"
+                </a>
+              </p>
+              #text "\n    "
+              <p>
+                #text "Once you're done, stop the emulation and then load the Wii Menu again as before."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image15.webp" alt="MSC setup guide image image15.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Go to Wii Options > Wii Settings > Internet > Connection Settings and create a wired connection (it does not matter if your PC/laptop is on Wi-Fi)."
+              </p>
+              #text "\n    "
+              <p>
+                #text "The connection test should be successful. Refuse the update if prompted and select to use this connection."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image43.webp" alt="MSC setup guide image image43.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "You can stop the emulation again and launch MARIO STRIKERS CHARGED directly from your Dolphin game list. You can now use Wiimmfi servers on Dolphin!"
+              </p>
+              #text "\n    "
+              <p class="setup-guide-warning">
+                <img class="setup-guide-warning-icon" src="/assets/text-boxes/ex-mark.png" alt="Warning"/>
+                #text "If you encounter error code 20100, your game file is likely unpatched or needs the latest "
+                <a class="cr-link" href="https://wiimmfi.de/patcher/iso" target="_blank" rel="noopener noreferrer">
+                  #text "Wiimmfi patch"
+                </a>
+                #text " (see Section 5.1)."
+              </p>
+              #text "\n    "
+              <h4>
+                #text "3.4.2 Use Netplay with Dolphin"
+              </h4>
+              #text "\n    "
+              <p>
+                #text "If you don't have a NAND backup, or your Wii console has been banned, you can use Netplay to play MARIO STRIKERS CHARGED multiplayer."
+              </p>
+              #text "\n    "
+              <p>
+                #text "With Netplay, you can play with up to four players and run 2v2 matches."
+              </p>
+              #text "\n    "
+              <p class="setup-guide-warning">
+                <img class="setup-guide-warning-icon" src="/assets/text-boxes/ex-mark.png" alt="Warning"/>
+                #text "Every player needs the same Dolphin version to connect (see Section 5.1)."
+              </p>
+              #text "\n    "
+              <p>
+                #text "For Netplay to work, click Tools > Start Netplay."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image36.webp" alt="MSC setup guide image image36.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "A small window opens."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image33.png" alt="MSC setup guide image image33.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "The 'Connect' tab is for joining a host via a Code."
+              </p>
+              #text "\n    "
+              <p>
+                #text "The 'Host' tab is for hosting a room."
+              </p>
+              #text "\n    "
+              <p>
+                #text "To create a room, set the connection type to 'Traversal server,' then select a game to host."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image4.png" alt="MSC setup guide image image4.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Once you click 'Host,' a new window appears for your room. I highly recommend going to 'Data,' ticking 'Sync Saves' and 'Load Saves,' and unticking the rest as shown below:"
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image6.png" alt="MSC setup guide image image6.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "That's the only way to not get your game save overwritten every time you join someone on Netplay."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Click Copy. This copies the Room ID code used to join the room."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Now click 'Assign Controller Ports' or your controls will not work in-game. Click that button, remove every GC port, and assign Wii Remote 1 and 2 to the correct players (you can add Wii Remote 3 and 4 if there are 3-4 players in the room)."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image50.png" alt="MSC setup guide image image50.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Now set the buffer. When players join, adjust the buffer based on the highest ping in the room."
+              </p>
+              #text "\n    "
+              <p>
+                #text "The SUPER SMASH BROS. MELEE community suggested the following rule of thumb for pad buffer:"
+              </p>
+              #text "\n    "
+              <p>
+                #text "Use 1 buffer per 8 ms, rounded up to the nearest whole number (1 Pad Buffer = 1/4 frame of lag)."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Example: highest ping in room -> 58ms/8 = 7.25 = 8 buffer."
+              </p>
+              #text "\n    "
+              <p>
+                #text "I personally suggest dividing ping by 10 and adding 2 or 3 buffer to cover potential lag spikes. You can also remove 1 or 2 buffer if the game feels smooth."
+              </p>
+              #text "\n    "
+              <p>
+                #text "You can now click Start, and the game should work correctly."
+              </p>
+              #text "\n    "
+              <p class="setup-guide-warning">
+                <img class="setup-guide-warning-icon" src="/assets/text-boxes/ex-mark.png" alt="Warning"/>
+                #text "Make sure every player has all four Wii Remote slots in controller settings set to 'Emulated Wii Remote,' or your cursor may not move in-game (see Section 5.1)."
+              </p>
+              #text "\n    \n"
+              <h3>
+                #text "3.5 Optional: Joy-Con / Switch Pro Flow"
+              </h3>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image72.jpg" alt="MSC setup guide image image72.jpg"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "This section explains how to connect Joy-Cons or Switch Pro Controllers using the Dolphin presets I created. If you're interested, you can also follow "
+                <a class="cr-link" href="https://www.youtube.com/watch?v=giS9ERN9ctI" target="_blank" rel="noopener noreferrer">
+                  #text "Steam Link"
+                </a>
+                #text " after this tutorial to play MARIO STRIKERS CHARGED on a phone/tablet for a handheld-style experience."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Additional Requirements:"
+              </p>
+              #text "\n    "
+              <p>
+                <a class="cr-link" href="https://drive.google.com/open?id=1J0GtpVCSTADb_YtVzdeiJymaIu2Tpik7&authuser=spikermkds%40gmail.com&usp=drive_fsw/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+                  #text "Joy-Con Presets for Dolphin"
+                </a>
+                #text " or"
+              </p>
+              #text "\n    "
+              <p>
+                <a class="cr-link" href="https://drive.google.com/drive/folders/1L2eR_IV45OmGsnuEFrBKis3DTbw4CIT8?usp=drive_link" target="_blank" rel="noopener noreferrer">
+                  #text "Switch Pro Controller Profile for Dolphin"
+                </a>
+              </p>
+              #text "\n    "
+              <p>
+                <a class="cr-link" href="https://github.com/Davidobot/BetterJoy" target="_blank" rel="noopener noreferrer">
+                  #text "BetterJoy 7.1+ for Joy-Cons or Switch Pro Controller support"
+                </a>
+              </p>
+              #text "\n    "
+              <p>
+                #text "Joy-Con or Switch Pro Controller"
+              </p>
+              #text "\n    "
+              <p>
+                #text "Nintendo Switch (to calibrate your Joy-Cons)"
+              </p>
+              #text "\n    "
+              <h4>
+                #text "3.5.1 Connect Joy-Cons / Switch Pro Controller"
+              </h4>
+              #text "\n    "
+              <p>
+                #text "To connect your Joy-Cons, download and install BetterJoy. This software makes Joy-Con/Switch Pro inputs appear as PS4/Xbox controller inputs, and it also recognizes Joy-Con/Switch Pro motion and sensor data."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image63.png" alt="MSC setup guide image image63.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "After downloading BetterJoy, extract the zip file and go to the Drivers folder."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Install ViGEmBusSetup_x64.msi, then open the HIDGuardian folder and run Install.bat."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image49.png" alt="MSC setup guide image image49.png"/>
+              </figure>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image7.png" alt="MSC setup guide image image7.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Once that is done, return to the root of the BetterJoy folder and launch BetterJoyForCemu."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image2.png" alt="MSC setup guide image image2.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "In the BetterJoy window, click the small arrow on the right side to open the Config panel used by your Joy-Cons or Switch Pro Controller."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image14.png" alt="MSC setup guide image image14.png"/>
+              </figure>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image34.png" alt="MSC setup guide image image34.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Check the values and make sure BetterJoy is configured exactly as shown below (otherwise it won't work or you may get input delay)."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image25.png" alt="MSC setup guide image image25.png"/>
+              </figure>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image1.png" alt="MSC setup guide image image1.png"/>
+              </figure>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image30.png" alt="MSC setup guide image image30.png"/>
+              </figure>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image58.png" alt="MSC setup guide image image58.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "These are the only values you need to set exactly as shown."
+              </p>
+              #text "\n    "
+              <p>
+                #text "After pre-configuration, click Apply (otherwise your changes will not be saved)."
+              </p>
+              #text "\n    "
+              <p>
+                #text "You can now go to your Windows Bluetooth settings and connect your Joy-Con or Switch Pro Controller via Bluetooth. To enable pairing, you need to hold the SYNC Button (or the button at the back of the Switch Pro Controller)."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image11.webp" alt="MSC setup guide image image11.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "When it's configured correctly, you should see something like this:"
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image9.webp" alt="MSC setup guide image image9.png"/>
+              </figure>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image46.webp" alt="MSC setup guide image image46.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Return to BetterJoy and you should see this, or this:"
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image35.png" alt="MSC setup guide image image35.png"/>
+              </figure>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image14.png" alt="MSC setup guide image image14.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Two important things to know for Joy-Cons:"
+              </p>
+              #text "\n    "
+              <p>
+                #text "1. If you want to play alone with both Joy-Cons, they should be set upward like in the previous image."
+              </p>
+              #text "\n    "
+              <p>
+                #text "2. If you want to play locally with someone or use a single Joy-Con, set it as shown below (clicking it changes its position)."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image24.png" alt="MSC setup guide image image24.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "For that scenario, tick the \"Do not rejoin Joy-Cons\" box in the Config panel."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image37.png" alt="MSC setup guide image image37.png"/>
+              </figure>
+              #text "\n    "
+              <ol>
+                #text "\n    "
+                <li>
+                  #text "Now that you're successfully connected, click Apply and minimize the window (do not close it, or Dolphin will not recognize the Joy-Con)."
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <h4>
+                #text "3.5.2 Configure Controls in Dolphin"
+              </h4>
+              #text "\n    "
+              <p>
+                #text "Open Dolphin and go to Controller Settings > Alternate Input Sources."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image62.webp" alt="MSC setup guide image image62.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Click Add and enter the same server port used in BetterJoy (26761)."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image56.png" alt="MSC setup guide image image56.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Open Wii Remote 1. Among the devices, you will see 'DSUClient'."
+              </p>
+              #text "\n    "
+              <p>
+                #text "DSUClient/0/ = Joy-Con 1"
+              </p>
+              #text "\n    "
+              <p>
+                #text "DSUClient/1/ = Joy-Con 2"
+              </p>
+              #text "\n    "
+              <p>
+                #text "You can now customize your controls using the information in Chapter 3.3, but I highly recommend using the Dolphin presets provided."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image20.png" alt="MSC setup guide image image20.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "The 1st folder contains presets for local multiplayer."
+              </p>
+              #text "\n    "
+              <p>
+                #text "The 2nd folder contains presets for solo play with both Joy-Cons."
+              </p>
+              #text "\n    "
+              <p>
+                #text "The 3rd folder contains presets for single Joy-Con play."
+              </p>
+              #text "\n    "
+              <p>
+                #text "The next chapter explains these presets in detail."
+              </p>
+              #text "\n    "
+              <h4>
+                #text "3.5.3 Joy-Con Preset Guide"
+              </h4>
+              #text "\n    "
+              <p>
+                #text "Move the Joy-Con preset .ini files you want to use for Dolphin to the following path:"
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image13.png" alt="MSC setup guide image image13.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Dual Joy-Con presets:"
+              </p>
+              #text "\n    "
+              <p>
+                #text "JoyConsDual MSC Switch.ini"
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image71.webp" alt="MSC setup guide image image71.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "JoyConsDual MSC Switch inverted.ini (changes are in orange)"
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image68.webp" alt="MSC setup guide image image68.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Single Joy-Con Left (Blue/Minus) presets:"
+              </p>
+              #text "\n    "
+              <p>
+                #text "Single Joycon Left(-).ini"
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image67.webp" alt="MSC setup guide image image67.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Single Joycon Left(-) Inverted.ini (changes are in orange)"
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image66.webp" alt="MSC setup guide image image66.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Single Joy-Con Right (Red/Plus) presets:"
+              </p>
+              #text "\n    "
+              <p>
+                #text "Single Joycon Right(+).ini"
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image70.webp" alt="MSC setup guide image image70.png"/>
+              </figure>
+              #text "\n    "
+              <p>
+                #text "Single Joycon Right(+)Inverted.ini (changes are in orange)"
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image69.webp" alt="MSC setup guide image image69.png"/>
+              </figure>
+              #text "\n    \n    "
+            </div>
+            #text "\n    "
+          </div>
+          #text "\n    "
+          <div class="content-box-bottom" aria-hidden="true"/>
+          #text "\n    "
+        </section>
+        #text "\n    "
+        <section class="content-box cr-section setup-guide-section">
+          #text "\n    "
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          #text "\n    "
+          <div class="content-box-center">
+            #text "\n    "
+            <div class="content-box-texture" aria-hidden="true"/>
+            #text "\n    "
+            <div class="content-box-content">
+              #text "\n    "
+              <h2 id="msc-setup-section-4">
+                #text "4. In-Game Optimization and Competitive Stability"
+              </h2>
+              #text "\n    "
+              <p>
+                #text "This guide helps both newcomers and experienced players improve their MARIO STRIKERS CHARGED gameplay experience."
+              </p>
+              #text "\n    "
+              <p>
+                #text "These optimizations can be used for both casual and competitive play and are highly recommended."
+              </p>
+              #text "\n    "
+              <h3>
+                #text "4.1 Camera and Sidekick Presets"
+              </h3>
+              #text "\n    "
+              <h4>
+                #text "4.1.1 Camera Settings"
+              </h4>
+              #text "\n    "
+              <p>
+                #text "In both Mario Strikers games, it is recommended to zoom out as much as possible for the best full-field view."
+              </p>
+              #text "\n    "
+              <p>
+                #text "To do this, follow these steps."
+              </p>
+              #text "\n    "
+              <ol>
+                #text "\n    "
+                <li>
+                  #text "In the MARIO STRIKERS CHARGED menu, go to OPTIONS (wrench icon)."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "VISUAL OPTIONS"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Select Camera Type STATIC and Level 1."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Accept"
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image65.webp" alt="MSC setup guide image image65.png"/>
+              </figure>
+              #text "\n    "
+              <h4>
+                #text "4.1.2 Preset Sidekicks for Online Play"
+              </h4>
+              #text "\n    "
+              <p>
+                #text "Is there anything worse than playing online and having to choose your captain's sidekicks every time, or accidentally loading a predefined team?"
+              </p>
+              #text "\n    "
+              <p>
+                #text "Here is the solution:"
+              </p>
+              #text "\n    "
+              <p>
+                #text "Select the sidekicks of your captains offline, start a match against the CPU and leave the match afterwards."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Log in via Wiimmfi and this information should remain saved in your Mii profile."
+              </p>
+              #text "\n    "
+              <h3>
+                #text "4.2 Console Display and Output Settings"
+              </h3>
+              #text "\n    "
+              <h4>
+                #text "4.2.1 Widescreen Settings"
+              </h4>
+              #text "\n    "
+              <p>
+                #text "Always set your Wii's aspect ratio to 16:9, which works best with the camera settings configured above. To do this, follow the steps below:"
+              </p>
+              #text "\n    "
+              <ol>
+                #text "\n    "
+                <li>
+                  #text "Go into your Wii Options"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Wii Settings"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Screen"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Widescreen Settings"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Select Widescreen (16:9) and confirm."
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image28.webp" alt="MSC setup guide image image28.png"/>
+              </figure>
+              #text "\n    "
+              <h4>
+                #text "4.2.2 TV Type"
+              </h4>
+              #text "\n    "
+              <p>
+                #text "To improve the visual quality and FPS of Wii games, please follow the steps below:"
+              </p>
+              #text "\n    "
+              <ol>
+                #text "\n    "
+                <li>
+                  #text "Go into your Wii Options"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Wii Settings"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "TV Type"
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Select EDTV / HDTV (480p) if available, otherwise select 60Hz (480i)"
+                </li>
+                #text "\n    "
+              </ol>
+              #text "\n    "
+              <p>
+                #text "Please note that EDTV / HDTV (480p) will only be available if you have a Component cable connected to your Wii."
+              </p>
+              #text "\n    "
+              <figure class="setup-guide-media">
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image12.webp" alt="MSC setup guide image image12.png"/>
+              </figure>
+              #text "\n    "
+              <ul class="cr-list">
+                #text "\n    "
+                <li>
+                  #text "Do not forget to set your TV/Monitor to Game mode in order to reduce input lag."
+                </li>
+                #text "\n    "
+              </ul>
+              #text "\n    "
+              <h3>
+                #text "4.3 QOL Gecko Codes"
+              </h3>
+              #text "\n    "
+              <h4>
+                #text "4.3.1 Optional Convenience Codes"
+              </h4>
+              #text "\n    "
+              <p>
+                #text "Additional quality-of-life and fun codes"
+              </p>
+              #text "\n    "
+              <p>
+                #text "Unlock Everything (Characters, Stadiums and Cheats) (PAL)"
+              </p>
+              #text "\n    "
+              <pre class="setup-guide-code">
+                #text "04c5f2f0 00000001\n04c5f2e4 00000001\n04c5f300 00000001\n04c5f2fc 00000000\n04c5f304 00000000\n04c5f2dc 00000000\n04c5f2d8 00000000\nC210F71C 00000002\n3800FFFF B00386AC\n60000000 00000000\nC210F63C 00000002\n3860FFFF 907F0068\n60000000 00000000"
+              </pre>
+              #text "\n    "
+              <p>
+                #text "Fix NK-Bug permanently (PAL)"
+              </p>
+              #text "\n    "
+              <pre class="setup-guide-code">
+                #text "48000000 806DF7A0\nDE000000 80008180\n14000178 01010012\nE0000000 80008000"
+              </pre>
+              #text "\n    "
+              <p>
+                #text "All stadiums are fast-paced (Bowser Stadium speed on slow fields)"
+              </p>
+              #text "\n    "
+              <pre class="setup-guide-code">
+                #text "C20081EC 0000000D\nD01F000C 3D60909B\n616B6560 7C1F5800\n40820010 3D803F26\n618C6666 919F000C\n396BFFF0 7C1F5800\n4082000C 3D800000\n919F000C 396BFFF0\n7C1F5800 40820010\n3D803E4C 618CCCCD\n919F000C 396BFFF0\n7C1F5800 40820010\n3D803F19 618C999A\n919F000C 00000000"
+              </pre>
+              #text "\n    "
+              <p>
+                #text "Blue Peach outfit against red opponents"
+              </p>
+              #text "\n    "
+              <pre class="setup-guide-code">
+                #text "04504ed0 000000f0\nC21C51F0 00000007\n93A30008 3C608050\n38634D00 2C1D0003\n4082000C 38800001\n48000008 38800005\n90830000 9083005C\n9083033C 908303F4\n60000000 00000000\nC21A34CC 00000003\n80BE0000 2C050005\n40A20008 38600000\n2C030000 00000000\nC208EEB4 00000003\n80BD0000 2C050005\n40A20008 38600000\n2C030000 00000000\nC2275070 00000003\n80BD0000 2C050005\n40A20008 38600000\n2C030000 00000000\nC22784A8 00000003\n80BC0000 2C050005\n40A20008 38600000\n2C030000 00000000"
+              </pre>
+              #text "\n    "
+              <p>
+                #text "Show white shot counter in the results screen"
+              </p>
+              #text "\n    "
+              <pre class="setup-guide-code">
+                #text "C0000000 00000008\n3D8080C8 3D4080C6\nA12CE830 A16CE832\n7D6B4A14 B16A644E\nA16CE834 B16A6450\nA12CE7DE A16CE7E0\n7D6B4A14 B16A64C0\nA16CE7E2 B16A64C2\n4E800020 00000000"
+              </pre>
+              #text "\n    "
+              <p>
+                #text "*Instead of \"Mega Strike goals / Mega Strike shots,\" it shows \"White and Yellow shots / Red and Orange shots.\""
+              </p>
+              #text "\n    "
+              <p>
+                #text "Control Kritter"
+              </p>
+              #text "\n    "
+              <pre class="setup-guide-code">
+                #text "48000000 8056a760\nde000000 00007fff\n020001b4 00000000\ne0000000 80008000\n28585ee2 00001000\n280001b4 00ff0000\n000001b4 00000001\ne0000000 00000000\n28585ee2 00000100\n280001b4 00ff0100\n000001b4 00000000\ne0000000 80008000\n285860d2 00001000\n280001b4 00ff0000\n000001b4 00000002\ne0000000 00000000\n285860d2 00000100\n280001b4 00ff0200\n000001b4 00000000\ne0000000 80008000\n285862c2 00001000\n280001b4 00ff0000\n000001b4 00000003\ne0000000 00000000\n285862c2 00000100\n280001b4 00ff0300\n000001b4 00000000\ne0000000 80008000\n285864b2 00001000\n280001b4 00ff0000\n000001b4 00000004\ne0000000 00000000\n285864b2 00000100\n280001b4 00ff0400\n000001b4 00000000\ne0000000 80008000\nC0000000 00000015\n3D808000 88AC01B4\n2C050001 41800094\n3D808057 814CA760\n7C0A6040 41800084\n3D208058 2C050001\n40820008 A1295EE2\n2C050002 40820008\nA12960D2 2C050003\n40820008 A12962C2\n2C050004 40820008\nA12964B2 C04A067C\n3D603E00 916A067C\nC06A067C 71250008\n41820008 EC42182A\n71250004 41820008\nEC421828 D04A067C\nC04A0678 71250002\n41820008 EC42182A\n71250001 41820008\nEC421828 D04A0678\n4E800020 00000000\n28585ee2 00000010\n280001b4 ff000000\n000001b5 00000001\ne0000000 00000000\n28585ee2 00000100\n280001b4 ff000001\n000001b5 00000000\ne0000000 80008000\n285860d2 00000010\n280001b4 ff000000\n000001b5 00000002\ne0000000 00000000\n285860d2 00000100\n280001b4 ff000002\n000001b5 00000000\ne0000000 80008000\n285862c2 00000010\n280001b4 ff000000\n000001b5 00000003\ne0000000 00000000\n285862c2 00000100\n280001b4 ff000003\n000001b5 00000000\ne0000000 80008000\n285864b2 00000010\n280001b4 ff000000\n000001b5 00000004\ne0000000 00000000\n285864b2 00000100\n280001b4 ff000004\n000001b5 00000000\ne0000000 80008000\nC0000000 00000015\n3D808000 88AC01B5\n2C050001 41800094\n3D808057 814CA764\n7C0A6040 41800084\n3D208058 2C050001\n40820008 A1295EE2\n2C050002 40820008\nA12960D2 2C050003\n40820008 A12962C2\n2C050004 40820008\nA12964B2 C04A067C\n3D603E00 916A067C\nC06A067C 71250008\n41820008 EC42182A\n71250004 41820008\nEC421828 D04A067C\nC04A0678 71250002\n41820008 EC42182A\n71250001 41820008\nEC421828 D04A0678\n4E800020 00000000"
+              </pre>
+              #text "\n    "
+              <p>
+                #text "Press - to take control of the home Kritter."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Press + to take control of the away Kritter."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Press 2 to stop controlling Kritters."
+              </p>
+              #text "\n    "
+              <p>
+                #text "Tennis tiebreaker in First-to-X goals"
+              </p>
+              #text "\n    "
+              <pre class="setup-guide-code">
+                #text "C21012E0 0000000C\n3E6080C5 6273F7B0\nA2930002 2C080001\n4181000C A25300BE\n7E549378 3A94FFFF\n7C144000 40820028\nA2A6002E 7C14A800\n4082001C 2C1400FF\n41820014 819300D4\n2C0C0002 40820008\n3A940001 3A940001\nB2930002 B106002C\n60000000 00000000"
+              </pre>
+              #text "\n    "
+              <ul class="cr-list">
+                #text "\n    "
+                <li>
+                  #text "Outscore your opponent by at least 2 goals to win."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Activates only if you select \"safe megastrikes\" from the player-cheats menu."
+                </li>
+                #text "\n    "
+              </ul>
+              #text "\n    "
+              <h3>
+                #text "4.4 Gameplay Tips"
+              </h3>
+              #text "\n    "
+              <p>
+                #text "Here is a playlist of the most relevant tutorials if you wish to learn MSC mechanics and improve your gameplay."
+              </p>
+              #text "\n    "
+              <p>
+                <a class="cr-link" href="https://youtube.com/playlist?list=PLLAlWhwo9P26CQhRR7yaSblmea687HiWE" target="_blank" rel="noopener noreferrer">
+                  #text "MSC Guides (a.k.a. !msctutorial)"
+                </a>
+              </p>
+              #text "\n    "
+            </div>
+            #text "\n    "
+          </div>
+          #text "\n    "
+          <div class="content-box-bottom" aria-hidden="true"/>
+          #text "\n    "
+        </section>
+        #text "\n    "
+        <section class="content-box cr-section setup-guide-section">
+          #text "\n    "
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          #text "\n    "
+          <div class="content-box-center">
+            #text "\n    "
+            <div class="content-box-texture" aria-hidden="true"/>
+            #text "\n    "
+            <div class="content-box-content">
+              #text "\n    "
+              <h2 id="msc-setup-section-5">
+                #text "5. Troubleshooting and References"
+              </h2>
+              #text "\n    "
+              <h3>
+                #text "5.1 Troubleshooting Quickchecks"
+              </h3>
+              #text "\n    "
+              <ul class="cr-list">
+                #text "\n    "
+                <li>
+                  #text "Connection fails on Wii DNS method: recheck DNS values in Section 2.2 and rerun the connection test."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "High delay or unstable matches: apply the connection checklist in Section 2.3.3."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Wiimmfi Error 20100 on Dolphin: your game is likely unpatched. Apply the latest Wiimmfi patch and retry."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Netplay room issues: confirm all players use the same Dolphin version and verify controller port assignment in Section 3.4.2."
+                </li>
+                #text "\n    "
+                <li>
+                  #text "Cursor does not move in-game: set all required controller slots to Emulated Wii Remote."
+                </li>
+                #text "\n    "
+              </ul>
+              #text "\n    "
+            </div>
+            #text "\n    "
+          </div>
+          #text "\n    "
+          <div class="content-box-bottom" aria-hidden="true"/>
+          #text "\n    "
+        </section>
+        #text "\n    "
+        <div class="setup-guide-meta-line">
+          #text "\n      "
+          <p class="cr-note">
+            #text "Source document: "
+            <a class="cr-link" href="https://docs.google.com/document/d/1a49tGOAVqi5mW9RqfZF3QanELxw8Ogsq4NQ068B8Zco/edit?tab=t.0" target="_blank" rel="noopener noreferrer">
+              #text "Published MSC Setup Guide"
+            </a>
+          </p>
+          #text "\n      "
+          <p class="setup-guide-credits">
+            #text "Credits @ImSpiker"
+          </p>
+          #text "\n    "
+        </div>
+        #text "\n    "
+      </article>
+      #text "\n    "
+    </section>
+    #text "\n  "
+  </main>
+  #text "\n\n  "
+  #text "\n  "
+  #text "\n\n\n"
+  <footer id="global-footer">
+    <p class="global-footer-disclaimer">
+      #text "This website is not affiliated with Nintendo. All product names, logos, and brands are property of their respective owners."
+    </p>
+    <p class="global-footer-links">
+      <a href="https://discord.gg/de2YaWg" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "DISCORD"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://x.com/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "X"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://www.youtube.com/@MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "YOUTUBE"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://twitch.tv/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "TWITCH"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/about-us" class="global-footer-link">
+        #text "ABOUT US"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/privacy-policy" class="global-footer-link">
+        #text "PRIVACY POLICY"
+      </a>
+    </p>
+  </footer>
+</body>
