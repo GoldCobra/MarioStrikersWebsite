@@ -24,10 +24,15 @@ requires an explicit base URL and matching server configuration.
 
 ## Routing and caching
 
-Public pages use `/slug`, with `/` for home. Express and Nginx both implement
-clean routes and permanent redirects from old `.html`, trailing-slash and
-legacy alias URLs. Maintain both configurations when changing route behavior.
-Canonical metadata, navigation and sitemap entries must agree with public URLs.
+Public pages use `/slug`, with `/` for home. `packages/shared/src/site/` is the
+single source: `pages.ts` lists every page with its head metadata,
+`navigation.ts` the menu model, `legacy-routes.ts` old URLs, and `routes.ts`
+resolves any request path exactly as production nginx does. The local servers
+use `resolveRoute()`; `npm run generate:nginx` writes the legacy-route part of
+the nginx configuration, and `npm run check` fails when it is stale. A unit
+test replays every URL shape recorded against production through
+`resolveRoute()`. Canonical metadata, navigation and sitemap entries must agree
+with public URLs.
 The private `/profile` page is excluded from indexing.
 
 Browser-loaded script and style URLs use `?v=...` cache tags. Update every

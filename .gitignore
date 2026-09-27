@@ -20,3 +20,6 @@ reports/
 .deploy/
 __pycache__/
 *.tsbuildinfo
+# Build output
+apps/web/dist/
+apps/web/.astro/

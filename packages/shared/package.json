@@ -1,0 +1,16 @@
+{
+  "name": "@ms/shared",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site registry, navigation model and URL routing shared by the website, its servers and its checks.",
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "exports": {
+    "./site/*": "./src/site/*.ts"
+  },
+  "scripts": {
+    "test": "node --test \"src/**/*.test.ts\""
+  }
+}

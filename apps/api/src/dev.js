@@ -10,14 +10,14 @@ function start() {
   blockExternalConnections();
   const { createApp } = require("./server");
   const { createFixtureProviders } = require("./dev/fixtures");
-  const port = process.env.PORT === undefined ? 8787 : Number(process.env.PORT);
+  // The site runs on 8787 (npm run dev at the repository root) and reaches this API through /api.
+  const port = process.env.PORT === undefined ? 8788 : Number(process.env.PORT);
   if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error("Invalid PORT.");
   const host = process.env.DEV_HOST || "127.0.0.1";
   if (!["127.0.0.1", "::1", "0.0.0.0"].includes(host)) throw new Error("Invalid DEV_HOST.");
-  const app = createApp({ providers: createFixtureProviders(), serveStatic: true });
+  const app = createApp({ providers: createFixtureProviders() });
   const server = app.listen(port, host, function () {
-    console.log("[dev] Synthetic sample data; Discord login is simulated.");
-    console.log("[dev] http://localhost:" + server.address().port);
+    console.log("[dev] API with synthetic sample data on port " + server.address().port + "; Discord login is simulated.");
   });
   server.on("error", function (error) {
     console.error(error.code === "EADDRINUSE"

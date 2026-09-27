@@ -30,11 +30,14 @@ npm ci
 npm run dev
 ```
 
-Open **http://localhost:8787**. This serves the website and API with synthetic
-sample data; no database, Discord account, Docker or `.env` file is required.
-The local login flow is simulated and does not authenticate with Discord.
-Stop the server with Ctrl+C. Backend changes restart it; reload the browser
-after frontend changes.
+Open **http://localhost:8787**. This serves the website (Astro development
+server) and the API (port 8788) with synthetic sample data; no database,
+Discord account, Docker or `.env` file is required. The local login flow is
+simulated and does not authenticate with Discord. Stop it with Ctrl+C. API
+changes restart the API; reload the browser after frontend changes.
+
+`npm run preview` builds the site and serves the production build the same way,
+with production routing.
 
 Optional Docker development, from the repository root:
 
@@ -67,15 +70,18 @@ stay identical to a reference commit.
 
 | Location | Purpose |
 | --- | --- |
-| `apps/web/public/` | Page shells, fragments, styles, browser scripts and runtime assets |
+| `apps/web/` | Astro site; `public/` holds page shells, styles, browser scripts and assets |
 | `apps/api/` | Express API, service integrations, fixtures and tests |
+| `packages/shared/` | Page registry, navigation model and URL routing used everywhere |
+| `tools/` | Local servers, the nginx route generator and their tests |
 | `tests/e2e/` | Comparison checks against a reference commit |
 | `infra/nginx/` | Production web server configuration |
 | `docs/` | Development notes, tool formats and design sources |
 
 The repository is an npm workspace; one `npm ci` at the root installs everything.
-The frontend uses plain HTML, CSS and JavaScript. Express serves clean page
-URLs during local development. Production uses Caddy, Nginx and Express;
+The pages are still plain HTML, CSS and JavaScript, built with Astro. One
+shared routing function serves clean URLs locally; production nginx mirrors it.
+Production uses Caddy, Nginx and Express;
 MSSQL provides community data, with local caches for public data and club logos.
 
 ## Contributing and releases

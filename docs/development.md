@@ -3,8 +3,11 @@
 ## Everyday setup
 
 Use Node.js 24 LTS. From the repository root, run `npm ci`, then `npm run dev`.
-Open **http://localhost:8787**. The server serves both the frontend and API;
-backend code changes restart it, and frontend changes need a browser refresh.
+Open **http://localhost:8787**. The Astro development server serves the site
+and forwards `/api` to the API on port 8788. API code changes restart the API;
+frontend changes need a browser refresh. `npm run preview` serves the production
+build instead. Both use the shared routing, so clean URLs, redirects and 404s
+match the live site.
 
 The development runner uses invented players, clubs, rankings, season data,
 events and Wiimmfi results from `apps/api/src/dev/fixtures.js`. It does not
@@ -42,7 +45,7 @@ application. HTTP development uses `SESSION_COOKIE_SECURE=false`; production
 uses secure cookies over HTTPS.
 
 Run `npm run dev:live` from the repository root to serve the site and live API together
-at **http://localhost:8787**. Missing service configuration may cause the
+at **http://localhost:8787** (the API reads `apps/api/.env`). Missing service configuration may cause the
 corresponding API calls to fail; other pages and browser save tools remain
 available. A live database smoke check is `npm run sync:mssql:once`; run it
 only when the intended database connection is configured.

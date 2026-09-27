@@ -1,0 +1,16 @@
+{
+  "name": "@ms/tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local servers, generators and checks for the website workspace.",
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "test": "node --test \"src/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@ms/shared": "*"
+  }
+}
