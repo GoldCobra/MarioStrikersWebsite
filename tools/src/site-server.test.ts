@@ -22,6 +22,7 @@ function writeSite(): string {
     writeFileSync(join(dir, "pages", `${slug}.html`), `<!doctype html><body data-page="${slug}"></body>`);
   }
   writeFileSync(join(dir, "css", "global.css"), "body{}");
+  writeFileSync(join(dir, "404.html"), '<!doctype html><body data-page="404"></body>');
   return dir;
 }
 
@@ -68,7 +69,10 @@ test("pages, assets and redirects follow the production routes", async () => {
   assert.equal(legacy.headers.get("location"), "/players?sample=1");
 
   assert.equal((await fetch(`${base}/assets/`)).status, 403);
-  assert.equal((await fetch(`${base}/MSBL`)).status, 404);
+  const missing = await fetch(`${base}/MSBL`);
+  assert.equal(missing.status, 404);
+  assert.match(await missing.text(), /data-page="404"/);
+  assert.equal((await fetch(`${base}/404.html`)).status, 404);
   assert.equal((await fetch(`${base}/players`, { method: "POST" })).status, 405);
 
   const head = await fetch(`${base}/players`, { method: "HEAD" });

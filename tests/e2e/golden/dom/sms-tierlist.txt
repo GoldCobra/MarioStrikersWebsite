@@ -66,7 +66,7 @@
   <main class="page-content tier-list-page" aria-label="SMS tier lists">
     #text "\n    "
     <h1 class="visually-hidden">
-      #text "SMS Tier Lists"
+      #text "Super Mario Strikers Tier List"
     </h1>
     <div id="global-content-tabs">
       <section class="global-tabs-shell" aria-label="Tier Lists tabs">

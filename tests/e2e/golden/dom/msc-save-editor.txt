@@ -56,7 +56,7 @@
   <main class="page-content save-editor-page" aria-label="MSC save editor">
     #text "\n    "
     <h1 class="visually-hidden">
-      #text "MSC Save Editor"
+      #text "Mario Strikers Charged Save Editor"
     </h1>
     <div id="global-content-tabs">
       <section class="global-tabs-shell" aria-label="MSC tabs">

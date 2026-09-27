@@ -69,7 +69,14 @@
     "tag": "meta",
     "attributes": {
       "name": "description",
-      "content": "View MSBL 2v2 ELO rankings for Mario Strikers Battle League community competition."
+      "content": "Live 2v2 ELO leaderboard for Mario Strikers: Battle League (MSBL): ranks, ratings, wins and losses of the community's ranked doubles players this season."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "theme-color",
+      "content": "#000000"
     }
   },
   {
@@ -83,7 +90,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:description",
-      "content": "View MSBL 2v2 ELO rankings for Mario Strikers Battle League community competition."
+      "content": "Live 2v2 ELO leaderboard for Mario Strikers: Battle League (MSBL): ranks, ratings, wins and losses of the community's ranked doubles players this season."
     }
   },
   {
@@ -97,7 +104,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:title",
-      "content": "MSBL ELO 2v2 | Mario Strikers Community"
+      "content": "Mario Strikers: Battle League 2v2 ELO Rankings (MSBL)"
     }
   },
   {
@@ -111,14 +118,28 @@
     "tag": "meta",
     "attributes": {
       "property": "og:description",
-      "content": "View MSBL 2v2 ELO rankings for Mario Strikers Battle League community competition."
+      "content": "Live 2v2 ELO leaderboard for Mario Strikers: Battle League (MSBL): ranks, ratings, wins and losses of the community's ranked doubles players this season."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:locale",
+      "content": "en_US"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:site_name",
+      "content": "Mario Strikers Community"
     }
   },
   {
     "tag": "meta",
     "attributes": {
       "property": "og:title",
-      "content": "MSBL ELO 2v2 | Mario Strikers Community"
+      "content": "Mario Strikers: Battle League 2v2 ELO Rankings (MSBL)"
     }
   },
   {
@@ -176,6 +197,6 @@
   },
   {
     "tag": "title",
-    "text": "MSBL ELO 2v2 | Mario Strikers Community"
+    "text": "Mario Strikers: Battle League 2v2 ELO Rankings (MSBL)"
   }
 ]

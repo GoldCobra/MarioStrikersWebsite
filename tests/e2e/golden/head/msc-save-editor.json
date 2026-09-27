@@ -69,7 +69,14 @@
     "tag": "meta",
     "attributes": {
       "name": "description",
-      "content": "Use the MSC Save Editor resource for Mario Strikers Charged save editing workflows."
+      "content": "Edit Mario Strikers Charged (MSC) saves in your browser: build and share team presets, manage your online friend list and apply the competitive settings."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "theme-color",
+      "content": "#000000"
     }
   },
   {
@@ -83,7 +90,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:description",
-      "content": "Use the MSC Save Editor resource for Mario Strikers Charged save editing workflows."
+      "content": "Edit Mario Strikers Charged (MSC) saves in your browser: build and share team presets, manage your online friend list and apply the competitive settings."
     }
   },
   {
@@ -97,7 +104,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:title",
-      "content": "MSC Save Editor | Mario Strikers Community"
+      "content": "Mario Strikers Charged Save Editor (MSC)"
     }
   },
   {
@@ -111,14 +118,28 @@
     "tag": "meta",
     "attributes": {
       "property": "og:description",
-      "content": "Use the MSC Save Editor resource for Mario Strikers Charged save editing workflows."
+      "content": "Edit Mario Strikers Charged (MSC) saves in your browser: build and share team presets, manage your online friend list and apply the competitive settings."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:locale",
+      "content": "en_US"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:site_name",
+      "content": "Mario Strikers Community"
     }
   },
   {
     "tag": "meta",
     "attributes": {
       "property": "og:title",
-      "content": "MSC Save Editor | Mario Strikers Community"
+      "content": "Mario Strikers Charged Save Editor (MSC)"
     }
   },
   {
@@ -175,7 +196,7 @@
       "@type": "SoftwareApplication",
       "name": "MSC Save Editor",
       "url": "https://mariostrikers.gg/msc-save-editor",
-      "description": "Use the MSC Save Editor resource for Mario Strikers Charged save editing workflows.",
+      "description": "Edit Mario Strikers Charged (MSC) saves in your browser: build and share team presets, manage your online friend list and apply the competitive settings.",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "Web",
       "isAccessibleForFree": true,
@@ -188,6 +209,6 @@
   },
   {
     "tag": "title",
-    "text": "MSC Save Editor | Mario Strikers Community"
+    "text": "Mario Strikers Charged Save Editor (MSC)"
   }
 ]

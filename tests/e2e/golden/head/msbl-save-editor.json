@@ -69,7 +69,14 @@
     "tag": "meta",
     "attributes": {
       "name": "description",
-      "content": "Use the MSBL Save Editor resource for Mario Strikers Battle League save editing workflows."
+      "content": "Edit Mario Strikers: Battle League (MSBL) save files in your browser: complete cups, unlock all gear, set coins and import gear presets. Nothing is uploaded."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "theme-color",
+      "content": "#000000"
     }
   },
   {
@@ -83,7 +90,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:description",
-      "content": "Use the MSBL Save Editor resource for Mario Strikers Battle League save editing workflows."
+      "content": "Edit Mario Strikers: Battle League (MSBL) save files in your browser: complete cups, unlock all gear, set coins and import gear presets. Nothing is uploaded."
     }
   },
   {
@@ -97,7 +104,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:title",
-      "content": "MSBL Save Editor | Mario Strikers Community"
+      "content": "Mario Strikers: Battle League Save Editor (MSBL)"
     }
   },
   {
@@ -111,14 +118,28 @@
     "tag": "meta",
     "attributes": {
       "property": "og:description",
-      "content": "Use the MSBL Save Editor resource for Mario Strikers Battle League save editing workflows."
+      "content": "Edit Mario Strikers: Battle League (MSBL) save files in your browser: complete cups, unlock all gear, set coins and import gear presets. Nothing is uploaded."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:locale",
+      "content": "en_US"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:site_name",
+      "content": "Mario Strikers Community"
     }
   },
   {
     "tag": "meta",
     "attributes": {
       "property": "og:title",
-      "content": "MSBL Save Editor | Mario Strikers Community"
+      "content": "Mario Strikers: Battle League Save Editor (MSBL)"
     }
   },
   {
@@ -175,7 +196,7 @@
       "@type": "SoftwareApplication",
       "name": "MSBL Save Editor",
       "url": "https://mariostrikers.gg/msbl-save-editor",
-      "description": "Use the MSBL Save Editor resource for Mario Strikers Battle League save editing workflows.",
+      "description": "Edit Mario Strikers: Battle League (MSBL) save files in your browser: complete cups, unlock all gear, set coins and import gear presets. Nothing is uploaded.",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "Web",
       "isAccessibleForFree": true,
@@ -188,6 +209,6 @@
   },
   {
     "tag": "title",
-    "text": "MSBL Save Editor | Mario Strikers Community"
+    "text": "Mario Strikers: Battle League Save Editor (MSBL)"
   }
 ]

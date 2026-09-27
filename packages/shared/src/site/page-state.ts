@@ -10,12 +10,12 @@ import {
   type NavSection,
   type TopNavKey,
 } from "./navigation.ts";
-import { findPage, isIndexable, pagePath } from "./pages.ts";
+import { NOT_FOUND_PAGE, findPage, isIndexable, pagePath } from "./pages.ts";
 import { SITE_ORIGIN } from "./site.ts";
 
 export interface PageState {
   readonly pageSlug: string;
-  /** "" only for pages outside every section and the fallbacks (none today). */
+  /** "" only for the not-found page. */
   readonly topKey: TopNavKey | "";
   readonly section: NavSection | null;
   readonly secondItem: NavSecond | null;
@@ -56,6 +56,8 @@ function stateFromMap(pageSlug: string): PageState | null {
 
 export function resolvePageState(pageSlug: string): PageState {
   const empty = { pageSlug, section: null, secondItem: null, leafItem: null };
+  // The not-found page belongs to no section, so no navigation entry is marked.
+  if (pageSlug === NOT_FOUND_PAGE.slug) return { ...empty, topKey: "" };
   if (pageSlug === "index") return { ...empty, topKey: "home" };
   if (pageSlug === "partners") return { ...empty, topKey: "partners" };
 

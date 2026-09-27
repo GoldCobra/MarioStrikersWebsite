@@ -58,6 +58,7 @@ export function resolveRoute(pathname: string, search: string, files: StaticFile
   // Exact locations.
   if (pathname === "/robots.txt" || pathname === "/sitemap.xml") return fileOrMissing(pathname, files);
   if (pathname === "/index.html") return withQuery("/");
+  if (pathname === "/404.html") return NOT_FOUND;
   if (pathname === "/") return fileOrMissing(pageFile("index"), files);
   const legacyTarget = lookup(LEGACY_REDIRECTS, pathname);
   if (legacyTarget) return withQuery(`/${legacyTarget}`);

@@ -69,7 +69,14 @@
     "tag": "meta",
     "attributes": {
       "name": "description",
-      "content": "View SMS 1v1 ELO rankings for Super Mario Strikers community competition."
+      "content": "Live 1v1 ELO leaderboard for Super Mario Strikers (SMS): ranks, ratings, wins and losses of the community's ranked players in the current season."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "theme-color",
+      "content": "#000000"
     }
   },
   {
@@ -83,7 +90,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:description",
-      "content": "View SMS 1v1 ELO rankings for Super Mario Strikers community competition."
+      "content": "Live 1v1 ELO leaderboard for Super Mario Strikers (SMS): ranks, ratings, wins and losses of the community's ranked players in the current season."
     }
   },
   {
@@ -97,7 +104,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:title",
-      "content": "SMS ELO 1v1 | Mario Strikers Community"
+      "content": "Super Mario Strikers 1v1 ELO Rankings (SMS)"
     }
   },
   {
@@ -111,14 +118,28 @@
     "tag": "meta",
     "attributes": {
       "property": "og:description",
-      "content": "View SMS 1v1 ELO rankings for Super Mario Strikers community competition."
+      "content": "Live 1v1 ELO leaderboard for Super Mario Strikers (SMS): ranks, ratings, wins and losses of the community's ranked players in the current season."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:locale",
+      "content": "en_US"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:site_name",
+      "content": "Mario Strikers Community"
     }
   },
   {
     "tag": "meta",
     "attributes": {
       "property": "og:title",
-      "content": "SMS ELO 1v1 | Mario Strikers Community"
+      "content": "Super Mario Strikers 1v1 ELO Rankings (SMS)"
     }
   },
   {
@@ -170,6 +191,6 @@
   },
   {
     "tag": "title",
-    "text": "SMS ELO 1v1 | Mario Strikers Community"
+    "text": "Super Mario Strikers 1v1 ELO Rankings (SMS)"
   }
 ]

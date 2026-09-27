@@ -35,6 +35,8 @@ const CONTENT_TYPES: Readonly<Record<string, string>> = {
   ".mp4": "video/mp4",
 };
 
+const NOT_FOUND_FILE = "/404.html";
+
 export interface SiteServerOptions {
   /** Directory of the built site. */
   readonly root: string;
@@ -87,6 +89,13 @@ export function createSiteServer(options: SiteServerOptions): Server {
         sendStatus(response, 403);
         return;
       case "not-found":
+        // Like nginx's error_page: the site's own not-found page, when the build has one.
+        if (files.isFile(NOT_FOUND_FILE)) {
+          response.writeHead(404, { "Content-Type": CONTENT_TYPES[".html"], "Cache-Control": "no-store" });
+          if (request.method === "HEAD") response.end();
+          else createReadStream(join(options.root, NOT_FOUND_FILE)).pipe(response);
+          return;
+        }
         sendStatus(response, 404);
         return;
       case "file": {
