@@ -115,6 +115,11 @@ jobs:
         run: node tests/e2e/run.ts routes
         env:
           ROUTES_URL: http://127.0.0.1:8080
+      - name: Stop Docker development before the comparison stacks
+        run: |
+          docker compose down --volumes
+          # Compose leaves a root-owned mount point for the container's node_modules volume.
+          sudo rm -rf backend/node_modules
       - name: Rendered markup matches the DOM and head goldens
         run: node tests/e2e/run.ts dom
       - name: Pages look identical to the reference commit
