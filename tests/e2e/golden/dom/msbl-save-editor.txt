@@ -124,7 +124,7 @@
         <label class="save-editor-field msbl-save-editor-field">
           #text "\n          "
           <span class="msbl-save-editor-coin-label">
-            <img class="msbl-save-editor-coin-icon" src="/assets/msbl-saveeditor/coin.png" alt="" aria-hidden="true"/>
+            <img class="msbl-save-editor-coin-icon" src="/assets/msbl-saveeditor/coin.png" width="300" height="300" alt="" aria-hidden="true"/>
             #text "COINS"
           </span>
           #text "\n          "
