@@ -73,11 +73,28 @@ const htmlFiles = [...rootPages, ...walk(path.join(root, "pages"))].filter((file
 const cssFiles = [...walk(path.join(root, "css")), ...walk(path.join(root, "assets/gear-builder"))].filter((file) =>
   file.endsWith(".css"),
 );
+// Page images reserve their space before they load and describe themselves (alt="" marks decoration).
+// Fragments in pages/templates/ are filled in by scripts and are exempt.
+function checkImages(file: string, source: string): void {
+  if (relative(file).startsWith("pages/templates/")) return;
+  for (const [tag] of source.matchAll(/<img\b[^>]*>/gi)) {
+    if (!/\ssrc=/.test(tag)) continue;
+    if (!/\swidth="\d+"/.test(tag) || !/\sheight="\d+"/.test(tag)) {
+      errors.push(`${relative(file)}: image without width and height ${tag}`);
+    }
+    const alt = /\salt="([^"]*)"/.exec(tag)?.[1];
+    if (alt === undefined || /\.(?:png|jpe?g|gif|webp|avif|svg)\b/i.test(alt)) {
+      errors.push(`${relative(file)}: image without a descriptive alt text ${tag}`);
+    }
+  }
+}
+
 for (const file of htmlFiles) {
   const source = fs.readFileSync(file, "utf8").replace(/<!--[\s\S]*?-->/g, "");
   for (const match of source.matchAll(/\b(?:src|href|poster)\s*=\s*["']([^"']+)["']/gi)) {
     checkReference(file, match[1] ?? "");
   }
+  checkImages(file, source);
 }
 for (const file of cssFiles) {
   const source = fs.readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");

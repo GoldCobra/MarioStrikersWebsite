@@ -83,7 +83,7 @@
           </div>
           #text "\n          "
           <div class="partner-guide-card-media" aria-hidden="true">
-            <img class="partner-guide-card-logo" src="/assets/partners/_nintenhub.png" alt="" loading="lazy" decoding="async"/>
+            <img class="partner-guide-card-logo" src="/assets/partners/_nintenhub.png" width="262" height="147" alt="" loading="lazy" decoding="async"/>
           </div>
           #text "\n          "
           <div class="content-box-bottom" aria-hidden="true"/>
@@ -127,7 +127,7 @@
           </div>
           #text "\n          "
           <div class="partner-guide-card-media" aria-hidden="true">
-            <img class="partner-guide-card-logo" src="/assets/partners/_ms-speedrunning.png" alt="" loading="lazy" decoding="async"/>
+            <img class="partner-guide-card-logo" src="/assets/partners/_ms-speedrunning.png" width="262" height="147" alt="" loading="lazy" decoding="async"/>
           </div>
           #text "\n          "
           <div class="content-box-bottom" aria-hidden="true"/>
@@ -171,7 +171,7 @@
           </div>
           #text "\n          "
           <div class="partner-guide-card-media" aria-hidden="true">
-            <img class="partner-guide-card-logo" src="/assets/partners/_wiisports.png" alt="" loading="lazy" decoding="async"/>
+            <img class="partner-guide-card-logo" src="/assets/partners/_wiisports.png" width="262" height="147" alt="" loading="lazy" decoding="async"/>
           </div>
           #text "\n          "
           <div class="content-box-bottom" aria-hidden="true"/>
@@ -215,7 +215,7 @@
           </div>
           #text "\n          "
           <div class="partner-guide-card-media" aria-hidden="true">
-            <img class="partner-guide-card-logo" src="/assets/partners/_ragnarok.png" alt="" loading="lazy" decoding="async"/>
+            <img class="partner-guide-card-logo" src="/assets/partners/_ragnarok.png" width="262" height="147" alt="" loading="lazy" decoding="async"/>
           </div>
           #text "\n          "
           <div class="content-box-bottom" aria-hidden="true"/>
@@ -259,7 +259,7 @@
           </div>
           #text "\n          "
           <div class="partner-guide-card-media" aria-hidden="true">
-            <img class="partner-guide-card-logo" src="/assets/partners/_nologo.png" alt="" loading="lazy" decoding="async"/>
+            <img class="partner-guide-card-logo" src="/assets/partners/_nologo.png" width="262" height="147" alt="" loading="lazy" decoding="async"/>
           </div>
           #text "\n          "
           <div class="content-box-bottom" aria-hidden="true"/>

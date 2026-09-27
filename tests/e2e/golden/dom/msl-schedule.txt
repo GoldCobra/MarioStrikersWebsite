@@ -105,7 +105,7 @@
         <section class="msl-schedule-item">
           #text "\n          "
           <h2 class="msl-schedule-banner-title">
-            <img class="msl-schedule-banner" src="/assets/msl/banner-fall.png" alt="MSL 2026 Fall Split"/>
+            <img class="msl-schedule-banner" src="/assets/msl/banner-fall.png" width="1440" height="500" alt="MSL 2026 Fall Split"/>
           </h2>
           #text "\n          "
           <p class="msl-schedule-meta">
@@ -121,7 +121,7 @@
         <section class="msl-schedule-item">
           #text "\n          "
           <h2 class="msl-schedule-banner-title">
-            <img class="msl-schedule-banner" src="/assets/msl/banner-summer.png" alt="MSL 2026 Summer Split"/>
+            <img class="msl-schedule-banner" src="/assets/msl/banner-summer.png" width="1440" height="500" alt="MSL 2026 Summer Split"/>
           </h2>
           #text "\n          "
           <p class="msl-schedule-meta">
@@ -140,7 +140,7 @@
         <section class="msl-schedule-item">
           #text "\n          "
           <h2 class="msl-schedule-banner-title">
-            <img class="msl-schedule-banner" src="/assets/msl/banner-spring.png" alt="MSL 2026 Spring Split"/>
+            <img class="msl-schedule-banner" src="/assets/msl/banner-spring.png" width="1440" height="500" alt="MSL 2026 Spring Split"/>
           </h2>
           #text "\n          "
           <p class="msl-schedule-meta">

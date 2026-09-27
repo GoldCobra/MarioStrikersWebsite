@@ -33,6 +33,8 @@ Agree on the task before editing shared navigation, global CSS or the same PSD.
 - Add meaningful coverage for changed behavior. Fixtures belong in
   `apps/api/src/fixtures/data-source.ts`; use invented data, never production exports.
 - Update the relevant short document when setup, behavior or operations change.
+- Give every page image its real `width` and `height` and a descriptive `alt`
+  (`alt=""` for decoration); `npm run check:frontend` enforces both.
 - Keep design sources in `docs/source-assets/` and exported runtime files in
   `assets/`. Coordinate binary edits; avoid unrelated asset conversions.
 - Keep credentials, personal saves, database exports and local caches out of Git.
