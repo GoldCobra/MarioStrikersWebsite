@@ -6,7 +6,14 @@ import { normalizeContract } from "./contract.deltas.ts";
 // apart from differences listed in contract.deltas.ts.
 const REF_URL = process.env.REF_URL ?? "";
 const CAND_URL = process.env.CAND_URL ?? "";
-const COMPARED_HEADERS = ["content-type", "cache-control", "x-data-cache", "x-data-generated-at", "x-data-source", "etag"];
+const COMPARED_HEADERS = [
+  "content-type",
+  "cache-control",
+  "x-data-cache",
+  "x-data-generated-at",
+  "x-data-source",
+  "etag",
+];
 
 export interface ContractRecord {
   method: string;
@@ -28,9 +35,8 @@ function normalizeSetCookie(value: string | undefined): string | undefined {
 }
 
 async function record(method: "GET" | "POST", context: APIRequestContext, path: string): Promise<ContractRecord> {
-  const response: APIResponse = method === "GET"
-    ? await context.get(path, { maxRedirects: 0 })
-    : await context.post(path, { maxRedirects: 0 });
+  const response: APIResponse =
+    method === "GET" ? await context.get(path, { maxRedirects: 0 }) : await context.post(path, { maxRedirects: 0 });
   const headers: Record<string, string> = {};
   const all = response.headers();
   for (const name of COMPARED_HEADERS) {
@@ -41,12 +47,21 @@ async function record(method: "GET" | "POST", context: APIRequestContext, path: 
   const buffer = await response.body();
   const isRedirect = response.status() >= 300 && response.status() < 400;
   // Redirect bodies are framework boilerplate; status and Location carry the contract.
-  const body = isRedirect ? null : contentType.includes("json")
-    ? JSON.parse(buffer.toString("utf8")) as unknown
-    : contentType.startsWith("image/") ? { bytes: buffer.length, sha: buffer.toString("base64").slice(0, 64) } : buffer.toString("utf8");
+  const body = isRedirect
+    ? null
+    : contentType.includes("json")
+      ? (JSON.parse(buffer.toString("utf8")) as unknown)
+      : contentType.startsWith("image/")
+        ? { bytes: buffer.length, sha: buffer.toString("base64").slice(0, 64) }
+        : buffer.toString("utf8");
   return normalizeContract({
-    method, path, status: response.status(), headers, location: normalizeLocation(all["location"]),
-    setCookie: normalizeSetCookie(all["set-cookie"]), body
+    method,
+    path,
+    status: response.status(),
+    headers,
+    location: normalizeLocation(all.location),
+    setCookie: normalizeSetCookie(all["set-cookie"]),
+    body,
   });
 }
 
@@ -55,22 +70,51 @@ function leaderboardPaths(): string[] {
   for (const game of LEADERBOARD_GAMES) {
     for (const mode of LEADERBOARD_MODES) {
       const base = `/api/leaderboards/${game}/${mode}`;
-      paths.push(base, base + "?limit=5", base + "?limit=5&offset=3", base + "?limit=150", base + "?offset=100",
-        base + "/top", base + "/top?limit=3", base + "/top?limit=500");
+      paths.push(
+        base,
+        base + "?limit=5",
+        base + "?limit=5&offset=3",
+        base + "?limit=150",
+        base + "?offset=100",
+        base + "/top",
+        base + "/top?limit=3",
+        base + "/top?limit=500",
+      );
     }
   }
-  paths.push("/api/leaderboards/invalid/elo1v1", "/api/leaderboards/msbl/invalid", "/api/leaderboards/msbl/elo1v1?limit=abc",
-    "/api/leaderboards/msbl/elo1v1?offset=-1", "/api/leaderboards/MSBL/ELO1V1");
+  paths.push(
+    "/api/leaderboards/invalid/elo1v1",
+    "/api/leaderboards/msbl/invalid",
+    "/api/leaderboards/msbl/elo1v1?limit=abc",
+    "/api/leaderboards/msbl/elo1v1?offset=-1",
+    "/api/leaderboards/MSBL/ELO1V1",
+  );
   return paths;
 }
 
 function entityPaths(): string[] {
-  const paths = ["/api/players", "/api/clubs", "/api/clubs/msbl", "/api/competitive-season/current", "/api/events/community",
-    "/api/wiimmfi/msc-charged", "/api/health", "/api/auth/me", "/api/profile/me", "/api/unknown", "/api/players/9999/profile",
-    "/api/players/abc/profile", "/api/players/0/profile", "/api/clubs/msbl/9999/profile", "/api/clubs/msbl/abc/profile",
-    "/api/clubs/msbl/9999/logo", "/api/clubs/msbl/abc/logo"];
+  const paths = [
+    "/api/players",
+    "/api/clubs",
+    "/api/clubs/msbl",
+    "/api/competitive-season/current",
+    "/api/events/community",
+    "/api/wiimmfi/msc-charged",
+    "/api/health",
+    "/api/auth/me",
+    "/api/profile/me",
+    "/api/unknown",
+    "/api/players/9999/profile",
+    "/api/players/abc/profile",
+    "/api/players/0/profile",
+    "/api/clubs/msbl/9999/profile",
+    "/api/clubs/msbl/abc/profile",
+    "/api/clubs/msbl/9999/logo",
+    "/api/clubs/msbl/abc/logo",
+  ];
   for (let id = 1; id <= FIXTURE_PLAYER_COUNT; id += 1) paths.push(`/api/players/${id}/profile`);
-  for (let id = 1; id <= FIXTURE_CLUB_COUNT; id += 1) paths.push(`/api/clubs/msbl/${id}/profile`, `/api/clubs/msbl/${id}/logo`);
+  for (let id = 1; id <= FIXTURE_CLUB_COUNT; id += 1)
+    paths.push(`/api/clubs/msbl/${id}/profile`, `/api/clubs/msbl/${id}/logo`);
   return paths;
 }
 
@@ -78,7 +122,7 @@ async function authFlow(context: APIRequestContext, code: "sample" | "sample-unl
   const records: ContractRecord[] = [];
   const start = await context.get("/api/auth/discord/start?returnTo=/profile", { maxRedirects: 0 });
   records.push(await record("GET", context, "/api/auth/discord/start?returnTo=/profile"));
-  const location = (start.headers()["location"] ?? "").replace("code=sample&", `code=${code}&`);
+  const location = (start.headers().location ?? "").replace("code=sample&", `code=${code}&`);
   records.push(await record("GET", context, location));
   records.push(await record("GET", context, "/api/auth/me"));
   records.push(await record("GET", context, "/api/profile/me"));
@@ -92,7 +136,10 @@ async function authFlow(context: APIRequestContext, code: "sample" | "sample-unl
 test.describe("API contract", () => {
   test.skip(!REF_URL || !CAND_URL, "REF_URL and CAND_URL are set by run.ts.");
 
-  for (const [name, paths] of [["leaderboards", leaderboardPaths()], ["entities", entityPaths()]] as const) {
+  for (const [name, paths] of [
+    ["leaderboards", leaderboardPaths()],
+    ["entities", entityPaths()],
+  ] as const) {
     test(name, async () => {
       const reference = await request.newContext({ baseURL: REF_URL });
       const candidate = await request.newContext({ baseURL: CAND_URL });

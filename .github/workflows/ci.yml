@@ -25,9 +25,6 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: backend
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -36,7 +33,6 @@ jobs:
         with:
           node-version-file: .node-version
           cache: npm
-          cache-dependency-path: backend/package-lock.json
       - run: npm ci
       - run: npm run check
       - run: npm test
@@ -53,7 +49,7 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .node-version
-      - run: npm --prefix backend run check:frontend
+      - run: npm run check:frontend
       - run: git diff --check
 
   containers:
@@ -68,9 +64,6 @@ jobs:
         with:
           node-version-file: .node-version
           cache: npm
-          cache-dependency-path: |
-            backend/package-lock.json
-            tests/e2e/package-lock.json
       - run: docker build --build-arg RELEASE_SHA=${{ github.sha }} -f Dockerfile.backend -t website-backend:ci .
       - run: docker build --build-arg RELEASE_SHA=${{ github.sha }} -f Dockerfile.frontend -t website-frontend:ci .
       - run: docker run --rm --add-host backend:127.0.0.1 website-frontend:ci nginx -t
@@ -107,7 +100,6 @@ jobs:
           print('Docker development serves synthetic data, clean routes, templates and uncached assets.')
           PY
       - name: Install end-to-end tools
-        working-directory: tests/e2e
         run: |
           npm ci
           npx playwright install --with-deps chromium
@@ -116,10 +108,7 @@ jobs:
         env:
           ROUTES_URL: http://127.0.0.1:8080
       - name: Stop Docker development before the comparison stacks
-        run: |
-          docker compose down --volumes
-          # Compose leaves a root-owned mount point for the container's node_modules volume.
-          sudo rm -rf backend/node_modules
+        run: docker compose down --volumes
       - name: Rendered markup matches the DOM and head goldens
         run: node tests/e2e/run.ts dom
       - name: Pages look identical to the reference commit

@@ -140,8 +140,8 @@ test("static serving permits public assets and clean routes, and hides repositor
   const legacy = await fetch(base + "/pages/players.html?sample=1", { redirect: "manual" });
   assert.equal(legacy.status, 301);
   assert.equal(legacy.headers.get("location"), "/players?sample=1");
-  for (const route of ["/backend/package.json", "/backend/src/config.js", "/README.md", "/.env", "/.git/config",
-    "/docs/development.md", "/docker-compose.prod.yml", "/css/../backend/package.json"]) {
+  for (const route of ["/apps/api/package.json", "/apps/api/src/config.js", "/package.json", "/README.md", "/.env", "/.git/config",
+    "/docs/development.md", "/docker-compose.prod.yml", "/css/../../../api/package.json", "/css/../index.html/../../package.json"]) {
     assert.equal((await fetch(base + route)).status, 404, route);
   }
 });

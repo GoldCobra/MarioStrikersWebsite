@@ -1,0 +1,14 @@
+# Generated, vendored or recorded files.
+package-lock.json
+**/node_modules/
+**/.cache/
+tests/e2e/golden/
+
+# Legacy code keeps its current formatting until it is rewritten in TypeScript.
+apps/api/
+apps/web/public/
+docs/archive/
+
+# Documentation and CI files are formatted by hand.
+*.md
+*.yml

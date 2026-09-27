@@ -4,9 +4,7 @@
   "enforcement": "active",
   "conditions": {
     "ref_name": {
-      "include": [
-        "refs/heads/gc-updates"
-      ],
+      "include": ["refs/heads/gc-updates"],
       "exclude": []
     }
   },

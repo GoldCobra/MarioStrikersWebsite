@@ -4,14 +4,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    command: npm run dev
+    command: ["node", "--watch", "apps/api/src/dev.js"]
     environment:
       NODE_ENV: development
       DEV_HOST: 0.0.0.0
       PORT: 8787
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - ./apps/api/src:/app/apps/api/src:ro
 
   frontend:
     build:
@@ -26,10 +25,6 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     volumes:
-      - ./index.html:/usr/share/nginx/html/index.html:ro
-      - ./assets:/usr/share/nginx/html/assets:ro
-      - ./css:/usr/share/nginx/html/css:ro
-      - ./js:/usr/share/nginx/html/js:ro
-      - ./pages:/usr/share/nginx/html/pages:ro
+      - ./apps/web/public:/usr/share/nginx/html:ro
     depends_on:
       - backend

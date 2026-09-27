@@ -29,7 +29,8 @@ function createLiveProviders() {
   };
 }
 
-const STATIC_ROOT = path.join(__dirname, "../../");
+// Development only: the static site lives in apps/web/public (production serves it with nginx).
+const STATIC_ROOT = path.join(__dirname, "../../web/public");
 const STATIC_PAGES_ROOT = path.join(STATIC_ROOT, "pages");
 const LEGACY_PAGE_ROUTE = /^\/pages\/([a-z0-9-]+)\.html$/i;
 const CLEAN_PAGE_ROUTE = /^\/([a-z0-9-]+)$/i;

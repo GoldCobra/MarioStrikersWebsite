@@ -25,7 +25,7 @@ PowerShell, macOS and Linux terminals:
 
 ```sh
 git clone --branch gc-updates https://github.com/GoldCobra/MarioStrikersWebsite.git
-cd MarioStrikersWebsite/backend
+cd MarioStrikersWebsite
 npm ci
 npm run dev
 ```
@@ -48,7 +48,7 @@ live service configuration and troubleshooting.
 
 ## Checks
 
-Run these commands from `backend/` before opening a pull request:
+Run these commands from the repository root before opening a pull request:
 
 ```sh
 npm run check
@@ -67,12 +67,13 @@ stay identical to a reference commit.
 
 | Location | Purpose |
 | --- | --- |
-| `index.html`, `pages/` | Page shells and shared HTML fragments |
-| `css/`, `js/` | Shared styles and browser behavior |
-| `assets/` | Runtime images, fonts and embedded Gear Builder |
-| `backend/` | Express API, service integrations, fixtures and tests |
+| `apps/web/public/` | Page shells, fragments, styles, browser scripts and runtime assets |
+| `apps/api/` | Express API, service integrations, fixtures and tests |
+| `tests/e2e/` | Comparison checks against a reference commit |
+| `infra/nginx/` | Production web server configuration |
 | `docs/` | Development notes, tool formats and design sources |
 
+The repository is an npm workspace; one `npm ci` at the root installs everything.
 The frontend uses plain HTML, CSS and JavaScript. Express serves clean page
 URLs during local development. Production uses Caddy, Nginx and Express;
 MSSQL provides community data, with local caches for public data and club logos.

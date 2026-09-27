@@ -2,8 +2,9 @@
 
 ## Pages and browser code
 
-The site uses static HTML, shared CSS and browser JavaScript. Page shells live
-in `index.html` and `pages/`; fetched fragments live in `pages/templates/`.
+The site uses static HTML, shared CSS and browser JavaScript in
+`apps/web/public/`, the web root; paths in this section are relative to it. Page
+shells live in `index.html` and `pages/`; fetched fragments live in `pages/templates/`.
 Use a configured local server because templates and API calls use `fetch()`.
 
 Each page sets `body data-page="..."`. `js/global-nav.js` uses it to build
@@ -40,7 +41,8 @@ and competitive-season data. Discord supplies authentication, member names and
 community events. Wiimmfi availability is retrieved through FlareSolverr.
 
 Public leaderboard, player-list, club-list and season responses use a refresh
-cache that persists snapshots under `backend/.cache/`. Club logos are cached
+cache that persists snapshots under `.cache/` in the API's working directory
+(`apps/api/.cache/` locally, `/app/.cache` in the container). Club logos are cached
 there too. These are runtime caches, not source data; production stores them
 on a named Docker volume. Account/profile responses use `no-store`. Season
 responses also use `no-store`: season data remains cached internally, but
@@ -82,5 +84,5 @@ Leaderboard games are `msbl`, `msc` and `sms`; modes are `elo1v1`,
 games; the `msbl-elo2v2` page and route still exist but have no tab.
 WHR is the all-time 1v1 rating that futbot recalculates from every reported
 result; the backend only reads it.
-`backend/src/server.js`, service implementations and their tests define
+`apps/api/src/server.js`, service implementations and their tests define
 response fields and validation.

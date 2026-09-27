@@ -22,9 +22,15 @@ function sleep(ms: number): Promise<void> {
 export async function preparePage(page: Page, options: { failApi?: boolean } = {}): Promise<void> {
   const tracker = { count: 0 };
   inFlight.set(page, tracker);
-  page.on("request", () => { tracker.count += 1; });
-  page.on("requestfinished", () => { tracker.count -= 1; });
-  page.on("requestfailed", () => { tracker.count -= 1; });
+  page.on("request", () => {
+    tracker.count += 1;
+  });
+  page.on("requestfinished", () => {
+    tracker.count -= 1;
+  });
+  page.on("requestfailed", () => {
+    tracker.count -= 1;
+  });
 
   const now = Date.parse(FIXTURE_NOW);
   await page.clock.install({ time: new Date(now - 1000) });
@@ -84,10 +90,14 @@ async function waitInPage(page: Page, predicate: () => boolean, what: string): P
 export async function settle(page: Page, options: { eagerImages?: boolean } = {}): Promise<void> {
   await page.waitForLoadState("load");
   await advance(page, 1000);
-  await waitInPage(page, () => {
-    const account = document.querySelector("[data-auth-state]");
-    return !account || account.getAttribute("data-auth-state") !== "loading";
-  }, "the account widget");
+  await waitInPage(
+    page,
+    () => {
+      const account = document.querySelector("[data-auth-state]");
+      return account?.getAttribute("data-auth-state") !== "loading";
+    },
+    "the account widget",
+  );
   await page.evaluate(async (eager) => {
     await document.fonts.ready;
     const images = Array.from(document.images);
@@ -96,12 +106,30 @@ export async function settle(page: Page, options: { eagerImages?: boolean } = {}
         if (image.loading === "lazy") image.loading = "eager";
       }
     }
-    await Promise.all(images.filter((image) => eager || image.loading !== "lazy").map((image) => image.complete
-      ? Promise.resolve()
-      : new Promise<void>((done) => {
-        image.addEventListener("load", () => done(), { once: true });
-        image.addEventListener("error", () => done(), { once: true });
-      })));
+    await Promise.all(
+      images
+        .filter((image) => eager || image.loading !== "lazy")
+        .map((image) =>
+          image.complete
+            ? Promise.resolve()
+            : new Promise<void>((done) => {
+                image.addEventListener(
+                  "load",
+                  () => {
+                    done();
+                  },
+                  { once: true },
+                );
+                image.addEventListener(
+                  "error",
+                  () => {
+                    done();
+                  },
+                  { once: true },
+                );
+              }),
+        ),
+    );
   }, Boolean(options.eagerImages));
   // Tab strips measure themselves on resize; their first measurement can run before the web fonts
   // arrive. One resize pass after the fonts settles them.
@@ -118,7 +146,9 @@ export async function settle(page: Page, options: { eagerImages?: boolean } = {}
 // Chromium leaves parts of very tall full-page captures unrastered, so full-length shots grow
 // the viewport to the document height instead and capture that viewport.
 export async function expandViewportToDocument(page: Page, width: number): Promise<void> {
-  const height = await page.evaluate(() => Math.ceil(Math.max(document.documentElement.scrollHeight, document.body.scrollHeight)));
+  const height = await page.evaluate(() =>
+    Math.ceil(Math.max(document.documentElement.scrollHeight, document.body.scrollHeight)),
+  );
   await page.setViewportSize({ width, height: Math.min(Math.max(height, 900), 16_000) });
   await settle(page);
 }
@@ -131,9 +161,9 @@ export async function hideDevNotice(page: Page): Promise<void> {
 // Simulated Discord login: "linked" has a player profile, "unlinked" does not.
 export async function login(page: Page, kind: "linked" | "unlinked"): Promise<void> {
   const start = await page.request.get("/api/auth/discord/start?returnTo=/", { maxRedirects: 0 });
-  const location = start.headers()["location"];
+  const location = start.headers().location;
   if (!location) throw new Error("Simulated login returned no redirect.");
   const callback = kind === "unlinked" ? location.replace("code=sample&", "code=sample-unlinked&") : location;
   const response = await page.request.get(callback, { maxRedirects: 0 });
-  if (response.status() !== 302) throw new Error("Simulated login failed with HTTP " + response.status());
+  if (response.status() !== 302) throw new Error(`Simulated login failed with HTTP ${response.status()}`);
 }

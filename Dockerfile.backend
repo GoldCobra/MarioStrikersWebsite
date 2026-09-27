@@ -2,20 +2,17 @@ FROM node:24-alpine
 ARG RELEASE_SHA=development
 LABEL org.opencontainers.image.revision=$RELEASE_SHA
 
-# Set working directory
+# The working directory stays /app: the API resolves its cache and .env paths from it,
+# and production mounts the persistent cache volume at /app/.cache.
 WORKDIR /app
 
-# Copy package files first (for better caching)
-COPY backend/package*.json ./
+# Workspace manifests first, so the dependency layer is reused until they change.
+COPY package.json package-lock.json ./
+COPY apps/api/package.json apps/api/
+RUN npm ci --omit=dev --workspace=@ms/api --no-audit --no-fund
 
-# Install dependencies
-RUN npm ci --omit=dev
+COPY apps/api/ apps/api/
 
-# Copy the rest of the backend code
-COPY backend/ ./
-
-# Expose the port
 EXPOSE 8787
 
-# Start the backend API
-CMD ["npm", "run", "start:api"]
+CMD ["node", "apps/api/src/index.js"]

@@ -20,6 +20,8 @@ Legs, using Gear Builder values `0..9`. See
 [Gear Builder maintenance](msbl-gear-builder-snapshot.md) before importing
 upstream assets or scripts.
 
+Script paths are relative to the web root `apps/web/public/`.
+
 The save editor at `/msbl-save-editor` is implemented by
 `js/msbl-save-editor-contract.js` and `js/msbl-save-editor.js`. It loads
 `strkrs.save`, edits Coins as an unsigned 32-bit value, imports Gear Builder

@@ -1,8 +1,8 @@
 {
-  "name": "mario-strikers-leaderboards-backend",
+  "name": "@ms/api",
   "version": "1.0.0",
   "private": true,
-  "description": "MSSQL API bridge and Discord auth backend for the Mario Strikers website.",
+  "description": "Express API for the Mario Strikers website: MSSQL data, Discord login and community events.",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

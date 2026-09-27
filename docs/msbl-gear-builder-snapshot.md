@@ -4,6 +4,8 @@ Source: `https://msbl.pages.dev/`
 
 ## Runtime location
 
+Paths are relative to the web root `apps/web/public/` unless they start with `docs/`.
+
 - Assets: `assets/gear-builder/`
 - Template: `pages/templates/msbl-gear-builder.html`
 - Host page: `pages/msbl-gear-builder.html`
@@ -33,7 +35,7 @@ Source: `https://msbl.pages.dev/`
 4. Remove the temporary monolith artifact after chunk generation:
    - delete `assets/gear-builder/builds.json`
 5. Run syntax checks:
-   - `npm --prefix backend run check:frontend`
+   - `npm run check:frontend`
    - verify character selection, presets, screenshots and XML import into the Save Editor in a browser
 6. Bump changed browser asset cache tags, including dynamically loaded scripts.
 

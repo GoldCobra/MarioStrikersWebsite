@@ -49,7 +49,7 @@ export const PAGE_SLUGS = [
   "sms-setup-guide",
   "sms-tierlist",
   "sms-whr",
-  "tab-placeholder"
+  "tab-placeholder",
 ] as const;
 
 export function pagePath(slug: string): string {

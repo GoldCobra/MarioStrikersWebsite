@@ -2,12 +2,12 @@
 
 ## Everyday setup
 
-Use Node.js 24 LTS. From `backend/`, run `npm ci`, then `npm run dev`.
+Use Node.js 24 LTS. From the repository root, run `npm ci`, then `npm run dev`.
 Open **http://localhost:8787**. The server serves both the frontend and API;
 backend code changes restart it, and frontend changes need a browser refresh.
 
 The development runner uses invented players, clubs, rankings, season data,
-events and Wiimmfi results from `backend/src/dev/fixtures.js`. It does not
+events and Wiimmfi results from `apps/api/src/dev/fixtures.js`. It does not
 require or use production credentials. Login with Discord is simulated locally:
 you can inspect a sample account and log out without contacting Discord.
 It does not validate real OAuth, guild membership or live database behavior.
@@ -25,9 +25,9 @@ Live integration work is optional and coordinated with GoldCobra. Use separate
 development credentials and permitted test data; do not copy a production
 database or account secrets into fixtures.
 
-Copy `backend/.env.example` to `backend/.env` with your editor or file manager.
+Copy `apps/api/.env.example` to `apps/api/.env` with your editor or file manager.
 Fill only the settings needed for the integration. The template and
-`backend/src/config.js` are the source of truth for names and defaults.
+`apps/api/src/config.js` are the source of truth for names and defaults.
 
 | Integration | Configuration |
 | --- | --- |
@@ -41,7 +41,7 @@ Register the exact local callback
 application. HTTP development uses `SESSION_COOKIE_SECURE=false`; production
 uses secure cookies over HTTPS.
 
-Run `npm run dev:live` from `backend/` to serve the site and live API together
+Run `npm run dev:live` from the repository root to serve the site and live API together
 at **http://localhost:8787**. Missing service configuration may cause the
 corresponding API calls to fail; other pages and browser save tools remain
 available. A live database smoke check is `npm run sync:mssql:once`; run it
