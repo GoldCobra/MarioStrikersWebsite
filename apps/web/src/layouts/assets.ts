@@ -1,4 +1,4 @@
-// The browser scripts and stylesheets pages load, each with its cache tag in one place. Bump a tag
+// The legacy browser scripts and stylesheets pages load, each with its cache tag in one place. Bump a tag
 // when the file's content changes; every page that loads the file picks the new URL up.
 
 export const SCRIPTS = {
@@ -8,8 +8,6 @@ export const SCRIPTS = {
   eventsEngine: "/js/events-engine.js?v=20260609-events-list-v17",
   flagUtils: "/js/flag-utils.js?v=20260621-flag-utils-v1",
   gearBuilderHost: "/js/msbl-gear-builder-host.js?v=20260508-lazy-v1",
-  globalNav: "/js/global-nav.js?v=20260912-local-dev-v1",
-  globalTabsEngine: "/js/global-tabs-engine.js?v=20260531-fix-v1",
   landingCountdown: "/js/landing-countdown.js?v=20260902-season-visuals-v1",
   leaderboardsConfig: "/js/leaderboards-config.js?v=20260925-whr-tabs-v1",
   leaderboardsEngine: "/js/leaderboards-engine.js?v=20260609-clickable-lb-profiles-v1",

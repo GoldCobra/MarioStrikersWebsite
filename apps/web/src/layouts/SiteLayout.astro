@@ -17,13 +17,13 @@ interface Props {
   /** Classes on <main> after "page-content". */
   mainClass?: string;
   mainLabel?: string;
-  /** In load order; all are deferred. */
-  scripts: readonly ScriptName[];
+  /** Legacy scripts, in load order; all are deferred and run after the modules. */
+  scripts?: readonly ScriptName[];
   /** Loaded after the global stylesheet. */
   stylesheets?: readonly StylesheetName[];
 }
 
-const { slug, mainClass, mainLabel, scripts, stylesheets = [] } = Astro.props;
+const { slug, mainClass, mainLabel, scripts = [], stylesheets = [] } = Astro.props;
 const page = slug === NOT_FOUND_PAGE.slug ? NOT_FOUND_PAGE : findPage(slug);
 if (!page) throw new Error(`Page "${slug}" is not in the page registry.`);
 
@@ -83,4 +83,4 @@ const bodyEnd =
 
   <main class={mainClass ? `page-content ${mainClass}` : "page-content"} aria-label={mainLabel}><Fragment set:html={mainStart} /><slot /></main>
 
-  <Fragment set:html={bodyEnd} /></body></html>
+  <script src="../entries/site.ts"></script><slot name="scripts" /><Fragment set:html={bodyEnd} /></body></html>

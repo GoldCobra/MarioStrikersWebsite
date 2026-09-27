@@ -12,6 +12,8 @@ export default defineConfig({
   devToolbar: { enabled: false },
   integrations: [siteRoutes()],
   vite: {
+    // Modules stay separate files, so a Content-Security-Policy can allow scripts by origin.
+    build: { assetsInlineLimit: 0 },
     server: {
       proxy: { "/api": process.env.MS_API_ORIGIN ?? "http://127.0.0.1:8788" },
     },

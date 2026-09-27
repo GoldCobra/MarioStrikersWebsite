@@ -12,7 +12,7 @@ const { slug, game } = Astro.props;
 const image = TIER_LISTS[game];
 const label = game.toUpperCase();
 ---
-<SiteLayout slug={slug} mainClass="tier-list-page" mainLabel={`${label} tier lists`} scripts={["globalTabsEngine", "globalNav"]}>
+<SiteLayout slug={slug} mainClass="tier-list-page" mainLabel={`${label} tier lists`}>
     <figure class="tier-list-figure tier-list-figure--scale65" style={`--tier-list-display-width: ${displayWidth(image)}px;`}>
       <img class="tier-list-image" src={image.src} width={image.width} height={image.height} alt={`${label} tier list`} decoding="async">
     </figure>
