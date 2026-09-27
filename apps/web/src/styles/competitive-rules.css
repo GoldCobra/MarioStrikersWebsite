@@ -1,0 +1,158 @@
+/* Shared content components */
+
+.competitive-rules-page {
+  display: block;
+  padding: 0 var(--content-inline-pad) clamp(1.5rem, 3.4vw, 2.2rem);
+}
+
+.competitive-rules-page #competitive-rules-root {
+  display: block;
+  padding-top: 0;
+}
+
+body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
+  padding-top: 0;
+}
+
+.competitive-rules-header {
+  max-width: var(--content-box-shell-max-width);
+  margin: 0 auto var(--rules-header-bottom-gap);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.9rem;
+  padding-top: var(--rules-header-offset-top);
+  padding-left: var(--rules-header-offset-left);
+  padding-right: var(--rules-header-offset-right);
+  box-sizing: border-box;
+}
+
+.cr-page-title,
+.cr-page-revised {
+  margin: 0;
+  font-family: "ITC Grizzly", sans-serif;
+  font-weight: 400;
+  line-height: 1.2;
+  font-size: calc(clamp(0.98rem, 1.18vw, 1.18rem) - 4px);
+  color: #d36402;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.cr-page-title {
+  text-align: left;
+}
+
+.cr-page-revised {
+  text-align: right;
+}
+
+.competitive-rules {
+  max-width: var(--content-box-shell-max-width);
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.competitive-rules h1,
+.competitive-rules h2,
+.competitive-rules h3,
+.competitive-rules h4 {
+  margin: 0;
+  font-family: "ITC Grizzly", sans-serif;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #d36402;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.competitive-rules h1 {
+  font-size: calc(clamp(1.4rem, 2vw, 2.1rem) + 2px);
+}
+
+.competitive-rules h2 {
+  margin-top: 1.25rem;
+  font-size: calc(clamp(1.1rem, 1.45vw, 1.45rem) + 2px);
+  color: #ece8d0;
+  -webkit-text-stroke: 1.6px #000;
+  text-stroke: 1.6px #000;
+  paint-order: stroke fill;
+  text-shadow: none;
+  filter: drop-shadow(-4px 3px 0 #000);
+}
+
+.competitive-rules .about-page-title {
+  margin-top: 0;
+  font-size: calc(clamp(1.1rem, 1.45vw, 1.45rem) + 2px);
+  color: #fff;
+  -webkit-text-stroke: 2px #000;
+  text-stroke: 2px #000;
+  paint-order: stroke fill;
+  filter: drop-shadow(-3px 2px 0 #000);
+}
+
+.competitive-rules h3 {
+  margin-top: 0.95rem;
+  font-size: calc(clamp(0.98rem, 1.25vw, 1.2rem) + 2px);
+  color: #000;
+  text-shadow: -1px 1px 0 #d36402;
+}
+
+.competitive-rules h4 {
+  margin-top: 0.7rem;
+  font-size: calc(clamp(0.92rem, 1.1vw, 1.05rem) + 2px);
+  color: #000;
+  text-shadow: -1px 1px 0 #d36402;
+}
+
+.competitive-rules p,
+.competitive-rules li {
+  margin: 0.42rem 0;
+  color: #fff;
+}
+
+.competitive-rules ul,
+.competitive-rules ol {
+  margin: 0.45rem 0 0.7rem 1.55rem;
+  padding: 0;
+}
+
+.competitive-rules ul {
+  list-style-type: square;
+  list-style-position: outside;
+}
+
+.competitive-rules li {
+  padding-left: 0;
+  position: static;
+}
+
+/* Guide body text + links: use a single, inherited text-shadow instead of the
+   box-level drop-shadow filter, matched to the Partners description shadow
+   (-2px 2px 0 #000) so guide/rules body copy reads identically to it. The filter
+   doubled the shadow of any nested element that also had its own filter
+   (links/spans), so links looked stronger inside <p>/<ol> than inside bullet
+   <li>. text-shadow does not stack on nesting, so all yellow links and body text
+   get one uniform shadow. The class is doubled to outrank the (0,2,0) :is(...)
+   rule. The bullet ::marker gets no shadow at all. */
+.competitive-rules.competitive-rules :is(p, li, a, span, strong, em) {
+  filter: none;
+  text-shadow: -2px 2px 0 #000;
+}
+
+.competitive-rules.competitive-rules ul li::marker {
+  color: #000;
+  text-shadow: none;
+}
+
+.cr-intro {
+  margin-bottom: 0.25rem;
+}
+
+.cr-section {
+  margin: 0;
+}
+

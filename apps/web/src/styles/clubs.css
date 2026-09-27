@@ -1,0 +1,286 @@
+.clubs-page {
+  padding-top: 0;
+}
+
+.msbl-clubs-root {
+  --msbl-club-row-base-width: 1076px;
+  --msbl-club-list-scale: 0.88;
+  --msbl-club-tag-shift-x: 0px;
+  --msbl-club-content-left: 132px;
+  --msbl-club-content-right: 14px;
+  --msbl-club-name-slot-top: calc(50% - 28px);
+  --msbl-club-name-slot-height: 28px;
+  --msbl-club-name-line-height: 28px;
+  --msbl-club-meta-slot-top: calc(50% + 3px);
+  --msbl-club-meta-slot-height: 18px;
+  width: min(1180px, 100%);
+  padding-top: 0;
+  margin: 0 auto;
+}
+
+.msbl-clubs-list {
+  --msbl-club-row-gap: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--msbl-club-row-gap);
+  margin: 0;
+  padding-top: 0;
+}
+
+.msbl-club-row {
+  display: block;
+  overflow: hidden;
+  width: min(calc(var(--msbl-club-row-base-width) * var(--msbl-club-list-scale)), 96vw);
+  aspect-ratio: 1600 / 110;
+  height: var(--msbl-club-row-pixel-height, auto);
+  margin: 0 auto;
+  position: relative;
+  padding: clamp(0.55rem, 0.9vw, 0.7rem) clamp(1.1rem, 2vw, 1.35rem) clamp(0.4rem, 0.8vw, 0.55rem);
+  border: 0;
+  background-image: url("../assets/clubs/club-list.png");
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 100% 100%;
+}
+
+.msbl-club-row.is-inactive {
+  background-image: url("../assets/clubs/inactive-club-list.png");
+  filter: grayscale(1);
+}
+
+.msbl-club-row::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  background-image: url("../assets/clubs/club-logo-border.png");
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 100% 100%;
+}
+
+.msbl-club-logo-slot {
+  --msbl-club-mask-scale: 1.04;
+  --msbl-club-mask-shift-x: 0%;
+  --msbl-club-mask-shift-y: 0%;
+  --msbl-club-mask-center-x: 50%;
+  --msbl-club-mask-center-y: 50%;
+  position: absolute;
+  left: calc(1.3% - 1px);
+  top: 4.8%;
+  width: calc(10.875% + 2px);
+  height: 81.818%;
+  transform: none;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+  -webkit-mask-image: url("../assets/clubs/club-mask.png");
+  mask-image: url("../assets/clubs/club-mask.png");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position:
+    calc(50% + var(--msbl-club-mask-shift-x))
+    calc(50% + var(--msbl-club-mask-shift-y));
+  mask-position:
+    calc(50% + var(--msbl-club-mask-shift-x))
+    calc(50% + var(--msbl-club-mask-shift-y));
+  -webkit-mask-size:
+    calc(100% * var(--msbl-club-mask-scale))
+    calc(100% * var(--msbl-club-mask-scale));
+  mask-size:
+    calc(100% * var(--msbl-club-mask-scale))
+    calc(100% * var(--msbl-club-mask-scale));
+  -webkit-mask-mode: alpha;
+  mask-mode: alpha;
+}
+
+.msbl-club-logo-img {
+  position: absolute;
+  z-index: 2;
+  left: var(--msbl-club-mask-center-x);
+  top: var(--msbl-club-mask-center-y);
+  height:100px;
+  width: auto;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  transform:
+    translate(-50%, -50%)
+    translate(var(--msbl-club-mask-shift-x), var(--msbl-club-mask-shift-y));
+}
+
+.msbl-club-row.is-inactive .msbl-club-logo-img:not(.msbl-club-logo-fallback) {
+  filter: grayscale(1);
+}
+
+.msbl-club-logo-fallback {
+  opacity: 0.075;
+}
+
+.msbl-club-main {
+  position: absolute;
+  left: var(--msbl-club-content-left);
+  right: var(--msbl-club-content-right);
+  top: 0;
+  bottom: 0;
+  width: auto;
+  min-width: 0;
+  display: block;
+  transform: none;
+}
+
+.msbl-club-primary {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--msbl-club-name-slot-top);
+  height: var(--msbl-club-name-slot-height);
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  min-width: 0;
+  padding-left: 4px;
+  min-height: 0;
+  transform: none;
+}
+
+.msbl-club-meta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--msbl-club-meta-slot-top);
+  height: var(--msbl-club-meta-slot-height);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: center;
+  gap: 0.72rem;
+  min-width: 0;
+  width: 100%;
+  padding-left: 4px;
+  min-height: 0;
+  transform: none;
+}
+
+.msbl-club-meta-item {
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  white-space: nowrap;
+  min-height: 18px;
+  line-height: 1;
+  padding-bottom: 0;
+}
+
+.msbl-club-name,
+.msbl-club-tag-meta,
+.msbl-club-status,
+.msbl-club-extra,
+.msbl-club-members {
+  color: #fff;
+}
+
+.msbl-club-name {
+  box-sizing: border-box;
+  color: #fff;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  padding-left: 4px;
+  font-family: "ITC Grizzly", sans-serif;
+  font-size: calc(clamp(1.24rem, 1.4vw, 1.5rem) - 1px);
+  line-height: var(--msbl-club-name-line-height);
+  min-height: 0;
+  padding-bottom: 0;
+  transform: none;
+}
+
+.msbl-club-tag-meta {
+  color: #c9c9c9;
+  justify-content: flex-start;
+  text-align: left;
+  padding-left: 4px;
+  transform: translateX(var(--msbl-club-tag-shift-x));
+}
+
+.msbl-club-status {
+  color: #c9c9c9;
+  white-space: nowrap;
+  justify-content: center;
+  text-align: center;
+  transform: translateX(-28px);
+}
+
+.msbl-club-status-icon,
+.msbl-club-members-icon {
+  width: clamp(11px, 0.95vw, 14px);
+  height: auto;
+  margin-right: 0.3rem;
+  flex: 0 0 auto;
+}
+
+.msbl-club-status-icon {
+  transform: translateY(0px);
+}
+
+.msbl-club-members-icon {
+  width: clamp(6px, 0.58vw, 8px);
+  transform: translateY(1px);
+}
+
+.msbl-club-status-text {
+  display: inline-block;
+}
+
+.msbl-club-extra {
+  color: #c9c9c9;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  transform: translateX(-28px);
+}
+
+.msbl-club-members {
+  color: #c9c9c9;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  justify-content: flex-start;
+  text-align: left;
+  white-space: nowrap;
+  padding-left: 14px;
+  transform: translateX(48px);
+}
+
+.msbl-club-members-text {
+  display: inline-block;
+}
+
+.msbl-club-tag-meta,
+.msbl-club-status,
+.msbl-club-extra,
+.msbl-club-members {
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: var(--reporter-letter-spacing);
+  text-shadow: none;
+}
+
+.msbl-clubs-note {
+  margin: 0;
+  color: #fff;
+  text-align: center;
+}
+
+.msbl-clubs-note-error {
+  color: #ffb6b6;
+}
+

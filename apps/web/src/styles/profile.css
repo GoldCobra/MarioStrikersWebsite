@@ -1,0 +1,646 @@
+.profile-page {
+  padding-bottom: var(--space-5);
+}
+
+.profile-root {
+  width: min(1040px, 100%);
+  margin: 0 auto;
+}
+
+.profile-loading {
+  margin: 0;
+}
+
+.profile-state-panel,
+.profile-header-panel,
+.profile-panel {
+  border: 4px solid #000;
+  border-radius: 0;
+  background: rgba(30, 33, 44, 0.9) url("../assets/players/profile-bg.jpg") center center / cover no-repeat;
+  color: #fff;
+}
+
+.profile-state-panel {
+  width: min(620px, 100%);
+  margin: 0 auto;
+  padding: clamp(1rem, 2vw, 1.4rem);
+  text-align: center;
+}
+
+.profile-state-title {
+  margin: 0 0 0.5rem;
+  color: #f5c300;
+  font-size: clamp(1.2rem, 2.5vw, 1.75rem);
+  line-height: 1.05;
+}
+
+.profile-state-message {
+  margin: 0;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: var(--reporter-font-size-sm);
+  letter-spacing: var(--reporter-letter-spacing);
+  line-height: var(--reporter-line-height);
+}
+
+.profile-state-actions {
+  margin: 0.9rem 0 0;
+}
+
+.profile-action-button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.8rem;
+  border: 2px solid #c77603;
+  background: #280101;
+  color: #f5c300;
+  text-decoration: none;
+}
+
+.profile-action-button:hover,
+.profile-action-button:focus-visible {
+  background: #c77603;
+  color: #280101;
+}
+
+.profile-shell {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.profile-header-panel {
+  overflow: hidden;
+}
+
+.profile-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 1rem 0.48rem;
+  background-color: #993c00;
+  background-image: url("../assets/players/title.png");
+  background-position: left top;
+  background-repeat: no-repeat;
+}
+
+.profile-name {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  color: #fff;
+  font-size: clamp(1.18rem, 2.2vw, 1.65rem);
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-header-flag {
+  width: 30px;
+  height: 20px;
+  object-fit: cover;
+  border: 1px solid rgba(0, 0, 0, 0.65);
+}
+
+.profile-meta {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.75rem 1rem 0.9rem;
+}
+
+.profile-meta-line {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 0.6rem;
+  align-items: start;
+  color: #f2f2f2;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: var(--reporter-font-size-sm);
+  letter-spacing: var(--reporter-letter-spacing);
+  line-height: var(--reporter-line-height);
+}
+
+.profile-meta-line > span {
+  color: #d7d8de;
+}
+
+.profile-meta-line > a {
+  min-width: 0;
+  color: #7ab6ff;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.profile-meta-line > a:hover,
+.profile-meta-line > a:focus-visible {
+  text-decoration: underline;
+}
+
+/* The results line reuses .profile-meta-line for font and link colours but holds a
+   single clickable label, so it drops the 96px label column. */
+.profile-results-line {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.72fr);
+  gap: 0.8rem;
+  align-items: start;
+}
+
+.profile-grid-main,
+.profile-grid-side {
+  display: grid;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.profile-panel {
+  padding: 0.75rem 0.85rem 0.9rem;
+}
+
+.profile-panel-title {
+  margin: 0 0 0.48rem;
+  color: #d7d8de;
+}
+
+.profile-muted {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.profile-code-list {
+  display: grid;
+  gap: 0.26rem;
+}
+
+.profile-code-row {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.38rem 0.55rem;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+}
+
+.profile-code-prefix {
+  flex: 0 0 auto;
+  color: #f4f4f4;
+}
+
+.profile-code-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-ratings-panel {
+  display: grid;
+  gap: 0.55rem;
+  width: calc(100% + var(--profile-rating-reward-glow-gutter));
+  margin-left: calc(-1 * var(--profile-rating-reward-glow-gutter));
+  padding-left: var(--profile-rating-reward-glow-gutter);
+  overflow: visible;
+}
+
+.profile-ratings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.profile-rating-unit {
+  min-width: 0;
+  display: grid;
+  gap: 0.32rem;
+  overflow: visible;
+}
+
+.profile-rating-card {
+  min-height: 108px;
+  padding: 0.42rem 0.4rem;
+  background: rgba(0, 0, 0, 0.32);
+}
+
+/* Dim the content, not the card, so the game-coloured border stays at full strength. */
+.profile-rating-card.is-inactive-rating > * {
+  opacity: 0.55;
+}
+
+.profile-rating-title {
+  margin: 0 0 0.24rem;
+  color: #fff;
+}
+
+.profile-rating-line {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: #f2f2f2;
+}
+
+.profile-rating-label {
+  color: #d7d8de;
+  font-weight: 400;
+}
+
+.profile-rating-value {
+  font-weight: 700;
+}
+
+.profile-rating-value.is-muted-stat-value {
+  color: rgba(255, 255, 255, 0.50);
+}
+
+.profile-rating-line:has(.is-muted-stat-value) .profile-rating-label {
+  color: rgba(255, 255, 255, 0.50);
+}
+
+.profile-rank-icon {
+  width: auto;
+  height: var(--profile-rank-icon-height);
+  object-fit: contain;
+  margin-right: 0.1rem;
+}
+
+.profile-rating-reward {
+  --profile-rating-reward-accent: #f4f4f4;
+  --profile-rating-reward-glow: rgba(244, 244, 244, 0.32);
+  --profile-rating-reward-glow-soft: 2px;
+  --profile-rating-reward-glow-strong: 7px;
+  min-width: 0;
+  display: grid;
+  gap: 0.18rem;
+  padding: 0 0.08rem;
+  overflow: visible;
+  color: #f2f2f2;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  letter-spacing: var(--reporter-letter-spacing);
+}
+
+.profile-rating-reward-main {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.34rem;
+  overflow: visible;
+}
+
+.profile-rating-reward-icon-wrap,
+.player-popup-rating-reward-icon-wrap {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: var(--profile-rating-reward-icon-height);
+  overflow: visible;
+}
+
+.profile-rating-reward-icon,
+.player-popup-rating-reward-icon {
+  width: auto;
+  height: var(--profile-rating-reward-icon-height);
+  filter:
+    drop-shadow(0 0 1px var(--profile-rating-reward-glow))
+    drop-shadow(0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow))
+    drop-shadow(0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow));
+  object-fit: contain;
+}
+
+.profile-rating-reward-name {
+  min-width: 0;
+  overflow: visible;
+  color: var(--profile-rating-reward-accent);
+  padding: 0 0.08rem;
+  text-shadow:
+    0 0 1px var(--profile-rating-reward-glow),
+    0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow),
+    0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow);
+  text-transform: uppercase;
+  transform: translateY(2px);
+  white-space: nowrap;
+}
+
+.profile-rating-reward.is-reward-tier-0,
+.player-popup-rating-reward.is-reward-tier-0 {
+  --profile-rating-reward-accent: #d7d8de;
+  --profile-rating-reward-glow: rgba(215, 216, 222, 0);
+}
+
+.profile-rating-reward.is-reward-tier-0 .profile-rating-reward-icon,
+.player-popup-rating-reward.is-reward-tier-0 .player-popup-rating-reward-icon {
+  filter: none;
+}
+
+.profile-rating-reward.is-reward-tier-0 .profile-rating-reward-name,
+.player-popup-rating-reward.is-reward-tier-0 .player-popup-rating-reward-name {
+  text-shadow: none;
+}
+
+.profile-rating-reward.is-reward-tier-1,
+.player-popup-rating-reward.is-reward-tier-1 {
+  --profile-rating-reward-accent: #d47a2d;
+  --profile-rating-reward-glow: rgba(212, 122, 45, 0.42);
+}
+
+.profile-rating-reward.is-reward-tier-2,
+.player-popup-rating-reward.is-reward-tier-2 {
+  --profile-rating-reward-accent: #dceaf2;
+  --profile-rating-reward-glow: rgba(220, 234, 242, 0.48);
+}
+
+.profile-rating-reward.is-reward-tier-3,
+.player-popup-rating-reward.is-reward-tier-3 {
+  --profile-rating-reward-accent: #f2b832;
+  --profile-rating-reward-glow: rgba(242, 184, 50, 0.44);
+}
+
+.profile-rating-reward.is-reward-tier-4,
+.player-popup-rating-reward.is-reward-tier-4 {
+  --profile-rating-reward-accent: #65dce4;
+  --profile-rating-reward-glow: rgba(101, 220, 228, 0.42);
+}
+
+.profile-rating-reward.is-reward-tier-5,
+.player-popup-rating-reward.is-reward-tier-5 {
+  --profile-rating-reward-accent: #82d8ff;
+  --profile-rating-reward-glow: rgba(130, 216, 255, 0.44);
+}
+
+.profile-rating-reward.is-reward-tier-6,
+.player-popup-rating-reward.is-reward-tier-6 {
+  --profile-rating-reward-accent: #a77cff;
+  --profile-rating-reward-glow: rgba(167, 124, 255, 0.44);
+}
+
+.profile-rating-reward.is-reward-tier-7,
+.player-popup-rating-reward.is-reward-tier-7 {
+  --profile-rating-reward-accent: #f05b6a;
+  --profile-rating-reward-glow: rgba(240, 91, 106, 0.44);
+}
+
+.profile-rating-reward-rule {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.profile-rating-reward-progress {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.78em;
+  line-height: 1.15;
+}
+
+.profile-rating-reward-progress span,
+.player-popup-rating-reward-progress span {
+  letter-spacing: 0;
+}
+
+.profile-rating-reward-progress strong {
+  flex: 0 0 auto;
+  color: rgba(255, 255, 255, 0.86);
+  font-weight: 700;
+}
+
+.profile-season-reward-line {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.46rem;
+  color: #f2f2f2;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: calc(var(--reporter-font-size-sm) + 2px);
+  letter-spacing: var(--reporter-letter-spacing);
+  line-height: var(--reporter-line-height);
+}
+
+.profile-season-reward-label {
+  color: #d7d8de;
+  font-weight: 400;
+}
+
+.profile-season-reward-icon {
+  width: auto;
+  height: var(--profile-rating-reward-icon-height);
+  object-fit: contain;
+}
+
+.profile-accolades-details,
+.player-popup-accolades-details,
+.profile-season-awards-details,
+.player-popup-season-awards-details {
+  min-width: 0;
+}
+
+.profile-accolades-details > summary,
+.player-popup-accolades-details > summary,
+.profile-season-awards-details > summary,
+.player-popup-season-awards-details > summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.36rem;
+  list-style: none;
+  user-select: none;
+}
+
+.profile-accolades-details > summary::-webkit-details-marker,
+.player-popup-accolades-details > summary::-webkit-details-marker,
+.profile-season-awards-details > summary::-webkit-details-marker,
+.player-popup-season-awards-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.profile-accolades-details > summary:focus-visible,
+.player-popup-accolades-details > summary:focus-visible,
+.profile-season-awards-details > summary:focus-visible,
+.player-popup-season-awards-details > summary:focus-visible {
+  outline: 2px solid rgba(255, 180, 64, 0.72);
+  outline-offset: 3px;
+}
+
+.profile-accolades-summary .profile-panel-title,
+.player-popup-accolades-summary .player-popup-section-title,
+.profile-season-awards-summary .profile-panel-title,
+.player-popup-season-awards-summary .player-popup-section-title {
+  margin: 0;
+}
+
+.profile-accolades-details > summary::after,
+.player-popup-accolades-details > summary::after,
+.profile-season-awards-details > summary::after,
+.player-popup-season-awards-details > summary::after {
+  content: "▶";
+  color: #ff8a00;
+  font-size: 0.78em;
+  line-height: 1;
+  order: -1;
+  flex: 0 0 auto;
+}
+
+.profile-accolades-details[open] > summary::after,
+.player-popup-accolades-details[open] > summary::after,
+.profile-season-awards-details[open] > summary::after,
+.player-popup-season-awards-details[open] > summary::after {
+  content: "▼";
+}
+
+.profile-season-awards,
+.player-popup-season-awards {
+  margin: 0.42rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.25rem;
+}
+.profile-season-award-item,
+.player-popup-season-award-item {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.32rem;
+  color: #f2f2f2;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: var(--reporter-font-size-sm);
+  letter-spacing: var(--reporter-letter-spacing);
+  line-height: var(--reporter-line-height);
+}
+.profile-season-award-ball,
+.player-popup-season-award-ball {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+.profile-season-award-season,
+.player-popup-season-award-season {
+  white-space: nowrap;
+  /* letter-spacing is also applied AFTER the last glyph, which pushed the ball 1.33px
+     further right than the gap on its other side; cancel that trailing advance. */
+  margin-right: calc(-1 * var(--reporter-letter-spacing));
+}
+.profile-season-award-name,
+.player-popup-season-award-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Reward and accolade entries read as full caps; the "Season Rewards" / "Tourney Accolades"
+   headings above them stay as written. Done here rather than by upper-casing the strings, so the
+   real text still reaches screen readers, copy/paste and the API. */
+.profile-season-award-season,
+.player-popup-season-award-season,
+.profile-season-award-name,
+.player-popup-season-award-name,
+.profile-accolade-name,
+.player-popup-accolade-name {
+  text-transform: uppercase;
+}
+.profile-accolades {
+  margin: 0.42rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.profile-accolade-item {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.32rem;
+  color: #f2f2f2;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: var(--reporter-font-size-sm);
+  letter-spacing: var(--reporter-letter-spacing);
+  line-height: var(--reporter-line-height);
+}
+
+.profile-accolade-ball {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.profile-accolade-medal {
+  width: 1.25em;
+  text-align: center;
+}
+
+.profile-accolade-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-accolade-date {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.92em;
+}
+
+/* Tournament winners are tinted in their game's colour - first place only, and deliberately
+   without a glow: the glow is reserved for the world champion titles below, which is why the
+   renderer never puts both classes on the same row. */
+.profile-accolade-name.is-winner-msbl,
+.player-popup-accolade-name.is-winner-msbl {
+  color: var(--game-color-msbl);
+}
+
+.profile-accolade-name.is-winner-msc,
+.player-popup-accolade-name.is-winner-msc {
+  color: var(--game-color-msc);
+}
+
+.profile-accolade-name.is-winner-sms,
+.player-popup-accolade-name.is-winner-sms {
+  color: var(--game-color-sms);
+}
+
+/* Gold at an MSL World Championship is the top honour in the scene, so the title glows.
+   Set by is_world_champion from the backend - see players-service.js. */
+.profile-accolade-name.is-world-champion,
+.player-popup-accolade-name.is-world-champion {
+  color: #ffed60;
+  text-shadow:
+    0 0 var(--accolade-champion-glow-near) var(--accolade-champion-tint-near),
+    0 0 var(--accolade-champion-glow-mid) var(--accolade-champion-tint-mid),
+    0 0 var(--accolade-champion-glow-far) var(--accolade-champion-tint-far);
+}
+
+/* The medal gets the same glow. drop-shadow works off the glyph's alpha channel, so the halo
+   follows the medal's outline instead of its box - the same reason the reward icons use it. */
+.profile-accolade-medal.is-world-champion,
+.player-popup-accolade-medal.is-world-champion {
+  filter:
+    drop-shadow(0 0 var(--accolade-champion-glow-near) var(--accolade-champion-tint-near))
+    drop-shadow(0 0 var(--accolade-champion-glow-mid) var(--accolade-champion-tint-mid))
+    drop-shadow(0 0 var(--accolade-champion-glow-far) var(--accolade-champion-tint-far));
+}
+
+/* .profile-accolade-name clips with overflow: hidden for its ellipsis, which would cut the
+   glow off. Widen the clip box sideways without moving the text - same trick the rating
+   cards use with --profile-rating-reward-glow-gutter. */
+.profile-accolade-name.is-world-champion {
+  padding: var(--accolade-glow-room) var(--profile-rating-reward-glow-gutter);
+  margin: calc(-1 * var(--accolade-glow-room)) calc(-1 * var(--profile-rating-reward-glow-gutter));
+}
+

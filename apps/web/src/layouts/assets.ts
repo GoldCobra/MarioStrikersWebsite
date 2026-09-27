@@ -30,8 +30,8 @@ export const SCRIPTS = {
 
 export type ScriptName = keyof typeof SCRIPTS;
 
+/** Stylesheets some pages load after the global one (src/styles). */
 export const STYLESHEETS = {
-  global: "/css/global.css?v=20260926-rank-name-v2",
   gearBuilder: "/assets/gear-builder/styles.css?v=20260428-cleanup-v1",
   gearBuilderHost: "/assets/gear-builder/host.css?v=20260527-shadow-layer-v1",
 } as const;

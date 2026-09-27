@@ -1,0 +1,358 @@
+/* A rating card takes its game's colour from its is-<game>-rating class; the border, the popup's
+   classic title and values, and the compact game code all read it from here. */
+.profile-rating-card.is-msbl-rating,
+.player-popup-rating-card.is-msbl-rating {
+  --rating-game-color: var(--game-color-msbl);
+}
+
+.profile-rating-card.is-msc-rating,
+.player-popup-rating-card.is-msc-rating {
+  --rating-game-color: var(--game-color-msc);
+}
+
+.profile-rating-card.is-sms-rating,
+.player-popup-rating-card.is-sms-rating {
+  --rating-game-color: var(--game-color-sms);
+}
+
+/* Every rating card, on the profile page and in the popup, is framed in its game's colour. */
+.profile-rating-card,
+.player-popup-rating-card {
+  border: 1px solid var(--rating-game-color, transparent);
+}
+
+.player-popup-rating-card .player-popup-rating-title,
+.player-popup-rating-card .player-popup-rating-value {
+  color: var(--rating-game-color, #fff);
+}
+
+.player-popup-rating-card .player-popup-rating-value.is-muted-stat-value {
+  color: rgba(255, 255, 255, 0.50);
+}
+
+.player-popup-rating-card .player-popup-rating-line:has(.is-muted-stat-value) .player-popup-rating-label {
+  color: rgba(255, 255, 255, 0.50);
+}
+
+.player-popup-rating-card.is-inactive-rating .player-popup-rating-title,
+.player-popup-rating-card.is-inactive-rating .player-popup-rating-line,
+.player-popup-rating-card.is-inactive-rating .player-popup-rating-label,
+.player-popup-rating-card.is-inactive-rating .player-popup-rating-value {
+  color: #4a4a4a;
+}
+
+.player-popup-rank-icon {
+  width: auto;
+  height: var(--profile-rank-icon-height);
+  object-fit: contain;
+  margin-right: 0.1rem;
+}
+
+/* Compact rating card layout (js/rating-cards.js switches between it and the classic list).
+   The rank icon sits alone top right. Bottom left, rows of fixed height stack the game code, the
+   rank name and the ELO rating, so the game code sits at the same height in every card of a row
+   even when a rank name or rating is missing; WHR/TST shares the rating's baseline bottom right.
+   The text size is each surface's classic value size, so the rating reads the same in both.
+   The ELO icon is sized on the digit height, measured per font (ITC Grizzly 0.74em, Reporter
+   0.73em; the cap unit is too short for ITC Grizzly). The text rows are calibrated on rendered
+   pixels: in a line-height 1 box the browser puts the baseline at a whole pixel (game code
+   --rating-title-baseline, rank name and rating --rating-text-baseline), and capitals and digits
+   render --rating-text-ink tall. So each visible gap is its baseline distance minus that ink. */
+.profile-rating-card {
+  --rating-card-text-size: 16px;
+  --rating-card-digit-height: 0.74em;
+  --rating-title-baseline: 16px;
+  --rating-text-baseline: 13px;
+  --rating-text-ink: 12px;
+  --rating-compact-metric-tracking: -0.02em;
+}
+
+.player-popup-rating-card {
+  --rating-card-text-size: 15px;
+  --rating-card-digit-height: 0.73em;
+  --rating-title-baseline: 17px;
+  --rating-text-baseline: 13px;
+  --rating-text-ink: 11px;
+  --rating-compact-metric-tracking: 0.06em;
+}
+
+:is(.profile-rating-card, .player-popup-rating-card).is-compact-layout {
+  --rating-compact-rank-size: calc(var(--profile-rank-icon-height) * 2);
+  --rating-compact-title-size: calc(var(--rating-card-text-size) + 4px);
+  --rating-compact-metric-size: calc(var(--rating-card-text-size) - 3px);
+  --rating-compact-metric-label-size: calc(var(--rating-compact-metric-size) - 2px);
+  --rating-compact-metric-color: rgba(255, 255, 255, 0.7);
+  --rating-compact-elo-scale: 1.15;
+  /* Visible gap from the game code's baseline to the rank name's capitals, and from the rank
+     name's baseline to the rating's digits (never the ELO icon). */
+  --rating-compact-text-gap: 7px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  /* Row 1 keeps the icon's height even without an icon, so every card of a row has the same
+     height. Rows 2-4 hold game code, rank name and rating in line-height 1 boxes, each bottom
+     aligned; rows 3 and 4 are sized so both ink gaps equal --rating-compact-text-gap. All rows
+     are whole pixels, so every baseline rounds the same way. */
+  grid-template-rows:
+    minmax(var(--rating-compact-rank-size), 1fr)
+    var(--rating-compact-title-size)
+    calc(var(--rating-compact-text-gap) + var(--rating-text-ink)
+      - var(--rating-compact-title-size) + var(--rating-title-baseline)
+      + var(--rating-card-text-size) - var(--rating-text-baseline))
+    calc(var(--rating-compact-text-gap) + var(--rating-text-ink));
+  column-gap: 0.4rem;
+  row-gap: 0;
+  min-height: 108px;
+  /* Tighter than the classic card, so the ELO icon, rating and WHR fit the 130px profile cards. */
+  padding: 0.3rem 0.25rem;
+}
+
+.player-popup-rating-card.is-compact-layout {
+  font-family: var(--reporter-font-stack);
+  letter-spacing: var(--reporter-letter-spacing);
+  line-height: 1.22;
+}
+
+:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank) {
+  grid-area: 1 / 2;
+  align-self: start;
+  justify-self: end;
+  width: auto;
+  height: var(--rating-compact-rank-size);
+  object-fit: contain;
+}
+
+:is(.profile-rating-compact-title, .player-popup-rating-compact-title) {
+  grid-area: 2 / 1 / 3 / 3;
+  align-self: end;
+  margin: 0;
+  color: var(--rating-game-color, #fff);
+  font-size: var(--rating-compact-title-size);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+:is(.profile-rating-compact-rank-name, .player-popup-rating-compact-rank-name) {
+  grid-area: 3 / 1 / 4 / 3;
+  align-self: end;
+  margin: 0;
+  color: #fff;
+  font-size: var(--rating-card-text-size);
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+:is(.profile-rating-compact-value, .player-popup-rating-compact-value) {
+  grid-area: 4 / 1;
+  align-self: end;
+  align-self: last baseline;
+  justify-self: start;
+  margin: 0;
+  color: #fff;
+  font-size: var(--rating-card-text-size);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* The ELO icon (230x200) is a little larger than the digits and centred on them. */
+:is(.profile-rating-compact-value, .player-popup-rating-compact-value)::before {
+  content: "";
+  display: inline-block;
+  height: calc(var(--rating-card-digit-height) * var(--rating-compact-elo-scale));
+  aspect-ratio: 230 / 200;
+  margin-right: 0.3em;
+  vertical-align: calc(var(--rating-card-digit-height) * (1 - var(--rating-compact-elo-scale)) / 2);
+  background: url("../assets/players/elo.png?v=20260926-elo-icon-v2") center / contain no-repeat;
+}
+
+:is(.profile-rating-compact-metric, .player-popup-rating-compact-metric) {
+  grid-area: 4 / 2;
+  align-self: end;
+  align-self: last baseline;
+  justify-self: end;
+  margin: 0;
+  color: var(--rating-compact-metric-color);
+  font-size: var(--rating-compact-metric-size);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: var(--rating-compact-metric-tracking);
+  white-space: nowrap;
+}
+
+:is(.profile-rating-compact-metric-label, .player-popup-rating-compact-metric-label) {
+  font-size: var(--rating-compact-metric-label-size);
+}
+
+:is(.profile-rating-compact-metric-value, .player-popup-rating-compact-metric-value) {
+  font-weight: 700;
+}
+
+/* A compact unit (reward level above, card below) spans two rows of the ratings grid as a subgrid,
+   so all reward levels of a row share one row and all cards start at the same height, even where
+   "Season Reward Level" wraps on the narrow profile cards and "Matches" does not. */
+:is(.profile-rating-unit, .player-popup-rating-unit):has(> .is-compact-layout) {
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+}
+
+:is(.profile-rating-unit, .player-popup-rating-unit):has(> .is-compact-layout) > :is(.profile-rating-reward, .player-popup-rating-reward) {
+  grid-row: 1;
+  align-self: start;
+}
+
+:is(.profile-rating-unit, .player-popup-rating-unit) > .is-compact-layout {
+  grid-row: 2;
+}
+
+/* The profile page already fades an inactive card's children; the popup's compact card does the
+   same instead of the classic grey text, so the border keeps its full colour on both. */
+.player-popup-rating-card.is-compact-layout.is-inactive-rating > * {
+  opacity: 0.55;
+}
+
+.player-popup-rating-reward {
+  --profile-rating-reward-accent: #f4f4f4;
+  --profile-rating-reward-glow: rgba(244, 244, 244, 0.32);
+  --profile-rating-reward-glow-soft: 2px;
+  --profile-rating-reward-glow-strong: 7px;
+  min-width: 0;
+  display: grid;
+  gap: 0.18rem;
+  padding: 0 0.08rem;
+  overflow: visible;
+  color: #f2f2f2;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  letter-spacing: var(--reporter-letter-spacing);
+}
+
+.player-popup-rating-reward-main {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.34rem;
+  overflow: visible;
+}
+
+.player-popup-rating-reward-name {
+  min-width: 0;
+  overflow: visible;
+  color: var(--profile-rating-reward-accent);
+  padding: 0 0.08rem;
+  text-shadow:
+    0 0 1px var(--profile-rating-reward-glow),
+    0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow),
+    0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow);
+  text-transform: uppercase;
+  transform: translateY(2px);
+  white-space: nowrap;
+}
+
+.player-popup-rating-reward-rule {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.player-popup-rating-reward-progress {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.78em;
+  line-height: 1.15;
+}
+
+.player-popup-rating-reward-progress strong {
+  flex: 0 0 auto;
+  color: rgba(255, 255, 255, 0.86);
+  font-weight: 700;
+}
+
+.player-popup-season-reward-line {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.46rem;
+  color: #f2f2f2;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  letter-spacing: var(--reporter-letter-spacing);
+}
+
+#player-profile-popup .player-popup-season-reward-line {
+  font-size: 17px;
+}
+
+.player-popup-season-reward-label {
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 400;
+}
+
+.player-popup-season-reward-icon {
+  width: auto;
+  height: var(--profile-rating-reward-icon-height);
+  object-fit: contain;
+}
+
+.player-popup-rank-banner {
+  display: block;
+  width: min(300px, 100%);
+  max-width: 100%;
+  height: auto;
+}
+
+#player-profile-popup,
+#club-profile-popup,
+#player-profile-popup *,
+#club-profile-popup * {
+  text-shadow: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+#player-profile-popup .player-popup-rating-reward:not(.is-reward-tier-0) .player-popup-rating-reward-icon {
+  filter:
+    drop-shadow(0 0 1px var(--profile-rating-reward-glow))
+    drop-shadow(0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow))
+    drop-shadow(0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow)) !important;
+}
+
+#player-profile-popup .player-popup-rating-reward:not(.is-reward-tier-0) .player-popup-rating-reward-name {
+  text-shadow:
+    0 0 1px var(--profile-rating-reward-glow),
+    0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow),
+    0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow) !important;
+}
+
+/* The blanket rule above strips every shadow in the popup, so the world champion glow has to be
+   re-asserted here with the same !important escape the reward name uses. */
+#player-profile-popup .player-popup-accolade-name.is-world-champion {
+  color: #ffed60;
+  text-shadow:
+    0 0 var(--accolade-champion-glow-near) var(--accolade-champion-tint-near),
+    0 0 var(--accolade-champion-glow-mid) var(--accolade-champion-tint-mid),
+    0 0 var(--accolade-champion-glow-far) var(--accolade-champion-tint-far) !important;
+}
+
+#player-profile-popup .player-popup-accolade-medal.is-world-champion {
+  filter:
+    drop-shadow(0 0 var(--accolade-champion-glow-near) var(--accolade-champion-tint-near))
+    drop-shadow(0 0 var(--accolade-champion-glow-mid) var(--accolade-champion-tint-mid))
+    drop-shadow(0 0 var(--accolade-champion-glow-far) var(--accolade-champion-tint-far)) !important;
+}
+
+/* At 5/5 only the progress count is tinted in the reached tier's colour (plain colour,
+   no glow). The tier name and reward icon keep their normal per-tier glow. */
+.profile-rating-reward.is-reward-complete .profile-rating-reward-progress strong,
+.player-popup-rating-reward.is-reward-complete .player-popup-rating-reward-progress strong {
+  color: var(--profile-rating-reward-accent);
+}
+
+#player-profile-popup .player-popup-rating-reward.is-reward-complete .player-popup-rating-reward-progress strong {
+  color: var(--profile-rating-reward-accent) !important;
+}
+

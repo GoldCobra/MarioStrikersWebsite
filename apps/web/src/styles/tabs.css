@@ -1,0 +1,199 @@
+/* Shared layout and tabs */
+
+.page-content {
+  display: block;
+  flex: 1;
+  width: min(1200px, 100%);
+  margin-inline: auto;
+  padding-inline: var(--content-inline-pad);
+}
+
+body[data-subnav="off"] .page-content {
+  padding-top: var(--space-5);
+}
+
+.page-content:has(> #global-content-tabs:not(:empty)) {
+  padding-top: 0;
+}
+
+#global-content-tabs:empty {
+  display: none;
+}
+
+#global-content-tabs {
+  width: var(--full-bleed-width);
+  margin-left: calc(50% - (var(--full-bleed-width) / 2));
+  position: relative;
+  z-index: 1;
+}
+
+.global-tabs-shell {
+  --active-left: 0px;
+  --active-width: 0px;
+  --tabs-head-top: 0px;
+  --tabs-head-height: var(--tabs-head-height-fluid);
+  --tabs-panel-top: var(--tabs-head-height-fluid);
+  --tabs-render-height: var(--tabs-head-height-fluid);
+  --tabs-panel-height: var(--tabs-panel-height-fluid);
+  --tabs-bg-image: var(--global-tabs-bg-image);
+  --tabs-bg-x: left;
+  --tabs-bg-y: 0px;
+  --tabs-bg-height: var(--global-tabs-bg-height);
+  --tabs-tab-width: var(--tabs-tab-width-fluid);
+  --tabs-tab-height: var(--tabs-head-height-fluid);
+  --tabs-tab-font-size: calc(var(--tabs-tab-font-size-fluid) + 2px);
+  width: 100%;
+  margin: 0.6rem 0 var(--tab-content-start-gap);
+  position: relative;
+  min-height: calc(var(--tabs-render-height) + var(--tabs-panel-height));
+  overflow: hidden;
+  background: transparent;
+}
+
+.global-tabs-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--tabs-bg-image);
+  background-repeat: repeat-x;
+  background-position: var(--tabs-bg-x) var(--tabs-bg-y);
+  background-size: auto var(--tabs-bg-height);
+  -webkit-mask-image:
+    linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0);
+  -webkit-mask-size:
+    100% var(--tabs-panel-height),
+    var(--active-width) var(--tabs-head-height);
+  -webkit-mask-position:
+    0 var(--tabs-panel-top),
+    var(--active-left) var(--tabs-head-top);
+  -webkit-mask-repeat: no-repeat, no-repeat;
+  mask-image:
+    linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0);
+  mask-size:
+    100% var(--tabs-panel-height),
+    var(--active-width) var(--tabs-head-height);
+  mask-position:
+    0 var(--tabs-panel-top),
+    var(--active-left) var(--tabs-head-top);
+  mask-repeat: no-repeat, no-repeat;
+}
+
+.global-tabs-list {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.42rem;
+  padding: 0 0.45rem;
+  background: transparent;
+  border-bottom: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.global-tabs-list.is-overflowing {
+  justify-content: flex-start;
+}
+
+.global-tab {
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  overflow: visible;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 4;
+  flex: 0 0 var(--tabs-tab-width);
+  height: var(--tabs-tab-height);
+  min-height: var(--tabs-tab-height);
+  padding: 0;
+  border-top: 2px solid #8c3320;
+  border-left: 2px solid #8c3320;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #d36402;
+  font-family: "ITC Grizzly", sans-serif;
+  font-size: var(--tabs-tab-font-size);
+  font-weight: 400;
+  line-height: 1;
+  text-align: center;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  text-decoration: none;
+  white-space: nowrap;
+  text-shadow: none;
+  cursor: pointer;
+}
+
+.global-tab.is-active {
+  z-index: 16;
+  overflow: visible;
+  background: transparent;
+  border-top: 2px solid transparent;
+  border-left: 2px solid transparent;
+  border-right: 0;
+  border-bottom: 0;
+  color: #020000;
+}
+
+.global-tab.is-active + .global-tab {
+  border-left-color: transparent;
+}
+
+.global-tab:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+}
+
+.leaderboard-tabs-shell {
+  --tabs-tab-width: 116px;
+  width: var(--full-bleed-width);
+  margin-left: calc(50% - (var(--full-bleed-width) / 2));
+}
+
+.leaderboard-ball-tab {
+  padding-inline: 0.06rem;
+}
+
+.leaderboard-tab-inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.32rem;
+  min-width: 0;
+}
+
+.leaderboard-tab-ball {
+  display: block;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex: 0 0 18px;
+}
+
+.leaderboard-tab-label {
+  display: inline-block;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.global-tabs-line-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 17;
+  pointer-events: none;
+  display: block;
+}
+

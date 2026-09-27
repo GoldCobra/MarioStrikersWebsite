@@ -1,0 +1,49 @@
+.tab-placeholder-page {
+  min-height: clamp(320px, 56vh, 640px);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 1.2rem;
+  padding-top: clamp(1.4rem, 4.2vw, 2.6rem);
+  padding-bottom: clamp(1.4rem, 4.2vw, 2.6rem);
+}
+
+.tab-placeholder-status {
+  margin: 0;
+  color: #fff;
+  font-family: "ITC Grizzly", sans-serif;
+  font-size: clamp(1.45rem, 4.2vw, 2.45rem);
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: none;
+  filter: drop-shadow(-2px 2px 0 #000);
+}
+
+.tab-placeholder-switches {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.tab-placeholder-switch {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 34px;
+  padding: 0.32rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.22);
+  color: #fff;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.tab-placeholder-switch.is-active {
+  background: rgba(255, 255, 255, 0.2);
+}
+

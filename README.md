@@ -71,7 +71,7 @@ stay identical to a reference commit.
 
 | Location | Purpose |
 | --- | --- |
-| `apps/web/` | Astro site: layout, page files and page families in `src/`; styles, browser scripts and assets in `public/` |
+| `apps/web/` | Astro site: layout, pages, page families and styles in `src/`; browser scripts and assets in `public/` |
 | `apps/api/` | Fastify API in TypeScript: one module per domain, integrations, fixtures and tests |
 | `packages/shared/` | Page registry, navigation model, URL routing and helpers shared by site and API |
 | `tools/` | Local servers, the nginx route generator and their tests |

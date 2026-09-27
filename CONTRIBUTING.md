@@ -26,8 +26,10 @@ Agree on the task before editing shared navigation, global CSS or the same PSD.
 - Keep one purpose per pull request and preserve the surrounding code style.
 - Use existing navigation, tabs, popup styles and config/engine patterns.
 - Keep browser links canonical, for example `/msc-save-editor`.
-- Bump the `?v=...` tag of a changed browser script or style in
-  `apps/web/src/layouts/assets.ts`, and in scripts that load it themselves.
+- Global styles live in `apps/web/src/styles/`, one partial per component;
+  their order in `global.ts` is the cascade. The stylesheet URL changes by
+  itself. Bump the `?v=...` tag of a changed browser script or Gear Builder
+  style in `apps/web/src/layouts/assets.ts`, and in scripts that load it themselves.
 - Add meaningful coverage for changed behavior. Fixtures belong in
   `apps/api/src/fixtures/data-source.ts`; use invented data, never production exports.
 - Update the relevant short document when setup, behavior or operations change.

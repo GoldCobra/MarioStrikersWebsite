@@ -1,0 +1,112 @@
+/* --- Global Popup ------------------------------------------------- */
+
+/* Kept for the body's own box, but this does NOT lock the viewport: html carries
+   overflow-y: auto and is the scrolling element. The real lock is on .popup-overlay. */
+body.popup-open {
+  overflow: hidden;
+}
+
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  padding: clamp(0.6rem, 2vw, 1.15rem);
+  /* The overlay covers the viewport, so making it a scroll container with "contain" lets it
+     swallow wheel and touch input instead of passing it to the page behind. The lock must NOT
+     go on html/body: html is the scrolling element here (it has overflow-y: auto), and hiding
+     its overflow drops the scrollbar and shifts the whole page sideways by ~15px on open. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Reaching the end of a list inside the popup must not chain out to the page either. */
+.player-popup-content,
+.player-popup-accolades,
+.club-popup-roster,
+.online-editor-delete-list {
+  overscroll-behavior: contain;
+}
+
+.popup-overlay[hidden],
+.popup-overlay [hidden] {
+  display: none !important;
+}
+
+.popup-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.62);
+  cursor: pointer;
+}
+
+.popup-card {
+  position: relative;
+  z-index: 1;
+  width: min(580px, calc(100vw - 1.8rem));
+  max-height: min(92vh, 980px);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  box-sizing: border-box;
+  border: 4px solid #000;
+  border-radius: 0;
+  background: #1e212c url("../assets/players/profile-bg.jpg") center center / cover no-repeat;
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.5);
+}
+
+.popup-close {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.55rem;
+  z-index: 2;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.popup-close:hover,
+.popup-close:focus-visible {
+  color: #f5c300;
+}
+
+.popup-close:focus-visible {
+  outline: 2px solid #f5c300;
+  outline-offset: 2px;
+}
+
+.popup-header {
+  padding: 0.75rem 1rem 0.4rem;
+  background: #993c00;
+}
+
+#player-profile-popup .popup-header,
+#club-profile-popup .popup-header {
+  background-color: #993c00;
+  background-image: url("../assets/players/title.png");
+  background-position: left top;
+  background-repeat: no-repeat;
+  background-size: auto;
+  overflow: hidden;
+}
+
+.popup-title {
+  margin: 0;
+  max-width: calc(100% - 1.8rem);
+  color: #fff;
+  font-family: "ITC Grizzly", sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.08rem, 1.42vw, 1.24rem);
+  line-height: 1.1;
+  text-shadow: none;
+  filter: drop-shadow(-2px 2px 0 #000);
+  transform: translateY(-2px);
+}
+
+/* ------------------------------------------------------------------ */
+

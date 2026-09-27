@@ -23,11 +23,15 @@ export function createStaticFiles(root: string): StaticFiles {
 /** Page files a build writes for the registered pages ("/index.html", "/pages/<slug>.html"). */
 export const PAGE_FILES: ReadonlySet<string> = new Set(PAGES.map((page) => pageFile(page.slug)));
 
-/** The site before a build: static files from apps/web/public plus the pages rendered from the registry. */
+// Files the site renders besides its pages: the global stylesheet under its content-hashed name and,
+// for HTML cached before that name existed, its former one.
+const GENERATED_FILE = /^\/css\/global(?:\.[0-9a-f]{12})?\.css$/;
+
+/** The site before a build: static files from apps/web/public plus everything the site renders. */
 export function createSourceSiteFiles(publicRoot: string): StaticFiles {
   const files = createStaticFiles(publicRoot);
   return {
-    isFile: (path) => PAGE_FILES.has(path) || files.isFile(path),
+    isFile: (path) => PAGE_FILES.has(path) || GENERATED_FILE.test(path) || files.isFile(path),
     isDirectory: (path) => files.isDirectory(path),
   };
 }

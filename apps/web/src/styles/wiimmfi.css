@@ -1,0 +1,23 @@
+/* WIIMMFI page */
+
+.msc-wiimmfi-page {
+  padding-top: 1.5rem;
+}
+
+.wiimmfi-region {
+  display: inline-block;
+  font-size: 0.78em;
+  color: #8d8d8d;
+  padding-left: 0.5rem;
+}
+
+.wiimmfi-region-head {
+  display: inline-block;
+}
+
+.wiimmfi-last-updated {
+  text-align: center;
+  font-size: 0.75em;
+  color: #8d8d8d;
+  margin-top: 1rem;
+}

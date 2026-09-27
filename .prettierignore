@@ -6,6 +6,9 @@ tests/e2e/golden/
 
 # Legacy code keeps its current formatting until it is rewritten in TypeScript.
 apps/web/public/
+# The global stylesheet keeps its formatting until its cleanup; the partials must concatenate to the
+# delivered file unchanged.
+apps/web/src/styles/*.css
 docs/archive/
 
 # Documentation and CI files are formatted by hand.

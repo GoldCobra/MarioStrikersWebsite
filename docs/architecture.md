@@ -9,10 +9,11 @@ loaded in the browser. In `apps/web/`:
 | --- | --- |
 | `src/layouts/SiteLayout.astro` | The document around every page: head metadata from the page registry, navigation, content tabs, footer, scripts |
 | `src/layouts/site-shell.ts` | Markup of the navigation, tabs and footer, rendered from the navigation model |
-| `src/layouts/assets.ts` | Every browser script and stylesheet with its cache tag, in one place |
+| `src/layouts/assets.ts` | Every browser script and page-specific stylesheet with its cache tag, in one place |
+| `src/styles/` | The global stylesheet as partials named after the components they style; `global.ts` fixes their order |
 | `src/pages/index.astro`, `src/pages/pages/<slug>.astro` | One file per page; built to `/index.html` and `/pages/<slug>.html`, served at `/` and `/<slug>` |
 | `src/components/pages/` | Page families: section overviews, leaderboards, rules and tier lists |
-| `public/` | Web root: `css/`, browser `js/`, `assets/`, fetched fragments in `pages/templates/` |
+| `public/` | Web root: browser `js/`, `assets/`, fetched fragments in `pages/templates/` |
 
 Navigation, tabs, breadcrumbs (JSON-LD) and favicons are static markup, so
 search engines see every internal link. The layout keeps the whitespace of the
@@ -20,7 +21,7 @@ former hand-written pages exactly, because text between inline elements takes
 space; the DOM goldens check it. `js/global-nav.js` adds the behaviour: the
 account widget, the tab strip (`js/global-tabs-engine.js`), centring of
 overflowing navigation, link prefetching and redirects of old `?tabs=` and
-`?submenu=` links. Shared popup classes in `css/global.css` are
+`?submenu=` links. Shared popup classes in `src/styles/popups.css` are
 `popup-overlay`, `popup-card`, `popup-header`, `popup-title` and `popup-close`.
 
 **Adding a page:** add it to `packages/shared/src/site/pages.ts` (title,
@@ -53,9 +54,14 @@ test replays every URL shape recorded against production through
 with public URLs.
 The private `/profile` page is excluded from indexing.
 
-Browser-loaded script and style URLs use `?v=...` cache tags. Pages take them
-from `apps/web/src/layouts/assets.ts`; scripts that load other files by URL
-keep their own tags until they move to bundled modules.
+The global stylesheet is delivered as one file named by its content hash
+(`/css/global.<hash>.css`), so browsers cache it for a year and a change
+always reaches them. Its partials are concatenated in the order listed in
+`src/styles/global.ts`; that order is the cascade, and the media blocks in
+`tablet.css` and `mobile.css` come last on purpose. Other browser-loaded
+script and style URLs use `?v=...` cache tags: pages take them from
+`apps/web/src/layouts/assets.ts`; scripts that load other files by URL keep
+their own tags until they move to bundled modules.
 PNG/WebP pairs in the Gear Builder include intentional fallback behavior.
 
 ## Backend and data
