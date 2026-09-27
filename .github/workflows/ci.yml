@@ -59,11 +59,18 @@ jobs:
   containers:
     name: containers
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            tests/e2e/package-lock.json
       - run: docker build --build-arg RELEASE_SHA=${{ github.sha }} -f Dockerfile.backend -t website-backend:ci .
       - run: docker build --build-arg RELEASE_SHA=${{ github.sha }} -f Dockerfile.frontend -t website-frontend:ci .
       - run: docker run --rm --add-host backend:127.0.0.1 website-frontend:ci nginx -t
@@ -99,6 +106,35 @@ jobs:
               assert 'no-store' in response.headers['Cache-Control']
           print('Docker development serves synthetic data, clean routes, templates and uncached assets.')
           PY
+      - name: Install end-to-end tools
+        working-directory: tests/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Routes match the production golden (nginx)
+        run: node tests/e2e/run.ts routes
+        env:
+          ROUTES_URL: http://127.0.0.1:8080
+      - name: Stop Docker development before the comparison stacks
+        run: |
+          docker compose down --volumes
+          # Compose leaves a root-owned mount point for the container's node_modules volume.
+          sudo rm -rf backend/node_modules
+      - name: Rendered markup matches the DOM and head goldens
+        run: node tests/e2e/run.ts dom
+      - name: Pages look identical to the reference commit
+        run: node tests/e2e/run.ts visual
+      - name: API answers identically to the reference commit
+        run: node tests/e2e/run.ts contract
+      - name: Upload end-to-end report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: e2e-report
+          path: |
+            tests/e2e/.cache/report
+            tests/e2e/.cache/test-results
+          retention-days: 14
       - name: Stop Docker development
         if: always()
         run: docker compose down --volumes

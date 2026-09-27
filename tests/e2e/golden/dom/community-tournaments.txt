@@ -1,0 +1,185 @@
+<body data-page="community-tournaments" data-subnav="on">
+  #text "\n  "
+  <div id="1">
+    #text "\n    "
+    <div id="global-nav">
+      <header id="2">
+        <a class="nav-brand" href="/" aria-label="Mario Strikers Community home">
+          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src='./assets/logo/logo.png'"/>
+          <span class="nav-brand-est">
+            #text "EST. 2017"
+          </span>
+        </a>
+        <nav class="main-nav main-nav-text" aria-label="Main navigation">
+          <a class="nav-top-link" href="/" data-top-key="home" aria-label="Home">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-home.png'"/>
+          </a>
+          <a class="nav-top-link" href="/games" data-top-key="games" aria-label="Games">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-games.webp" width="733" height="198" alt="Games" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-games.png'"/>
+          </a>
+          <a class="nav-top-link is-active" href="/competitive" data-top-key="competitive" aria-label="Competitive">
+            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-competitive-active.webp" width="733" height="198" alt="Competitive" onerror="this.onerror=null;this.src='./assets/nav-buttons/active/nav-competitive-active.png'"/>
+          </a>
+          <a class="nav-top-link" href="/players" data-top-key="players" aria-label="Players">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-players.webp" width="733" height="198" alt="Players" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-players.png'"/>
+          </a>
+          <a class="nav-top-link" href="/partners" data-top-key="partners" aria-label="Partners">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-partners.png'"/>
+          </a>
+        </nav>
+        <div id="global-account" class="global-account" data-auth-state="logged-out"/>
+      </header>
+    </div>
+    #text "\n    "
+    <div id="global-subnav">
+      <nav class="sub-nav sub-nav-level2" aria-label="Competitive navigation">
+        <a class="sub-link sub-link-text" href="/competitive-rules" aria-label="Rules">
+          <span class="sub-link-label">
+            #text "Rules"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/msl" aria-label="MSL">
+          <span class="sub-link-label">
+            #text "MSL"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text is-active" href="/competitive-tournaments" aria-label="Events">
+          <span class="sub-link-label">
+            #text "Events"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/competitive-leaderboards" aria-label="Leaderboards">
+          <span class="sub-link-label">
+            #text "Leaderboards"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/competitive-tier-lists" aria-label="Tier Lists">
+          <span class="sub-link-label">
+            #text "Tier Lists"
+          </span>
+        </a>
+      </nav>
+    </div>
+    #text "\n  "
+  </div>
+  #text "\n\n  "
+  <main class="page-content">
+    <div id="global-content-tabs">
+      <section class="global-tabs-shell" aria-label="Events tabs">
+        <div class="global-tabs-list">
+          <a class="global-tab is-active" href="/community-tournaments" aria-label="Tournaments" aria-current="page">
+            #text "TOURNAMENTS"
+          </a>
+          <svg class="global-tabs-line-overlay"/>
+        </div>
+      </section>
+    </div>
+    #text "\n    "
+    <section class="events-page" aria-label="Current community tournaments">
+      #text "\n      "
+      <section id="events-root" aria-label="Current community tournaments">
+        <section class="leaderboard-block players-list-block events-list-block">
+          <section class="leaderboard-list players-list events-list" role="list" aria-label="Current tournaments">
+            <article class="lb-row players-row events-row" role="listitem">
+              <a class="events-row-link" href="/community-tournaments" target="_blank" rel="noopener noreferrer" aria-label="Open Discord channel for SAMPLE TRAINING CUP">
+                <div class="lb-inner-frame players-inner-frame">
+                  <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
+                    <span class="players-flag-slot">
+                      <img class="events-game-ball" src="/assets/games/msblball.png" alt="" aria-hidden="true" onerror="this.onerror=null;this.remove();"/>
+                    </span>
+                  </div>
+                  <span class="lb-player players-name events-name">
+                    <span class="players-name-text events-name-text">
+                      #text "SAMPLE TRAINING CUP"
+                    </span>
+                  </span>
+                  <div class="lb-points players-points-spacer events-points-spacer" aria-hidden="true"/>
+                </div>
+              </a>
+            </article>
+            <article class="lb-row players-row events-row" role="listitem">
+              <a class="events-row-link" href="/community-tournaments" target="_blank" rel="noopener noreferrer" aria-label="Open Discord channel for DEMO CHARGED CLASSIC">
+                <div class="lb-inner-frame players-inner-frame">
+                  <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
+                    <span class="players-flag-slot">
+                      <img class="events-game-ball" src="/assets/games/mscball.png" alt="" aria-hidden="true" onerror="this.onerror=null;this.remove();"/>
+                    </span>
+                  </div>
+                  <span class="lb-player players-name events-name">
+                    <span class="players-name-text events-name-text">
+                      #text "DEMO CHARGED CLASSIC"
+                    </span>
+                  </span>
+                  <div class="lb-points players-points-spacer events-points-spacer" aria-hidden="true"/>
+                </div>
+              </a>
+            </article>
+            <article class="lb-row players-row events-row" role="listitem">
+              <a class="events-row-link" href="/community-tournaments" target="_blank" rel="noopener noreferrer" aria-label="Open Discord channel for FIXTURE SUPER SERIES">
+                <div class="lb-inner-frame players-inner-frame">
+                  <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
+                    <span class="players-flag-slot">
+                      <img class="events-game-ball" src="/assets/games/smsball.png" alt="" aria-hidden="true" onerror="this.onerror=null;this.remove();"/>
+                    </span>
+                  </div>
+                  <span class="lb-player players-name events-name">
+                    <span class="players-name-text events-name-text">
+                      #text "FIXTURE SUPER SERIES"
+                    </span>
+                  </span>
+                  <div class="lb-points players-points-spacer events-points-spacer" aria-hidden="true"/>
+                </div>
+              </a>
+            </article>
+          </section>
+        </section>
+      </section>
+      #text "\n    "
+    </section>
+    #text "\n  "
+  </main>
+  #text "\n\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n\n\n"
+  <footer id="global-footer">
+    <p class="global-footer-disclaimer">
+      #text "This website is not affiliated with Nintendo. All product names, logos, and brands are property of their respective owners."
+    </p>
+    <p class="global-footer-links">
+      <a href="https://discord.gg/de2YaWg" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "DISCORD"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://x.com/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "X"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://www.youtube.com/@MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "YOUTUBE"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://twitch.tv/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "TWITCH"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/about-us" class="global-footer-link">
+        #text "ABOUT US"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/privacy-policy" class="global-footer-link">
+        #text "PRIVACY POLICY"
+      </a>
+    </p>
+  </footer>
+</body>

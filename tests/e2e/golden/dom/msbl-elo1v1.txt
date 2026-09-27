@@ -1,0 +1,1065 @@
+<body data-page="msbl-elo1v1" data-subnav="on">
+  #text "\n  "
+  <div id="1">
+    #text "\n    "
+    <div id="global-nav">
+      <header id="2">
+        <a class="nav-brand" href="/" aria-label="Mario Strikers Community home">
+          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src='./assets/logo/logo.png'"/>
+          <span class="nav-brand-est">
+            #text "EST. 2017"
+          </span>
+        </a>
+        <nav class="main-nav main-nav-text" aria-label="Main navigation">
+          <a class="nav-top-link" href="/" data-top-key="home" aria-label="Home">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-home.png'"/>
+          </a>
+          <a class="nav-top-link" href="/games" data-top-key="games" aria-label="Games">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-games.webp" width="733" height="198" alt="Games" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-games.png'"/>
+          </a>
+          <a class="nav-top-link is-active" href="/competitive" data-top-key="competitive" aria-label="Competitive">
+            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-competitive-active.webp" width="733" height="198" alt="Competitive" onerror="this.onerror=null;this.src='./assets/nav-buttons/active/nav-competitive-active.png'"/>
+          </a>
+          <a class="nav-top-link" href="/players" data-top-key="players" aria-label="Players">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-players.webp" width="733" height="198" alt="Players" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-players.png'"/>
+          </a>
+          <a class="nav-top-link" href="/partners" data-top-key="partners" aria-label="Partners">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-partners.png'"/>
+          </a>
+        </nav>
+        <div id="global-account" class="global-account" data-auth-state="logged-out"/>
+      </header>
+    </div>
+    #text "\n    "
+    <div id="global-subnav">
+      <nav class="sub-nav sub-nav-level2" aria-label="Competitive navigation">
+        <a class="sub-link sub-link-text" href="/competitive-rules" aria-label="Rules">
+          <span class="sub-link-label">
+            #text "Rules"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/msl" aria-label="MSL">
+          <span class="sub-link-label">
+            #text "MSL"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/competitive-tournaments" aria-label="Events">
+          <span class="sub-link-label">
+            #text "Events"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text is-active" href="/competitive-leaderboards" aria-label="Leaderboards">
+          <span class="sub-link-label">
+            #text "Leaderboards"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/competitive-tier-lists" aria-label="Tier Lists">
+          <span class="sub-link-label">
+            #text "Tier Lists"
+          </span>
+        </a>
+      </nav>
+    </div>
+    #text "\n  "
+  </div>
+  #text "\n\n  "
+  <main class="page-content">
+    #text "\n    "
+    <h1 class="visually-hidden">
+      #text "MSBL ELO 1v1"
+    </h1>
+    <div id="global-content-tabs"/>
+    #text "\n    "
+    <section id="leaderboards-root" aria-label="Leaderboards">
+      <section class="global-tabs-shell leaderboard-tabs-shell" aria-label="Leaderboards">
+        <nav class="global-tabs-list" aria-label="Leaderboard tabs">
+          <a id="msbl-elo1v1-tab-msbl-elo1v1" class="global-tab leaderboard-ball-tab is-active" href="/msbl-elo1v1" data-lb-tab="msbl-elo1v1" data-lb-href="/msbl-elo1v1" aria-current="page" tabindex="0">
+            <span class="leaderboard-tab-inner">
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/msblball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/msblball.png'"/>
+              <span class="leaderboard-tab-label">
+                #text "ELO 1v1"
+              </span>
+            </span>
+          </a>
+          <a id="msbl-elo1v1-tab-msbl-whr" class="global-tab leaderboard-ball-tab" href="/msbl-whr" data-lb-tab="msbl-whr" data-lb-href="/msbl-whr" tabindex="-1">
+            <span class="leaderboard-tab-inner">
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/msblball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/msblball.png'"/>
+              <span class="leaderboard-tab-label">
+                #text "WHR"
+              </span>
+            </span>
+          </a>
+          <a id="msbl-elo1v1-tab-msc-elo1v1" class="global-tab leaderboard-ball-tab" href="/msc-elo1v1" data-lb-tab="msc-elo1v1" data-lb-href="/msc-elo1v1" tabindex="-1">
+            <span class="leaderboard-tab-inner">
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/mscball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/mscball.png'"/>
+              <span class="leaderboard-tab-label">
+                #text "ELO 1v1"
+              </span>
+            </span>
+          </a>
+          <a id="msbl-elo1v1-tab-msc-whr" class="global-tab leaderboard-ball-tab" href="/msc-whr" data-lb-tab="msc-whr" data-lb-href="/msc-whr" tabindex="-1">
+            <span class="leaderboard-tab-inner">
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/mscball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/mscball.png'"/>
+              <span class="leaderboard-tab-label">
+                #text "WHR"
+              </span>
+            </span>
+          </a>
+          <a id="msbl-elo1v1-tab-sms-elo1v1" class="global-tab leaderboard-ball-tab" href="/sms-elo1v1" data-lb-tab="sms-elo1v1" data-lb-href="/sms-elo1v1" tabindex="-1">
+            <span class="leaderboard-tab-inner">
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/smsball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/smsball.png'"/>
+              <span class="leaderboard-tab-label">
+                #text "ELO 1v1"
+              </span>
+            </span>
+          </a>
+          <a id="msbl-elo1v1-tab-sms-whr" class="global-tab leaderboard-ball-tab" href="/sms-whr" data-lb-tab="sms-whr" data-lb-href="/sms-whr" tabindex="-1">
+            <span class="leaderboard-tab-inner">
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/smsball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/smsball.png'"/>
+              <span class="leaderboard-tab-label">
+                #text "WHR"
+              </span>
+            </span>
+          </a>
+          <svg class="global-tabs-line-overlay"/>
+        </nav>
+      </section>
+      <section class="leaderboard-block" aria-label="Leaderboard rows">
+        <div id="leaderboard-list" class="leaderboard-list" role="list">
+          <article class="lb-row lb-row-rank-1 lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/7-strikerstitan-b.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank-1">
+                  <svg class="lb-rank-1-svg" viewBox="0 0 100 120" aria-hidden="true" focusable="false">
+                    <defs>
+                      <linearGradient id="lb-rank1-grad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="120">
+                        <stop offset="0%" stop-color="#fff45a"/>
+                        <stop offset="52%" stop-color="#ffc800"/>
+                        <stop offset="100%" stop-color="#9a5b00"/>
+                      </linearGradient>
+                    </defs>
+                    <text class="lb-rank-1-svg-stroke" x="50" y="50%" text-anchor="middle">
+                      #text "1"
+                    </text>
+                    <text class="lb-rank-1-svg-fill" x="50" y="50%" text-anchor="middle" fill="url(#lb-rank1-grad)">
+                      #text "1"
+                    </text>
+                  </svg>
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="1" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Sample Player">
+                  #text "Sample Player"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1887"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-rank-2 lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/7-strikerstitan-b.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "2"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="2" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Practice Partner">
+                  #text "Practice Partner"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1856"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-rank-3 lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/7-strikerstitan-b.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "3"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="3" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Training Rookie">
+                  #text "Training Rookie"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1826"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/7-strikerstitan-b.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "4"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="4" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Pixel Piranha">
+                  #text "Pixel Piranha"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1794"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/7-strikerstitan-b.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "5"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="5" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Turbo Shell">
+                  #text "Turbo Shell"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1767"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "6"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="6" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Banana Drift">
+                  #text "Banana Drift"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1739"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "7"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="7" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Chain Chomper">
+                  #text "Chain Chomper"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1707"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "8"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="8" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Mega Striker">
+                  #text "Mega Striker"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1677"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-II.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "9"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="9" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Hyper Volley">
+                  #text "Hyper Volley"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1649"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-II.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "10"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="10" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Koopa Kicker">
+                  #text "Koopa Kicker"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1626"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-I.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "11"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="11" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Lakitu Loop">
+                  #text "Lakitu Loop"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1599"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-I.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "12"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="12" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Cloud Keeper">
+                  #text "Cloud Keeper"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1562"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-I.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "13"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="13" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Zoë Ñandú">
+                  #text "Zoë Ñandú"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1534"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "14"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="14" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Captain Incredibly Long Sample Name">
+                  #text "Captain Incredibly Long Sample Name"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1508"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "15"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="15" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for dotted.sample">
+                  #text "dotted.sample"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1475"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "16"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="16" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for <i>Escaped Name</i>">
+                  #text "<i>Escaped Name</i>"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1452"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-II.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "17"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="17" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Player 42">
+                  #text "Player 42"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1427"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-II.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "18"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="18" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Rocket Toad">
+                  #text "Rocket Toad"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1391"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-I.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "19"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="19" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Midfield Mushroom">
+                  #text "Midfield Mushroom"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1361"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-I.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "20"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="20" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Goalie Gumba">
+                  #text "Goalie Gumba"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1336"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-I.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "21"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="21" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Thunder Boot">
+                  #text "Thunder Boot"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1303"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "22"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="22" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Crystal Cleat">
+                  #text "Crystal Cleat"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1274"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "23"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="23" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Lava Lob">
+                  #text "Lava Lob"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1252"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-II.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "24"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="24" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Sand Tomb Sam">
+                  #text "Sand Tomb Sam"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1221"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-II.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "25"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="25" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Stormship Sky">
+                  #text "Stormship Sky"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1189"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-II.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "26"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="26" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Galactic Goal">
+                  #text "Galactic Goal"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1166"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-I.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "27"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="27" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Vice Versa">
+                  #text "Vice Versa"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1130"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-I.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "28"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="28" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Dump Truck Dan">
+                  #text "Dump Truck Dan"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1105"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/3-gold-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "29"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="29" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Wasteland Will">
+                  #text "Wasteland Will"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1069"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/3-gold-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "30"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="30" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Classroom Kid">
+                  #text "Classroom Kid"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1041"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/3-gold-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "31"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="31" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Sudden Death">
+                  #text "Sudden Death"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "1012"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/3-gold-II.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "32"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="32" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Results Rita">
+                  #text "Results Rita"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "989"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/3-gold-II.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "33"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="33" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Credits Carl">
+                  #text "Credits Carl"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "961"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/3-gold-II.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "34"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="34" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Pause Menu">
+                  #text "Pause Menu"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "935"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/3-gold-I.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "35"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="35" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Loading Lou">
+                  #text "Loading Lou"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "902"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/3-gold-I.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "36"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="36" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Header Hank">
+                  #text "Header Hank"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "867"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/2-silver-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "37"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="37" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Volley Vera">
+                  #text "Volley Vera"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "837"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/2-silver-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "38"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="38" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Bicycle Ben">
+                  #text "Bicycle Ben"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "816"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/2-silver-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "39"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="39" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Nutmeg Nora">
+                  #text "Nutmeg Nora"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "782"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/2-silver-II.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "40"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="40" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Penalty Pete">
+                  #text "Penalty Pete"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "756"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/2-silver-II.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "41"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="41" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Offside Olly">
+                  #text "Offside Olly"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "728"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/2-silver-I.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "42"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="42" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Corner Cora">
+                  #text "Corner Cora"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "696"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/2-silver-I.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "43"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="43" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Free Kick Finn">
+                  #text "Free Kick Finn"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "665"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/2-silver-I.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "44"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="44" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Throw-in Theo">
+                  #text "Throw-in Theo"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "644"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/1-bronze-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "45"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="45" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Extra Time Eve">
+                  #text "Extra Time Eve"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "615"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/1-bronze-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "46"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="46" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Golden Goal Gus">
+                  #text "Golden Goal Gus"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "587"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/1-bronze-III.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "47"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="47" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Hat-trick Hal">
+                  #text "Hat-trick Hal"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "553"
+              </div>
+            </div>
+          </article>
+          <article class="lb-row lb-row-has-rank-icon" role="listitem">
+            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/1-bronze-II.png" alt="" aria-hidden="true" loading="lazy"/>
+            <div class="lb-inner-frame">
+              <div class="lb-rank-cell">
+                <span class="lb-rank">
+                  #text "48"
+                </span>
+              </div>
+              <div class="lb-player">
+                <button type="button" class="lb-player-trigger" data-player-id="48" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Last Minute Lin">
+                  #text "Last Minute Lin"
+                </button>
+              </div>
+              <div class="lb-points">
+                #text "529"
+              </div>
+            </div>
+          </article>
+        </div>
+        <p id="leaderboard-empty" class="leaderboard-empty" hidden="">
+          #text "Loading..."
+        </p>
+      </section>
+    </section>
+    #text "\n  "
+  </main>
+  #text "\n\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  \n\n\n"
+  <footer id="global-footer">
+    <p class="global-footer-disclaimer">
+      #text "This website is not affiliated with Nintendo. All product names, logos, and brands are property of their respective owners."
+    </p>
+    <p class="global-footer-links">
+      <a href="https://discord.gg/de2YaWg" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "DISCORD"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://x.com/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "X"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://www.youtube.com/@MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "YOUTUBE"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://twitch.tv/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "TWITCH"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/about-us" class="global-footer-link">
+        #text "ABOUT US"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/privacy-policy" class="global-footer-link">
+        #text "PRIVACY POLICY"
+      </a>
+    </p>
+  </footer>
+</body>

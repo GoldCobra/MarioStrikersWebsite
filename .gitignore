@@ -1,5 +1,6 @@
 start.bat
 backend/node_modules/
+node_modules/
 backend/.env
 backend/.env.*
 !backend/.env.example

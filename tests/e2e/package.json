@@ -1,0 +1,23 @@
+{
+  "name": "@ms/e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Visual, DOM, route and API contract checks that compare the website against a reference commit.",
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "visual": "node run.ts visual",
+    "visual:self-check": "node run.ts visual --self-check",
+    "dom": "node run.ts dom",
+    "dom:update": "node run.ts dom --update",
+    "contract": "node run.ts contract",
+    "routes": "node run.ts routes",
+    "routes:update": "node run.ts routes --update"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "24.19.0"
+  }
+}

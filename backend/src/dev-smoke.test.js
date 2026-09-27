@@ -86,8 +86,8 @@ test("all public API families return populated fixture contracts", async functio
   const profile = await (await fetch(base + "/api/players/1/profile")).json();
   assert.equal(profile.player.name, "Sample Player");
   assert.ok(profile.ratings.msbl.rating > 0);
-  assert.equal(profile.ratings.msbl.season_reward_level.current_wins, 3);
-  assert.equal(profile.ratings.msbl.season_reward_level.required_wins, 10);
+  assert.equal(profile.ratings.msbl.season_reward_level.current_wins, 0);
+  assert.equal(profile.ratings.msbl.season_reward_level.required_wins, 5);
   const club = await (await fetch(base + "/api/clubs/msbl/1/profile")).json();
   assert.equal(club.club.name, "Sample Strikers");
   assert.equal(club.club.join_conditions, "Open to Anyone");
@@ -96,7 +96,7 @@ test("all public API families return populated fixture contracts", async functio
   assert.match(logo.headers.get("content-type"), /image\/svg\+xml/);
   assert.match(await logo.text(), /SAMPLE/);
   const season = await (await fetch(base + "/api/competitive-season/current")).json();
-  assert.equal(season.season.displayName, "Sample Season");
+  assert.equal(season.season.displayName, "Dusk Season 2026");
   const wiimmfi = await (await fetch(base + "/api/wiimmfi/msc-charged")).json();
   assert.equal(wiimmfi.players[0].name, "Sample Player");
   assert.equal((await fetch(base + "/api/players/9999/profile")).status, 404);

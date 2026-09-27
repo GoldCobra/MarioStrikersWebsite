@@ -1,0 +1,737 @@
+<body data-page="sms-competitiverules" data-subnav="on">
+  #text "\n  "
+  <div id="1">
+    #text "\n    "
+    <div id="global-nav">
+      <header id="2">
+        <a class="nav-brand" href="/" aria-label="Mario Strikers Community home">
+          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src='./assets/logo/logo.png'"/>
+          <span class="nav-brand-est">
+            #text "EST. 2017"
+          </span>
+        </a>
+        <nav class="main-nav main-nav-text" aria-label="Main navigation">
+          <a class="nav-top-link" href="/" data-top-key="home" aria-label="Home">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-home.png'"/>
+          </a>
+          <a class="nav-top-link" href="/games" data-top-key="games" aria-label="Games">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-games.webp" width="733" height="198" alt="Games" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-games.png'"/>
+          </a>
+          <a class="nav-top-link is-active" href="/competitive" data-top-key="competitive" aria-label="Competitive">
+            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-competitive-active.webp" width="733" height="198" alt="Competitive" onerror="this.onerror=null;this.src='./assets/nav-buttons/active/nav-competitive-active.png'"/>
+          </a>
+          <a class="nav-top-link" href="/players" data-top-key="players" aria-label="Players">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-players.webp" width="733" height="198" alt="Players" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-players.png'"/>
+          </a>
+          <a class="nav-top-link" href="/partners" data-top-key="partners" aria-label="Partners">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-partners.png'"/>
+          </a>
+        </nav>
+        <div id="global-account" class="global-account" data-auth-state="logged-out"/>
+      </header>
+    </div>
+    #text "\n    "
+    <div id="global-subnav">
+      <nav class="sub-nav sub-nav-level2" aria-label="Competitive navigation">
+        <a class="sub-link sub-link-text is-active" href="/competitive-rules" aria-label="Rules">
+          <span class="sub-link-label">
+            #text "Rules"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/msl" aria-label="MSL">
+          <span class="sub-link-label">
+            #text "MSL"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/competitive-tournaments" aria-label="Events">
+          <span class="sub-link-label">
+            #text "Events"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/competitive-leaderboards" aria-label="Leaderboards">
+          <span class="sub-link-label">
+            #text "Leaderboards"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/competitive-tier-lists" aria-label="Tier Lists">
+          <span class="sub-link-label">
+            #text "Tier Lists"
+          </span>
+        </a>
+      </nav>
+    </div>
+    #text "\n  "
+  </div>
+  #text "\n\n  "
+  <main class="page-content competitive-rules-page">
+    #text "\n    "
+    <h1 class="visually-hidden">
+      #text "SMS Competitive Rules"
+    </h1>
+    <div id="global-content-tabs">
+      <section class="global-tabs-shell" aria-label="Rules tabs">
+        <div class="global-tabs-list">
+          <a class="global-tab" href="/msbl-competitiverules" aria-label="MSBL">
+            #text "MSBL"
+          </a>
+          <a class="global-tab" href="/msc-competitiverules" aria-label="MSC">
+            #text "MSC"
+          </a>
+          <a class="global-tab is-active" href="/sms-competitiverules" aria-label="SMS" aria-current="page">
+            #text "SMS"
+          </a>
+          <svg class="global-tabs-line-overlay"/>
+        </div>
+      </section>
+    </div>
+    #text "\n    "
+    <section id="competitive-rules-root" aria-label="SMS competitive rules">
+      <header class="competitive-rules-header" aria-label="SMS rules header">
+        <h1 class="cr-page-title">
+          #text "The Super Mario Strikers (Mario Smash Football) Competitive Ruleset"
+        </h1>
+        <p class="cr-page-revised">
+          #text "Last revised April 17, 2026"
+        </p>
+      </header>
+      <article class="competitive-rules content-box-list" aria-label="SMS competitive rules">
+        <section class="content-box cr-section" id="sms-rules-1">
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          <div class="content-box-center">
+            <div class="content-box-texture" aria-hidden="true"/>
+            <div class="content-box-content">
+              <h2>
+                #text "1. Introduction"
+              </h2>
+              <section class="cr-subsection" id="sms-rules-1-1">
+                <h3>
+                  #text "1.1 Purpose"
+                </h3>
+                <p>
+                  #text "These rules establish a Competition Committee and a standardized competitive ruleset."
+                </p>
+              </section>
+              <section class="cr-subsection" id="sms-rules-1-2">
+                <h3>
+                  #text "1.2 Scope and Rule Priority"
+                </h3>
+                <p>
+                  #text "These rules apply by default to Mario Strikers League (MSL) competitions and community-organized tournaments."
+                </p>
+                <p>
+                  #text "If a tournament publishes explicit event-specific rule changes, those rules apply only to that event."
+                </p>
+                <p>
+                  #text "Where game-specific rules conflict with universal rules, game-specific rules take precedence."
+                </p>
+                <p>
+                  #text "For unresolved disputes, Tournament Staff decisions are final for the current event."
+                </p>
+              </section>
+            </div>
+          </div>
+          <div class="content-box-bottom" aria-hidden="true"/>
+        </section>
+        <section class="content-box cr-section" id="sms-rules-2">
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          <div class="content-box-center">
+            <div class="content-box-texture" aria-hidden="true"/>
+            <div class="content-box-content">
+              <h2>
+                #text "2. Universal Competitive Rules"
+              </h2>
+              <section class="cr-subsection" id="sms-rules-2-1">
+                <h3>
+                  #text "2.1 Match Administration"
+                </h3>
+                <p>
+                  #text "Before a set starts, players must confirm host setup, match settings, and any organizer requirements."
+                </p>
+                <p>
+                  #text "If players cannot agree before the set starts, involve Tournament Staff before gameplay. If staff is unavailable, postpone the set until a ruling is possible."
+                </p>
+                <p>
+                  #text "Once players explicitly agree before match start, the agreement is binding unless a material technical or competitive issue occurs."
+                </p>
+              </section>
+              <section class="cr-subsection" id="sms-rules-2-2">
+                <h3>
+                  #text "2.2 Competitive Integrity"
+                </h3>
+                <p>
+                  #text "All games must use organizer-approved settings and versions. Unapproved gameplay-altering methods are prohibited unless explicitly listed as legal in game-specific rules."
+                </p>
+                <p>
+                  #text "Wired Ethernet is strongly recommended for the most stable competitive match quality and lower latency. It is not mandatory."
+                </p>
+                <p>
+                  #text "Players should use a connection that avoids avoidable disruptions."
+                </p>
+                <p>
+                  #text "Players must cooperate with staff requests for evidence, testing, and match-state reconstruction during disputes."
+                </p>
+                <p>
+                  #text "Players must communicate clearly and act in good faith during setup, gameplay, and dispute resolution."
+                </p>
+              </section>
+              <section class="cr-subsection" id="sms-rules-2-3">
+                <h3>
+                  #text "2.3 Dispute Escalation"
+                </h3>
+                <p>
+                  #text "When a dispute occurs (for example stalling or integrity concerns), players must pause at the next legal point and request staff review."
+                </p>
+                <p>
+                  #text "Provide video evidence whenever possible. If staff is unavailable, record exact details and suspend the set until review."
+                </p>
+                <p>
+                  #text "Players should not continue play before official review is completed. If they do, retroactive staff action may be limited by available evidence and tournament policy."
+                </p>
+              </section>
+            </div>
+          </div>
+          <div class="content-box-bottom" aria-hidden="true"/>
+        </section>
+        <section class="content-box cr-section" id="sms-rules-3">
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          <div class="content-box-center">
+            <div class="content-box-texture" aria-hidden="true"/>
+            <div class="content-box-content">
+              <h2>
+                #text "3. Game-Specific Rules & Settings"
+              </h2>
+              <section class="cr-subsection" id="sms-rules-3-1">
+                <h3>
+                  #text "3.1 Game Version and Platform"
+                </h3>
+                <p>
+                  #text "Official version: NTSC-U for Nintendo GameCube on the custom Citrus Dolphin build. Required game file format: .iso."
+                </p>
+                <p>
+                  #text "Download Citrus here: "
+                  <a class="cr-link" href="https://discord.com/channels/268737069939949569/862655693638205461/1000108888747679834" target="_blank" rel="noopener noreferrer">
+                    #text "Citrus Build Download"
+                  </a>
+                  #text "."
+                </p>
+                <p>
+                  #text "If Citrus does not work, players may use the latest Dolphin Beta as backup: "
+                  <a class="cr-link" href="https://dolphin-emu.org/download/" target="_blank" rel="noopener noreferrer">
+                    #text "Dolphin Download"
+                  </a>
+                  #text "."
+                </p>
+              </section>
+              <section class="cr-subsection" id="sms-rules-3-2">
+                <h3>
+                  #text "3.2 Dolphin Netplay Settings"
+                </h3>
+                <ul class="cr-list">
+                  <li>
+                    #text "Netplay lobby \"Network\" must be set to \"Fair Input Delay\"."
+                  </li>
+                  <li>
+                    #text "Players should agree on a stable buffer and generally use the lowest value that avoids lag."
+                  </li>
+                  <li>
+                    #text "A baseline formula is BUFFER = PING / 8, but values may be lower or higher if both players agree."
+                  </li>
+                  <li>
+                    #text "The absolute minimum buffer is 6, and the absolute maximum buffer is 20."
+                  </li>
+                  <li>
+                    #text "If no stable connection is possible at buffer 20 or lower, the match should be postponed."
+                  </li>
+                </ul>
+              </section>
+              <section class="cr-subsection" id="sms-rules-3-3">
+                <h3>
+                  #text "3.3 Match Settings and Visual Options"
+                </h3>
+                <ul class="cr-list">
+                  <li>
+                    #text "Skill Level: LEGEND"
+                  </li>
+                  <li>
+                    #text "Match Time: 5 MINUTES"
+                  </li>
+                  <li>
+                    #text "Power Ups: ON"
+                  </li>
+                  <li>
+                    #text "Super Strike: OFF"
+                  </li>
+                  <li>
+                    #text "Rumble: ON"
+                  </li>
+                  <li>
+                    #text "Bowser Attack: OFF"
+                  </li>
+                </ul>
+                <p>
+                  #text "Default visual settings:"
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Camera Type: AUTO ZOOM"
+                  </li>
+                  <li>
+                    #text "Aspect Ratio: WIDE (16:9)"
+                  </li>
+                </ul>
+              </section>
+              <section class="cr-subsection" id="sms-rules-3-4">
+                <h3>
+                  #text "3.4 Stadiums and Match Procedure"
+                </h3>
+                <p>
+                  #text "Any stadium is allowed."
+                </p>
+                <p>
+                  #text "This process applies to best-of-3, best-of-5, and best-of-7 formats:"
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "In bracket play, higher seed gets first choice. In round robin or Swiss, first choice is decided by coin flip."
+                  </li>
+                  <li>
+                    #text "The winner of first choice selects one option: stadium, home/away side, or first captain pick."
+                  </li>
+                  <li>
+                    #text "The other player selects one of the remaining two options, and the last option goes to the first player."
+                  </li>
+                  <li>
+                    #text "Play the game with the selected stadium and side/captain setup."
+                  </li>
+                  <li>
+                    #text "After each game, the loser chooses two options from stadium, home/away side, and captain, and the winner gets the remaining option."
+                  </li>
+                  <li>
+                    #text "The player selecting stadium cannot choose a stadium they already won on earlier in the set unless both players agree."
+                  </li>
+                  <li>
+                    #text "This restriction applies even when that prior stadium win happened on the opponent's stadium choice."
+                  </li>
+                  <li>
+                    #text "If setup is incorrect (for example illegal stadium pick), players must quit within the first 5 seconds on the game timer; otherwise the game stands."
+                  </li>
+                </ul>
+              </section>
+              <section class="cr-subsection" id="sms-rules-3-5">
+                <h3>
+                  #text "3.5 Gameplay Restrictions"
+                </h3>
+                <p>
+                  <strong>
+                    #text "SUPER TEAM"
+                  </strong>
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Super Team is banned due to a run-speed advantage."
+                  </li>
+                  <li>
+                    #text "Character information: "
+                    <a class="cr-link" href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQH9tbcsCen9qqxYfyHjk-m_XszEXTzB6Yo5_jgEmujpUUsBJl9vxZqITLz7ooblubuhxelAOCx7zRb/pubhtml?gid=0&single=true" target="_blank" rel="noopener noreferrer">
+                      #text "Character Information"
+                    </a>
+                    #text "."
+                  </li>
+                </ul>
+                <p>
+                  <strong>
+                    #text "CHEAT CODES"
+                  </strong>
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Cheat codes are strictly forbidden, including codes that do not directly affect gameplay."
+                  </li>
+                </ul>
+              </section>
+            </div>
+          </div>
+          <div class="content-box-bottom" aria-hidden="true"/>
+        </section>
+        <section class="content-box cr-section" id="sms-rules-4">
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          <div class="content-box-center">
+            <div class="content-box-texture" aria-hidden="true"/>
+            <div class="content-box-content">
+              <h2>
+                #text "4. Match Disruptions & Technical Issues"
+              </h2>
+              <section class="cr-subsection" id="sms-rules-4-1">
+                <h3>
+                  #text "4.1 Disconnections"
+                </h3>
+                <p>
+                  #text "A disconnect may result in an automatic game loss, but if intent is unclear, match state should be reconstructed as accurately as possible."
+                </p>
+                <p>
+                  #text "If players cannot agree on reconstruction details, staff should decide the official restart procedure."
+                </p>
+                <p>
+                  #text "When reconstruction is approved, restore score, key state conditions, and possession as closely as possible."
+                </p>
+                <p>
+                  #text "If a game-specific disconnection rule exists, that game-specific rule overrides this baseline."
+                </p>
+              </section>
+              <section class="cr-subsection" id="sms-rules-4-2">
+                <h3>
+                  #text "4.2 Restarts and Misconfiguration"
+                </h3>
+                <p>
+                  #text "Tournament organizers may approve restarts in exceptional circumstances (for example infrastructure or power interruptions)."
+                </p>
+                <p>
+                  #text "If settings are misconfigured in a way that could affect the result, request review immediately after that game. Once the next game starts, the prior game is normally locked."
+                </p>
+                <p>
+                  #text "Repeated misconfiguration may result in escalating penalties."
+                </p>
+              </section>
+              <section class="cr-subsection" id="sms-rules-4-3">
+                <h3>
+                  #text "4.3 Stalling Review"
+                </h3>
+                <p>
+                  #text "Stalling or excessive delay may result in game or set forfeiture at organizer discretion."
+                </p>
+                <p>
+                  #text "If a player believes stalling occurred, formally call it, preserve evidence, and request staff review before continuing."
+                </p>
+                <p>
+                  #text "Without sufficient evidence, staff action may be limited. If staff is unavailable, suspend the set and resume after review."
+                </p>
+              </section>
+              <section class="cr-subsection" id="sms-rules-4-4">
+                <h3>
+                  #text "4.4 Pause Protocol"
+                </h3>
+                <p>
+                  #text "Mid-game pauses are allowed only for urgent technical issues or real-life emergencies, preferably in non-contested states."
+                </p>
+                <p>
+                  #text "Unauthorized pauses may result in automatic game forfeiture unless both players agree to a resolution or a true emergency is confirmed."
+                </p>
+              </section>
+              <section class="cr-subsection" id="sms-rules-4-5">
+                <h3>
+                  #text "4.5 Penalty Ladder"
+                </h3>
+                <p>
+                  #text "Rules violations are subject to penalties including, but not limited to:"
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Game restart"
+                  </li>
+                  <li>
+                    #text "Loss of a game"
+                  </li>
+                  <li>
+                    #text "Loss of a match"
+                  </li>
+                  <li>
+                    #text "Tournament forfeiture"
+                  </li>
+                </ul>
+                <p>
+                  #text "Any imposed penalty may be made public at organizer discretion."
+                </p>
+              </section>
+              <section class="cr-subsection" id="sms-rules-4-6">
+                <h3>
+                  #text "4.6 Restart Reconstruction Details"
+                </h3>
+                <p>
+                  #text "If players cannot agree after a disconnection, restart as close as possible to the original state:"
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Score: Recreate score differential (for example crash at 7-4 -> recreate as 3-0)."
+                  </li>
+                  <li>
+                    #text "Items: Recreate prior item state, recreate item differential, or agree to restart with no items."
+                  </li>
+                  <li>
+                    #text "Time and possession: If one player had possession, that player walks the ball into goalie at the correct time and play continues. If possession was contested, walk to goalie and punt with B to resume neutral play."
+                  </li>
+                </ul>
+              </section>
+              <section class="cr-subsection" id="sms-rules-4-7">
+                <h3>
+                  #text "4.7 Multiple Crashes and Lag Disputes"
+                </h3>
+                <p>
+                  #text "For repeated disconnections, reschedule the set after the issue is resolved. Tournament organizers may forfeit a game at their discretion."
+                </p>
+                <p>
+                  #text "If connection quality is disputed, test in Strikers 101 before the first match and involve staff if no agreement is reached."
+                </p>
+              </section>
+              <section class="cr-subsection" id="sms-rules-4-8">
+                <h3>
+                  #text "4.8 Stalling Examples"
+                </h3>
+                <p>
+                  #text "Examples of illegal stalling tactics include:"
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Standing still in front of your Kritter with the ball."
+                  </li>
+                  <li>
+                    #text "Dribbling away from the opponent's goal with no defensive pressure and no offensive intent."
+                  </li>
+                  <li>
+                    #text "Running kickoff possession back to your own defensive corner."
+                  </li>
+                  <li>
+                    #text "Running back to your Kritter unless one of the following applies: Kritter is stunned/recovering, out of position, you are avoiding an incoming item, or you just collected the ball in your defensive corner."
+                  </li>
+                </ul>
+                <p>
+                  #text "Examples of legal time-wasting plays include:"
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Holding possession with Kritter as long as possible."
+                  </li>
+                  <li>
+                    #text "Clearing the ball downfield with a player or Kritter from any location, including kickoff."
+                  </li>
+                  <li>
+                    #text "Guarding a loose ball by hitting opposing players attempting to challenge."
+                  </li>
+                </ul>
+              </section>
+              <section class="cr-subsection" id="sms-rules-4-9">
+                <h3>
+                  #text "4.9 Pause Timing Details"
+                </h3>
+                <p>
+                  #text "In SMS, if a pause is necessary, wait until your own Kritter has full possession or immediately after a goal."
+                </p>
+                <p>
+                  #text "Pauses should not exceed 1 minute unless active discussion with Tournament Staff is ongoing. If players cannot agree after 1 minute, contact staff immediately."
+                </p>
+              </section>
+            </div>
+          </div>
+          <div class="content-box-bottom" aria-hidden="true"/>
+        </section>
+        <section class="content-box cr-section" id="sms-rules-5">
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          <div class="content-box-center">
+            <div class="content-box-texture" aria-hidden="true"/>
+            <div class="content-box-content">
+              <h2>
+                #text "5. Scheduling & Matchmaking Conduct"
+              </h2>
+              <section class="cr-subsection" id="sms-rules-5-1">
+                <h3>
+                  #text "5.1 Scheduling Expectations"
+                </h3>
+                <p>
+                  #text "Scheduling with your opponent is part of competitive play. Communicate early and often."
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Players have real-life responsibilities; respect scheduled set times."
+                  </li>
+                  <li>
+                    #text "If you cannot make a scheduled time, notify your opponent as early as possible."
+                  </li>
+                </ul>
+              </section>
+              <section class="cr-subsection" id="sms-rules-5-2">
+                <h3>
+                  #text "5.2 Delay and No-Show Penalties"
+                </h3>
+                <p>
+                  #text "When players mutually agree on an official set time, late arrival or no-show without communication triggers these penalties:"
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "0-10 minutes late: No penalty"
+                  </li>
+                  <li>
+                    #text "10-20 minutes late: Loss of 1 pick (opponent gets first two picks in Game 1 setup)"
+                  </li>
+                  <li>
+                    #text "20-40 minutes late: Forfeit of Game 1"
+                  </li>
+                  <li>
+                    #text "40-60 minutes late: Forfeit of Games 1 and 2"
+                  </li>
+                  <li>
+                    #text "More than 60 minutes late or no-show: Forfeit of the set"
+                  </li>
+                </ul>
+              </section>
+              <section class="cr-subsection" id="sms-rules-5-3">
+                <h3>
+                  #text "5.3 Emergency Clause"
+                </h3>
+                <p>
+                  #text "Tournament Staff may rescind penalties and allow rescheduling for valid emergencies that prevented prior communication."
+                </p>
+                <p>
+                  #text "Abuse of this clause is prohibited. Repeated emergency claims may be denied at staff discretion."
+                </p>
+              </section>
+              <section class="cr-subsection" id="sms-rules-5-4">
+                <h3>
+                  #text "5.4 Pressuring"
+                </h3>
+                <p>
+                  #text "Set times must be mutually agreed. Short-notice play is allowed only by mutual agreement."
+                </p>
+                <p>
+                  #text "Players must not pressure opponents into playing. Staff may penalize pressuring behavior."
+                </p>
+                <p>
+                  #text "Examples include:"
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Excessive pinging."
+                  </li>
+                  <li>
+                    #text "Demanding immediate play by claiming your schedule cannot otherwise meet the deadline."
+                  </li>
+                </ul>
+              </section>
+            </div>
+          </div>
+          <div class="content-box-bottom" aria-hidden="true"/>
+        </section>
+        <section class="content-box cr-section" id="sms-rules-6">
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
+          </div>
+          <div class="content-box-center">
+            <div class="content-box-texture" aria-hidden="true"/>
+            <div class="content-box-content">
+              <h2>
+                #text "6. Code of Conduct"
+              </h2>
+              <section class="cr-subsection" id="sms-rules-6-1">
+                <h3>
+                  #text "6.1 Behavior Standards"
+                </h3>
+                <p>
+                  #text "Players must show good sportsmanship and respect toward opponents and tournament organizers. Players must compete in good faith and avoid behavior inconsistent with honesty and fair play. Inappropriate behavior includes, but is not limited to:"
+                </p>
+                <ul class="cr-list">
+                  <li>
+                    #text "Interfering with tournament operation"
+                  </li>
+                  <li>
+                    #text "Acting in an unsportsmanlike or disruptive manner, or annoying, abusing, threatening, or harassing others"
+                  </li>
+                  <li>
+                    #text "Engaging in collusion (for example any agreement to predetermine outcomes)"
+                  </li>
+                  <li>
+                    #text "Cheating by any means"
+                  </li>
+                  <li>
+                    #text "Intentionally delaying or tampering with gameplay"
+                  </li>
+                  <li>
+                    #text "Offensive, vulgar, or obscene gamertags"
+                  </li>
+                  <li>
+                    #text "Sexism, ageism, racism, or any other form of prejudice or bigotry"
+                  </li>
+                  <li>
+                    #text "Engaging in violence or behavior deemed immoral, unethical, disgraceful, or indecent by tournament owners"
+                  </li>
+                  <li>
+                    #text "Offering gifts or rewards to gain competitive advantage or create competitive disadvantage for opponents"
+                  </li>
+                  <li>
+                    #text "Otherwise violating these rules"
+                  </li>
+                </ul>
+              </section>
+            </div>
+          </div>
+          <div class="content-box-bottom" aria-hidden="true"/>
+        </section>
+        <p class="cr-note">
+          #text "Source document: "
+          <a class="cr-link" href="https://docs.google.com/document/d/e/2PACX-1vRUeYhYOYrG3jF5yA26U7joUx4uft4yMfqva3mHuw_ZDbTCZaEccZmRTv_bReo1MkPpoSIWst_loqbu/pub" target="_blank" rel="noopener noreferrer">
+            #text "Published SMS Rules"
+          </a>
+        </p>
+      </article>
+    </section>
+    #text "\n  "
+  </main>
+  #text "\n\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n\n\n"
+  <footer id="global-footer">
+    <p class="global-footer-disclaimer">
+      #text "This website is not affiliated with Nintendo. All product names, logos, and brands are property of their respective owners."
+    </p>
+    <p class="global-footer-links">
+      <a href="https://discord.gg/de2YaWg" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "DISCORD"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://x.com/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "X"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://www.youtube.com/@MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "YOUTUBE"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://twitch.tv/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "TWITCH"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/about-us" class="global-footer-link">
+        #text "ABOUT US"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/privacy-policy" class="global-footer-link">
+        #text "PRIVACY POLICY"
+      </a>
+    </p>
+  </footer>
+</body>

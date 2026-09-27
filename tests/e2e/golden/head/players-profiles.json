@@ -1,0 +1,149 @@
+[
+  {
+    "tag": "link",
+    "attributes": {
+      "rel": "apple-touch-icon",
+      "href": "/assets/favicon/blball.png",
+      "type": "image/png"
+    }
+  },
+  {
+    "tag": "link",
+    "attributes": {
+      "rel": "canonical",
+      "href": "https://mariostrikers.gg/players-profiles"
+    }
+  },
+  {
+    "tag": "link",
+    "attributes": {
+      "rel": "icon",
+      "href": "/assets/favicon/blball.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    }
+  },
+  {
+    "tag": "link",
+    "attributes": {
+      "rel": "icon",
+      "href": "/assets/favicon/favicon.ico",
+      "type": "image/x-icon"
+    }
+  },
+  {
+    "tag": "link",
+    "attributes": {
+      "rel": "preload",
+      "href": "/assets/fonts/MLSBY.woff",
+      "as": "font",
+      "type": "font/woff",
+      "crossorigin": ""
+    }
+  },
+  {
+    "tag": "link",
+    "attributes": {
+      "rel": "preload",
+      "href": "/assets/fonts/itc-grizzly.woff",
+      "as": "font",
+      "type": "font/woff",
+      "crossorigin": ""
+    }
+  },
+  {
+    "tag": "link",
+    "attributes": {
+      "rel": "shortcut icon",
+      "href": "/assets/favicon/favicon.ico",
+      "type": "image/x-icon"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "charset": "utf-8"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "description",
+      "content": "Browse Mario Strikers player profiles and competitive community records."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "robots",
+      "content": "noindex, follow"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "twitter:card",
+      "content": "summary"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "twitter:description",
+      "content": "Browse Mario Strikers player profiles and competitive community records."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "twitter:site",
+      "content": "@MarioStrikersGG"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "twitter:title",
+      "content": "Player Profiles | Mario Strikers Community"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "viewport",
+      "content": "width=device-width, initial-scale=1"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:description",
+      "content": "Browse Mario Strikers player profiles and competitive community records."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:title",
+      "content": "Player Profiles | Mario Strikers Community"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:type",
+      "content": "website"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:url",
+      "content": "https://mariostrikers.gg/players-profiles"
+    }
+  },
+  {
+    "tag": "title",
+    "text": "Player Profiles | Mario Strikers Community"
+  }
+]

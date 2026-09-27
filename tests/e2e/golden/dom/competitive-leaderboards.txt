@@ -1,0 +1,186 @@
+<body data-page="competitive-leaderboards" data-subnav="on">
+  #text "\n  "
+  <div id="1">
+    #text "\n    "
+    <div id="global-nav">
+      <header id="2">
+        <a class="nav-brand" href="/" aria-label="Mario Strikers Community home">
+          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src='./assets/logo/logo.png'"/>
+          <span class="nav-brand-est">
+            #text "EST. 2017"
+          </span>
+        </a>
+        <nav class="main-nav main-nav-text" aria-label="Main navigation">
+          <a class="nav-top-link" href="/" data-top-key="home" aria-label="Home">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-home.png'"/>
+          </a>
+          <a class="nav-top-link" href="/games" data-top-key="games" aria-label="Games">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-games.webp" width="733" height="198" alt="Games" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-games.png'"/>
+          </a>
+          <a class="nav-top-link is-active" href="/competitive" data-top-key="competitive" aria-label="Competitive">
+            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-competitive-active.webp" width="733" height="198" alt="Competitive" onerror="this.onerror=null;this.src='./assets/nav-buttons/active/nav-competitive-active.png'"/>
+          </a>
+          <a class="nav-top-link" href="/players" data-top-key="players" aria-label="Players">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-players.webp" width="733" height="198" alt="Players" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-players.png'"/>
+          </a>
+          <a class="nav-top-link" href="/partners" data-top-key="partners" aria-label="Partners">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-partners.png'"/>
+          </a>
+        </nav>
+        <div id="global-account" class="global-account" data-auth-state="logged-out"/>
+      </header>
+    </div>
+    #text "\n    "
+    <div id="global-subnav">
+      <nav class="sub-nav sub-nav-level2" aria-label="Competitive navigation">
+        <a class="sub-link sub-link-text" href="/competitive-rules" aria-label="Rules">
+          <span class="sub-link-label">
+            #text "Rules"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/msl" aria-label="MSL">
+          <span class="sub-link-label">
+            #text "MSL"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/competitive-tournaments" aria-label="Events">
+          <span class="sub-link-label">
+            #text "Events"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text is-active" href="/competitive-leaderboards" aria-label="Leaderboards" aria-current="page">
+          <span class="sub-link-label">
+            #text "Leaderboards"
+          </span>
+        </a>
+        <a class="sub-link sub-link-text" href="/competitive-tier-lists" aria-label="Tier Lists">
+          <span class="sub-link-label">
+            #text "Tier Lists"
+          </span>
+        </a>
+      </nav>
+    </div>
+    #text "\n  "
+  </div>
+  #text "\n\n  "
+  <main class="page-content">
+    #text "\n    "
+    <h1 class="visually-hidden">
+      #text "Competitive Leaderboards"
+    </h1>
+    <div id="global-content-tabs"/>
+    #text "\n    "
+    <section id="leaderboards-root" aria-label="Leaderboards">
+      <section class="global-tabs-shell leaderboard-tabs-shell" aria-label="Leaderboards">
+        <nav class="global-tabs-list" aria-label="Leaderboard tabs">
+          <a id="competitive-leaderboards-tab-msbl-elo1v1" class="global-tab leaderboard-ball-tab" href="/msbl-elo1v1" data-lb-tab="msbl-elo1v1" data-lb-href="/msbl-elo1v1">
+            <span class="leaderboard-tab-inner">
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/msblball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/msblball.png'"/>
+              <span class="leaderboard-tab-label">
+                #text "ELO 1v1"
+              </span>
+            </span>
+          </a>
+          <a id="competitive-leaderboards-tab-msbl-whr" class="global-tab leaderboard-ball-tab" href="/msbl-whr" data-lb-tab="msbl-whr" data-lb-href="/msbl-whr">
+            <span class="leaderboard-tab-inner">
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/msblball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/msblball.png'"/>
+              <span class="leaderboard-tab-label">
+                #text "WHR"
+              </span>
+            </span>
+          </a>
+          <a id="competitive-leaderboards-tab-msc-elo1v1" class="global-tab leaderboard-ball-tab" href="/msc-elo1v1" data-lb-tab="msc-elo1v1" data-lb-href="/msc-elo1v1">
+            <span class="leaderboard-tab-inner">
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/mscball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/mscball.png'"/>
+              <span class="leaderboard-tab-label">
+                #text "ELO 1v1"
+              </span>
+            </span>
+          </a>
+          <a id="competitive-leaderboards-tab-msc-whr" class="global-tab leaderboard-ball-tab" href="/msc-whr" data-lb-tab="msc-whr" data-lb-href="/msc-whr">
+            <span class="leaderboard-tab-inner">
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/mscball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/mscball.png'"/>
+              <span class="leaderboard-tab-label">
+                #text "WHR"
+              </span>
+            </span>
+          </a>
+          <a id="competitive-leaderboards-tab-sms-elo1v1" class="global-tab leaderboard-ball-tab" href="/sms-elo1v1" data-lb-tab="sms-elo1v1" data-lb-href="/sms-elo1v1">
+            <span class="leaderboard-tab-inner">
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/smsball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/smsball.png'"/>
+              <span class="leaderboard-tab-label">
+                #text "ELO 1v1"
+              </span>
+            </span>
+          </a>
+          <a id="competitive-leaderboards-tab-sms-whr" class="global-tab leaderboard-ball-tab" href="/sms-whr" data-lb-tab="sms-whr" data-lb-href="/sms-whr">
+            <span class="leaderboard-tab-inner">
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/smsball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/smsball.png'"/>
+              <span class="leaderboard-tab-label">
+                #text "WHR"
+              </span>
+            </span>
+          </a>
+          <svg class="global-tabs-line-overlay"/>
+        </nav>
+      </section>
+      <section class="leaderboard-block" aria-label="Leaderboard rows">
+        <div id="leaderboard-list" class="leaderboard-list" role="list"/>
+        <p id="leaderboard-empty" class="leaderboard-empty" hidden="">
+          #text "No ratings available."
+        </p>
+      </section>
+    </section>
+    #text "\n  "
+  </main>
+  #text "\n\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n  "
+  #text "\n\n\n"
+  <footer id="global-footer">
+    <p class="global-footer-disclaimer">
+      #text "This website is not affiliated with Nintendo. All product names, logos, and brands are property of their respective owners."
+    </p>
+    <p class="global-footer-links">
+      <a href="https://discord.gg/de2YaWg" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "DISCORD"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://x.com/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "X"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://www.youtube.com/@MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "YOUTUBE"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://twitch.tv/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "TWITCH"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/about-us" class="global-footer-link">
+        #text "ABOUT US"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/privacy-policy" class="global-footer-link">
+        #text "PRIVACY POLICY"
+      </a>
+    </p>
+  </footer>
+</body>

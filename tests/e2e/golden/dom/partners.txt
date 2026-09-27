@@ -1,0 +1,317 @@
+<body data-page="partners" data-subnav="off">
+  #text "\n  "
+  <div id="1">
+    #text "\n    "
+    <div id="global-nav">
+      <header id="2">
+        <a class="nav-brand" href="/" aria-label="Mario Strikers Community home">
+          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src='./assets/logo/logo.png'"/>
+          <span class="nav-brand-est">
+            #text "EST. 2017"
+          </span>
+        </a>
+        <nav class="main-nav main-nav-text" aria-label="Main navigation">
+          <a class="nav-top-link" href="/" data-top-key="home" aria-label="Home">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-home.png'"/>
+          </a>
+          <a class="nav-top-link" href="/games" data-top-key="games" aria-label="Games">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-games.webp" width="733" height="198" alt="Games" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-games.png'"/>
+          </a>
+          <a class="nav-top-link" href="/competitive" data-top-key="competitive" aria-label="Competitive">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-competitive.webp" width="733" height="198" alt="Competitive" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-competitive.png'"/>
+          </a>
+          <a class="nav-top-link" href="/players" data-top-key="players" aria-label="Players">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-players.webp" width="733" height="198" alt="Players" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-players.png'"/>
+          </a>
+          <a class="nav-top-link is-active" href="/partners" data-top-key="partners" aria-label="Partners" aria-current="page">
+            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-partners-active.webp" width="733" height="198" alt="Partners" onerror="this.onerror=null;this.src='./assets/nav-buttons/active/nav-partners-active.png'"/>
+          </a>
+        </nav>
+        <div id="global-account" class="global-account" data-auth-state="logged-out"/>
+      </header>
+    </div>
+    #text "\n    "
+    <div id="global-subnav"/>
+    #text "\n  "
+  </div>
+  #text "\n\n  "
+  <main class="page-content partners-page">
+    #text "\n    "
+    <h1 class="visually-hidden">
+      #text "Partners"
+    </h1>
+    <div id="global-content-tabs"/>
+    #text "\n    "
+    <section id="partners-root" class="partners-root" aria-label="Partners">
+      #text "\n      "
+      <div class="partners-list content-box-list" role="list" aria-label="Partner list">
+        #text "\n        "
+        <article class="content-box partner-guide-card" role="listitem">
+          #text "\n          "
+          <div class="content-box-top" aria-hidden="true">
+            #text "\n            "
+            <div class="content-box-top-left"/>
+            #text "\n            "
+            <div class="content-box-top-main"/>
+            #text "\n          "
+          </div>
+          #text "\n          "
+          <div class="content-box-center">
+            #text "\n            "
+            <div class="content-box-texture" aria-hidden="true"/>
+            #text "\n            "
+            <div class="partner-guide-card-flex">
+              #text "\n              "
+              <div class="partner-guide-card-title-wrap">
+                #text "\n                "
+                <h2 class="partner-guide-card-title">
+                  #text "NINTENHUB"
+                </h2>
+                #text "\n              "
+              </div>
+              #text "\n            "
+            </div>
+            #text "\n            "
+            <div class="partner-guide-card-description-wrap">
+              #text "\n              "
+              <p class="partner-guide-card-description">
+                #text "Nintenhub is a Nintendo-focused community hub that brings together fans, communities, and Nintendo-related content under one shared brand."
+              </p>
+              #text "\n            "
+            </div>
+            #text "\n          "
+          </div>
+          #text "\n          "
+          <div class="partner-guide-card-media" aria-hidden="true">
+            <img class="partner-guide-card-logo" src="/assets/partners/_nintenhub.png" alt="" loading="lazy" decoding="async"/>
+          </div>
+          #text "\n          "
+          <div class="content-box-bottom" aria-hidden="true"/>
+          #text "\n        "
+        </article>
+        #text "\n\n        "
+        <article class="content-box partner-guide-card" role="listitem">
+          #text "\n          "
+          <div class="content-box-top" aria-hidden="true">
+            #text "\n            "
+            <div class="content-box-top-left"/>
+            #text "\n            "
+            <div class="content-box-top-main"/>
+            #text "\n          "
+          </div>
+          #text "\n          "
+          <div class="content-box-center">
+            #text "\n            "
+            <div class="content-box-texture" aria-hidden="true"/>
+            #text "\n            "
+            <div class="partner-guide-card-flex">
+              #text "\n              "
+              <div class="partner-guide-card-title-wrap">
+                #text "\n                "
+                <h2 class="partner-guide-card-title">
+                  #text "MARIO STRIKERS SPEEDRUNNING"
+                </h2>
+                #text "\n              "
+              </div>
+              #text "\n            "
+            </div>
+            #text "\n            "
+            <div class="partner-guide-card-description-wrap">
+              #text "\n              "
+              <p class="partner-guide-card-description">
+                #text "Mario Strikers Speedrunning is a community focused on speedrunning all Mario Strikers titles, uniting players around records, routing, and fast-paced competition."
+              </p>
+              #text "\n            "
+            </div>
+            #text "\n          "
+          </div>
+          #text "\n          "
+          <div class="partner-guide-card-media" aria-hidden="true">
+            <img class="partner-guide-card-logo" src="/assets/partners/_ms-speedrunning.png" alt="" loading="lazy" decoding="async"/>
+          </div>
+          #text "\n          "
+          <div class="content-box-bottom" aria-hidden="true"/>
+          #text "\n        "
+        </article>
+        #text "\n\n        "
+        <article class="content-box partner-guide-card" role="listitem">
+          #text "\n          "
+          <div class="content-box-top" aria-hidden="true">
+            #text "\n            "
+            <div class="content-box-top-left"/>
+            #text "\n            "
+            <div class="content-box-top-main"/>
+            #text "\n          "
+          </div>
+          #text "\n          "
+          <div class="content-box-center">
+            #text "\n            "
+            <div class="content-box-texture" aria-hidden="true"/>
+            #text "\n            "
+            <div class="partner-guide-card-flex">
+              #text "\n              "
+              <div class="partner-guide-card-title-wrap">
+                #text "\n                "
+                <h2 class="partner-guide-card-title">
+                  #text "WII SPORTS"
+                </h2>
+                #text "\n              "
+              </div>
+              #text "\n            "
+            </div>
+            #text "\n            "
+            <div class="partner-guide-card-description-wrap">
+              #text "\n              "
+              <p class="partner-guide-card-description">
+                #text "Wii Sports Server is a leading Discord community for Wii Sports fans and players, offering tournaments, weekly challenges, NetPlay support, and dedicated spaces for competition across Wii Sports, Wii Sports Resort, Wii Sports Club, and Switch Sports."
+              </p>
+              #text "\n            "
+            </div>
+            #text "\n          "
+          </div>
+          #text "\n          "
+          <div class="partner-guide-card-media" aria-hidden="true">
+            <img class="partner-guide-card-logo" src="/assets/partners/_wiisports.png" alt="" loading="lazy" decoding="async"/>
+          </div>
+          #text "\n          "
+          <div class="content-box-bottom" aria-hidden="true"/>
+          #text "\n        "
+        </article>
+        #text "\n\n        "
+        <article class="content-box partner-guide-card" role="listitem">
+          #text "\n          "
+          <div class="content-box-top" aria-hidden="true">
+            #text "\n            "
+            <div class="content-box-top-left"/>
+            #text "\n            "
+            <div class="content-box-top-main"/>
+            #text "\n          "
+          </div>
+          #text "\n          "
+          <div class="content-box-center">
+            #text "\n            "
+            <div class="content-box-texture" aria-hidden="true"/>
+            #text "\n            "
+            <div class="partner-guide-card-flex">
+              #text "\n              "
+              <div class="partner-guide-card-title-wrap">
+                #text "\n                "
+                <h2 class="partner-guide-card-title">
+                  #text "RAGNAROK"
+                </h2>
+                #text "\n              "
+              </div>
+              #text "\n            "
+            </div>
+            #text "\n            "
+            <div class="partner-guide-card-description-wrap">
+              #text "\n              "
+              <p class="partner-guide-card-description">
+                #text "The RAGNAROK server was founded to unite the entire competitive Inazuma Eleven community. We focus on every Inazuma Eleven game that can be played online. RAGNAROK holds the records for the largest tournaments of Inazuma Eleven GO, Inazuma Eleven GO: Chrono Stones, Inazuma Eleven GO Galaxy, Inazuma Eleven GO Strikers 2013, and Inazuma Eleven GO Strikers 2013 Xtreme."
+              </p>
+              #text "\n            "
+            </div>
+            #text "\n          "
+          </div>
+          #text "\n          "
+          <div class="partner-guide-card-media" aria-hidden="true">
+            <img class="partner-guide-card-logo" src="/assets/partners/_ragnarok.png" alt="" loading="lazy" decoding="async"/>
+          </div>
+          #text "\n          "
+          <div class="content-box-bottom" aria-hidden="true"/>
+          #text "\n        "
+        </article>
+        #text "\n\n        "
+        <article class="content-box partner-guide-card" role="listitem">
+          #text "\n          "
+          <div class="content-box-top" aria-hidden="true">
+            #text "\n            "
+            <div class="content-box-top-left"/>
+            #text "\n            "
+            <div class="content-box-top-main"/>
+            #text "\n          "
+          </div>
+          #text "\n          "
+          <div class="content-box-center">
+            #text "\n            "
+            <div class="content-box-texture" aria-hidden="true"/>
+            #text "\n            "
+            <div class="partner-guide-card-flex">
+              #text "\n              "
+              <div class="partner-guide-card-title-wrap">
+                #text "\n                "
+                <h2 class="partner-guide-card-title">
+                  #text "CUSTOM ROBOCENTER"
+                </h2>
+                #text "\n              "
+              </div>
+              #text "\n            "
+            </div>
+            #text "\n            "
+            <div class="partner-guide-card-description-wrap">
+              #text "\n              "
+              <p class="partner-guide-card-description">
+                #text "Custom Robo Hub is a community for fans of Custom Robo: Battle Revolution and the series as a whole, offering regular netplay events, active friendlies, and ongoing efforts to enhance the competitive experience through balance updates."
+              </p>
+              #text "\n            "
+            </div>
+            #text "\n          "
+          </div>
+          #text "\n          "
+          <div class="partner-guide-card-media" aria-hidden="true">
+            <img class="partner-guide-card-logo" src="/assets/partners/_nologo.png" alt="" loading="lazy" decoding="async"/>
+          </div>
+          #text "\n          "
+          <div class="content-box-bottom" aria-hidden="true"/>
+          #text "\n        "
+        </article>
+        #text "\n      "
+      </div>
+      #text "\n    "
+    </section>
+    #text "\n  "
+  </main>
+  #text "\n\n  "
+  #text "\n  "
+  #text "\n\n\n"
+  <footer id="global-footer">
+    <p class="global-footer-disclaimer">
+      #text "This website is not affiliated with Nintendo. All product names, logos, and brands are property of their respective owners."
+    </p>
+    <p class="global-footer-links">
+      <a href="https://discord.gg/de2YaWg" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "DISCORD"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://x.com/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "X"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://www.youtube.com/@MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "YOUTUBE"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="https://twitch.tv/MarioStrikersGG" class="global-footer-link" target="_blank" rel="noopener noreferrer">
+        #text "TWITCH"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/about-us" class="global-footer-link">
+        #text "ABOUT US"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
+      <a href="/privacy-policy" class="global-footer-link">
+        #text "PRIVACY POLICY"
+      </a>
+    </p>
+  </footer>
+</body>
