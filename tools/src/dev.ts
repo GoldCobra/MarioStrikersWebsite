@@ -14,7 +14,7 @@ const apiOrigin = `http://127.0.0.1:${apiPort}`;
 const api = startProcess(
   "api",
   process.execPath,
-  ["--watch", live ? "src/dev-live.js" : "src/dev.js"],
+  ["--watch", live ? "src/dev-live.ts" : "src/dev.ts"],
   {
     PORT: String(apiPort),
     DEV_HOST: "127.0.0.1",

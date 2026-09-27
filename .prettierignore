@@ -5,7 +5,6 @@ package-lock.json
 tests/e2e/golden/
 
 # Legacy code keeps its current formatting until it is rewritten in TypeScript.
-apps/api/
 apps/web/public/
 docs/archive/
 

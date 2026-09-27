@@ -30,7 +30,7 @@ database or account secrets into fixtures.
 
 Copy `apps/api/.env.example` to `apps/api/.env` with your editor or file manager.
 Fill only the settings needed for the integration. The template and
-`apps/api/src/config.js` are the source of truth for names and defaults.
+`apps/api/src/config.ts` are the source of truth for names and defaults.
 
 | Integration | Configuration |
 | --- | --- |
@@ -47,8 +47,8 @@ uses secure cookies over HTTPS.
 Run `npm run dev:live` from the repository root to serve the site and live API together
 at **http://localhost:8787** (the API reads `apps/api/.env`). Missing service configuration may cause the
 corresponding API calls to fail; other pages and browser save tools remain
-available. A live database smoke check is `npm run sync:mssql:once`; run it
-only when the intended database connection is configured.
+available. A live database smoke check is `npm run ops:check-db --workspace=@ms/api`;
+run it only when the intended database connection is configured.
 
 ## Checks and troubleshooting
 

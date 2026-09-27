@@ -1,6 +1,6 @@
 # Deployment and rollback
 
-Production runs Caddy for HTTPS, Nginx for the frontend and Express for the API
+Production runs Caddy for HTTPS, Nginx for the frontend and the Fastify API
 using `docker-compose.prod.yml`. FlareSolverr is an additional service. Database
 and Discord credentials, along with runtime cache volumes, remain on the server.
 

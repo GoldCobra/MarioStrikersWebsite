@@ -4,13 +4,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    command: ["node", "--watch", "apps/api/src/dev.js"]
+    command: ["node", "--watch", "apps/api/src/dev.ts"]
     environment:
       NODE_ENV: development
       DEV_HOST: 0.0.0.0
       PORT: 8787
     volumes:
       - ./apps/api/src:/app/apps/api/src:ro
+      - ./packages/shared/src:/app/packages/shared/src:ro
 
   frontend:
     build:

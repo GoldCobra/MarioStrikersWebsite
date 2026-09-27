@@ -10,6 +10,7 @@
   "scripts": {
     "build": "astro build",
     "check": "astro check",
+    "test": "node --test \"src/**/*.test.ts\"",
     "astro": "astro"
   },
   "dependencies": {

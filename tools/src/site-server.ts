@@ -51,7 +51,8 @@ function forwardToApi(request: IncomingMessage, response: ServerResponse, apiOri
   const target = new URL(request.url ?? "/", apiOrigin);
   const upstream = httpRequest(
     target,
-    { method: request.method, headers: { ...request.headers, host: target.host } },
+    // Like nginx, the API sees the site's host, which its same-site checks compare with the Origin.
+    { method: request.method, headers: request.headers },
     (apiResponse) => {
       response.writeHead(apiResponse.statusCode ?? 502, apiResponse.headers);
       apiResponse.pipe(response);

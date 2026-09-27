@@ -30,13 +30,25 @@ function normalizeLocation(value: string | undefined): string | undefined {
   return value?.replace(/([?&]state=)[^&]+/, "$1<state>");
 }
 
+// Signed cookie values differ per process; each cookie keeps its name, attributes and whether it is empty.
 function normalizeSetCookie(value: string | undefined): string | undefined {
-  return value?.replace(/=([^;]+)/, (_match, token: string) => (token ? "=<token>" : "="));
+  return value
+    ?.split("\n")
+    .map((cookie) =>
+      cookie.replace(/^([^=;]+)=([^;]*)/, (_match, name: string, token: string) => `${name}=${token ? "<token>" : ""}`),
+    )
+    .join("\n");
+}
+
+async function send(method: "GET" | "POST", context: APIRequestContext, path: string): Promise<APIResponse> {
+  return method === "GET" ? context.get(path, { maxRedirects: 0 }) : context.post(path, { maxRedirects: 0 });
 }
 
 async function record(method: "GET" | "POST", context: APIRequestContext, path: string): Promise<ContractRecord> {
-  const response: APIResponse =
-    method === "GET" ? await context.get(path, { maxRedirects: 0 }) : await context.post(path, { maxRedirects: 0 });
+  return toRecord(method, path, await send(method, context, path));
+}
+
+async function toRecord(method: "GET" | "POST", path: string, response: APIResponse): Promise<ContractRecord> {
   const headers: Record<string, string> = {};
   const all = response.headers();
   for (const name of COMPARED_HEADERS) {
@@ -120,8 +132,10 @@ function entityPaths(): string[] {
 
 async function authFlow(context: APIRequestContext, code: "sample" | "sample-unlinked"): Promise<ContractRecord[]> {
   const records: ContractRecord[] = [];
-  const start = await context.get("/api/auth/discord/start?returnTo=/profile", { maxRedirects: 0 });
-  records.push(await record("GET", context, "/api/auth/discord/start?returnTo=/profile"));
+  // One start: its state must reach the callback together with the cookie this start set.
+  const startPath = "/api/auth/discord/start?returnTo=/profile";
+  const start = await send("GET", context, startPath);
+  records.push(await toRecord("GET", startPath, start));
   const location = (start.headers().location ?? "").replace("code=sample&", `code=${code}&`);
   records.push(await record("GET", context, location));
   records.push(await record("GET", context, "/api/auth/me"));
@@ -146,7 +160,7 @@ test.describe("API contract", () => {
       for (const path of paths) {
         const expected = await record("GET", reference, path);
         const actual = await record("GET", candidate, path);
-        expect(actual, path).toEqual(expected);
+        expect.soft(actual, path).toEqual(expected);
       }
       await reference.dispose();
       await candidate.dispose();

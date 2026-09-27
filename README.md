@@ -71,8 +71,8 @@ stay identical to a reference commit.
 | Location | Purpose |
 | --- | --- |
 | `apps/web/` | Astro site; `public/` holds page shells, styles, browser scripts and assets |
-| `apps/api/` | Express API, service integrations, fixtures and tests |
-| `packages/shared/` | Page registry, navigation model and URL routing used everywhere |
+| `apps/api/` | Fastify API in TypeScript: one module per domain, integrations, fixtures and tests |
+| `packages/shared/` | Page registry, navigation model, URL routing and helpers shared by site and API |
 | `tools/` | Local servers, the nginx route generator and their tests |
 | `tests/e2e/` | Comparison checks against a reference commit |
 | `infra/nginx/` | Production web server configuration |
@@ -81,7 +81,7 @@ stay identical to a reference commit.
 The repository is an npm workspace; one `npm ci` at the root installs everything.
 The pages are still plain HTML, CSS and JavaScript, built with Astro. One
 shared routing function serves clean URLs locally; production nginx mirrors it.
-Production uses Caddy, Nginx and Express;
+Production uses Caddy, Nginx and the Fastify API;
 MSSQL provides community data, with local caches for public data and club logos.
 
 ## Contributing and releases
