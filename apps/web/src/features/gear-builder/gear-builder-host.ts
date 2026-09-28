@@ -193,6 +193,17 @@ function setupHeightSync(host: HTMLElement): () => void {
   return schedule;
 }
 
+/**
+ * sliders.js paints its range sliders from window.onload, written for a page that loads it directly. Here
+ * it runs after the page has loaded, so the handler would never fire: run it once. (While the page is
+ * still loading, the load event runs it as intended.)
+ */
+function runMissedLoadHandler(): void {
+  if (document.readyState === "complete" && typeof window.onload === "function") {
+    window.onload.call(window, new Event("load"));
+  }
+}
+
 function paneStatusHtml(message: string, isError: boolean): string {
   return `<p class="msbl-gear-pane-state${isError ? " is-error" : ""}" role="status">${message}</p>`;
 }
@@ -271,6 +282,7 @@ export async function initGearBuilder(host: HTMLElement): Promise<void> {
     host.innerHTML = preferWebp(await response.text());
     attachWebpFallbacks(host);
     for (const script of SCRIPTS) await loadScript(script);
+    runMissedLoadHandler();
     const observer = statObserver();
     const schedule = setupHeightSync(host);
     setupLazyPanes(host, observer, schedule);

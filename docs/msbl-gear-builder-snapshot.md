@@ -8,6 +8,9 @@ Paths are relative to the web root `apps/web/public/` unless they start with `do
 
 - Assets: `assets/gear-builder/`
 - Template: `pages/templates/msbl-gear-builder.html`
+- Character panes: generated at build time from `apps/web/src/content/gear-builder/`
+  (`characters.ts` holds the base stats and speed with the ball, `pane.ts` the markup)
+  and served at `/pages/templates/msbl-gear-builder/panes/<character>.html`
 - Host page: `apps/web/src/pages/pages/msbl-gear-builder.astro`
 - Host bootstrap: `apps/web/src/features/gear-builder/gear-builder-host.ts`
 - Original full-page snapshot archive: `docs/archive/gear-builder/index-original.html`
@@ -24,6 +27,9 @@ Paths are relative to the web root `apps/web/public/` unless they start with `do
 2. Regenerate `pages/templates/msbl-gear-builder.html` from the source HTML section:
    - keep only the `<section class="section">...</section>` block
    - rewrite `src="images/..."` and `href="images/..."` to `../assets/gear-builder/images/...`
+   - move the 16 character panes out of it: update `characters.ts` when stats changed and
+     `pane.ts` when the pane markup changed (its ids and classes are what the scripts use);
+     `pane.test.ts` pins the current output, so update `pane.golden.json` with the change
 3. Preserve and review local changes when integrating upstream files:
    - explicit event params instead of implicit global `event`
    - checklist assignment bug fix (`===`)
@@ -42,5 +48,7 @@ Paths are relative to the web root `apps/web/public/` unless they start with `do
 ## Notes
 
 - This integration is a local snapshot (no auto-sync).
-- Public route: `/msbl-gear-builder`; implementation file: `pages/msbl-gear-builder.html`.
+- Public route: `/msbl-gear-builder`; implementation file: `apps/web/src/pages/pages/msbl-gear-builder.astro`.
+- `scripts/sliders.js` paints its sliders from `window.onload`; the host runs that handler once
+  after loading the scripts, because the page has already loaded by then.
 - Record the imported source/date and retain attribution when updating the snapshot.
