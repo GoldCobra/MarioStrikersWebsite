@@ -750,7 +750,5 @@
   "assets/tierlists/sms-tierlist-current.png": "8f15d150dd99708a",
   "assets/tierlists/sms-tierlist-current.webp": "e732ef6a2b79ffee",
   "assets/ui/menu-buttons.png": "466d156c2ae71d04",
-  "pages/templates/club-profile-popup.html": "957a6e273f4d7966",
-  "pages/templates/msbl-gear-builder.html": "4a06a19324138c27",
-  "pages/templates/player-profile-popup.html": "f3914db3ef147473"
+  "pages/templates/msbl-gear-builder.html": "4a06a19324138c27"
 }

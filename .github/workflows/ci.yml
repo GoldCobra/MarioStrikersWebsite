@@ -92,7 +92,7 @@ jobs:
                   if attempt == 29:
                       raise
                   time.sleep(1)
-          for route in ['/', '/players', '/msbl-elo1v1', '/pages/templates/player-profile-popup.html', '/api/clubs/msbl/1/logo']:
+          for route in ['/', '/players', '/msbl-elo1v1', '/pages/templates/msbl-gear-builder.html', '/api/clubs/msbl/1/logo']:
               with urllib.request.urlopen(base + route, timeout=5) as response:
                   assert response.status == 200, route
           with urllib.request.urlopen(base + '/api/auth/me', timeout=5) as response:

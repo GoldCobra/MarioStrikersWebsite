@@ -51,7 +51,7 @@ function buildProbes(): string[] {
     "/assets/",
     "/pages/",
     "/pages/templates/player-profile-popup.html",
-    "/pages/templates/club-profile-popup.html",
+    "/pages/templates/msbl-gear-builder.html",
     "/css/global.css",
     "/js/global-nav.js",
     "/favicon.ico",

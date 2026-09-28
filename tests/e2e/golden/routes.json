@@ -1791,11 +1791,11 @@
   },
   {
     "path": "/pages/templates/player-profile-popup.html",
-    "status": 200,
+    "status": 404,
     "location": null
   },
   {
-    "path": "/pages/templates/club-profile-popup.html",
+    "path": "/pages/templates/msbl-gear-builder.html",
     "status": 200,
     "location": null
   },

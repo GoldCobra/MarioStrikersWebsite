@@ -1,20 +1,14 @@
-// A dialog loaded from an HTML template on first use (pages/templates/*-popup.html): named slots
-// (data-slot) and lists (data-list) to fill, a status line for loading and errors, close buttons, Escape,
-// and focus kept inside while it is open. The player and the club popup are built on it.
+// A dialog mounted from its HTML template on first use (the feature's *-popup.html, bundled with its code):
+// named slots (data-slot) and lists (data-list) to fill, a status line for loading and errors, close
+// buttons, Escape, and focus kept inside while it is open. The player and the club popup are built on it.
 
 export interface PopupOptions {
-  readonly templateUrl: string;
+  /** The popup's markup: one root element, hidden until opened. */
+  readonly template: string;
   /** Class on <body> while the popup is open. */
   readonly openClass: string;
   /** The close button that gets focus when the popup opens. */
   readonly closeButtonSelector: string;
-  /** Note shown above the page's list when the popup cannot open at all, with a retry button. */
-  readonly openError: {
-    readonly id: string;
-    readonly className: string;
-    readonly message: string;
-    readonly mountIds: readonly string[];
-  };
 }
 
 function mapByAttribute(root: HTMLElement, attribute: string): Record<string, HTMLElement | undefined> {
@@ -45,7 +39,6 @@ export class TemplatePopup {
   isOpen = false;
   private activeRequest: symbol | null = null;
   private opener: HTMLElement | null = null;
-  private templateLoad: Promise<HTMLElement> | null = null;
   private keyboardBound = false;
   private readonly options: PopupOptions;
 
@@ -53,25 +46,11 @@ export class TemplatePopup {
     this.options = options;
   }
 
-  /** Loads and mounts the popup once; a failed load is retried on the next request. */
-  ensure(): Promise<HTMLElement> {
-    if (this.root) return Promise.resolve(this.root);
-    this.templateLoad ??= fetch(this.options.templateUrl, { headers: { Accept: "text/html" }, cache: "no-cache" })
-      .then((response) => {
-        if (!response.ok) throw new Error(`Failed to load ${this.options.templateUrl}.`);
-        return response.text();
-      })
-      .then((html) => this.mount(html))
-      .catch((error: unknown) => {
-        this.templateLoad = null;
-        throw error;
-      });
-    return this.templateLoad;
-  }
-
-  private mount(html: string): HTMLElement {
+  /** Mounts the popup once. */
+  ensure(): HTMLElement {
+    if (this.root) return this.root;
     const wrapper = document.createElement("div");
-    wrapper.innerHTML = html.trim();
+    wrapper.innerHTML = this.options.template.trim();
     const root = wrapper.firstElementChild;
     if (!(root instanceof HTMLElement)) throw new Error("Invalid popup template.");
     document.body.appendChild(root);
@@ -99,7 +78,6 @@ export class TemplatePopup {
   begin(): symbol {
     const request = Symbol("popup-request");
     this.activeRequest = request;
-    this.clearOpenError();
     this.bindKeyboard();
     return request;
   }
@@ -120,7 +98,6 @@ export class TemplatePopup {
 
   close(): void {
     this.activeRequest = null;
-    this.clearOpenError();
     if (!this.root) return;
     this.root.hidden = true;
     this.root.setAttribute("aria-hidden", "true");
@@ -149,30 +126,6 @@ export class TemplatePopup {
   setText(slot: string, value: string): void {
     const node = this.slots[slot];
     if (node) node.textContent = value;
-  }
-
-  clearOpenError(): void {
-    document.getElementById(this.options.openError.id)?.remove();
-  }
-
-  /** When the popup cannot even open, a note with a retry button appears above the page's list. */
-  showOpenError(retry: () => void): void {
-    this.clearOpenError();
-    const { id, className, message, mountIds } = this.options.openError;
-    const mount = mountIds.map((mountId) => document.getElementById(mountId)).find(Boolean);
-    if (!mount) return;
-    const feedback = document.createElement("p");
-    feedback.id = id;
-    feedback.className = className;
-    feedback.setAttribute("role", "alert");
-    feedback.textContent = message;
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "profile-action-button";
-    button.textContent = "Retry";
-    button.addEventListener("click", retry);
-    feedback.appendChild(button);
-    mount.insertAdjacentElement("beforebegin", feedback);
   }
 
   private bindKeyboard(): void {

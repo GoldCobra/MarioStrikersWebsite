@@ -1,7 +1,7 @@
-// Guards against stale browser caches: images, fonts, the Gear Builder snapshot and the popup templates keep
-// their URL when their content changes, and browsers cache them for up to a month. assets.lock.json
-// records a hash of every such file; a changed file fails `npm run check` until its ?v= cache tag is
-// bumped where it is referenced (or it gets a new name) and the lock is renewed:
+// Guards against stale browser caches: images, fonts and the Gear Builder snapshot keep their URL when
+// their content changes, and browsers cache them for up to a month. assets.lock.json records a hash of
+// every such file; a changed file fails `npm run check` until its ?v= cache tag is bumped where it is
+// referenced (or it gets a new name) and the lock is renewed:
 //   node tools/src/assets-lock.ts          check (part of npm run check)
 //   node tools/src/assets-lock.ts --write  renew the lock after the tags are bumped
 

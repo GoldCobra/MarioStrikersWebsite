@@ -55,8 +55,9 @@ country helpers and `popup.ts`, the template popup both profile popups are built
 on. The
 competitive rules are rendered at build time from `src/content/competitive-rules/`
 (edit the typed text in `rules.ts`), so their pages need no script and search
-engines read the full text. The popups are loaded from
-`/pages/templates/player-profile-popup.html` and `club-profile-popup.html`.
+engines read the full text. The popups' markup
+(`player-profile-popup.html`, `club-profile-popup.html`) sits next to their code
+and is bundled with it.
 The Gear Builder loads `/pages/templates/msbl-gear-builder.html` and its assets
 under `assets/gear-builder/`; its 16 character panes are rendered at build time
 from `src/content/gear-builder/` (see [Gear Builder maintenance](msbl-gear-builder-snapshot.md)).

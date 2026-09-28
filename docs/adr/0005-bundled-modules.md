@@ -24,4 +24,5 @@ character panes are rendered from typed data.
 - Nothing to bump: a changed file gets a new URL, an unchanged one stays
   cached for a year.
 - Shared helpers exist once (`@ms/shared/html`, `src/lib/popup.ts`, ...).
-- Only the Gear Builder snapshot and the popup templates keep `?v=` tags.
+- Only the Gear Builder snapshot keeps `?v=` tags; the popup templates are
+  bundled with their code.
