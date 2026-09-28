@@ -39,6 +39,10 @@ Agree on the task before editing shared navigation, global CSS or the same PSD.
   (`alt=""` for decoration); `npm run check:frontend` enforces both.
 - Keep design sources in `docs/source-assets/` and exported runtime files in
   `assets/`. Coordinate binary edits; avoid unrelated asset conversions.
+- A changed image, font or popup template keeps its URL, and browsers cache it:
+  bump its `?v=` cache tag where it is referenced or give it a new name, then
+  renew `apps/web/assets.lock.json` with `node tools/src/assets-lock.ts --write`.
+  `npm run check` fails until then.
 - Keep credentials, personal saves, database exports and local caches out of Git.
 
 ## Common changes
