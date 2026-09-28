@@ -1,8 +1,8 @@
 ---
 import SiteLayout from "../../layouts/SiteLayout.astro";
 ---
-<SiteLayout slug="community-tournaments" scripts={["eventsEngine"]}>
+<SiteLayout slug="community-tournaments">
     <section class="events-page" aria-label="Current community tournaments">
       <section id="events-root" aria-label="Current community tournaments"></section>
     </section>
-  </SiteLayout>
+  <Fragment slot="scripts"><script src="../../entries/events-page.ts"></script></Fragment></SiteLayout>

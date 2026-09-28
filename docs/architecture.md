@@ -36,11 +36,14 @@ list its scripts by name from `assets.ts`. A unit test fails when the registry
 and the page files disagree. Page modules go into the layout's `scripts` slot
 (`<Fragment slot="scripts"><script src="…"></script></Fragment>`).
 
-The players list, the player popup (`src/features/players/`), the profile page
-(`src/features/profile/`), the rating cards (`src/features/rating-cards/`), the
-clubs list with its club popup (`src/features/clubs/`) and the leaderboards
-(`src/features/leaderboards/`: the tab strip is rendered into the page, the rows
-load in the browser) are modules. `src/lib/` holds the shared API fetch, the
+All browser code except the save editors and the Gear Builder host is modules
+in `src/features/`: the players list and player popup (`players/`), the profile
+page (`profile/`), the rating cards (`rating-cards/`), the clubs list and club
+popup (`clubs/`), the leaderboards (`leaderboards/`: the tab strip is rendered
+into the page, the rows load in the browser), the home page season countdowns
+(`landing-countdown/`; the clock logic in `season-clock.ts` is unit-tested),
+the community events (`events/`), the MSC Wiimmfi list (`wiimmfi/`) and the
+placeholder page (`placeholder/`). `src/lib/` holds the shared API fetch, the
 country helpers and `popup.ts`, the template popup both profile popups are built
 on. The
 competitive rules are rendered at build time from `src/content/competitive-rules/`
