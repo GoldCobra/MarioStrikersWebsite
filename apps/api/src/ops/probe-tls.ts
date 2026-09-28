@@ -20,12 +20,16 @@ await runOperation("ops:probe-tls", async ({ config }) => {
     let pool: mssql.ConnectionPool | null = null;
     try {
       pool = await new mssql.ConnectionPool(createConnectionConfig(settings)).connect();
-      const result = await pool
+      await pool.request().query("SELECT 1 AS ok");
+      // Reading the connection's encryption needs VIEW SERVER STATE, which the site's login may lack.
+      const encrypted = await pool
         .request()
         .query<{ encrypted: string }>(
           "SELECT encrypt_option AS encrypted FROM sys.dm_exec_connections WHERE session_id = @@SPID",
-        );
-      results.push({ ...variant, connects: true, encrypted: result.recordset[0]?.encrypted ?? "unknown" });
+        )
+        .then((result) => result.recordset[0]?.encrypted ?? "unknown")
+        .catch(() => "not visible to this login");
+      results.push({ ...variant, connects: true, encrypted });
     } catch (error) {
       results.push({ ...variant, connects: false, error: error instanceof Error ? error.message : String(error) });
     } finally {
