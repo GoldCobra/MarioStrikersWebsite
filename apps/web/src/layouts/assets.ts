@@ -6,7 +6,6 @@ export const SCRIPTS = {
   gearBuilderHost: "/js/msbl-gear-builder-host.js?v=20260508-lazy-v1",
   landingCountdown: "/js/landing-countdown.js?v=20260902-season-visuals-v1",
   msblSaveEditorContract: "/js/msbl-save-editor-contract.js?v=20260501-msbl-gear-preset-v1",
-  msblClubsEngine: "/js/msbl-clubs-engine.js?v=20260913-popup-resilience-v1",
   msblSaveEditor: "/js/msbl-save-editor.js?v=20260501-msbl-gear-preset-v1",
   mscOnlineEditor: "/js/msc-online-editor.js?v=20260429-delete-codes-v1",
   mscSaveEditor: "/js/msc-save-editor.js?v=20260501-export-applies-v1",
