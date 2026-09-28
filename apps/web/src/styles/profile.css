@@ -228,11 +228,6 @@
   background: rgba(0, 0, 0, 0.32);
 }
 
-/* Dim the content, not the card, so the game-coloured border stays at full strength. */
-.profile-rating-card.is-inactive-rating > * {
-  opacity: 0.55;
-}
-
 .profile-rating-title {
   margin: 0 0 0.24rem;
   color: #fff;

@@ -1,5 +1,15 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
   "reference": "9e2e749f620ef37f164ed7059d9ead4b91bb77a7",
-  "changes": []
+  "changes": [
+    {
+      "screenshots": [
+        "states/players-popup-*",
+        "states/leaderboard-popup-*",
+        "states/whr-popup-*",
+        "states/profile-linked-*"
+      ],
+      "reason": "Owner request: the game code on the compact rating cards sits higher, 11px instead of 7px above the rank name's capitals, so the card grows by 4px; inactive cards (no match this season) get a grey border and greyed-out content."
+    }
+  ]
 }
