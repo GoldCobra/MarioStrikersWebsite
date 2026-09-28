@@ -174,7 +174,6 @@
   border-radius: 50%;
 }
 
-.global-account-label,
 .global-account-name {
   display: inline-block;
   max-width: 116px;
@@ -183,10 +182,6 @@
   white-space: nowrap;
   font-size: 0.84rem;
   letter-spacing: 0.02em;
-}
-
-.global-account[data-auth-state="loading"] .global-account-label {
-  display: none;
 }
 
 .global-account-menu {

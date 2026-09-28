@@ -272,32 +272,6 @@
   font-weight: 700;
 }
 
-.player-popup-season-reward-line {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.46rem;
-  color: #f2f2f2;
-  font-family: var(--reporter-font-stack);
-  font-weight: var(--reporter-font-weight);
-  letter-spacing: var(--reporter-letter-spacing);
-}
-
-#player-profile-popup .player-popup-season-reward-line {
-  font-size: 17px;
-}
-
-.player-popup-season-reward-label {
-  color: rgba(255, 255, 255, 0.92);
-  font-weight: 400;
-}
-
-.player-popup-season-reward-icon {
-  width: auto;
-  height: var(--profile-rating-reward-icon-height);
-  object-fit: contain;
-}
-
 .player-popup-rank-banner {
   display: block;
   width: min(300px, 100%);

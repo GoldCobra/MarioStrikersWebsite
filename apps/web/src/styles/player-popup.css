@@ -207,8 +207,7 @@ body.player-popup-open {
   .player-popup-season-award-item,
   .player-popup-rating-title,
   .player-popup-rating-line,
-  .player-popup-rating-reward-main,
-  .player-popup-season-reward-line
+  .player-popup-rating-reward-main
 ) {
   font-size: var(--reporter-font-size-sm);
 }
@@ -222,8 +221,7 @@ body.player-popup-open {
   .player-popup-season-award-item,
   .player-popup-rating-title,
   .player-popup-rating-line,
-  .player-popup-rating-reward-main,
-  .player-popup-season-reward-line
+  .player-popup-rating-reward-main
 ) {
   font-size: 15px;
   line-height: 1.22;

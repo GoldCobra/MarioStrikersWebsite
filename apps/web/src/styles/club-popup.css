@@ -168,20 +168,9 @@
   transform: translateY(0px);
 }
 
-.club-popup-meta-condition,
-.club-popup-meta-extra,
-.club-popup-meta-separator {
+.club-popup-meta-condition {
   display: inline-flex;
   align-items: center;
-}
-
-.club-popup-meta-separator {
-  margin: 0 0.38rem;
-  color: rgba(255, 255, 255, 0.68);
-}
-
-.club-popup-meta-extra {
-  color: #f2f2f2;
 }
 
 .club-popup-content {
