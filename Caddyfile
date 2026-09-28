@@ -1,4 +1,11 @@
-mariostrikers.gg, www.mariostrikers.gg {
+# www serves nothing itself: every request moves permanently to the same path on the main domain, so
+# search engines index one address per page.
+www.mariostrikers.gg {
+	header Strict-Transport-Security "max-age=31536000"
+	redir https://mariostrikers.gg{uri} permanent
+}
+
+mariostrikers.gg {
 	encode zstd gzip
 	header {
 		Strict-Transport-Security "max-age=31536000"
