@@ -24,7 +24,7 @@ adds the behaviour (`src/features/nav/`): the account widget, the tab strip
 (`src/features/tabs/`), centring of overflowing navigation, link prefetching and
 redirects of old `?tabs=` and `?submenu=` links. Modules run before the legacy
 scripts; while a legacy script still reads a global (such as
-`window.GlobalTabsEngine`), the module that replaced its provider sets it. Shared popup classes in `src/styles/popups.css` are
+`window.MSCFlags`), the page's entry module sets it (`src/lib/legacy-globals.ts`). Shared popup classes in `src/styles/popups.css` are
 `popup-overlay`, `popup-card`, `popup-header`, `popup-title` and `popup-close`.
 
 **Adding a page:** add it to `packages/shared/src/site/pages.ts` (title,
@@ -40,8 +40,9 @@ and the page files disagree. Page modules go into the layout's `scripts` slot
 The players list, the player popup (`src/features/players/`), the profile page
 (`src/features/profile/`) and the rating cards (`src/features/rating-cards/`)
 are modules; `src/lib/` holds the shared API fetch and country helpers. The
-leaderboards and clubs are still legacy engines in `public/js/`: the
-leaderboards pair `leaderboards-config.js` with `leaderboards-engine.js`. The
+leaderboards (`src/features/leaderboards/`: the tab strip is rendered into the
+page, the rows load in the browser) are modules too; the clubs are still the
+legacy `public/js/msbl-clubs-engine.js`. The
 competitive rules are rendered at build time from `src/content/competitive-rules/`
 (edit the typed text in `rules.ts`), so their pages need no script and search
 engines read the full text. The player popup is loaded from
