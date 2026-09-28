@@ -232,6 +232,115 @@
     }
   },
   {
+    "tag": "script",
+    "json": {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Mario Strikers: Battle League tier list",
+      "url": "https://mariostrikers.gg/msbl-tierlist",
+      "itemListOrder": "https://schema.org/ItemListOrderDescending",
+      "numberOfItems": 16,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Waluigi",
+          "description": "S+ tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Pauline",
+          "description": "S tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Toad",
+          "description": "S tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Donkey Kong",
+          "description": "S tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Peach",
+          "description": "S tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "Bowser",
+          "description": "A tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 7,
+          "name": "Diddy Kong",
+          "description": "A tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 8,
+          "name": "Bowser Jr.",
+          "description": "B tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 9,
+          "name": "Mario",
+          "description": "B tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 10,
+          "name": "Shy Guy",
+          "description": "B tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 11,
+          "name": "Birdo",
+          "description": "B tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 12,
+          "name": "Wario",
+          "description": "B tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 13,
+          "name": "Luigi",
+          "description": "C tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 14,
+          "name": "Rosalina",
+          "description": "C tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 15,
+          "name": "Daisy",
+          "description": "C tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 16,
+          "name": "Yoshi",
+          "description": "D tier"
+        }
+      ]
+    }
+  },
+  {
     "tag": "title",
     "text": "Mario Strikers: Battle League Tier List (MSBL)"
   }

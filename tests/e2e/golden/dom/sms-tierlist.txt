@@ -87,7 +87,11 @@
     #text "\n    "
     <figure class="tier-list-figure tier-list-figure--scale65">
       #text "\n      "
-      <img class="tier-list-image" src="/assets/tierlists/sms-tierlist-current.webp" width="1003" height="384" alt="SMS tier list" decoding="async"/>
+      <img class="tier-list-image" src="/assets/tierlists/sms-tierlist-current.webp" width="1003" height="384" alt="Super Mario Strikers tier list" decoding="async"/>
+      #text "\n      "
+      <figcaption class="visually-hidden">
+        #text "Super Mario Strikers tier list, from best to weakest. Captains: S tier: Daisy, Peach. A tier: Mario, Yoshi, Super Team, Luigi. B tier: Waluigi, Wario, Donkey Kong. Sidekicks: S tier: Toad. A tier: Birdo. B tier: Koopa Troopa, Hammer Bros."
+      </figcaption>
       #text "\n    "
     </figure>
     #text "\n  "

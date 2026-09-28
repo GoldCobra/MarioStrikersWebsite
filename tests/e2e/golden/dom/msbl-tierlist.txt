@@ -87,7 +87,11 @@
     #text "\n    "
     <figure class="tier-list-figure tier-list-figure--scale65">
       #text "\n      "
-      <img class="tier-list-image" src="/assets/tierlists/msbl-tierlist-current.webp" width="826" height="774" alt="MSBL tier list" decoding="async"/>
+      <img class="tier-list-image" src="/assets/tierlists/msbl-tierlist-current.webp" width="826" height="774" alt="Mario Strikers: Battle League tier list" decoding="async"/>
+      #text "\n      "
+      <figcaption class="visually-hidden">
+        #text "Mario Strikers: Battle League tier list, from best to weakest. S+ tier: Waluigi. S tier: Pauline, Toad, Donkey Kong, Peach. A tier: Bowser, Diddy Kong. B tier: Bowser Jr., Mario, Shy Guy, Birdo, Wario. C tier: Luigi, Rosalina, Daisy. D tier: Yoshi."
+      </figcaption>
       #text "\n    "
     </figure>
     #text "\n  "

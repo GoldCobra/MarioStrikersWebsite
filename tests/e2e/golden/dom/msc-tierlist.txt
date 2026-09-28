@@ -87,7 +87,11 @@
     #text "\n    "
     <figure class="tier-list-figure tier-list-figure--scale65">
       #text "\n      "
-      <img class="tier-list-image" src="/assets/tierlists/msc-tierlist-current.webp" width="1135" height="774" alt="MSC tier list" decoding="async"/>
+      <img class="tier-list-image" src="/assets/tierlists/msc-tierlist-current.webp" width="1135" height="774" alt="Mario Strikers Charged tier list" decoding="async"/>
+      #text "\n      "
+      <figcaption class="visually-hidden">
+        #text "Mario Strikers Charged tier list, from best to weakest. Captains: S+ tier: Waluigi. S tier: Petey Piranha, Donkey Kong. A tier: Daisy, Wario, Bowser. B tier: Luigi, Mario, Diddy Kong. C tier: Yoshi, Peach. D tier: Bowser Jr. Sidekicks: S tier: Boo. A tier: Birdo, Dry Bones. B tier: Hammer Bros., Monty Mole. C tier: Toad, Koopa Troopa, Shy Guy."
+      </figcaption>
       #text "\n    "
     </figure>
     #text "\n  "

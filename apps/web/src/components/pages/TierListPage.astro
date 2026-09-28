@@ -1,7 +1,9 @@
 ---
-// Tier list pages: the current tier list image of one game.
+// Tier list pages: the current tier list image of one game, with the ranking as hidden text and
+// structured data for search engines and screen readers.
+import { canonicalUrl } from "@ms/shared/site/pages";
 import SiteLayout from "../../layouts/SiteLayout.astro";
-import { TIER_LISTS, displayWidth, type TierListGame } from "../../content/tier-lists.ts";
+import { TIER_LISTS, displayWidth, tierListJsonLd, tierListText, type TierListGame } from "../../content/tier-lists.ts";
 
 interface Props {
   slug: string;
@@ -9,11 +11,13 @@ interface Props {
 }
 
 const { slug, game } = Astro.props;
-const image = TIER_LISTS[game];
+const list = TIER_LISTS[game];
+const image = list.image;
 const label = game.toUpperCase();
 ---
-<SiteLayout slug={slug} mainClass="tier-list-page" mainLabel={`${label} tier lists`}>
+<SiteLayout slug={slug} mainClass="tier-list-page" mainLabel={`${label} tier lists`} jsonLd={tierListJsonLd(list, canonicalUrl(slug))}>
     <figure class="tier-list-figure tier-list-figure--scale65" style={`--tier-list-display-width: ${displayWidth(image)}px;`}>
-      <img class="tier-list-image" src={image.src} width={image.width} height={image.height} alt={`${label} tier list`} decoding="async">
+      <img class="tier-list-image" src={image.src} width={image.width} height={image.height} alt={`${list.game} tier list`} decoding="async">
+      <figcaption class="visually-hidden">{tierListText(list)}</figcaption>
     </figure>
   </SiteLayout>
