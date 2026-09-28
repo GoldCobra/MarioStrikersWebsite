@@ -128,3 +128,17 @@ test("production refuses the fixture data source", async () => {
   );
   await assert.rejects(buildApp({ config, data: createFixtureDataSource() }), /cannot run in production/);
 });
+
+test("rate-limited requests get the error shape of every other error", async () => {
+  const { app } = await createTestApp({ env: { RATE_LIMIT_ENABLED: "true" } });
+  let response = await app.inject("/api/auth/discord/start");
+  for (let attempt = 0; attempt < 30 && response.statusCode !== 429; attempt += 1) {
+    response = await app.inject("/api/auth/discord/start");
+  }
+  assert.equal(response.statusCode, 429);
+  const body = response.json<{ error: string; code: string; retryAfter: string }>();
+  assert.equal(body.code, "RATE_LIMITED");
+  assert.equal(body.error, "Too many requests. Try again in a minute.");
+  assert.match(body.retryAfter, /minute|second/);
+  assert.equal(response.headers["cache-control"], "no-store");
+});
