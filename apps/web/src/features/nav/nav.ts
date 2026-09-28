@@ -184,10 +184,16 @@ function bindAccountInteractions(root: HTMLElement): void {
         method: "POST",
         credentials: "same-origin",
         headers: { Accept: "application/json" },
-      }).finally(() => {
-        if (pageSlug() === "profile") window.location.reload();
-        else renderLoggedOut(root);
-      });
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error("Logout failed.");
+          if (pageSlug() === "profile") window.location.reload();
+          else renderLoggedOut(root);
+        })
+        .catch(() => {
+          // The session may still exist: stay signed in and let the user try again.
+          actionNode.textContent = "Logout failed, try again";
+        });
     }
   });
   document.addEventListener("click", (event) => {
