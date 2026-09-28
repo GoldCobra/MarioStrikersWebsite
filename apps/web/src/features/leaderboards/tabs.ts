@@ -8,15 +8,17 @@ export interface LeaderboardTab {
   readonly key: string;
   readonly label: string;
   readonly icon: string;
+  /** Intrinsic size of the square icon; CSS draws it at 18px. */
+  readonly iconSize: number;
 }
 
 export const LEADERBOARD_TABS: readonly LeaderboardTab[] = [
-  { key: "msbl-elo1v1", label: "ELO 1v1", icon: "msblball.png" },
-  { key: "msbl-whr", label: "WHR", icon: "msblball.png" },
-  { key: "msc-elo1v1", label: "ELO 1v1", icon: "mscball.png" },
-  { key: "msc-whr", label: "WHR", icon: "mscball.png" },
-  { key: "sms-elo1v1", label: "ELO 1v1", icon: "smsball.png" },
-  { key: "sms-whr", label: "WHR", icon: "smsball.png" },
+  { key: "msbl-elo1v1", label: "ELO 1v1", icon: "msblball.png", iconSize: 128 },
+  { key: "msbl-whr", label: "WHR", icon: "msblball.png", iconSize: 128 },
+  { key: "msc-elo1v1", label: "ELO 1v1", icon: "mscball.png", iconSize: 64 },
+  { key: "msc-whr", label: "WHR", icon: "mscball.png", iconSize: 64 },
+  { key: "sms-elo1v1", label: "ELO 1v1", icon: "smsball.png", iconSize: 128 },
+  { key: "sms-whr", label: "WHR", icon: "smsball.png", iconSize: 128 },
 ];
 
 // Asset URLs are relative to the page, as the former engine wrote them; every page URL is one level deep.
@@ -31,7 +33,7 @@ function tabInner(tab: LeaderboardTab): string {
   const src = `${ASSET_PREFIX}/assets/nav-buttons/sub/${tab.icon.replace(/\.png$/i, ".webp")}`;
   return [
     '<span class="leaderboard-tab-inner">',
-    `<img class="leaderboard-tab-ball" src="${escapeHtml(src)}" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='${escapeHtml(fallback)}'">`,
+    `<img class="leaderboard-tab-ball" src="${escapeHtml(src)}" width="${tab.iconSize}" height="${tab.iconSize}" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='${escapeHtml(fallback)}'">`,
     `<span class="leaderboard-tab-label">${escapeHtml(tabLabel(tab.label))}</span>`,
     "</span>",
   ].join("");
