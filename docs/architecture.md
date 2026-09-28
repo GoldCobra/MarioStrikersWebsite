@@ -75,7 +75,9 @@ test replays every URL shape recorded against production through
 `resolveRoute()`. Canonical metadata, navigation and sitemap entries must agree
 with public URLs.
 The private `/profile` page is excluded from indexing. `/sitemap.xml` is
-generated from the indexable pages of the registry. Unknown URLs get the site's
+generated from the indexable pages of the registry; its `lastmod` is the date the page's
+content last changed, which `scripts/deploy.py` records from the git history
+before the image build (`src/lib/lastmod.ts`). Unknown URLs get the site's
 own not-found page (`src/pages/404.astro`) with status 404, and API responses
 carry `X-Robots-Tag: noindex`.
 

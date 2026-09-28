@@ -226,6 +226,19 @@ class DeploymentTests(unittest.TestCase):
         self.deployer.change.assert_called_once_with(COMMIT)
         self.assertEqual(self.deployer.read(COMMIT)["ci_url"], "https://example.test/ci")
 
+    def test_lastmod_records_the_newest_commit_date_per_web_file(self):
+        log = "\n".join(["@2026-09-28T12:00:00+02:00", "", "apps/web/src/pages/pages/a.astro",
+                         "@2026-09-01T09:00:00+02:00", "", "apps/web/src/pages/pages/a.astro",
+                         "apps/web/src/content/b.ts"])
+        self.runner.side_effect = lambda args, **kwargs: log if args[1] == "log" else ""
+        with tempfile.TemporaryDirectory() as source:
+            self.deployer.write_lastmod(COMMIT, Path(source))
+            dates = json.loads((Path(source) / "apps/web/.release/lastmod.json").read_text(encoding="utf-8"))
+        self.assertEqual(dates, {"apps/web/src/pages/pages/a.astro": "2026-09-28T12:00:00+02:00",
+                                 "apps/web/src/content/b.ts": "2026-09-01T09:00:00+02:00"})
+        command = self.runner.call_args.args[0]
+        self.assertEqual(command[-3:], [COMMIT, "--", "apps/web/src"])
+
     def test_ci_failure_never_builds_or_changes_production(self):
         self.build_setup()
         with patch("deploy.verify_ci", side_effect=DeployError("CI failed")), self.assertRaises(DeployError):

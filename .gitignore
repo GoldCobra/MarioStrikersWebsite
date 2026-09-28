@@ -23,3 +23,6 @@ __pycache__/
 # Build output
 apps/web/dist/
 apps/web/.astro/
+
+# Written by scripts/deploy.py for the sitemap dates of a release build.
+apps/web/.release/
