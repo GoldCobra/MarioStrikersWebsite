@@ -16,7 +16,7 @@ the CI `containers` job and locally on Windows, macOS and Linux:
 npm ci
 npx playwright install chromium
 npm run test:visual     # screenshots: reference commit vs working tree
-npm run test:dom        # rendered markup and head vs committed goldens
+npm run test:dom        # rendered markup and head vs committed goldens, plus the CSP check
 npm run test:contract   # every API response and the save tools: reference commit vs working tree
 node tests/e2e/run.ts routes   # status and Location of all URL shapes (needs ROUTES_URL)
 ```
@@ -40,6 +40,11 @@ node tests/e2e/run.ts routes   # status and Location of all URL shapes (needs RO
   intended change (`node tests/e2e/run.ts dom --update`, `... routes --update`)
   and review the diff in the pull request.
 - **Intended API changes** are listed in `tests/e2e/specs/contract.deltas.ts`.
+- **Content Security Policy.** `specs/csp.spec.ts` (run with the DOM check)
+  opens every page and the interactive flows (popups, sign-in, Gear Builder
+  panes and card picture, all save editors) under the policy of
+  `infra/nginx/snippets/document-headers.conf`, which the local site server
+  sends as well, and fails on any violation.
 - **Save tools.** `specs/save-tools.spec.ts` (run with the contract check)
   drives the MSBL and MSC save editors and the friendlist editor through fixed
   flows on both stacks: loading valid and broken files, every edit, imports and

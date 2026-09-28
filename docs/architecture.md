@@ -22,7 +22,11 @@ former hand-written pages exactly, because text between inline elements takes
 space; the DOM goldens check it. `src/entries/site.ts`, loaded on every page,
 adds the behaviour (`src/features/nav/`): the account widget, the tab strip
 (`src/features/tabs/`), centring of overflowing navigation, link prefetching and
-redirects of old `?tabs=` and `?submenu=` links. Modules set no globals. Shared popup classes in `src/styles/popups.css` are
+redirects of old `?tabs=` and `?submenu=` links. Modules set no globals. Markup
+carries no inline scripts or event handlers, so a Content Security Policy can
+forbid them: an image states its fallback as `data-fallback-src` or
+`data-on-error="remove|hide"`, handled by `src/lib/image-fallbacks.ts`
+(`npm run check:frontend` rejects inline handlers). Shared popup classes in `src/styles/popups.css` are
 `popup-overlay`, `popup-card`, `popup-header`, `popup-title` and `popup-close`.
 
 **Adding a page:** add it to `packages/shared/src/site/pages.ts` (title,
@@ -82,6 +86,12 @@ content-hashed names. Only the Gear Builder snapshot keeps `?v=...` cache tags:
 its stylesheets in `apps/web/src/layouts/assets.ts`, its template, panes and
 scripts in `src/features/gear-builder/gear-builder-host.ts`.
 PNG/WebP pairs in the Gear Builder include intentional fallback behavior.
+
+Security headers: Caddy sends HSTS, `nosniff`, `Referrer-Policy` and
+`X-Frame-Options`; nginx adds a Content Security Policy, `Permissions-Policy`
+and `Cross-Origin-Opener-Policy` to every document
+(`infra/nginx/snippets/document-headers.conf`). The policy is sent as
+report-only until the live site has been checked under it, then enforced.
 
 ## Backend and data
 
