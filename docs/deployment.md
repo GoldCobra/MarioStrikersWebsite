@@ -101,6 +101,21 @@ docker run --rm -v "$PWD/Caddyfile:/etc/caddy/Caddyfile:ro" caddy:2 caddy valida
 docker exec msc-website-caddy caddy reload --config /etc/caddy/Caddyfile
 ```
 
+The containers run unprivileged: the API as `node` (uid 1000), nginx as
+`nginx`. The API writes only to its cache volume, which must belong to uid
+1000. A new volume takes that over from the image; the existing production
+volume was changed once (2026-09-28) after a backup:
+
+```sh
+docker run --rm -v mario-strikers-website_backend-cache:/data -v /root/backups:/backup alpine \
+  tar czf /backup/backend-cache-before-chown.tgz -C /data .
+docker run --rm -v mario-strikers-website_backend-cache:/data alpine chown -R 1000:1000 /data
+```
+
+Base images are pinned by digest (Dockerfiles, `docker-compose.prod.yml`);
+Dependabot proposes updates. Caddy and FlareSolverr are pinned to the versions
+that run, so their next restart does not upgrade them unnoticed.
+
 The database TLS settings (`MSSQL_TRUST_SERVER_CERTIFICATE`,
 `MSSQL_TLS_MIN_VERSION` in `backend/.env`) are chosen with
 `docker exec msc-website-backend node apps/api/src/ops/probe-tls.ts`, which tries
