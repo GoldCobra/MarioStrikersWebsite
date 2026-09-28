@@ -5,26 +5,26 @@
     <div id="global-nav">
       <header id="2">
         <a class="nav-brand" href="/" aria-label="Mario Strikers Community home">
-          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src='./assets/logo/logo.png'"/>
+          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" data-fallback-src="./assets/logo/logo.png"/>
           <span class="nav-brand-est">
             #text "EST. 2017"
           </span>
         </a>
         <nav class="main-nav main-nav-text" aria-label="Main navigation">
           <a class="nav-top-link" href="/" data-top-key="home" aria-label="Home">
-            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-home.png'"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" data-fallback-src="./assets/nav-buttons/default/nav-home.png"/>
           </a>
           <a class="nav-top-link" href="/games" data-top-key="games" aria-label="Games">
-            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-games.webp" width="733" height="198" alt="Games" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-games.png'"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-games.webp" width="733" height="198" alt="Games" data-fallback-src="./assets/nav-buttons/default/nav-games.png"/>
           </a>
           <a class="nav-top-link is-active" href="/competitive" data-top-key="competitive" aria-label="Competitive">
-            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-competitive-active.webp" width="733" height="198" alt="Competitive" onerror="this.onerror=null;this.src='./assets/nav-buttons/active/nav-competitive-active.png'"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-competitive-active.webp" width="733" height="198" alt="Competitive" data-fallback-src="./assets/nav-buttons/active/nav-competitive-active.png"/>
           </a>
           <a class="nav-top-link" href="/players" data-top-key="players" aria-label="Players">
-            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-players.webp" width="733" height="198" alt="Players" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-players.png'"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-players.webp" width="733" height="198" alt="Players" data-fallback-src="./assets/nav-buttons/default/nav-players.png"/>
           </a>
           <a class="nav-top-link" href="/partners" data-top-key="partners" aria-label="Partners">
-            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-partners.png'"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" data-fallback-src="./assets/nav-buttons/default/nav-partners.png"/>
           </a>
         </nav>
         <div id="global-account" class="global-account" data-auth-state="logged-out"/>
@@ -75,7 +75,7 @@
         <nav class="global-tabs-list" aria-label="Leaderboard tabs">
           <a id="competitive-leaderboards-tab-msbl-elo1v1" class="global-tab leaderboard-ball-tab" href="/msbl-elo1v1" data-lb-tab="msbl-elo1v1" data-lb-href="/msbl-elo1v1">
             <span class="leaderboard-tab-inner">
-              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/msblball.webp" width="128" height="128" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/msblball.png'"/>
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/msblball.webp" width="128" height="128" alt="" aria-hidden="true" data-fallback-src="./assets/nav-buttons/sub/msblball.png"/>
               <span class="leaderboard-tab-label">
                 #text "ELO 1v1"
               </span>
@@ -83,7 +83,7 @@
           </a>
           <a id="competitive-leaderboards-tab-msbl-whr" class="global-tab leaderboard-ball-tab" href="/msbl-whr" data-lb-tab="msbl-whr" data-lb-href="/msbl-whr">
             <span class="leaderboard-tab-inner">
-              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/msblball.webp" width="128" height="128" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/msblball.png'"/>
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/msblball.webp" width="128" height="128" alt="" aria-hidden="true" data-fallback-src="./assets/nav-buttons/sub/msblball.png"/>
               <span class="leaderboard-tab-label">
                 #text "WHR"
               </span>
@@ -91,7 +91,7 @@
           </a>
           <a id="competitive-leaderboards-tab-msc-elo1v1" class="global-tab leaderboard-ball-tab" href="/msc-elo1v1" data-lb-tab="msc-elo1v1" data-lb-href="/msc-elo1v1">
             <span class="leaderboard-tab-inner">
-              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/mscball.webp" width="64" height="64" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/mscball.png'"/>
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/mscball.webp" width="64" height="64" alt="" aria-hidden="true" data-fallback-src="./assets/nav-buttons/sub/mscball.png"/>
               <span class="leaderboard-tab-label">
                 #text "ELO 1v1"
               </span>
@@ -99,7 +99,7 @@
           </a>
           <a id="competitive-leaderboards-tab-msc-whr" class="global-tab leaderboard-ball-tab" href="/msc-whr" data-lb-tab="msc-whr" data-lb-href="/msc-whr">
             <span class="leaderboard-tab-inner">
-              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/mscball.webp" width="64" height="64" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/mscball.png'"/>
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/mscball.webp" width="64" height="64" alt="" aria-hidden="true" data-fallback-src="./assets/nav-buttons/sub/mscball.png"/>
               <span class="leaderboard-tab-label">
                 #text "WHR"
               </span>
@@ -107,7 +107,7 @@
           </a>
           <a id="competitive-leaderboards-tab-sms-elo1v1" class="global-tab leaderboard-ball-tab" href="/sms-elo1v1" data-lb-tab="sms-elo1v1" data-lb-href="/sms-elo1v1">
             <span class="leaderboard-tab-inner">
-              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/smsball.webp" width="128" height="128" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/smsball.png'"/>
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/smsball.webp" width="128" height="128" alt="" aria-hidden="true" data-fallback-src="./assets/nav-buttons/sub/smsball.png"/>
               <span class="leaderboard-tab-label">
                 #text "ELO 1v1"
               </span>
@@ -115,7 +115,7 @@
           </a>
           <a id="competitive-leaderboards-tab-sms-whr" class="global-tab leaderboard-ball-tab" href="/sms-whr" data-lb-tab="sms-whr" data-lb-href="/sms-whr">
             <span class="leaderboard-tab-inner">
-              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/smsball.webp" width="128" height="128" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/smsball.png'"/>
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/smsball.webp" width="128" height="128" alt="" aria-hidden="true" data-fallback-src="./assets/nav-buttons/sub/smsball.png"/>
               <span class="leaderboard-tab-label">
                 #text "WHR"
               </span>

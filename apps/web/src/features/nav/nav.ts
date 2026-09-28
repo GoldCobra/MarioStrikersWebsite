@@ -136,7 +136,7 @@ function renderLoggedIn(root: HTMLElement, user: DiscordUser): void {
   const name = (user.global_name || user.username || user.id || "Account").trim();
   const avatarUrl = discordAvatarUrl(user);
   const avatar = avatarUrl
-    ? `<img class="global-account-avatar" src="${escapeHtml(avatarUrl)}" alt="" aria-hidden="true" referrerpolicy="no-referrer" onerror="this.hidden=true;">`
+    ? `<img class="global-account-avatar" src="${escapeHtml(avatarUrl)}" alt="" aria-hidden="true" referrerpolicy="no-referrer" data-on-error="hide">`
     : '<span class="global-account-icon" aria-hidden="true">D</span>';
   root.setAttribute("data-auth-state", "logged-in");
   root.innerHTML = [

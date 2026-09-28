@@ -1,7 +1,7 @@
 // Serves a built site exactly as production nginx routes it and forwards /api to the API.
 // Used for local previews and by the comparison checks; never exposed publicly.
 
-import { createReadStream } from "node:fs";
+import { createReadStream, readFileSync } from "node:fs";
 import {
   createServer,
   request as httpRequest,
@@ -10,6 +10,7 @@ import {
   type ServerResponse,
 } from "node:http";
 import { extname, join } from "node:path";
+import { REPO_ROOT } from "./processes.ts";
 import { createStaticFiles } from "@ms/shared/site/node-static-files";
 import { resolveRoute } from "@ms/shared/site/routes";
 
@@ -36,6 +37,16 @@ const CONTENT_TYPES: Readonly<Record<string, string>> = {
 };
 
 const NOT_FOUND_FILE = "/404.html";
+
+/** The security headers production nginx sends with every document (infra/nginx/snippets). */
+export function documentHeaders(): Record<string, string> {
+  const snippet = readFileSync(join(REPO_ROOT, "infra/nginx/snippets/document-headers.conf"), "utf8");
+  const headers: Record<string, string> = {};
+  for (const [, name, value] of snippet.matchAll(/^add_header ([\w-]+) "([^"]*)" always;$/gm)) {
+    if (name && value !== undefined) headers[name] = value;
+  }
+  return headers;
+}
 
 export interface SiteServerOptions {
   /** Directory of the built site. */
@@ -69,6 +80,7 @@ function forwardToApi(request: IncomingMessage, response: ServerResponse, apiOri
 
 export function createSiteServer(options: SiteServerOptions): Server {
   const files = createStaticFiles(options.root);
+  const security = documentHeaders();
   return createServer((request, response) => {
     const url = new URL(request.url ?? "/", "http://localhost");
     if (url.pathname.startsWith("/api/")) {
@@ -91,7 +103,7 @@ export function createSiteServer(options: SiteServerOptions): Server {
       case "not-found":
         // Like nginx's error_page: the site's own not-found page, when the build has one.
         if (files.isFile(NOT_FOUND_FILE)) {
-          response.writeHead(404, { "Content-Type": CONTENT_TYPES[".html"], "Cache-Control": "no-store" });
+          response.writeHead(404, { "Content-Type": CONTENT_TYPES[".html"], "Cache-Control": "no-store", ...security });
           if (request.method === "HEAD") response.end();
           else createReadStream(join(options.root, NOT_FOUND_FILE)).pipe(response);
           return;
@@ -99,8 +111,13 @@ export function createSiteServer(options: SiteServerOptions): Server {
         sendStatus(response, 404);
         return;
       case "file": {
-        const type = CONTENT_TYPES[extname(route.path).toLowerCase()] ?? "application/octet-stream";
-        response.writeHead(200, { "Content-Type": type, "Cache-Control": "no-store" });
+        const extension = extname(route.path).toLowerCase();
+        const type = CONTENT_TYPES[extension] ?? "application/octet-stream";
+        response.writeHead(200, {
+          "Content-Type": type,
+          "Cache-Control": "no-store",
+          ...(extension === ".html" ? security : {}),
+        });
         if (request.method === "HEAD") {
           response.end();
           return;

@@ -75,6 +75,13 @@ test("pages, assets and redirects follow the production routes", async () => {
   assert.equal((await fetch(`${base}/404.html`)).status, 404);
   assert.equal((await fetch(`${base}/players`, { method: "POST" })).status, 405);
 
+  // Documents carry the production security headers; other files do not need them.
+  const policy = page.headers.get("content-security-policy-report-only") ?? page.headers.get("content-security-policy");
+  assert.match(policy ?? "", /default-src 'self'/);
+  assert.equal(page.headers.get("cross-origin-opener-policy"), "same-origin");
+  assert.match(missing.headers.get("permissions-policy") ?? "", /camera=\(\)/);
+  assert.equal(css.headers.get("cross-origin-opener-policy"), null);
+
   const head = await fetch(`${base}/players`, { method: "HEAD" });
   assert.equal(head.status, 200);
   assert.equal(await head.text(), "");

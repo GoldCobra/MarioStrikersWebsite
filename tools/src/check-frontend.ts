@@ -90,8 +90,24 @@ function checkImages(file: string, source: string): void {
   }
 }
 
+// A Content Security Policy blocks inline event handlers and inline scripts. The Gear Builder snapshot's
+// template is the one exception: its host turns the handlers into listeners.
+const INLINE_HANDLER = /<[a-z][^>]*\son[a-z]+\s*=/i;
+const INLINE_SCRIPT = /<script\b(?![^>]*\ssrc=)(?![^>]*type="application\/ld\+json")[^>]*>/i;
+function checkInlineCode(file: string, source: string): void {
+  if (relative(file) === "pages/templates/msbl-gear-builder.html") return;
+  if (INLINE_HANDLER.test(source)) errors.push(`${relative(file)}: inline event handler`);
+  if (INLINE_SCRIPT.test(source)) errors.push(`${relative(file)}: inline script`);
+}
+for (const file of walk(path.join(root, "_astro")).filter((name) => name.endsWith(".js"))) {
+  if (/\son(?:error|load|click)=\\?["']/.test(fs.readFileSync(file, "utf8"))) {
+    errors.push(`${relative(file)}: markup with an inline event handler`);
+  }
+}
+
 for (const file of htmlFiles) {
   const source = fs.readFileSync(file, "utf8").replace(/<!--[\s\S]*?-->/g, "");
+  checkInlineCode(file, source);
   for (const match of source.matchAll(/\b(?:src|href|poster)\s*=\s*["']([^"']+)["']/gi)) {
     checkReference(file, match[1] ?? "");
   }

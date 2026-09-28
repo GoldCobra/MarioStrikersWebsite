@@ -53,7 +53,7 @@ export default defineConfig({
     },
     {
       name: "golden",
-      testMatch: /dom\.spec\.ts/,
+      testMatch: /(dom|csp)\.spec\.ts/,
       snapshotPathTemplate: goldenSnapshots,
       use: { browserName: "chromium", baseURL: process.env.CAND_URL },
     },

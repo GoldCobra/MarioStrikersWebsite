@@ -28,6 +28,7 @@ WORKDIR /usr/share/nginx/html
 COPY --from=build /app/apps/web/dist/ ./
 COPY infra/nginx/frontend.conf /etc/nginx/http.d/default.conf
 COPY infra/nginx/generated/legacy-routes.conf /etc/nginx/snippets/legacy-routes.conf
+COPY infra/nginx/snippets/document-headers.conf /etc/nginx/snippets/document-headers.conf
 
 EXPOSE 8080
 

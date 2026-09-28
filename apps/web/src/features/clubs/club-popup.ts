@@ -58,7 +58,7 @@ const REGION_BADGE_CLASSES: Readonly<Record<string, string>> = {
 };
 
 const popup = new TemplatePopup({
-  templateUrl: "/pages/templates/club-profile-popup.html?v=20260602-equipment-row-v1",
+  templateUrl: "/pages/templates/club-profile-popup.html?v=20260928-no-inline-handlers-v1",
   openClass: "popup-open",
   closeButtonSelector: ".club-popup-close",
   openError: {
@@ -166,7 +166,7 @@ function roleBadge(role: unknown): string {
 function rosterItem(entry: RosterEntry | null | undefined): string {
   const countryCode = normalizeCountryCode(entry?.country);
   const flag = countryCode
-    ? `<img class="club-popup-roster-flag" src="${escapeHtml(flagUrl(countryCode))}" alt="" aria-hidden="true"${flagTitleAttribute(countryCode)} loading="lazy" onerror="this.onerror=null;this.remove();">`
+    ? `<img class="club-popup-roster-flag" src="${escapeHtml(flagUrl(countryCode))}" alt="" aria-hidden="true"${flagTitleAttribute(countryCode)} loading="lazy" data-on-error="remove">`
     : '<span class="club-popup-roster-flag club-popup-roster-flag-empty" aria-hidden="true"></span>';
   const name = text(entry?.name).trim() || "Unknown";
   const discordName = text(entry?.discord_name).trim();

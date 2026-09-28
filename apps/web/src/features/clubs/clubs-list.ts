@@ -118,7 +118,7 @@ function logoHtml(club: Club, fallbackText: string): string {
   }
   return [
     '<div class="msbl-club-logo-slot">',
-    `<img class="msbl-club-logo-img" src="${escapeHtml(url)}" alt="${escapeHtml(fallbackText)} club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${NO_CLUB_LOGO_URL}';this.alt='';this.classList.add('msbl-club-logo-fallback');">`,
+    `<img class="msbl-club-logo-img" src="${escapeHtml(url)}" alt="${escapeHtml(fallbackText)} club logo" loading="lazy" referrerpolicy="no-referrer" data-fallback-src="${NO_CLUB_LOGO_URL}" data-fallback-alt="" data-fallback-class="msbl-club-logo-fallback">`,
     "</div>",
   ].join("");
 }
