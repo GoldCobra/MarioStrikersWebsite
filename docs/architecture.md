@@ -41,8 +41,10 @@ The players list, the player popup (`src/features/players/`), the profile page
 (`src/features/profile/`) and the rating cards (`src/features/rating-cards/`)
 are modules; `src/lib/` holds the shared API fetch and country helpers. The
 leaderboards and clubs are still legacy engines in `public/js/`: the
-leaderboards pair `leaderboards-config.js` with `leaderboards-engine.js`, as the
-competitive rules do. The player popup is loaded from
+leaderboards pair `leaderboards-config.js` with `leaderboards-engine.js`. The
+competitive rules are rendered at build time from `src/content/competitive-rules/`
+(edit the typed text in `rules.ts`), so their pages need no script and search
+engines read the full text. The player popup is loaded from
 `/pages/templates/player-profile-popup.html`.
 The Gear Builder loads `/pages/templates/msbl-gear-builder.html` and its assets
 under `assets/gear-builder/`.
