@@ -6,7 +6,7 @@ import rateLimitPlugin from "@fastify/rate-limit";
 import Fastify, { type FastifyBaseLogger, type FastifyInstance } from "fastify";
 import type { Config } from "./config.ts";
 import type { DataSource } from "./data-source.ts";
-import { registerErrorHandling } from "./http/errors.ts";
+import { HttpError, registerErrorHandling } from "./http/errors.ts";
 import type { RouteContext } from "./http/route-context.ts";
 import { registerAuthRoutes } from "./modules/auth/routes.ts";
 import { registerClubRoutes } from "./modules/clubs/routes.ts";
@@ -59,12 +59,9 @@ export async function buildApp({ config, data, loggerInstance }: AppOptions): Pr
   if (config.rateLimitEnabled) {
     await app.register(rateLimitPlugin, {
       global: false,
-      errorResponseBuilder: (_request, context) => ({
-        statusCode: 429,
-        error: "Too many requests. Try again in a minute.",
-        code: "RATE_LIMITED",
-        retryAfter: context.after,
-      }),
+      // An HttpError, so the answer has the shape of every other error: { error, code, retryAfter }.
+      errorResponseBuilder: (_request, context) =>
+        new HttpError(429, "RATE_LIMITED", "Too many requests. Try again in a minute.", { retryAfter: context.after }),
     });
   }
 
