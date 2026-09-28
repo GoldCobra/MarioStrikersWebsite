@@ -90,8 +90,9 @@ PNG/WebP pairs in the Gear Builder include intentional fallback behavior.
 Security headers: Caddy sends HSTS, `nosniff`, `Referrer-Policy` and
 `X-Frame-Options`; nginx adds a Content Security Policy, `Permissions-Policy`
 and `Cross-Origin-Opener-Policy` to every document
-(`infra/nginx/snippets/document-headers.conf`). The policy is sent as
-report-only until the live site has been checked under it, then enforced.
+(`infra/nginx/snippets/document-headers.conf`). The policy is enforced; a
+change to it should first be checked with `npm run test:dom` (the CSP check)
+and, when it affects third-party content, on the live site in report-only mode.
 
 ## Backend and data
 
