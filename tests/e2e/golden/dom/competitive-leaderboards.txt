@@ -75,7 +75,7 @@
         <nav class="global-tabs-list" aria-label="Leaderboard tabs">
           <a id="competitive-leaderboards-tab-msbl-elo1v1" class="global-tab leaderboard-ball-tab" href="/msbl-elo1v1" data-lb-tab="msbl-elo1v1" data-lb-href="/msbl-elo1v1">
             <span class="leaderboard-tab-inner">
-              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/msblball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/msblball.png'"/>
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/msblball.webp" width="128" height="128" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/msblball.png'"/>
               <span class="leaderboard-tab-label">
                 #text "ELO 1v1"
               </span>
@@ -83,7 +83,7 @@
           </a>
           <a id="competitive-leaderboards-tab-msbl-whr" class="global-tab leaderboard-ball-tab" href="/msbl-whr" data-lb-tab="msbl-whr" data-lb-href="/msbl-whr">
             <span class="leaderboard-tab-inner">
-              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/msblball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/msblball.png'"/>
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/msblball.webp" width="128" height="128" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/msblball.png'"/>
               <span class="leaderboard-tab-label">
                 #text "WHR"
               </span>
@@ -91,7 +91,7 @@
           </a>
           <a id="competitive-leaderboards-tab-msc-elo1v1" class="global-tab leaderboard-ball-tab" href="/msc-elo1v1" data-lb-tab="msc-elo1v1" data-lb-href="/msc-elo1v1">
             <span class="leaderboard-tab-inner">
-              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/mscball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/mscball.png'"/>
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/mscball.webp" width="64" height="64" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/mscball.png'"/>
               <span class="leaderboard-tab-label">
                 #text "ELO 1v1"
               </span>
@@ -99,7 +99,7 @@
           </a>
           <a id="competitive-leaderboards-tab-msc-whr" class="global-tab leaderboard-ball-tab" href="/msc-whr" data-lb-tab="msc-whr" data-lb-href="/msc-whr">
             <span class="leaderboard-tab-inner">
-              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/mscball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/mscball.png'"/>
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/mscball.webp" width="64" height="64" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/mscball.png'"/>
               <span class="leaderboard-tab-label">
                 #text "WHR"
               </span>
@@ -107,7 +107,7 @@
           </a>
           <a id="competitive-leaderboards-tab-sms-elo1v1" class="global-tab leaderboard-ball-tab" href="/sms-elo1v1" data-lb-tab="sms-elo1v1" data-lb-href="/sms-elo1v1">
             <span class="leaderboard-tab-inner">
-              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/smsball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/smsball.png'"/>
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/smsball.webp" width="128" height="128" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/smsball.png'"/>
               <span class="leaderboard-tab-label">
                 #text "ELO 1v1"
               </span>
@@ -115,7 +115,7 @@
           </a>
           <a id="competitive-leaderboards-tab-sms-whr" class="global-tab leaderboard-ball-tab" href="/sms-whr" data-lb-tab="sms-whr" data-lb-href="/sms-whr">
             <span class="leaderboard-tab-inner">
-              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/smsball.webp" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/smsball.png'"/>
+              <img class="leaderboard-tab-ball" src="/assets/nav-buttons/sub/smsball.webp" width="128" height="128" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='./assets/nav-buttons/sub/smsball.png'"/>
               <span class="leaderboard-tab-label">
                 #text "WHR"
               </span>
@@ -134,7 +134,6 @@
     #text "\n  "
   </main>
   #text "\n\n  "
-  #text "\n  "
   #text "\n\n\n"
   <footer id="global-footer">
     <p class="global-footer-disclaimer">

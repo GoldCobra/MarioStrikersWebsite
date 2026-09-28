@@ -23,8 +23,7 @@ space; the DOM goldens check it. `src/entries/site.ts`, loaded on every page,
 adds the behaviour (`src/features/nav/`): the account widget, the tab strip
 (`src/features/tabs/`), centring of overflowing navigation, link prefetching and
 redirects of old `?tabs=` and `?submenu=` links. Modules run before the legacy
-scripts; while a legacy script still reads a global (such as
-`window.GlobalTabsEngine`), the module that replaced its provider sets it. Shared popup classes in `src/styles/popups.css` are
+scripts and set no globals. Shared popup classes in `src/styles/popups.css` are
 `popup-overlay`, `popup-card`, `popup-header`, `popup-title` and `popup-close`.
 
 **Adding a page:** add it to `packages/shared/src/site/pages.ts` (title,
@@ -38,14 +37,16 @@ and the page files disagree. Page modules go into the layout's `scripts` slot
 (`<Fragment slot="scripts"><script src="…"></script></Fragment>`).
 
 The players list, the player popup (`src/features/players/`), the profile page
-(`src/features/profile/`) and the rating cards (`src/features/rating-cards/`)
-are modules; `src/lib/` holds the shared API fetch and country helpers. The
-leaderboards and clubs are still legacy engines in `public/js/`: the
-leaderboards pair `leaderboards-config.js` with `leaderboards-engine.js`. The
+(`src/features/profile/`), the rating cards (`src/features/rating-cards/`), the
+clubs list with its club popup (`src/features/clubs/`) and the leaderboards
+(`src/features/leaderboards/`: the tab strip is rendered into the page, the rows
+load in the browser) are modules. `src/lib/` holds the shared API fetch, the
+country helpers and `popup.ts`, the template popup both profile popups are built
+on. The
 competitive rules are rendered at build time from `src/content/competitive-rules/`
 (edit the typed text in `rules.ts`), so their pages need no script and search
-engines read the full text. The player popup is loaded from
-`/pages/templates/player-profile-popup.html`.
+engines read the full text. The popups are loaded from
+`/pages/templates/player-profile-popup.html` and `club-profile-popup.html`.
 The Gear Builder loads `/pages/templates/msbl-gear-builder.html` and its assets
 under `assets/gear-builder/`.
 

@@ -1,9 +1,6 @@
-// The clubs page; the list and its popup are still legacy msbl-clubs-engine.js, which reads these
-// helpers from window.
+// The clubs page: the club list and the club popup (src/features/clubs/).
 
-import { preloadPageData } from "../lib/api.ts";
-import { exposeCountries, exposePublicData } from "../lib/legacy-globals.ts";
+import { initClubsList } from "../features/clubs/clubs-list.ts";
 
-exposePublicData();
-exposeCountries();
-preloadPageData();
+const mount = document.getElementById("msbl-clubs-root");
+if (mount) void initClubsList(mount);

@@ -1,6 +1,7 @@
 ---
-// Leaderboard pages; leaderboards-config.js picks the game and mode from the page slug.
+// Leaderboard pages: the tab strip is part of the page; the rows of the active tab load in the browser.
 import SiteLayout from "../../layouts/SiteLayout.astro";
+import { renderLeaderboardShell } from "../../features/leaderboards/tabs.ts";
 
 interface Props {
   slug: string;
@@ -8,9 +9,6 @@ interface Props {
 
 const { slug } = Astro.props;
 ---
-<SiteLayout
-  slug={slug}
-  scripts={["leaderboardsConfig", "leaderboardsEngine"]}
->
-    <section id="leaderboards-root" aria-label="Leaderboards"></section>
+<SiteLayout slug={slug}>
+    <section id="leaderboards-root" aria-label="Leaderboards"><Fragment set:html={renderLeaderboardShell(slug)} /></section>
   <Fragment slot="scripts"><script src="../../entries/leaderboard-page.ts"></script></Fragment></SiteLayout>
