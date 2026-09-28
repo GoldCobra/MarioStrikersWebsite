@@ -38,6 +38,9 @@ Paths are relative to the web root `apps/web/public/` unless they start with `do
    - `builder.js` lazy-loads character chunks via `new URL("../builds/<character>.json", import.meta.url)`
    - preset drafts in `sessionStorage` and XML exports used by the MSBL Save Editor
    - host navigation/tab integration, lazy screenshot loading and PNG/WebP fallbacks
+   - accessibility: `alt` on the stat icons and card pictures, `aria-label` on the stat
+     inputs, sliders and the character select (the host turns the template's inline
+     `onclick`/`onchange` handlers into listeners, so the enforced CSP allows them)
 4. Remove the temporary monolith artifact after chunk generation:
    - delete `assets/gear-builder/builds.json`
 5. Run syntax checks:

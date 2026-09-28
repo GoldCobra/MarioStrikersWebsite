@@ -84,7 +84,7 @@ export function renderPane(c: GearCharacter): string {
               </div>
               <div class="buildcard ${c.cssClass}" id="card${c.index}">
                 <div class="cardpic">
-                  <img src="../assets/gear-builder/images/characters/${c.image}">
+                  <img src="../assets/gear-builder/images/characters/${c.image}" alt="${c.name}">
                   <div class="cardchar ${c.cssClass}">${c.cardName}</div>
                   <div class="cardbuild ${c.cssClass}">0000</div>
                 </div>
@@ -107,24 +107,24 @@ export function renderPane(c: GearCharacter): string {
                 </div>
                 <div class="statbar">
                   <div class="strengthbar">
-                    <img class="bar str" src="../assets/gear-builder/images/stats/${c.stats[0]}.png">
-                    <img class="baricon" src="../assets/gear-builder/images/icons/strength.png">
+                    <img class="bar str" src="../assets/gear-builder/images/stats/${c.stats[0]}.png" alt="">
+                    <img class="baricon" src="../assets/gear-builder/images/icons/strength.png" alt="">
                   </div>
                   <div class="speedbar">
-                    <img class="bar spe" src="../assets/gear-builder/images/stats/${c.stats[1]}.png">
-                    <img class="baricon" src="../assets/gear-builder/images/icons/speed.png">
+                    <img class="bar spe" src="../assets/gear-builder/images/stats/${c.stats[1]}.png" alt="">
+                    <img class="baricon" src="../assets/gear-builder/images/icons/speed.png" alt="">
                   </div>
                   <div class="shotbar">
-                    <img class="bar sho" src="../assets/gear-builder/images/stats/${c.stats[2]}.png">
-                    <img class="baricon" src="../assets/gear-builder/images/icons/shot.png">
+                    <img class="bar sho" src="../assets/gear-builder/images/stats/${c.stats[2]}.png" alt="">
+                    <img class="baricon" src="../assets/gear-builder/images/icons/shot.png" alt="">
                   </div>
                   <div class="passbar">
-                    <img class="bar pas" src="../assets/gear-builder/images/stats/${c.stats[3]}.png">
-                    <img class="baricon" src="../assets/gear-builder/images/icons/pass.png">
+                    <img class="bar pas" src="../assets/gear-builder/images/stats/${c.stats[3]}.png" alt="">
+                    <img class="baricon" src="../assets/gear-builder/images/icons/pass.png" alt="">
                   </div>
                   <div class="techbar">
-                    <img class="bar tec" src="../assets/gear-builder/images/stats/${c.stats[4]}.png">
-                    <img class="baricon" src="../assets/gear-builder/images/icons/tech.png">
+                    <img class="bar tec" src="../assets/gear-builder/images/stats/${c.stats[4]}.png" alt="">
+                    <img class="baricon" src="../assets/gear-builder/images/icons/tech.png" alt="">
                     <div class="tooltip ${c.cssClass}" id="tip${c.index}">Speed with Ball: ${c.speedWithBall}</div>
                   </div>
                 </div>

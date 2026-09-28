@@ -417,8 +417,11 @@
   "assets/gear-builder/scripts/tabs.js": "1a3db6911d7f242f",
   "assets/gear-builder/styles.css": "cc5ae9a473aa4364",
   "assets/landing/comp-season-burst.png": "a692290ad22f1dcd",
+  "assets/landing/comp-season-burst.webp": "4bd463cc536f12a8",
   "assets/landing/comp-season-dusk.png": "8e40dd4ba206a68c",
+  "assets/landing/comp-season-dusk.webp": "72a731792f2ccf29",
   "assets/landing/strikers-club.png": "b4c366d02e358379",
+  "assets/landing/strikers-club.webp": "741c74a822b0f801",
   "assets/leaderboards/normal-rank.png": "490a8099e166cb33",
   "assets/leaderboards/rank1.png": "2bed980a33241ec5",
   "assets/leaderboards/rank2.png": "6ec6e0f7a5ec5864",
@@ -718,6 +721,6 @@
   "assets/tierlists/sms-tierlist-current.webp": "e732ef6a2b79ffee",
   "assets/ui/menu-buttons.png": "466d156c2ae71d04",
   "pages/templates/club-profile-popup.html": "957a6e273f4d7966",
-  "pages/templates/msbl-gear-builder.html": "bedd0f18078b4f45",
+  "pages/templates/msbl-gear-builder.html": "4a06a19324138c27",
   "pages/templates/player-profile-popup.html": "f3914db3ef147473"
 }

@@ -1,6 +1,6 @@
-// The generated Gear Builder panes against the snapshot's former pane files (pane.golden.json holds their
-// hashes). Lines are compared trimmed: two files had stray indentation and trailing spaces, which render
-// the same; everything the builder's scripts read (ids, classes, values) must match exactly.
+// The generated Gear Builder panes against their recorded output (pane.golden.json). The first recording
+// matched the snapshot's former pane files line by line (trimmed); an intended markup change re-records it.
+// Everything the builder's scripts read (ids, classes, values) must stay as it is.
 
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
