@@ -133,12 +133,16 @@ test("all public API families return populated fixture contracts", async () => {
   assert.match(logo.headers.get("content-type") ?? "", /image\/svg\+xml/);
   assert.match(await logo.text(), /SAMPLE/);
   assert.equal(
-    (await json<{ season: { displayName: string } }>("/api/competitive-season/current")).season.displayName,
+    (await json<{ season: { display_name: string } }>("/api/competitive-season/current")).season.display_name,
     "Dusk Season 2026",
   );
   assert.equal(
     (await json<{ players: { name: string }[] }>("/api/wiimmfi/msc-charged")).players[0]?.name,
     "Sample Player",
+  );
+  assert.match(
+    (await json<{ players: { friend_code: string }[] }>("/api/wiimmfi/msc-charged")).players[0]?.friend_code ?? "",
+    /^\d{4}-\d{4}-\d{4}$/,
   );
   assert.equal((await fetch(`${base}/api/players/9999/profile`)).status, 404);
   assert.equal((await fetch(`${base}/api/clubs/msbl/9999/profile`)).status, 404);

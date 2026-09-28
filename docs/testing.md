@@ -39,6 +39,12 @@ node tests/e2e/run.ts routes   # status and Location of all URL shapes (needs RO
   `routes.json` recorded against production nginx. Update them only for an
   intended change (`node tests/e2e/run.ts dom --update`, `... routes --update`)
   and review the diff in the pull request.
+- **Intended visual changes** are listed in `tests/e2e/approved-changes.json`:
+  the screenshots that may differ, with the reason. An approval names the
+  reference commit it was made against and lapses when
+  `visual-reference.sha` moves on, so it never hides a later regression. The
+  candidate's screenshot of an approved change is attached to the report for
+  review.
 - **Intended API changes** are listed in `tests/e2e/specs/contract.deltas.ts`.
 - **Content Security Policy.** `specs/csp.spec.ts` (run with the DOM check)
   opens every page and the interactive flows (popups, sign-in, Gear Builder

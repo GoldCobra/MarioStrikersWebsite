@@ -83,7 +83,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:card",
-      "content": "summary"
+      "content": "summary_large_image"
     }
   },
   {
@@ -91,6 +91,20 @@
     "attributes": {
       "name": "twitter:description",
       "content": "The current competitive tier list for Super Mario Strikers (SMS), ranking the captains and sidekicks by their strength in the community's competitive play."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "twitter:image",
+      "content": "https://mariostrikers.gg/assets/og/mariostrikers-og.jpg"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "twitter:image:alt",
+      "content": "Mario Strikers Discord Server logo: Battle League, Charged, Super Mario Strikers"
     }
   },
   {
@@ -119,6 +133,34 @@
     "attributes": {
       "property": "og:description",
       "content": "The current competitive tier list for Super Mario Strikers (SMS), ranking the captains and sidekicks by their strength in the community's competitive play."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:image",
+      "content": "https://mariostrikers.gg/assets/og/mariostrikers-og.jpg"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:image:alt",
+      "content": "Mario Strikers Discord Server logo: Battle League, Charged, Super Mario Strikers"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:image:height",
+      "content": "630"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:image:width",
+      "content": "1200"
     }
   },
   {
@@ -185,6 +227,110 @@
           "position": 4,
           "name": "SMS",
           "item": "https://mariostrikers.gg/sms-tierlist"
+        }
+      ]
+    }
+  },
+  {
+    "tag": "script",
+    "json": {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Super Mario Strikers tier list (captains)",
+      "url": "https://mariostrikers.gg/sms-tierlist",
+      "itemListOrder": "https://schema.org/ItemListOrderDescending",
+      "numberOfItems": 9,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Daisy",
+          "description": "S tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Peach",
+          "description": "S tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Mario",
+          "description": "A tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Yoshi",
+          "description": "A tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Super Team",
+          "description": "A tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "Luigi",
+          "description": "A tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 7,
+          "name": "Waluigi",
+          "description": "B tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 8,
+          "name": "Wario",
+          "description": "B tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 9,
+          "name": "Donkey Kong",
+          "description": "B tier"
+        }
+      ]
+    }
+  },
+  {
+    "tag": "script",
+    "json": {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Super Mario Strikers tier list (sidekicks)",
+      "url": "https://mariostrikers.gg/sms-tierlist",
+      "itemListOrder": "https://schema.org/ItemListOrderDescending",
+      "numberOfItems": 4,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Toad",
+          "description": "S tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Birdo",
+          "description": "A tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Koopa Troopa",
+          "description": "B tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Hammer Bros.",
+          "description": "B tier"
         }
       ]
     }

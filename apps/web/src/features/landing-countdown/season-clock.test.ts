@@ -41,9 +41,9 @@ test("the local cycle follows Berlin wall-clock time across daylight saving time
 
 test("the competitive season counts to its start, then its end, then shows it ended", () => {
   const season = {
-    displayName: " Rise 2026 ",
-    startDateUtc: "2026-10-01T00:00:00Z",
-    endDateUtc: "2026-10-29T00:00:00Z",
+    display_name: " Rise 2026 ",
+    start_date_utc: "2026-10-01T00:00:00Z",
+    end_date_utc: "2026-10-29T00:00:00Z",
   };
   assert.deepEqual(competitiveSeasonPhase(season, at("2026-09-30T00:00:00Z")), {
     headline: "Rise 2026",

@@ -89,5 +89,22 @@ The health-check origin defaults to `https://mariostrikers.gg`; override it with
 the command, for example `python3 scripts/deploy.py --project EXISTING_PROJECT list`.
 
 Changes to Caddy, FlareSolverr, credentials or database schema need a separate
-owner-reviewed operations change. Keep this procedure, the CI job names and
+owner-reviewed operations change.
+
+A `Caddyfile` change reaches the server with the release (Caddy reads it from
+the checkout) but becomes active only after a reload. Check it with the running
+image first, then reload; if the container still shows the old file (a single
+file mount can keep the replaced file), restart the container instead:
+
+```sh
+docker run --rm -v "$PWD/Caddyfile:/etc/caddy/Caddyfile:ro" caddy:2 caddy validate --config /etc/caddy/Caddyfile
+docker exec msc-website-caddy caddy reload --config /etc/caddy/Caddyfile
+```
+
+The database TLS settings (`MSSQL_TRUST_SERVER_CERTIFICATE`,
+`MSSQL_TLS_MIN_VERSION` in `backend/.env`) are chosen with
+`docker exec msc-website-backend node apps/api/src/ops/probe-tls.ts`, which tries
+them from strictest to laxest against the real database. The backend reads
+`.env` when its container is created, so redeploy the current release after a
+change. Keep this procedure, the CI job names and
 the [GitHub rulesets](github-maintenance.md) aligned.

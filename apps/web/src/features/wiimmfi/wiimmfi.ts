@@ -6,7 +6,7 @@ import { toText } from "@ms/shared/text";
 
 interface OnlinePlayer {
   readonly name?: unknown;
-  readonly friendCode?: unknown;
+  readonly friend_code?: unknown;
   readonly region?: unknown;
 }
 
@@ -36,7 +36,7 @@ function playersHtml(players: readonly OnlinePlayer[]): string {
         '<tr class="online-editor-separator-row" aria-hidden="true"><td colspan="3"><span class="online-editor-row-separator"></span></td></tr>' +
         "<tr>" +
         `<td><span class="online-editor-roster-name">${escapeHtml(toText(player.name))}</span></td>` +
-        `<td><span class="online-editor-roster-code">${escapeHtml(toText(player.friendCode))}</span></td>` +
+        `<td><span class="online-editor-roster-code">${escapeHtml(toText(player.friend_code))}</span></td>` +
         `<td><span class="wiimmfi-region">${escapeHtml(regionLabel(player.region))}</span></td>` +
         "</tr>",
     )

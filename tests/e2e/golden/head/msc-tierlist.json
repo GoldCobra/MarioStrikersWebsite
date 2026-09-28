@@ -83,7 +83,7 @@
     "tag": "meta",
     "attributes": {
       "name": "twitter:card",
-      "content": "summary"
+      "content": "summary_large_image"
     }
   },
   {
@@ -91,6 +91,20 @@
     "attributes": {
       "name": "twitter:description",
       "content": "The current competitive tier list for Mario Strikers Charged (MSC), ranking the captains and sidekicks by their strength in the community's competitive play."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "twitter:image",
+      "content": "https://mariostrikers.gg/assets/og/mariostrikers-og.jpg"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "name": "twitter:image:alt",
+      "content": "Mario Strikers Discord Server logo: Battle League, Charged, Super Mario Strikers"
     }
   },
   {
@@ -119,6 +133,34 @@
     "attributes": {
       "property": "og:description",
       "content": "The current competitive tier list for Mario Strikers Charged (MSC), ranking the captains and sidekicks by their strength in the community's competitive play."
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:image",
+      "content": "https://mariostrikers.gg/assets/og/mariostrikers-og.jpg"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:image:alt",
+      "content": "Mario Strikers Discord Server logo: Battle League, Charged, Super Mario Strikers"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:image:height",
+      "content": "630"
+    }
+  },
+  {
+    "tag": "meta",
+    "attributes": {
+      "property": "og:image:width",
+      "content": "1200"
     }
   },
   {
@@ -185,6 +227,152 @@
           "position": 4,
           "name": "MSC",
           "item": "https://mariostrikers.gg/msc-tierlist"
+        }
+      ]
+    }
+  },
+  {
+    "tag": "script",
+    "json": {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Mario Strikers Charged tier list (captains)",
+      "url": "https://mariostrikers.gg/msc-tierlist",
+      "itemListOrder": "https://schema.org/ItemListOrderDescending",
+      "numberOfItems": 12,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Waluigi",
+          "description": "S+ tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Petey Piranha",
+          "description": "S tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Donkey Kong",
+          "description": "S tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Daisy",
+          "description": "A tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Wario",
+          "description": "A tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "Bowser",
+          "description": "A tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 7,
+          "name": "Luigi",
+          "description": "B tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 8,
+          "name": "Mario",
+          "description": "B tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 9,
+          "name": "Diddy Kong",
+          "description": "B tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 10,
+          "name": "Yoshi",
+          "description": "C tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 11,
+          "name": "Peach",
+          "description": "C tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 12,
+          "name": "Bowser Jr.",
+          "description": "D tier"
+        }
+      ]
+    }
+  },
+  {
+    "tag": "script",
+    "json": {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Mario Strikers Charged tier list (sidekicks)",
+      "url": "https://mariostrikers.gg/msc-tierlist",
+      "itemListOrder": "https://schema.org/ItemListOrderDescending",
+      "numberOfItems": 8,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Boo",
+          "description": "S tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Birdo",
+          "description": "A tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Dry Bones",
+          "description": "A tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Hammer Bros.",
+          "description": "B tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Monty Mole",
+          "description": "B tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "Toad",
+          "description": "C tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 7,
+          "name": "Koopa Troopa",
+          "description": "C tier"
+        },
+        {
+          "@type": "ListItem",
+          "position": 8,
+          "name": "Shy Guy",
+          "description": "C tier"
         }
       ]
     }

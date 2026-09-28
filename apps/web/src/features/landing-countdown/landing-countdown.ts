@@ -14,7 +14,7 @@ import {
 
 interface SeasonStatus {
   readonly season?: CompetitiveSeason | null;
-  readonly serverNowUtc?: unknown;
+  readonly server_now_utc?: unknown;
 }
 
 const SEASON_API_URL = "/api/competitive-season/current";
@@ -43,7 +43,7 @@ export function initLandingCountdown(): void {
   /** Shows the season's artwork; an image that fails to load restores the previous one for good. */
   const applySeasonImage = (season: CompetitiveSeason): void => {
     if (!seasonImage) return;
-    const name = competitiveSeasonImageName(season.displayName);
+    const name = competitiveSeasonImageName(season.display_name);
     if (!name || failedImages.has(name)) return;
     const nextSrc = `${SEASON_IMAGE_BASE}${name}.png`;
     const previousSrc = seasonImage.getAttribute("src");
@@ -91,7 +91,7 @@ export function initLandingCountdown(): void {
       const response = await fetch(SEASON_API_URL, { headers: { Accept: "application/json" }, cache: "no-store" });
       if (!response.ok) throw new Error(`Competitive season API failed with ${response.status}`);
       const payload = (await response.json()) as SeasonStatus | null;
-      const serverNowMs = timeMs(payload?.serverNowUtc);
+      const serverNowMs = timeMs(payload?.server_now_utc);
       status = payload;
       serverOffsetMs = serverNowMs ? Date.now() - serverNowMs : 0;
       refreshAfterTarget = false;

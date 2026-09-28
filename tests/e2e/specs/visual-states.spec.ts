@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { test, type Page } from "@playwright/test";
+import { expectScreenshot } from "../lib/approvals.ts";
 import { expandViewportToDocument, hideDevNotice, login, preparePage, settle } from "../lib/browser.ts";
 import { STATE_WIDTHS } from "../lib/site.ts";
 
@@ -99,7 +100,7 @@ for (const state of STATES) {
       if (state.act) await state.act(page);
       await hideDevNotice(page);
       if (state.fullPage) await expandViewportToDocument(page, width);
-      await expect(page).toHaveScreenshot(["states", `${state.name}-${width}.png`]);
+      await expectScreenshot(page, "states", `${state.name}-${width}.png`);
     });
   }
 }

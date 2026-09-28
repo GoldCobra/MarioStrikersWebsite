@@ -48,7 +48,6 @@ body {
   );
   --global-nav-bar-bg-image: url("../assets/backgrounds/navigation/nav-bar-bg.png");
   --global-nav-footer-image: url("../assets/backgrounds/footer/navFooter.png");
-  --global-tabs-bg-image: url("../assets/nav-buttons/sub/tabs.png");
   --global-tabs-bg-image: image-set(
     url("../assets/nav-buttons/sub/tabs.webp") type("image/webp"),
     url("../assets/nav-buttons/sub/tabs.png") type("image/png")

@@ -13,6 +13,9 @@ export function registerWiimmfiRoutes(app: FastifyInstance, { data }: RouteConte
       request.log.warn({ err }, "[wiimmfi] No player list available");
       throw new HttpError(503, "UPSTREAM_UNAVAILABLE", "Wiimmfi data is unavailable.");
     }
-    return reply.header("Cache-Control", PUBLIC_DATA_CACHE_CONTROL).send({ count: players.length, players });
+    return reply.header("Cache-Control", PUBLIC_DATA_CACHE_CONTROL).send({
+      count: players.length,
+      players: players.map((player) => ({ region: player.region, friend_code: player.friendCode, name: player.name })),
+    });
   });
 }

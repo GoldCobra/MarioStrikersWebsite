@@ -17,7 +17,9 @@ loaded in the browser. In `apps/web/`:
 | `public/` | Web root: `assets/` (including the Gear Builder snapshot), fetched fragments in `pages/templates/` |
 
 Navigation, tabs, breadcrumbs (JSON-LD) and favicons are static markup, so
-search engines see every internal link. The layout keeps the whitespace of the
+search engines see every internal link. Link previews (Open Graph, Twitter)
+use `public/assets/og/mariostrikers-og.jpg`, rendered from the site's artwork
+by `node tools/src/render-og-image.ts`. The layout keeps the whitespace of the
 former hand-written pages exactly, because text between inline elements takes
 space; the DOM goldens check it. `src/entries/site.ts`, loaded on every page,
 adds the behaviour (`src/features/nav/`): the account widget, the tab strip
@@ -77,9 +79,12 @@ generated from the indexable pages of the registry. Unknown URLs get the site's
 own not-found page (`src/pages/404.astro`) with status 404, and API responses
 carry `X-Robots-Tag: noindex`.
 
-The global stylesheet is delivered as one file named by its content hash
-(`/css/global.<hash>.css`), so browsers cache it for a year and a change
-always reaches them. Its partials are concatenated in the order listed in
+The global stylesheet is delivered as one minified file named by its content
+hash (`/css/global.<hash>.css`), so browsers cache it for a year and a change
+always reaches them. Minifying (lightningcss) removes comments, whitespace and
+declarations a later one in the same rule overrides; a test checks that every
+at-rule, prefixed declaration, `!important` and referenced file survives, and
+invalid CSS fails the build. Its partials are concatenated in the order listed in
 `src/styles/global.ts`; that order is the cascade, and the media blocks in
 `tablet.css` and `mobile.css` come last on purpose. Modules are bundled with
 content-hashed names. Only the Gear Builder snapshot keeps `?v=...` cache tags:
@@ -107,12 +112,16 @@ cache that persists snapshots under `.cache/` in the API's working directory
 there too. These are runtime caches, not source data; production stores them
 on a named Docker volume. Account/profile responses use `no-store`. Season
 responses also use `no-store`: season data remains cached internally, but
-`serverNowUtc` is generated at response time for countdown synchronization.
+`server_now_utc` is generated at response time for countdown synchronization.
 
 Discord OAuth requests `identify` and `guilds.members.read`, checks membership
 in the configured guild, and sets a signed HTTP-only session cookie.
 `/api/profile/me` maps the Discord user to `Player.DiscordID`. A bot token
 enables Discord name lookups and event discovery.
+
+Responses use snake_case keys throughout; code inside the API uses camelCase
+and converts at the route (the season route shows how, since its cached
+snapshot keeps the service's shape).
 
 Local development uses synthetic fixtures through the same public route
 shapes; see [development](development.md) for simulated versus live behavior.
