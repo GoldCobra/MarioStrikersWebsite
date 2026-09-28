@@ -1,6 +1,6 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "2a7812de6e36fd01b5f2436e6814f2969eb2161e",
+  "reference": "67d8e6bb70c1ab52773296f83710ba8ec7b9db8a",
   "changes": [
     {
       "screenshots": ["states/error-leaderboard-*"],
