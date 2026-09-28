@@ -7,7 +7,7 @@
 import { escapeHtml } from "@ms/shared/html";
 import { breadcrumbItems, pageLabel, resolvePageState } from "@ms/shared/site/page-state";
 import { NOT_FOUND_PAGE, canonicalUrl, findPage } from "@ms/shared/site/pages";
-import { SITE_NAME } from "@ms/shared/site/site";
+import { SITE_NAME, SITE_ORIGIN } from "@ms/shared/site/site";
 import { GLOBAL_CSS_PATH } from "../styles/global.ts";
 import { STYLESHEETS, type StylesheetName } from "./assets.ts";
 import { renderContentTabs, renderFaviconLinks, renderFooter, renderMainNav, renderSubNav } from "./site-shell.ts";
@@ -22,6 +22,9 @@ interface Props {
 }
 
 const { slug, mainClass, mainLabel, stylesheets = [] } = Astro.props;
+// Link previews (rendered by tools/src/render-og-image.ts).
+const SHARE_IMAGE = `${SITE_ORIGIN}/assets/og/mariostrikers-og.jpg`;
+const SHARE_IMAGE_ALT = "Mario Strikers Discord Server logo: Battle League, Charged, Super Mario Strikers";
 const page = slug === NOT_FOUND_PAGE.slug ? NOT_FOUND_PAGE : findPage(slug);
 if (!page) throw new Error(`Page "${slug}" is not in the page registry.`);
 
@@ -55,10 +58,16 @@ const bodyEnd = "\n\n\n" + renderFooter();
   <meta property="og:description" content={page.description}>
   {canonical && <meta property="og:url" content={canonical}>}
   <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content={SHARE_IMAGE}>
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content={SHARE_IMAGE_ALT}>
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@MarioStrikersGG">
   <meta name="twitter:title" content={page.title}>
   <meta name="twitter:description" content={page.description}>
+  <meta name="twitter:image" content={SHARE_IMAGE}>
+  <meta name="twitter:image:alt" content={SHARE_IMAGE_ALT}>
   {(page.jsonLd ?? []).map((data) => <script is:inline type="application/ld+json" set:html={JSON.stringify(data, null, 2)} />)}
   <Fragment set:html={renderFaviconLinks().join("\n  ")} />
   {breadcrumbs && (

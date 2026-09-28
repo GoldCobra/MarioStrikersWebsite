@@ -17,7 +17,9 @@ loaded in the browser. In `apps/web/`:
 | `public/` | Web root: `assets/` (including the Gear Builder snapshot), fetched fragments in `pages/templates/` |
 
 Navigation, tabs, breadcrumbs (JSON-LD) and favicons are static markup, so
-search engines see every internal link. The layout keeps the whitespace of the
+search engines see every internal link. Link previews (Open Graph, Twitter)
+use `public/assets/og/mariostrikers-og.jpg`, rendered from the site's artwork
+by `node tools/src/render-og-image.ts`. The layout keeps the whitespace of the
 former hand-written pages exactly, because text between inline elements takes
 space; the DOM goldens check it. `src/entries/site.ts`, loaded on every page,
 adds the behaviour (`src/features/nav/`): the account widget, the tab strip
