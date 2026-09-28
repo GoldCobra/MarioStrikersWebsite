@@ -7,14 +7,14 @@ loaded in the browser. In `apps/web/`:
 
 | Location | Purpose |
 | --- | --- |
-| `src/layouts/SiteLayout.astro` | The document around every page: head metadata from the page registry, navigation, content tabs, footer, scripts |
+| `src/layouts/SiteLayout.astro` | The document around every page: head metadata from the page registry, navigation, content tabs, footer, the page's module |
 | `src/layouts/site-shell.ts` | Markup of the navigation, tabs and footer, rendered from the navigation model |
 | `src/entries/`, `src/features/<name>/` | Browser code in TypeScript, bundled by Vite with content-hashed file names: one entry per page type, one folder per feature |
-| `src/layouts/assets.ts` | Every legacy browser script and page-specific stylesheet with its cache tag, in one place |
+| `src/layouts/assets.ts` | The Gear Builder's stylesheets with their cache tags |
 | `src/styles/` | The global stylesheet as partials named after the components they style; `global.ts` fixes their order |
 | `src/pages/index.astro`, `src/pages/pages/<slug>.astro` | One file per page; built to `/index.html` and `/pages/<slug>.html`, served at `/` and `/<slug>` |
 | `src/components/pages/` | Page families: section overviews, leaderboards, rules and tier lists |
-| `public/` | Web root: legacy browser `js/` (moving to `src/features/`), `assets/`, fetched fragments in `pages/templates/` |
+| `public/` | Web root: `assets/` (including the Gear Builder snapshot), fetched fragments in `pages/templates/` |
 
 Navigation, tabs, breadcrumbs (JSON-LD) and favicons are static markup, so
 search engines see every internal link. The layout keeps the whitespace of the
@@ -22,8 +22,7 @@ former hand-written pages exactly, because text between inline elements takes
 space; the DOM goldens check it. `src/entries/site.ts`, loaded on every page,
 adds the behaviour (`src/features/nav/`): the account widget, the tab strip
 (`src/features/tabs/`), centring of overflowing navigation, link prefetching and
-redirects of old `?tabs=` and `?submenu=` links. Modules run before the legacy
-scripts and set no globals. Shared popup classes in `src/styles/popups.css` are
+redirects of old `?tabs=` and `?submenu=` links. Modules set no globals. Shared popup classes in `src/styles/popups.css` are
 `popup-overlay`, `popup-card`, `popup-header`, `popup-title` and `popup-close`.
 
 **Adding a page:** add it to `packages/shared/src/site/pages.ts` (title,
@@ -32,18 +31,20 @@ description, hidden heading, robots; an indexable page needs a title of at most
 both), place it in the navigation model
 (`navigation.ts`) if it needs a menu entry or tab, create
 `src/pages/pages/<slug>.astro` with `SiteLayout` (or a family component), and
-list its scripts by name from `assets.ts`. A unit test fails when the registry
+add its module entry in `src/entries/` if it needs one. A unit test fails when the registry
 and the page files disagree. Page modules go into the layout's `scripts` slot
 (`<Fragment slot="scripts"><script src="…"></script></Fragment>`).
 
-All browser code except the save editors and the Gear Builder host is modules
-in `src/features/`: the players list and player popup (`players/`), the profile
+All browser code is modules in `src/features/`: the players list and player popup (`players/`), the profile
 page (`profile/`), the rating cards (`rating-cards/`), the clubs list and club
 popup (`clubs/`), the leaderboards (`leaderboards/`: the tab strip is rendered
 into the page, the rows load in the browser), the home page season countdowns
 (`landing-countdown/`; the clock logic in `season-clock.ts` is unit-tested),
-the community events (`events/`), the MSC Wiimmfi list (`wiimmfi/`) and the
-placeholder page (`placeholder/`). `src/lib/` holds the shared API fetch, the
+the community events (`events/`), the MSC Wiimmfi list (`wiimmfi/`), the
+placeholder page (`placeholder/`), the save editors (`save-editors/`: pure
+byte-level cores such as `msbl/save-core.ts` and `msc/online-core.ts`, plus
+their page code; see [save formats](save-tools.md)) and the host of the
+third-party Gear Builder (`gear-builder/`). `src/lib/` holds the shared API fetch, the
 country helpers and `popup.ts`, the template popup both profile popups are built
 on. The
 competitive rules are rendered at build time from `src/content/competitive-rules/`
@@ -51,7 +52,8 @@ competitive rules are rendered at build time from `src/content/competitive-rules
 engines read the full text. The popups are loaded from
 `/pages/templates/player-profile-popup.html` and `club-profile-popup.html`.
 The Gear Builder loads `/pages/templates/msbl-gear-builder.html` and its assets
-under `assets/gear-builder/`.
+under `assets/gear-builder/`; its 16 character panes are rendered at build time
+from `src/content/gear-builder/` (see [Gear Builder maintenance](msbl-gear-builder-snapshot.md)).
 
 Browser code calls the API on the same origin (`/api/...`).
 
@@ -75,10 +77,10 @@ The global stylesheet is delivered as one file named by its content hash
 (`/css/global.<hash>.css`), so browsers cache it for a year and a change
 always reaches them. Its partials are concatenated in the order listed in
 `src/styles/global.ts`; that order is the cascade, and the media blocks in
-`tablet.css` and `mobile.css` come last on purpose. Other browser-loaded
-script and style URLs use `?v=...` cache tags: pages take them from
-`apps/web/src/layouts/assets.ts`; scripts that load other files by URL keep
-their own tags until they move to bundled modules.
+`tablet.css` and `mobile.css` come last on purpose. Modules are bundled with
+content-hashed names. Only the Gear Builder snapshot keeps `?v=...` cache tags:
+its stylesheets in `apps/web/src/layouts/assets.ts`, its template, panes and
+scripts in `src/features/gear-builder/gear-builder-host.ts`.
 PNG/WebP pairs in the Gear Builder include intentional fallback behavior.
 
 ## Backend and data

@@ -1,7 +1,7 @@
 ---
 import SiteLayout from "../../layouts/SiteLayout.astro";
 ---
-<SiteLayout slug="msbl-save-editor" mainClass="save-editor-page msbl-save-editor-page" mainLabel="MSBL save editor" scripts={["msblSaveEditorContract", "msblSaveEditor"]}>
+<SiteLayout slug="msbl-save-editor" mainClass="save-editor-page msbl-save-editor-page" mainLabel="MSBL save editor">
     <section class="save-editor-panel msbl-save-editor-panel">
       <p class="save-editor-description">This Save Editor patches Mario Strikers: Battle League <span class="save-editor-mode-accent">strkrs.save</span> files locally in your browser. No save data is uploaded. USE AT YOUR OWN RISK!</p>
 
@@ -26,4 +26,4 @@ import SiteLayout from "../../layouts/SiteLayout.astro";
       <a id="msbl-save-editor-download" class="save-editor-download-link" download="strkrs.save"></a>
       <p id="msbl-save-editor-status" class="save-editor-note"></p>
     </section>
-  </SiteLayout>
+  <Fragment slot="scripts"><script src="../../entries/msbl-save-editor-page.ts"></script></Fragment></SiteLayout>

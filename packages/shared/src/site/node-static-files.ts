@@ -23,9 +23,10 @@ export function createStaticFiles(root: string): StaticFiles {
 /** Page files a build writes for the registered pages ("/index.html", "/pages/<slug>.html"). */
 export const PAGE_FILES: ReadonlySet<string> = new Set(PAGES.map((page) => pageFile(page.slug)));
 
-// Files the site renders besides its pages: the sitemap, and the global stylesheet under its
-// content-hashed name and, for HTML cached before that name existed, its former one.
-const GENERATED_FILE = /^\/(?:sitemap\.xml|css\/global(?:\.[0-9a-f]{12})?\.css)$/;
+// Files the site renders besides its pages: the sitemap, the global stylesheet under its content-hashed
+// name and, for HTML cached before that name existed, its former one, and the Gear Builder's panes.
+const GENERATED_FILE =
+  /^\/(?:sitemap\.xml|css\/global(?:\.[0-9a-f]{12})?\.css|pages\/templates\/msbl-gear-builder\/panes\/[a-z-]+\.html)$/;
 
 /** The site before a build: static files from apps/web/public plus everything the site renders. */
 export function createSourceSiteFiles(publicRoot: string): StaticFiles {
