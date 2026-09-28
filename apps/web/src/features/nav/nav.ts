@@ -275,23 +275,15 @@ function syncSubNav(): void {
   });
 }
 
-function stabilizeScrollbarLayout(): void {
-  const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-  document.documentElement.style.setProperty("--sbw", `${scrollbarWidth}px`);
-  document.documentElement.style.paddingRight = "";
-}
-
 export function initNavigation(): void {
   let resizeTimer: number | undefined;
   window.addEventListener("resize", () => {
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => {
-      stabilizeScrollbarLayout();
       syncSubNav();
     }, 100);
   });
 
-  stabilizeScrollbarLayout();
   if (redirectLegacyUrl(pageSlug())) return;
 
   const navRoot = document.getElementById("global-nav");

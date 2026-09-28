@@ -415,30 +415,6 @@
   font-weight: 700;
 }
 
-.profile-season-reward-line {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.46rem;
-  color: #f2f2f2;
-  font-family: var(--reporter-font-stack);
-  font-weight: var(--reporter-font-weight);
-  font-size: calc(var(--reporter-font-size-sm) + 2px);
-  letter-spacing: var(--reporter-letter-spacing);
-  line-height: var(--reporter-line-height);
-}
-
-.profile-season-reward-label {
-  color: #d7d8de;
-  font-weight: 400;
-}
-
-.profile-season-reward-icon {
-  width: auto;
-  height: var(--profile-rating-reward-icon-height);
-  object-fit: contain;
-}
-
 .profile-accolades-details,
 .player-popup-accolades-details,
 .profile-season-awards-details,
