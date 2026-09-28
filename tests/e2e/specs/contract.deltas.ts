@@ -10,6 +10,20 @@ const INVALID_ID_PATHS = new Set(["/api/players/abc/profile", "/api/players/0/pr
 // P2a: the login binds its OAuth state to the browser with this cookie (login CSRF protection).
 const OAUTH_STATE_COOKIE = "msc_oauth_state=";
 
+// P7: the season and Wiimmfi responses use snake_case keys like every other response (they had camelCase).
+const SNAKE_CASED_PATHS = new Set(["/api/competitive-season/current", "/api/wiimmfi/msc-charged"]);
+
+function snakeCaseKeys(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(snakeCaseKeys);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, entry]) => [
+      key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`),
+      snakeCaseKeys(entry),
+    ]),
+  );
+}
+
 function normalizeCookie(cookie: string): string {
   // P2a: fixture cookies now come from the production session code: same attributes, with an Expires on
   // clearing and in the production order.
@@ -25,7 +39,7 @@ export function normalizeContract(record: ContractRecord): ContractRecord {
   // P2a: error responses are never cached.
   if (record.status >= 400 && headers["cache-control"] === "no-store") delete headers["cache-control"];
 
-  let body = record.body;
+  let body = SNAKE_CASED_PATHS.has(record.path) ? snakeCaseKeys(record.body) : record.body;
   if (record.status >= 400 && body && typeof body === "object" && "code" in body) {
     const { code, ...rest } = body as Record<string, unknown>;
     if (typeof code === "string" && NEW_ERROR_CODES.has(code)) body = rest;

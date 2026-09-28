@@ -21,9 +21,9 @@ const berlinClock = new Intl.DateTimeFormat("en-US", {
 });
 
 export interface CompetitiveSeason {
-  readonly displayName?: unknown;
-  readonly startDateUtc?: unknown;
-  readonly endDateUtc?: unknown;
+  readonly display_name?: unknown;
+  readonly start_date_utc?: unknown;
+  readonly end_date_utc?: unknown;
 }
 
 export interface CountdownPhase {
@@ -73,10 +73,10 @@ export function competitiveSeasonPhase(
   season: CompetitiveSeason,
   nowMs: number,
 ): CountdownPhase & { readonly targetMs: number } {
-  const startMs = timeMs(season.startDateUtc);
-  const endMs = timeMs(season.endDateUtc);
+  const startMs = timeMs(season.start_date_utc);
+  const endMs = timeMs(season.end_date_utc);
   // eslint-disable-next-line @typescript-eslint/no-base-to-string -- the API sends a string
-  const headline = (season.displayName ? String(season.displayName) : "COMPETITIVE SEASON").trim();
+  const headline = (season.display_name ? String(season.display_name) : "COMPETITIVE SEASON").trim();
   if (startMs && nowMs < startMs) {
     return { headline, prefix: "SEASON BEGINS:", remainingMs: startMs - nowMs, targetMs: startMs };
   }

@@ -110,12 +110,16 @@ cache that persists snapshots under `.cache/` in the API's working directory
 there too. These are runtime caches, not source data; production stores them
 on a named Docker volume. Account/profile responses use `no-store`. Season
 responses also use `no-store`: season data remains cached internally, but
-`serverNowUtc` is generated at response time for countdown synchronization.
+`server_now_utc` is generated at response time for countdown synchronization.
 
 Discord OAuth requests `identify` and `guilds.members.read`, checks membership
 in the configured guild, and sets a signed HTTP-only session cookie.
 `/api/profile/me` maps the Discord user to `Player.DiscordID`. A bot token
 enables Discord name lookups and event discovery.
+
+Responses use snake_case keys throughout; code inside the API uses camelCase
+and converts at the route (the season route shows how, since its cached
+snapshot keeps the service's shape).
 
 Local development uses synthetic fixtures through the same public route
 shapes; see [development](development.md) for simulated versus live behavior.

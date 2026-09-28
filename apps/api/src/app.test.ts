@@ -64,7 +64,10 @@ test("season responses keep cached data but send a fresh clock without mutating 
     assert.equal(response.headers["cache-control"], "no-store");
     assert.equal(response.headers["x-data-generated-at"], oldTime);
     assert.equal(response.headers["x-data-cache"], "stale");
-    assert.deepEqual(response.json(), { serverNowUtc: new Date(time).toISOString(), season });
+    assert.deepEqual(response.json(), {
+      server_now_utc: new Date(time).toISOString(),
+      season: { id: 1, display_name: "Sample Season", end_date_utc: "2026-10-01T00:00:00.000Z" },
+    });
   }
   assert.equal(payload.serverNowUtc, oldTime);
 });
