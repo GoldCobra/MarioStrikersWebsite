@@ -1,5 +1,6 @@
 // Player profiles as the API sends them, and the readings the profile page and the player popup share.
 
+import { toText } from "@ms/shared/text";
 import type { Ratings } from "../rating-cards/rating-cards.ts";
 
 export interface FriendCodes {
@@ -42,20 +43,14 @@ export interface PlayerProfile {
   readonly ratings?: Ratings | null;
 }
 
-/** String form of an API value; null, undefined and other falsy values become "". */
-export function text(value: unknown): string {
-  // eslint-disable-next-line @typescript-eslint/no-base-to-string -- API strings and numbers
-  return value ? String(value) : "";
-}
-
 export function hasDisplayText(value: unknown): boolean {
-  const trimmed = text(value).trim();
+  const trimmed = toText(value).trim();
   return trimmed !== "" && trimmed !== "-";
 }
 
 /** "PAL: 1234-5678" → prefix "PAL:", code "1234-5678". */
 export function parseCodeLine(lineValue: unknown): { prefix: string; code: string } {
-  const line = text(lineValue).trim();
+  const line = toText(lineValue).trim();
   if (!line) return { prefix: "", code: "-" };
   const index = line.indexOf(":");
   if (index <= 0) return { prefix: "", code: line };
@@ -92,14 +87,14 @@ export function mscFriendCodeLines(data: FriendCodes): unknown[] {
 
 /** An ISO date's day ("2026-03-10"), or the text itself when it is no date. */
 export function dateText(value: unknown): string {
-  const raw = text(value).trim();
+  const raw = toText(value).trim();
   if (!raw) return "";
   const date = new Date(raw);
   return Number.isNaN(date.getTime()) ? raw : date.toISOString().slice(0, 10);
 }
 
 export function gameBallIconUrl(gameCode: unknown): string {
-  const code = text(gameCode).trim().toLowerCase();
+  const code = toText(gameCode).trim().toLowerCase();
   const ball = code === "msbl" ? "msblball" : code === "msc" ? "mscball" : "smsball";
   return `../assets/nav-buttons/sub/${ball}.webp`;
 }
@@ -112,7 +107,7 @@ const WINNER_GAMES = new Set(["msbl", "msc", "sms"]);
  */
 export function accoladeNameClasses(baseClass: string, entry: Accolade | null | undefined): string {
   if (entry?.is_world_champion) return `${baseClass} is-world-champion`;
-  const game = text(entry?.game_code).toLowerCase();
+  const game = toText(entry?.game_code).toLowerCase();
   if (entry?.is_winner && WINNER_GAMES.has(game)) return `${baseClass} is-winner-${game}`;
   return baseClass;
 }

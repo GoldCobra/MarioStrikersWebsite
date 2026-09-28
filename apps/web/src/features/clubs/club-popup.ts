@@ -1,21 +1,12 @@
 // The club popup of the clubs page, filled from /api/clubs/msbl/:id/profile; a profile stays cached for
 // 30 seconds, so reopening a club shows it at once.
 
+import { toPositiveInt, toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
 import { flagTitleAttribute, flagUrl, normalizeCountryCode } from "../../lib/countries.ts";
 import { scaleFitText } from "../../lib/fit-text.ts";
 import { TemplatePopup } from "../../lib/popup.ts";
-import {
-  clubRegions,
-  logoUrl,
-  positiveInt,
-  statusClass,
-  statusHtml,
-  statusVariant,
-  text,
-  textList,
-  type Club,
-} from "./club-data.ts";
+import { clubRegions, logoUrl, statusClass, statusHtml, statusVariant, textList, type Club } from "./club-data.ts";
 
 interface RosterEntry {
   readonly name?: unknown;
@@ -77,7 +68,7 @@ function statusSpan(status: string): string {
 /** Open clubs show their club codes; others their join condition. Regions follow as badges. */
 function renderClubInfo(club: Club | null): void {
   const line = popup.slots["club-line-primary"];
-  const status = text(club?.join_conditions).trim();
+  const status = toText(club?.join_conditions).trim();
   if (line) {
     line.hidden = false;
     if (statusVariant(status) === "open-to-anyone") {
@@ -101,7 +92,7 @@ function renderClubInfo(club: Club | null): void {
 }
 
 function uniformIcon(slot: string, uniform: unknown): string {
-  const label = text(uniform).trim();
+  const label = toText(uniform).trim();
   const color = label ? (UNIFORM_COLORS[label.toLowerCase()] ?? "") : "";
   if (!color || !label) return "";
   return `<span class="club-popup-action-icon club-popup-uniform-icon" data-uniform-slot="${escapeHtml(slot)}" style="--club-uniform-color: ${escapeHtml(color)};" title="${escapeHtml(label)}" aria-label="${escapeHtml(label)}"></span>`;
@@ -110,7 +101,7 @@ function uniformIcon(slot: string, uniform: unknown): string {
 function renderEquipment(club: Club | null): void {
   const line = popup.slots["club-equipment-line"];
   if (!line) return;
-  const stadium = text(club?.stadium).trim();
+  const stadium = toText(club?.stadium).trim();
   line.hidden = false;
   line.innerHTML =
     uniformIcon("first", club?.first_uniform) +
@@ -120,7 +111,7 @@ function renderEquipment(club: Club | null): void {
 
 /** A discord.gg or discord.com/invite link, or "" for anything else. */
 function discordInviteUrl(club: Club | null): string {
-  const raw = text(club?.discord_server).trim();
+  const raw = toText(club?.discord_server).trim();
   if (!raw) return "";
   try {
     const url = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`);
@@ -151,14 +142,14 @@ function renderActions(club: Club | null): void {
 }
 
 function createdDate(value: unknown): string {
-  const raw = text(value).trim();
+  const raw = toText(value).trim();
   if (!raw) return "";
   const date = new Date(raw);
   return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
 }
 
 function roleBadge(role: unknown): string {
-  const normalized = text(role).trim().toLowerCase();
+  const normalized = toText(role).trim().toLowerCase();
   if (normalized !== "owner" && normalized !== "officer") return "";
   return `<span class="club-popup-role-badge is-${normalized}"><span class="club-popup-role-label">${normalized.toUpperCase()}</span></span>`;
 }
@@ -168,8 +159,8 @@ function rosterItem(entry: RosterEntry | null | undefined): string {
   const flag = countryCode
     ? `<img class="club-popup-roster-flag" src="${escapeHtml(flagUrl(countryCode))}" alt="" aria-hidden="true"${flagTitleAttribute(countryCode)} loading="lazy" data-on-error="remove">`
     : '<span class="club-popup-roster-flag club-popup-roster-flag-empty" aria-hidden="true"></span>';
-  const name = text(entry?.name).trim() || "Unknown";
-  const discordName = text(entry?.discord_name).trim();
+  const name = toText(entry?.name).trim() || "Unknown";
+  const discordName = toText(entry?.discord_name).trim();
   return [
     '<li class="club-popup-roster-item">',
     flag,
@@ -205,8 +196,8 @@ function renderLogo(club: Club | null): void {
 
 function renderProfile(profile: ClubProfile | null): void {
   const club = profile?.club ?? {};
-  const name = text(club.name).trim() || "-";
-  const tag = text(club.tag).trim();
+  const name = toText(club.name).trim() || "-";
+  const tag = toText(club.tag).trim();
   const nameNode = popup.slots["club-name"];
   if (nameNode) {
     nameNode.innerHTML = tag
@@ -235,7 +226,7 @@ async function fetchClubProfile(clubId: number): Promise<ClubProfile | null> {
 }
 
 export async function openClubPopup(clubIdRaw: unknown, opener: HTMLElement | null): Promise<void> {
-  const clubId = positiveInt(clubIdRaw);
+  const clubId = toPositiveInt(clubIdRaw);
   if (!clubId) return;
   const request = popup.begin();
   try {

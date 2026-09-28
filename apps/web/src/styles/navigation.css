@@ -130,10 +130,10 @@
   justify-content: center;
   gap: 0.38rem;
   padding: 0.2rem 0.55rem;
-  border: 2px solid #c77603;
+  border: 2px solid var(--color-amber);
   border-radius: 0;
-  background: #280101;
-  color: #f5c300;
+  background: var(--color-maroon);
+  color: var(--color-gold);
   font: inherit;
   line-height: 1;
   text-decoration: none;
@@ -142,8 +142,8 @@
 
 .global-account-button:hover,
 .global-account-button:focus-visible {
-  background: #c77603;
-  color: #280101;
+  background: var(--color-amber);
+  color: var(--color-maroon);
 }
 
 .global-account-button:focus-visible,
@@ -190,7 +190,7 @@
   right: 0;
   width: 168px;
   padding: 0.28rem;
-  border: 2px solid #c77603;
+  border: 2px solid var(--color-amber);
   background: rgba(10, 4, 4, 0.96);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.45);
 }
@@ -219,7 +219,7 @@
 
 .global-account-menu-item:hover,
 .global-account-menu-item:focus-visible {
-  color: #f5c300;
+  color: var(--color-gold);
   background: rgba(199, 118, 3, 0.18);
 }
 
@@ -274,9 +274,9 @@ body[data-subnav="on"] #global-subnav {
   justify-content: center;
   min-height: 31px;
   padding: 0.22rem 0.86rem;
-  border: 2px solid #c77603;
-  background: #280101;
-  color: #f5c300;
+  border: 2px solid var(--color-amber);
+  background: var(--color-maroon);
+  color: var(--color-gold);
   font-family: "ITC Grizzly", sans-serif;
   font-size: clamp(0.6rem, 0.96vw, 0.88rem);
   letter-spacing: 0.02em;
@@ -298,8 +298,8 @@ body[data-subnav="on"] #global-subnav {
 }
 
 .sub-link-text.is-active {
-  border-color: #c77603;
-  background: #c77603;
-  color: #280101;
+  border-color: var(--color-amber);
+  background: var(--color-amber);
+  color: var(--color-maroon);
 }
 

@@ -98,7 +98,7 @@ body[data-page="sms-setup-guide"] .setup-guide-video-frame {
 .setup-guide-code {
   margin: 0.45rem 0 0.75rem;
   padding: 0.58rem 0.72rem;
-  border-left: 3px solid #c77603;
+  border-left: 3px solid var(--color-amber);
   background: rgba(0, 0, 0, 0.34);
   color: #f4f4f4;
   font-family: "Consolas", "Courier New", monospace;

@@ -29,7 +29,7 @@ body[data-page="index"] .page-content {
   left: 1.4%;
   top: 28.5%;
   margin: 0;
-  color: #d36402;
+  color: var(--color-orange);
   font-family: "ITC Grizzly", sans-serif;
   font-size: calc(clamp(0.98rem, 1.18vw, 1.18rem) - 4px);
   letter-spacing: 0.03em;
@@ -67,7 +67,7 @@ body[data-page="index"] .page-content {
 .landing-club-headline {
   margin: 0;
   text-align: left;
-  color: #f5c300;
+  color: var(--color-gold);
   font-family: "ITC Grizzly", sans-serif;
   font-size: calc(clamp(0.78rem, 1.28vw, 1.26rem) + 7px);
   letter-spacing: 0.03em;

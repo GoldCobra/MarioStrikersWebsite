@@ -1,5 +1,6 @@
 // MSBL clubs as the API sends them, and the readings the club list and the club popup share.
 
+import { toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
 
 export interface Club {
@@ -24,23 +25,12 @@ export interface Club {
 
 export const NO_CLUB_LOGO_URL = "../assets/clubs/no-club-logo.png";
 
-/** String form of an API value; null, undefined and other falsy values become "". */
-export function text(value: unknown): string {
-  // eslint-disable-next-line @typescript-eslint/no-base-to-string -- API strings and numbers
-  return value ? String(value) : "";
-}
-
-export function positiveInt(value: unknown): number | null {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-}
-
 /** A list or a single value as trimmed, non-empty strings. */
 export function textList(value: unknown): string[] {
   if (Array.isArray(value)) {
-    return (value as unknown[]).map((entry) => text(entry).trim()).filter(Boolean);
+    return (value as unknown[]).map((entry) => toText(entry).trim()).filter(Boolean);
   }
-  const single = text(value).trim();
+  const single = toText(value).trim();
   return single ? [single] : [];
 }
 
@@ -79,7 +69,7 @@ export function statusHtml(status: string): string {
 
 /** The club logo (cached by the API, or an absolute URL), or "" for none. */
 export function logoUrl(club: Club | null | undefined): string {
-  const raw = text(club?.logo).trim();
+  const raw = toText(club?.logo).trim();
   if (!raw) return "";
   if (/^\/(?!\/)/.test(raw)) return raw;
   return /^https?:\/\//i.test(raw) ? raw : "";

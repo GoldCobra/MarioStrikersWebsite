@@ -222,7 +222,6 @@
   .competitive-rules h2 {
     font-size: clamp(1rem, 5vw, 1.35rem);
     -webkit-text-stroke: 1px #000;
-    text-stroke: 1px #000;
   }
 
   .competitive-rules ul,
@@ -890,7 +889,7 @@
   .setup-guide-page .content-box-bottom {
     background:
       linear-gradient(90deg, rgba(250, 196, 2, 0.98) 0%, rgba(250, 196, 2, 0.98) 50%, rgba(250, 196, 2, 0) 58%) left top / 58% 6px no-repeat,
-      linear-gradient(90deg, #fac402 0%, #c77603 48%, #7e1d06 100%) left top / 100% 2px no-repeat,
+      linear-gradient(90deg, #fac402 0%, var(--color-amber) 48%, #7e1d06 100%) left top / 100% 2px no-repeat,
       linear-gradient(#050505, #050505) left 7px / 100% calc(100% - 7px) no-repeat;
   }
 
@@ -950,7 +949,6 @@
     line-height: 0.92;
     letter-spacing: 0.025em;
     -webkit-text-stroke-width: 1.2px;
-    text-stroke-width: 1.2px;
     text-shadow: none;
     filter: drop-shadow(-3px 2px 0 rgba(0, 0, 0, 0.95)) drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.95));
   }

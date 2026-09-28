@@ -121,7 +121,7 @@ body[data-subnav="off"] .page-content {
   border-bottom: 0;
   border-radius: 0;
   background: transparent;
-  color: #d36402;
+  color: var(--color-orange);
   font-family: "ITC Grizzly", sans-serif;
   font-size: var(--tabs-tab-font-size);
   font-weight: 400;

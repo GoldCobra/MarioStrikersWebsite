@@ -1,6 +1,7 @@
 // Leaderboard rows: loaded for the active tab, kept five minutes in sessionStorage so tab switches and
 // returns show rows at once (refreshed in the background), and a message when the API is unreachable.
 
+import { toPositiveInt, toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
 import { COMPETITIVE_RANK_ICON_BY_NUMBER, RANK_ICON_ASSET_VERSION } from "@ms/shared/ranks";
 import { fetchJson } from "../../lib/api.ts";
@@ -67,16 +68,6 @@ type RowSource = "cache" | "network";
 let activeRender = 0;
 let rowAssetsPreload: Promise<unknown> | null = null;
 
-function text(value: unknown): string {
-  // eslint-disable-next-line @typescript-eslint/no-base-to-string -- API strings and numbers
-  return value ? String(value) : "";
-}
-
-function positiveInt(value: unknown): number | null {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-}
-
 function normalizeRows(rows: unknown): Row[] {
   if (!Array.isArray(rows)) return [];
   return (rows as (Record<string, unknown> | null)[])
@@ -84,14 +75,14 @@ function normalizeRows(rows: unknown): Row[] {
       const rank = Number(row?.rank);
       const rating = Number(row?.rating);
       const rankNumber = Number(row?.rank_number);
-      const displayName = text(row?.display_name || row?.player || row?.name).trim();
-      const competitiveRank = text(
+      const displayName = toText(row?.display_name || row?.player || row?.name).trim();
+      const competitiveRank = toText(
         row?.competitive_rank || row?.competitiveRank || row?.rank_name || row?.rankName,
       ).trim();
       if (!displayName || !Number.isFinite(rating)) return null;
       return {
         rank: Number.isFinite(rank) && rank > 0 ? Math.floor(rank) : index + 1,
-        player_id: positiveInt(row?.player_id),
+        player_id: toPositiveInt(row?.player_id),
         display_name: displayName,
         rating,
         rank_number: Number.isFinite(rankNumber) && rankNumber > 0 ? Math.floor(rankNumber) : 0,

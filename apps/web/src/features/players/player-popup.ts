@@ -1,6 +1,7 @@
 // The player profile popup of the players list and the leaderboards, filled from
 // /api/players/:id/profile.
 
+import { toPositiveInt, toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
 import { fetchJson } from "../../lib/api.ts";
 import { countryDisplayName, flagUrl, normalizeCountryCode } from "../../lib/countries.ts";
@@ -14,7 +15,6 @@ import {
   mscFriendCodeLines,
   parseCodeLine,
   switchFriendCodeLines,
-  text,
   type Accolade,
   type PlayerProfile,
   type SeasonAward,
@@ -31,11 +31,6 @@ const popup = new TemplatePopup({
     mountIds: ["players-root", "leaderboards-root"],
   },
 });
-
-export function toPositiveInt(value: unknown): number | null {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-}
 
 /** Loads the popup ahead of the first click. */
 export function ensurePopup(): Promise<HTMLElement> {
@@ -93,8 +88,8 @@ function renderDetailsList<T>(
 }
 
 function seasonAwardItem(entry: SeasonAward | null | undefined): string {
-  const season = text(entry?.season_name).trim();
-  const award = text(entry?.award_name).trim() || "-";
+  const season = toText(entry?.season_name).trim();
+  const award = toText(entry?.award_name).trim() || "-";
   return [
     '<li class="player-popup-season-award-item">',
     `<span class="player-popup-season-award-season">${escapeHtml(season)}</span>`,
@@ -105,8 +100,8 @@ function seasonAwardItem(entry: SeasonAward | null | undefined): string {
 }
 
 function accoladeItem(entry: Accolade | null | undefined): string {
-  const medal = text(entry?.place_medal || "•").trim() || "•";
-  const name = text(entry?.tournament_name).trim() || "-";
+  const medal = toText(entry?.place_medal || "•").trim() || "•";
+  const name = toText(entry?.tournament_name).trim() || "-";
   const date = dateText(entry?.start_date);
   return [
     '<li class="player-popup-accolade-item">',
@@ -172,11 +167,11 @@ function renderRatings(profile: PlayerProfile): void {
 function renderProfile(profile: PlayerProfile): void {
   const player = profile.player ?? {};
   const friendCodes = profile.friend_codes ?? {};
-  popup.setText("player-name", text(player.name || "-"));
+  popup.setText("player-name", toText(player.name || "-"));
   renderFlag(player.country);
   renderCodeLines("fc-switch", switchFriendCodeLines(friendCodes));
   renderCodeLines("fc-msc", mscFriendCodeLines(friendCodes));
-  renderResultsLink(text(player.results_url).trim());
+  renderResultsLink(toText(player.results_url).trim());
   renderDetailsList(
     "season-awards",
     ".player-popup-season-awards-details",

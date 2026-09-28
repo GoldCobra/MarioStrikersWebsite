@@ -12,3 +12,9 @@ export function toText(value: unknown): string {
 export function normalizeText(value: unknown): string {
   return toText(value).trim();
 }
+
+/** A whole number above 0 from a loosely typed value, such as an id in a URL or JSON, else null. */
+export function toPositiveInt(value: unknown): number | null {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}

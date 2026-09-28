@@ -72,9 +72,6 @@
 
   .global-tabs-shell {
     --tabs-panel-height: 44px;
-  }
-
-  .global-tabs-shell {
     --tabs-tab-height: 38px;
     --tabs-tab-width: 136px;
     --tabs-tab-font-size: calc(0.76rem - 2px);

@@ -1,10 +1,10 @@
 // The players page: every player, active ones first, then by name. A name opens the profile popup.
 
+import { toPositiveInt, toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
 import { fetchJson } from "../../lib/api.ts";
 import { flagTitleAttribute, flagUrl, normalizeCountryCode } from "../../lib/countries.ts";
-import { ensurePopup, toPositiveInt } from "./player-popup.ts";
-import { text } from "./profile-data.ts";
+import { ensurePopup } from "./player-popup.ts";
 
 interface PlayerRow {
   readonly player_id?: unknown;
@@ -19,7 +19,7 @@ function isActive(row: PlayerRow | null | undefined): boolean {
 }
 
 function sortName(row: PlayerRow | null | undefined): string {
-  return text(row?.display_name || row?.name)
+  return toText(row?.display_name || row?.name)
     .trim()
     .toLowerCase();
 }
@@ -34,8 +34,8 @@ function comparePlayers(a: PlayerRow, b: PlayerRow): number {
 }
 
 function rowHtml(row: PlayerRow): string {
-  const name = text(row.name).trim() || "-";
-  const displayName = text(row.display_name || row.name).trim() || "-";
+  const name = toText(row.name).trim() || "-";
+  const displayName = toText(row.display_name || row.name).trim() || "-";
   const playerId = toPositiveInt(row.player_id);
   const countryCode = normalizeCountryCode(row.country);
   const rowClass = isActive(row) ? "lb-row players-row" : "lb-row players-row is-inactive";

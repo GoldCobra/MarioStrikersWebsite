@@ -95,7 +95,6 @@
   line-height: 1;
   color: #f5f7ff;
   -webkit-text-stroke: 0;
-  text-stroke: 0;
   text-shadow: none;
   filter: drop-shadow(-2px 2px 0 #000);
   paint-order: normal;
@@ -163,7 +162,6 @@
 .lb-row-rank-3 .lb-rank {
   filter: drop-shadow(-2px 1px 0 #000);
   -webkit-text-stroke: 2px #000;
-  text-stroke: 2px #000;
   paint-order: stroke fill;
 }
 
@@ -214,11 +212,11 @@
 
 .lb-player-trigger:hover,
 .lb-player-trigger:focus-visible {
-  color: #f5c300;
+  color: var(--color-gold);
 }
 
 .lb-player-trigger:focus-visible {
-  outline: 2px solid #f5c300;
+  outline: 2px solid var(--color-gold);
   outline-offset: 2px;
 }
 
