@@ -72,11 +72,11 @@ body.popup-open {
 
 .popup-close:hover,
 .popup-close:focus-visible {
-  color: #f5c300;
+  color: var(--color-gold);
 }
 
 .popup-close:focus-visible {
-  outline: 2px solid #f5c300;
+  outline: 2px solid var(--color-gold);
   outline-offset: 2px;
 }
 

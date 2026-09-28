@@ -97,11 +97,11 @@
 
 .players-name-trigger:hover,
 .players-name-trigger:focus-visible {
-  color: #f5c300;
+  color: var(--color-gold);
 }
 
 .players-name-trigger:focus-visible {
-  outline: 2px solid #f5c300;
+  outline: 2px solid var(--color-gold);
   outline-offset: 2px;
 }
 

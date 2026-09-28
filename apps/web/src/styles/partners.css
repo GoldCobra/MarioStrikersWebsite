@@ -63,7 +63,6 @@
   text-transform: uppercase;
   white-space: nowrap;
   -webkit-text-stroke: 1.6px #000;
-  text-stroke: 1.6px #000;
   paint-order: stroke fill;
   text-shadow: none;
   filter: drop-shadow(-4px 3px 0 #000);

@@ -119,7 +119,7 @@
 }
 
 .save-editor-slot:focus-visible {
-  outline: 2px solid #f5c300;
+  outline: 2px solid var(--color-gold);
   outline-offset: 2px;
 }
 
@@ -227,7 +227,7 @@
 }
 
 .save-editor-icon-option:focus-visible {
-  outline: 2px solid #f5c300;
+  outline: 2px solid var(--color-gold);
   outline-offset: 1px;
 }
 
@@ -275,7 +275,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #f5c300;
+  color: var(--color-gold);
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
@@ -335,13 +335,13 @@
 }
 
 .save-editor-field > span {
-  color: #f5c300;
+  color: var(--color-gold);
   text-transform: uppercase;
 }
 
 .save-editor-field > select {
   min-height: 36px;
-  border: 1px solid #c77603;
+  border: 1px solid var(--color-amber);
   background: rgba(20, 0, 0, 0.86);
   color: #ffffff;
   padding: 0 0.42rem;
@@ -381,7 +381,7 @@
 
 .msbl-save-editor-field > input {
   min-height: 36px;
-  border: 1px solid #c77603;
+  border: 1px solid var(--color-amber);
   background: rgba(20, 0, 0, 0.86);
   color: #ffffff;
   padding: 0 0.42rem;
@@ -401,7 +401,7 @@
 }
 
 .save-editor-note.is-warning {
-  color: #c77603;
+  color: var(--color-amber);
 }
 
 .save-editor-note.is-error {
@@ -409,7 +409,7 @@
 }
 
 .save-editor-note.is-success {
-  color: #c77603;
+  color: var(--color-amber);
 }
 
 .online-editor-panel {
@@ -425,7 +425,7 @@
 }
 
 .online-editor-field > span {
-  color: #f5c300;
+  color: var(--color-gold);
   text-transform: uppercase;
 }
 
@@ -436,7 +436,7 @@
 .online-editor-profile-trigger {
   min-height: 36px;
   width: 100%;
-  border: 1px solid #c77603;
+  border: 1px solid var(--color-amber);
   background: rgba(20, 0, 0, 0.86);
   color: #ffffff;
   padding: 0.38rem 2rem 0.38rem 0.42rem;
@@ -456,7 +456,7 @@
   transform: translateY(-28%);
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  border-top: 7px solid #c77603;
+  border-top: 7px solid var(--color-amber);
   pointer-events: none;
 }
 
@@ -556,7 +556,7 @@
 }
 
 .online-editor-table th {
-  color: #f5c300;
+  color: var(--color-gold);
   text-transform: uppercase;
 }
 
@@ -584,7 +584,7 @@
 }
 
 .online-editor-roster-count {
-  color: #f5c300;
+  color: var(--color-gold);
 }
 
 .online-editor-separator-row td {
@@ -617,7 +617,7 @@
 .online-editor-popup-field > input,
 .online-editor-popup-field > textarea {
   min-height: 36px;
-  border: 1px solid #c77603;
+  border: 1px solid var(--color-amber);
   background: rgba(20, 0, 0, 0.86);
   color: #ffffff;
   padding: 0 0.5rem;
@@ -632,7 +632,7 @@
 
 .online-editor-popup-field > input:focus-visible,
 .online-editor-popup-field > textarea:focus-visible {
-  outline: 2px solid #f5c300;
+  outline: 2px solid var(--color-gold);
   outline-offset: 2px;
 }
 
@@ -662,18 +662,18 @@
 
 .online-editor-delete-row:hover,
 .online-editor-delete-row:focus-within {
-  color: #f5c300;
+  color: var(--color-gold);
 }
 
 .online-editor-delete-checkbox {
   width: 14px;
   height: 14px;
   margin: 0;
-  accent-color: #c77603;
+  accent-color: var(--color-amber);
 }
 
 .online-editor-delete-checkbox:focus-visible {
-  outline: 2px solid #f5c300;
+  outline: 2px solid var(--color-gold);
   outline-offset: 2px;
 }
 

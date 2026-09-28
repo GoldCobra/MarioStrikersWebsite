@@ -139,7 +139,7 @@ body.player-popup-open {
   grid-template-columns: auto auto 1fr auto;
   align-items: center;
   gap: 0.3rem;
-  color: #f2f2f2;
+  color: var(--color-text-light);
 }
 
 .player-popup-accolade-item.is-empty {
@@ -194,7 +194,7 @@ body.player-popup-open {
   display: flex;
   align-items: center;
   gap: 0.2rem;
-  color: #f2f2f2;
+  color: var(--color-text-light);
 }
 
 #player-profile-popup :is(

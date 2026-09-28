@@ -84,7 +84,11 @@ hash (`/css/global.<hash>.css`), so browsers cache it for a year and a change
 always reaches them. Minifying (lightningcss) removes comments, whitespace and
 declarations a later one in the same rule overrides; a test checks that every
 at-rule, prefixed declaration, `!important` and referenced file survives, and
-invalid CSS fails the build. Its partials are concatenated in the order listed in
+invalid CSS fails the build. `npm run lint:css` (stylelint, part of
+`npm run check`) catches invalid values, unknown properties and duplicates. The
+brand colours are custom properties in `base.css` (`--color-gold`,
+`--color-amber`, `--color-orange`, `--color-maroon`, `--color-text-light`,
+plus one `--game-color-*` per game). Its partials are concatenated in the order listed in
 `src/styles/global.ts`; that order is the cascade, and the media blocks in
 `tablet.css` and `mobile.css` come last on purpose. Modules are bundled with
 content-hashed names. Only the Gear Builder snapshot keeps `?v=...` cache tags:

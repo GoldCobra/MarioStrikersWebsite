@@ -29,7 +29,7 @@
 
 .profile-state-title {
   margin: 0 0 0.5rem;
-  color: #f5c300;
+  color: var(--color-gold);
   font-size: clamp(1.2rem, 2.5vw, 1.75rem);
   line-height: 1.05;
 }
@@ -53,16 +53,16 @@
   align-items: center;
   justify-content: center;
   padding: 0.35rem 0.8rem;
-  border: 2px solid #c77603;
-  background: #280101;
-  color: #f5c300;
+  border: 2px solid var(--color-amber);
+  background: var(--color-maroon);
+  color: var(--color-gold);
   text-decoration: none;
 }
 
 .profile-action-button:hover,
 .profile-action-button:focus-visible {
-  background: #c77603;
-  color: #280101;
+  background: var(--color-amber);
+  color: var(--color-maroon);
 }
 
 .profile-shell {
@@ -115,7 +115,7 @@
   grid-template-columns: 96px minmax(0, 1fr);
   gap: 0.6rem;
   align-items: start;
-  color: #f2f2f2;
+  color: var(--color-text-light);
   font-family: var(--reporter-font-stack);
   font-weight: var(--reporter-font-weight);
   font-size: var(--reporter-font-size-sm);
@@ -243,7 +243,7 @@
   display: flex;
   align-items: center;
   gap: 0.2rem;
-  color: #f2f2f2;
+  color: var(--color-text-light);
 }
 
 .profile-rating-label {
@@ -280,7 +280,7 @@
   gap: 0.18rem;
   padding: 0 0.08rem;
   overflow: visible;
-  color: #f2f2f2;
+  color: var(--color-text-light);
   font-family: var(--reporter-font-stack);
   font-weight: var(--reporter-font-weight);
   letter-spacing: var(--reporter-letter-spacing);
@@ -490,7 +490,7 @@
   grid-template-columns: auto auto minmax(0, 1fr);
   align-items: center;
   gap: 0.32rem;
-  color: #f2f2f2;
+  color: var(--color-text-light);
   font-family: var(--reporter-font-stack);
   font-weight: var(--reporter-font-weight);
   font-size: var(--reporter-font-size-sm);
@@ -542,7 +542,7 @@
   grid-template-columns: auto auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.32rem;
-  color: #f2f2f2;
+  color: var(--color-text-light);
   font-family: var(--reporter-font-stack);
   font-weight: var(--reporter-font-weight);
   font-size: var(--reporter-font-size-sm);

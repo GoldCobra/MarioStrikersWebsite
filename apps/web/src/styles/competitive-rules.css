@@ -34,7 +34,7 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
   font-weight: 400;
   line-height: 1.2;
   font-size: calc(clamp(0.98rem, 1.18vw, 1.18rem) - 4px);
-  color: #d36402;
+  color: var(--color-orange);
   text-transform: uppercase;
   letter-spacing: 0.01em;
   white-space: nowrap;
@@ -64,7 +64,7 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
   font-family: "ITC Grizzly", sans-serif;
   font-weight: 400;
   line-height: 1.2;
-  color: #d36402;
+  color: var(--color-orange);
   text-transform: uppercase;
   text-wrap: balance;
 }
@@ -78,7 +78,6 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
   font-size: calc(clamp(1.1rem, 1.45vw, 1.45rem) + 2px);
   color: #ece8d0;
   -webkit-text-stroke: 1.6px #000;
-  text-stroke: 1.6px #000;
   paint-order: stroke fill;
   text-shadow: none;
   filter: drop-shadow(-4px 3px 0 #000);
@@ -89,7 +88,6 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
   font-size: calc(clamp(1.1rem, 1.45vw, 1.45rem) + 2px);
   color: #fff;
   -webkit-text-stroke: 2px #000;
-  text-stroke: 2px #000;
   paint-order: stroke fill;
   filter: drop-shadow(-3px 2px 0 #000);
 }
@@ -98,14 +96,14 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
   margin-top: 0.95rem;
   font-size: calc(clamp(0.98rem, 1.25vw, 1.2rem) + 2px);
   color: #000;
-  text-shadow: -1px 1px 0 #d36402;
+  text-shadow: -1px 1px 0 var(--color-orange);
 }
 
 .competitive-rules h4 {
   margin-top: 0.7rem;
   font-size: calc(clamp(0.92rem, 1.1vw, 1.05rem) + 2px);
   color: #000;
-  text-shadow: -1px 1px 0 #d36402;
+  text-shadow: -1px 1px 0 var(--color-orange);
 }
 
 .competitive-rules p,

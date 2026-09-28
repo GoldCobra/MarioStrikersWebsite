@@ -3,7 +3,7 @@
 }
 
 .msbl-club-row[data-club-id]:focus-visible {
-  outline: 2px solid #f5c300;
+  outline: 2px solid var(--color-gold);
   outline-offset: 2px;
 }
 
@@ -33,7 +33,7 @@
 }
 
 .club-popup-tag-label {
-  color: #f5c300;
+  color: var(--color-gold);
 }
 
 #club-profile-popup :is(
@@ -54,7 +54,7 @@
 
 .club-popup-line {
   margin: 0.22rem 0 0;
-  color: #f2f2f2;
+  color: var(--color-text-light);
   display: flex;
   align-items: center;
   gap: 0;
@@ -101,7 +101,7 @@
 }
 
 .club-popup-stadium-label {
-  color: #f2f2f2;
+  color: var(--color-text-light);
   line-height: 1;
 }
 
@@ -259,7 +259,7 @@
   width: 28.4px;
   height: 22px;
   display: block;
-  background: var(--club-uniform-color, #f2f2f2);
+  background: var(--club-uniform-color, var(--color-text-light));
   transform: translate(-50%, -50%);
   -webkit-mask-image: url("../assets/clubs/uniform-fill-mask.png");
   mask-image: url("../assets/clubs/uniform-fill-mask.png");
@@ -442,7 +442,7 @@
 
 .msbl-club-status.is-invite-only,
 .club-popup-meta-condition.is-invite-only {
-  color: #f5c300;
+  color: var(--color-gold);
 }
 
 .msbl-club-status.is-open-to-anyone,
