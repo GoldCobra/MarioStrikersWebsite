@@ -1,6 +1,7 @@
 // The MSBL clubs page: clubs with members, active ones first, then by size and name. A row opens the
 // club popup (click, Enter or Space).
 
+import { toPositiveInt, toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
 import { fetchJson } from "../../lib/api.ts";
 import { scaleFitText } from "../../lib/fit-text.ts";
@@ -9,10 +10,8 @@ import {
   clubRegions,
   isClubActive,
   logoUrl,
-  positiveInt,
   statusClass,
   statusHtml,
-  text,
   type Club,
 } from "./club-data.ts";
 import { openClubPopup } from "./club-popup.ts";
@@ -124,8 +123,8 @@ function logoHtml(club: Club, fallbackText: string): string {
 }
 
 function metaHtml(club: Club, active: boolean): string {
-  const tag = text(club.tag).trim();
-  const status = text(club.status).trim() || "-";
+  const tag = toText(club.tag).trim();
+  const status = toText(club.status).trim() || "-";
   const regions = clubRegions(club);
   const memberIcon = active ? ACTIVE_MEMBERS_ICON_URL : INACTIVE_MEMBERS_ICON_URL;
   return [
@@ -140,9 +139,9 @@ function metaHtml(club: Club, active: boolean): string {
 }
 
 function rowHtml(club: Club): string {
-  const clubId = positiveInt(club.club_id);
-  const tag = text(club.tag).trim();
-  const name = text(club.name).trim();
+  const clubId = toPositiveInt(club.club_id);
+  const tag = toText(club.tag).trim();
+  const name = toText(club.name).trim();
   const active = isClubActive(club);
   const label = name || tag || "Club";
   const interactive = clubId
@@ -164,11 +163,11 @@ function compareClubs(a: Club, b: Club): number {
   if (activeDiff !== 0) return activeDiff;
   const memberDiff = Number(b.member_count || 0) - Number(a.member_count || 0);
   if (memberDiff !== 0) return memberDiff;
-  const nameA = text(a.name).trim().toLowerCase();
-  const nameB = text(b.name).trim().toLowerCase();
+  const nameA = toText(a.name).trim().toLowerCase();
+  const nameB = toText(b.name).trim().toLowerCase();
   if (nameA !== nameB) return nameA < nameB ? -1 : 1;
-  const tagA = text(a.tag).trim().toLowerCase();
-  const tagB = text(b.tag).trim().toLowerCase();
+  const tagA = toText(a.tag).trim().toLowerCase();
+  const tagB = toText(b.tag).trim().toLowerCase();
   if (tagA === tagB) return 0;
   return tagA < tagB ? -1 : 1;
 }
@@ -193,14 +192,14 @@ export async function initClubsList(mount: HTMLElement): Promise<void> {
 
     mount.addEventListener("click", (event) => {
       const row = rowOf(event);
-      const clubId = positiveInt(row?.getAttribute("data-club-id"));
+      const clubId = toPositiveInt(row?.getAttribute("data-club-id"));
       if (row && clubId) void openClubPopup(clubId, row);
     });
     mount.addEventListener("keydown", (event) => {
       const row = rowOf(event);
       if (!row || (event.key !== "Enter" && event.key !== " ")) return;
       event.preventDefault();
-      const clubId = positiveInt(row.getAttribute("data-club-id"));
+      const clubId = toPositiveInt(row.getAttribute("data-club-id"));
       if (clubId) void openClubPopup(clubId, row);
     });
   } catch {

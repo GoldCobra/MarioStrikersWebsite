@@ -6,6 +6,7 @@
 //               bottom left, game code, rank name and ELO rating; WHR/TST bottom right.
 //   "classic" - the label/value list: Rating, Matches, WHR/TST, Games; reward level below.
 
+import { toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
 
 export type RatingCardLayout = "compact" | "classic";
@@ -67,11 +68,6 @@ interface Card {
   readonly isInactive: boolean;
 }
 
-function text(value: unknown): string {
-  // eslint-disable-next-line @typescript-eslint/no-base-to-string -- API strings and numbers
-  return value ? String(value) : "";
-}
-
 function finite(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
@@ -96,9 +92,9 @@ function readCard(definition: CardDefinition, ratings: Ratings | null | undefine
   const rating = ratings?.[definition.key] ?? {};
   const ratingValue = finite(rating.rating);
   const metricValue = finite(rating[definition.metricKey]);
-  const setsValue = text(rating.sets);
-  const gamesValue = text(rating.games);
-  const rankIconUrl = text(rating.rank_icon_url);
+  const setsValue = toText(rating.sets);
+  const gamesValue = toText(rating.games);
+  const rankIconUrl = toText(rating.rank_icon_url);
   return {
     definition,
     ratingValue,
@@ -106,7 +102,7 @@ function readCard(definition: CardDefinition, ratings: Ratings | null | undefine
     setsValue,
     gamesValue,
     rankIconUrl,
-    rankName: text(rating.competitive_rank).trim(),
+    rankName: toText(rating.competitive_rank).trim(),
     rewardLevel: rating.season_reward_level,
     isVisible:
       ratingValue !== null ||
@@ -175,8 +171,8 @@ function compactBody(prefix: string, card: Card): string {
 
 function ratingReward(prefix: string, rewardLevel: SeasonRewardLevel | null | undefined): string {
   const reward = rewardLevel ?? {};
-  const imageUrl = text(reward.image_url).trim();
-  const name = text(reward.name || "Unranked").trim() || "Unranked";
+  const imageUrl = toText(reward.image_url).trim();
+  const name = toText(reward.name || "Unranked").trim() || "Unranked";
   const requiredWins = Math.max(1, rewardWins(reward.required_wins, 5));
   const currentWins = Math.min(requiredWins, rewardWins(reward.current_wins, 0));
   const order = Number(reward.order);

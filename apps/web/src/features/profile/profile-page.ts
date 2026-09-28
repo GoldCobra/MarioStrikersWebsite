@@ -1,5 +1,6 @@
 // The signed-in player's own profile (/profile), from /api/profile/me, or the reason it cannot be shown.
 
+import { toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
 import { flagTitleAttribute, flagUrl, normalizeCountryCode } from "../../lib/countries.ts";
 import {
@@ -10,7 +11,6 @@ import {
   mscFriendCodeLines,
   parseCodeLine,
   switchFriendCodeLines,
-  text,
   type Accolade,
   type FriendCodes,
   type PlayerProfile,
@@ -99,9 +99,9 @@ function seasonAwards(awards: readonly SeasonAward[]): string {
     .map((entry) =>
       [
         '<li class="profile-season-award-item">',
-        `<span class="profile-season-award-season">${escapeHtml(text(entry.season_name))}</span>`,
+        `<span class="profile-season-award-season">${escapeHtml(toText(entry.season_name))}</span>`,
         ballImage("profile-season-award-ball", entry.game_code),
-        `<span class="profile-season-award-name">${escapeHtml(text(entry.award_name || "-"))}</span>`,
+        `<span class="profile-season-award-name">${escapeHtml(toText(entry.award_name || "-"))}</span>`,
         "</li>",
       ].join(""),
     )
@@ -117,8 +117,8 @@ function accolades(entries: readonly Accolade[]): string {
       return [
         '<li class="profile-accolade-item">',
         ballImage("profile-accolade-ball", entry.game_code),
-        `<span class="profile-accolade-medal${entry.is_world_champion ? " is-world-champion" : ""}">${escapeHtml(text(entry.place_medal))}</span>`,
-        `<span class="${escapeHtml(accoladeNameClasses("profile-accolade-name", entry))}">${escapeHtml(text(entry.tournament_name || "-"))}</span>`,
+        `<span class="profile-accolade-medal${entry.is_world_champion ? " is-world-champion" : ""}">${escapeHtml(toText(entry.place_medal))}</span>`,
+        `<span class="${escapeHtml(accoladeNameClasses("profile-accolade-name", entry))}">${escapeHtml(toText(entry.tournament_name || "-"))}</span>`,
         date ? `<span class="profile-accolade-date">${escapeHtml(date)}</span>` : "",
         "</li>",
       ].join("");
@@ -133,11 +133,11 @@ function profileHtml(profile: PlayerProfile): string {
   const flag = countryCode
     ? `<img class="profile-header-flag" src="${escapeHtml(flagUrl(countryCode))}" alt="" aria-hidden="true"${flagTitleAttribute(countryCode)} data-on-error="remove">`
     : "";
-  const clubName = text(player.club_name).trim();
+  const clubName = toText(player.club_name).trim();
   const clubText = clubName
-    ? clubName + (player.club_tag ? ` [${text(player.club_tag)}]` : "")
+    ? clubName + (player.club_tag ? ` [${toText(player.club_tag)}]` : "")
     : "No club membership listed.";
-  const resultsUrl = text(player.results_url).trim();
+  const resultsUrl = toText(player.results_url).trim();
   const results = resultsUrl
     ? `<section class="profile-panel profile-results-panel"><p class="profile-meta-line profile-results-line"><a href="${escapeHtml(resultsUrl)}" target="_blank" rel="noopener noreferrer">Results at start.gg</a></p></section>`
     : "";
@@ -145,7 +145,7 @@ function profileHtml(profile: PlayerProfile): string {
     '<section class="profile-shell">',
     '<header class="profile-header-panel">',
     '<div class="profile-header-title">',
-    `<h2 class="profile-name">${escapeHtml(text(player.name || "Player Profile"))}</h2>`,
+    `<h2 class="profile-name">${escapeHtml(toText(player.name || "Player Profile"))}</h2>`,
     flag,
     "</div>",
     '<div class="profile-meta">',

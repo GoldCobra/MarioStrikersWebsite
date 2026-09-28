@@ -2,6 +2,7 @@
 // the formation and the icon picker, imports and exports them as XML and exports the patched save with
 // the competitive default settings.
 
+import { toPositiveInt } from "@ms/shared/text";
 import { downloadFile, elementById, pickedFile, showStatus, type StatusLevel } from "../shared/editor-ui.ts";
 import {
   REGIONS,
@@ -50,11 +51,6 @@ function sidekickFallbackIcon(id: number): string {
   return `${ICON_BASE}/sidekicks/${sidekickFolder(id)}/mario-${sidekickKey(id)}.png`;
 }
 
-function positiveInt(value: string | null): number | null {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed >= 1 ? parsed : null;
-}
-
 /** Reads an XML-Export file back: exactly the 12 captains, sidekicks 1..8. */
 export function parsePresetXml(xmlText: string): Parsed<Record<string, Team>> {
   const fail = (reason: string): Parsed<Record<string, Team>> => ({ ok: false, error: `XML import failed: ${reason}` });
@@ -71,10 +67,10 @@ export function parsePresetXml(xmlText: string): Parsed<Record<string, Team>> {
 
   const teams: Record<string, Team> = {};
   for (const node of nodes) {
-    const id = positiveInt(node.getAttribute("id"));
-    const top = positiveInt(node.getAttribute("top"));
-    const bottom = positiveInt(node.getAttribute("bottom"));
-    const back = positiveInt(node.getAttribute("back"));
+    const id = toPositiveInt(node.getAttribute("id"));
+    const top = toPositiveInt(node.getAttribute("top"));
+    const bottom = toPositiveInt(node.getAttribute("bottom"));
+    const back = toPositiveInt(node.getAttribute("back"));
     if (!id || id > 12) return fail("captain id must be 1-12.");
     if (teams[String(id)]) return fail(`duplicate captain id ${id}.`);
     if (!top || top > 8 || !bottom || bottom > 8 || !back || back > 8)
