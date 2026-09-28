@@ -18,7 +18,7 @@ interface SeasonStatus {
 }
 
 const SEASON_API_URL = "/api/competitive-season/current";
-const SEASON_IMAGE_BASE = "./assets/landing/comp-season-";
+const SEASON_IMAGE_BASE = "/assets/landing/comp-season-";
 
 function renderCountdown(node: HTMLElement, phase: CountdownPhase, segmentsHtml: string): void {
   const headline = node.closest(".landing-club")?.querySelector(".landing-club-headline");
@@ -40,14 +40,16 @@ export function initLandingCountdown(): void {
   let requestInFlight = false;
   let refreshAfterTarget = false;
 
-  /** Shows the season's artwork; an image that fails to load restores the previous one for good. */
+  /** Shows the season's artwork; an image that fails to load restores the previous one for good. The
+   * page ships the current season's image, which stays untouched: setting it again would repaint it and
+   * delay the largest contentful paint. */
   const applySeasonImage = (season: CompetitiveSeason): void => {
     if (!seasonImage) return;
     const name = competitiveSeasonImageName(season.display_name);
     if (!name || failedImages.has(name)) return;
     const nextSrc = `${SEASON_IMAGE_BASE}${name}.webp`;
+    if (seasonImage.src === new URL(nextSrc, document.baseURI).href) return;
     const previousSrc = seasonImage.getAttribute("src");
-    if (previousSrc === nextSrc) return;
     const previousAlt = seasonImage.getAttribute("alt");
     seasonImage.onerror = () => {
       seasonImage.onerror = null;
