@@ -35,6 +35,12 @@ const STATES: VisualState[] = [
     act: (page) => clickAndSettle(page, ".players-name-trigger[data-player-id]"),
   },
   {
+    // The fixture player 4 has no match in the current season, so every rating card is greyed out.
+    name: "players-popup-inactive",
+    path: "/players",
+    act: (page) => clickAndSettle(page, '.players-name-trigger[data-player-id="4"]'),
+  },
+  {
     name: "leaderboard-popup",
     path: "/msbl-elo1v1",
     act: (page) => clickAndSettle(page, ".lb-player-trigger[data-player-id]"),

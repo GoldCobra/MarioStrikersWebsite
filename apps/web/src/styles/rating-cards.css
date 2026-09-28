@@ -21,6 +21,18 @@
   border: 1px solid var(--rating-game-color, transparent);
 }
 
+/* A card without a match in the current season is greyed out: a grey frame, and content that is
+   faded and without colour. The content fades, not the card, so the card's background stays. The
+   popup's classic card greys its text instead (below). */
+:is(.profile-rating-card, .player-popup-rating-card).is-inactive-rating {
+  border-color: #6b6b6b;
+}
+
+:is(.profile-rating-card, .player-popup-rating-card.is-compact-layout).is-inactive-rating > * {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
 .player-popup-rating-card .player-popup-rating-title,
 .player-popup-rating-card .player-popup-rating-value {
   color: var(--rating-game-color, #fff);
@@ -83,19 +95,21 @@
   --rating-compact-metric-label-size: calc(var(--rating-compact-metric-size) - 2px);
   --rating-compact-metric-color: rgba(255, 255, 255, 0.7);
   --rating-compact-elo-scale: 1.15;
-  /* Visible gap from the game code's baseline to the rank name's capitals, and from the rank
-     name's baseline to the rating's digits (never the ELO icon). */
+  /* Visible gaps: from the game code's baseline to the rank name's capitals (larger, so the game
+     code reads as the card's heading), and from the rank name's baseline to the rating's digits
+     (never the ELO icon). */
+  --rating-compact-title-gap: 11px;
   --rating-compact-text-gap: 7px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   /* Row 1 keeps the icon's height even without an icon, so every card of a row has the same
      height. Rows 2-4 hold game code, rank name and rating in line-height 1 boxes, each bottom
-     aligned; rows 3 and 4 are sized so both ink gaps equal --rating-compact-text-gap. All rows
-     are whole pixels, so every baseline rounds the same way. */
+     aligned; rows 3 and 4 are sized so the ink gaps equal --rating-compact-title-gap and
+     --rating-compact-text-gap. All rows are whole pixels, so every baseline rounds the same way. */
   grid-template-rows:
     minmax(var(--rating-compact-rank-size), 1fr)
     var(--rating-compact-title-size)
-    calc(var(--rating-compact-text-gap) + var(--rating-text-ink)
+    calc(var(--rating-compact-title-gap) + var(--rating-text-ink)
       - var(--rating-compact-title-size) + var(--rating-title-baseline)
       + var(--rating-card-text-size) - var(--rating-text-baseline))
     calc(var(--rating-compact-text-gap) + var(--rating-text-ink));
@@ -206,12 +220,6 @@
   grid-row: 2;
 }
 
-/* The profile page already fades an inactive card's children; the popup's compact card does the
-   same instead of the classic grey text, so the border keeps its full colour on both. */
-.player-popup-rating-card.is-compact-layout.is-inactive-rating > * {
-  opacity: 0.55;
-}
-
 .player-popup-rating-reward {
   --profile-rating-reward-accent: #f4f4f4;
   --profile-rating-reward-glow: rgba(244, 244, 244, 0.32);
@@ -293,6 +301,11 @@
     drop-shadow(0 0 1px var(--profile-rating-reward-glow))
     drop-shadow(0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow))
     drop-shadow(0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow)) !important;
+}
+
+/* The blanket rule above also removes the grey of an inactive card, so it is re-asserted here. */
+#player-profile-popup .player-popup-rating-card.is-compact-layout.is-inactive-rating > * {
+  filter: grayscale(1) !important;
 }
 
 #player-profile-popup .player-popup-rating-reward:not(.is-reward-tier-0) .player-popup-rating-reward-name {
