@@ -1,6 +1,6 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "9e2e749f620ef37f164ed7059d9ead4b91bb77a7",
+  "reference": "5a34ce95b7da589d9b64313345ca38defed80b10",
   "changes": [
     {
       "screenshots": [
@@ -9,7 +9,7 @@
         "states/whr-popup-*",
         "states/profile-linked-*"
       ],
-      "reason": "Owner request: the game code on the compact rating cards sits higher, 11px instead of 7px above the rank name's capitals, so the card grows by 4px; inactive cards (no match this season) get a grey border and greyed-out content."
+      "reason": "Owner request: compact rating cards show their game's artwork (profile-comp-<game>.webp), darkened and fading to black over the bottom fifth; on inactive cards (no match this season) it is faded and grey like the content."
     }
   ]
 }

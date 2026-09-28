@@ -1,18 +1,22 @@
-/* A rating card takes its game's colour from its is-<game>-rating class; the border, the popup's
-   classic title and values, and the compact game code all read it from here. */
+/* A rating card takes its game's colour and artwork from its is-<game>-rating class; the border,
+   the popup's classic title and values, and the compact game code read the colour from here, the
+   compact card's background the artwork. */
 .profile-rating-card.is-msbl-rating,
 .player-popup-rating-card.is-msbl-rating {
   --rating-game-color: var(--game-color-msbl);
+  --rating-game-art: url("../assets/players/profile-comp-msbl.webp");
 }
 
 .profile-rating-card.is-msc-rating,
 .player-popup-rating-card.is-msc-rating {
   --rating-game-color: var(--game-color-msc);
+  --rating-game-art: url("../assets/players/profile-comp-msc.webp");
 }
 
 .profile-rating-card.is-sms-rating,
 .player-popup-rating-card.is-sms-rating {
   --rating-game-color: var(--game-color-sms);
+  --rating-game-art: url("../assets/players/profile-comp-sms.webp");
 }
 
 /* Every rating card, on the profile page and in the popup, is framed in its game's colour. */
@@ -21,14 +25,15 @@
   border: 1px solid var(--rating-game-color, transparent);
 }
 
-/* A card without a match in the current season is greyed out: a grey frame, and content that is
-   faded and without colour. The content fades, not the card, so the card's background stays. The
-   popup's classic card greys its text instead (below). */
+/* A card without a match in the current season is greyed out: a grey frame, and content and
+   artwork that are faded and without colour. The content fades, not the card, so the card's
+   background stays. The popup's classic card greys its text instead (below). */
 :is(.profile-rating-card, .player-popup-rating-card).is-inactive-rating {
   border-color: #6b6b6b;
 }
 
-:is(.profile-rating-card, .player-popup-rating-card.is-compact-layout).is-inactive-rating > * {
+:is(.profile-rating-card, .player-popup-rating-card.is-compact-layout).is-inactive-rating > *,
+:is(.profile-rating-card, .player-popup-rating-card).is-compact-layout.is-inactive-rating::before {
   opacity: 0.45;
   filter: grayscale(1);
 }
@@ -118,6 +123,22 @@
   min-height: 108px;
   /* Tighter than the classic card, so the ELO icon, rating and WHR fit the 130px profile cards. */
   padding: 0.3rem 0.25rem;
+  position: relative;
+  isolation: isolate;
+}
+
+/* The game's artwork (352x226, twice the popup card) fills the card behind its content, darkened
+   so the text reads, and turns black over the bottom fifth. It is a layer of its own, so an
+   inactive card can grey it out (above); the popup's blanket "filter: none" does not reach it. */
+:is(.profile-rating-card, .player-popup-rating-card).is-compact-layout::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(to top, #000, transparent 20%),
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+    var(--rating-game-art) left center / cover no-repeat;
 }
 
 .player-popup-rating-card.is-compact-layout {
