@@ -1,5 +1,5 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "4c6613bb0bf08b05a8a4c73bdf9b8b99090d63ab",
+  "reference": "8ae865ba5c36402018692d57388e8427190c72c8",
   "changes": []
 }

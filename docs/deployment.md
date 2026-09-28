@@ -52,8 +52,10 @@ The script fetches `origin/gc-updates` and requires the requested SHA to be
 that branch's current head. The local checkout must be clean, on `gc-updates`
 and an ancestor of the requested commit. It builds from `git archive` of the
 requested SHA, adding the date of each web source file's last commit for the
-sitemap's `lastmod` (`apps/web/.release/lastmod.json`), verifies the source again, then fast-forwards the clean checkout
-to that commit before activation.
+sitemap's `lastmod` (`apps/web/.release/lastmod.json`), verifies the source
+again, then fast-forwards the clean checkout to that commit before activation.
+The script itself therefore runs as the previous release left it: a change to
+`scripts/deploy.py` takes effect from the next release.
 
 CI verification uses GitHub's API and requires successful jobs named
 `backend (ubuntu-latest)`, `backend (windows-latest)`, `frontend`,
