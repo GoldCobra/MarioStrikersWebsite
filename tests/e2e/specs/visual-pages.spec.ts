@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { test } from "@playwright/test";
+import { expectScreenshot } from "../lib/approvals.ts";
 import { expandViewportToDocument, hideDevNotice, preparePage, settle } from "../lib/browser.ts";
 import { PAGE_SLUGS, PAGE_WIDTHS, pagePath } from "../lib/site.ts";
 
@@ -14,9 +15,9 @@ for (const width of PAGE_WIDTHS) {
         await page.goto(pagePath(slug));
         await settle(page, { eagerImages: true });
         await hideDevNotice(page);
-        await expect(page).toHaveScreenshot(["pages", `${slug}-${width}-top.png`]);
+        await expectScreenshot(page, "pages", `${slug}-${width}-top.png`);
         await expandViewportToDocument(page, width);
-        await expect(page).toHaveScreenshot(["pages", `${slug}-${width}-full.png`]);
+        await expectScreenshot(page, "pages", `${slug}-${width}-full.png`);
       });
     }
   });

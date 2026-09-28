@@ -1,0 +1,10 @@
+{
+  "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
+  "reference": "2a7812de6e36fd01b5f2436e6814f2969eb2161e",
+  "changes": [
+    {
+      "screenshots": ["states/error-leaderboard-*"],
+      "reason": "When the API fails, the leaderboard shows 'Ratings could not be loaded.' instead of ten fixed rows with outdated real player names (plan default for FALLBACK_ROWS)."
+    }
+  ]
+}

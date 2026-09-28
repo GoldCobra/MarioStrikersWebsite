@@ -1,5 +1,5 @@
 // Leaderboard rows: loaded for the active tab, kept five minutes in sessionStorage so tab switches and
-// returns show rows at once (refreshed in the background), with fixed rows when the API is unreachable.
+// returns show rows at once (refreshed in the background), and a message when the API is unreachable.
 
 import { escapeHtml } from "@ms/shared/html";
 import { COMPETITIVE_RANK_ICON_BY_NUMBER, RANK_ICON_ASSET_VERSION } from "@ms/shared/ranks";
@@ -62,28 +62,7 @@ interface Row {
   readonly competitive_rank: string;
 }
 
-type RowSource = "cache" | "network" | "fallback";
-
-/** Shown when the API cannot be reached and nothing is cached (owner decision pending on removal). */
-const FALLBACK_ROWS: readonly Row[] = [
-  ["Romomo", 1992],
-  ["Virtue", 1984],
-  ["Zesty", 1940],
-  ["Jbangsness", 1779],
-  ["Ink", 1681],
-  ["SaMuRaI7", 1661],
-  ["J", 1644],
-  ["Xshadow", 1626],
-  ["NukA67", 1528],
-  ["karlosjr", 1477],
-].map(([display_name, rating], index) => ({
-  rank: index + 1,
-  player_id: null,
-  display_name: String(display_name),
-  rating: Number(rating),
-  rank_number: 0,
-  competitive_rank: "",
-}));
+type RowSource = "cache" | "network";
 
 let activeRender = 0;
 let rowAssetsPreload: Promise<unknown> | null = null;
@@ -238,12 +217,13 @@ function rowsHtml(rows: readonly Row[]): string {
     .join("");
 }
 
-async function fetchRows(tabKey: string, allowCache: boolean): Promise<{ rows: Row[]; source: RowSource }> {
+/** The rows of a tab, from this tab session's cache or the API; null when neither has them. */
+async function fetchRows(tabKey: string, allowCache: boolean): Promise<{ rows: Row[]; source: RowSource } | null> {
   const cached = allowCache ? readCachedRows(tabKey) : null;
   if (cached) return { rows: cached, source: "cache" };
 
   const dash = tabKey.indexOf("-");
-  if (dash <= 0 || dash >= tabKey.length - 1) return { rows: [...FALLBACK_ROWS], source: "fallback" };
+  if (dash <= 0 || dash >= tabKey.length - 1) return null;
   const url = `/api/leaderboards/${tabKey.slice(0, dash)}/${tabKey.slice(dash + 1)}?limit=100&offset=0`;
   try {
     const payload = await fetchJson<{ rows?: unknown } | null>(url);
@@ -251,9 +231,8 @@ async function fetchRows(tabKey: string, allowCache: boolean): Promise<{ rows: R
     writeCachedRows(tabKey, rows);
     return { rows, source: "network" };
   } catch {
-    // The API is unreachable: fixed rows keep the page usable.
+    return null;
   }
-  return { rows: [...FALLBACK_ROWS], source: "fallback" };
 }
 
 async function renderRows(tabKey: string): Promise<void> {
@@ -268,6 +247,12 @@ async function renderRows(tabKey: string): Promise<void> {
   const primary = await fetchRows(tabKey, true);
   await (rowAssetsPreload ?? Promise.resolve());
   if (request !== activeRender) return;
+  if (!primary) {
+    list.innerHTML = "";
+    empty.textContent = "Ratings could not be loaded.";
+    empty.hidden = false;
+    return;
+  }
   if (!primary.rows.length) {
     list.innerHTML = "";
     empty.textContent = "No ratings available.";
@@ -281,7 +266,7 @@ async function renderRows(tabKey: string): Promise<void> {
     // Cached rows show at once; fresh rows replace them when they arrive.
     fetchRows(tabKey, false)
       .then((refreshed) => {
-        if (refreshed.source !== "network" || request !== activeRender) return;
+        if (refreshed?.source !== "network" || request !== activeRender) return;
         list.innerHTML = rowsHtml(refreshed.rows);
         empty.hidden = refreshed.rows.length > 0;
       })
