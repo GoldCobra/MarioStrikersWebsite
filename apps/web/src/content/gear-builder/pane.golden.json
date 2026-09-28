@@ -1,21 +1,21 @@
 {
-  "note": "SHA-256 of each former pane file with every line trimmed; pane.test.ts renders the same text.",
+  "note": "SHA-256 of each rendered pane with every line trimmed. The first version matched the snapshot's former pane files (PR #22); alt texts were added in PR #26.",
   "panes": {
-    "birdo": "da03cb5f373bdf4c3c7cf49208d9715a2525cdcd6047861340dc68a33244d18d",
-    "bowser-jr": "dea641285a952651dff63c37b6d3b785005d58dde7f661f8597334faa77545ef",
-    "bowser": "ccc961f1bafdccb3ceaee489a5fdb027082036180f9112640b88fa40bf3735b7",
-    "daisy": "b230b7c8b01713b2cf65591e94559bdf8c67bc7480094dbbcce714605fb5da9e",
-    "diddy-kong": "a05c87eda0b9dfeca103af4d92614644b25603b87e089f0813ac83632a31f036",
-    "dk": "52c159b6b8c8cc474744d082b1ed20630d03d58d14829a95bbd10fbdc086282c",
-    "luigi": "0f421abf14505d878621a47dc6478b80c20aa8c1dee43ea48a140aeaff306b98",
-    "mario": "908e35b8e73ad7484367ba779aba3dca6d71ca258b7fb7673025753f489a6c01",
-    "pauline": "a36fe447f2bb21745de8d45f1f5d9524012c8df062a29364c2e290d0af1a6336",
-    "peach": "1494737a9d1be2038da25f447705980c1ff3fd7788078f03e4872724184e0a71",
-    "rosalina": "bab262c43b50d58b726381d3c78de5caa5f0f9db36a4eb41199b2ce6c21fe1e9",
-    "shy-guy": "70f8ab43bfd85063d537c6b304ebe7f021e5bb97e33839e6296eaca821083b5e",
-    "toad": "fbe93e466d433e19d556428142b0bfc78e1094ef45ebb72e6fdc652b1d90e46f",
-    "waluigi": "f411a8b447acc88d324305585b8bc9ecdcfc1f9569222059ea45bb6674ce8791",
-    "wario": "fbf33d2c12cc6927f4c4de46644462e869a4e0b72e25f7416d2e7ddcc860f990",
-    "yoshi": "b4a165127a4f21150a3ff5673974eb2354588376e56df578634d16c15e69a43e"
+    "birdo": "43add3ca1df0b45653b51faab04a5c92cdb494ecaeddd19daa64e3c1c92853e8",
+    "bowser": "c955e904f038fb206c658561b49d4b228b21e7ee55bd5359c0cf1c831d952091",
+    "bowser-jr": "afca82a1176371a9d447b6c5719b9c45dae08aa3fadc94e16e365a0affde2ecf",
+    "daisy": "ee8cae5be3091d2352d88f3eea06f522d3f3fd443a2b67644916df3e0b241b70",
+    "diddy-kong": "9939c65a4c8132978e7732e1a7039454dbb4e169c62313d10a74ddc552365fcd",
+    "dk": "da20625364224d505431e2a4635cd65c9946e1c4486da56bce71a0aa5ecaf718",
+    "luigi": "199095c6dffb15c5b1f789ec875130a7a95ddb910a9a2f38b84d7da0c6db8089",
+    "mario": "dbf1179cef17c3d0a4dd27bd3e42a89170c5378330ed1ac6706c1ffafa8cf90d",
+    "pauline": "be35265cafaf4ab24c6ea4bf7bb7fa012d09c46f3789434c0d7a9dafdce7a26f",
+    "peach": "74c9d212975d3279d548f04c9d897ae089f6c355692a7406b32a5f95b32d4815",
+    "rosalina": "304cba39b426a3b99d49a21b5a32c8c46b6da50179b75fd28312fe73f97b8228",
+    "shy-guy": "95b2e1f075db6f8bc9c34b1940f307bf814d9f3936458acf494f99dd6aba0dc6",
+    "toad": "66e9e54007689a97e1eb0aa79d6a9a08d4f714b961ba355f9e694de8478c9973",
+    "waluigi": "23b0ecec167e985adcb4b029e7311fc2316220f03ba7374b96fa984f80786ff1",
+    "wario": "554e1360effa88b7e20d7e6ecbfcfd558c74af72ec71954bbc4786e21c3ff9f5",
+    "yoshi": "0118355576e2fd3f16d07348523802409189a2e6a3eba30e3b960668508e86ea"
   }
 }

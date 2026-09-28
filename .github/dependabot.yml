@@ -1,0 +1,28 @@
+# Update proposals as pull requests against gc-updates. Base images are pinned by digest, so without these
+# they would never receive security fixes. npm updates arrive once a month as one grouped pull request.
+version: 2
+updates:
+  - package-ecosystem: docker
+    directory: /
+    target-branch: gc-updates
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker-compose
+    directory: /
+    target-branch: gc-updates
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: gc-updates
+    schedule:
+      interval: monthly
+  - package-ecosystem: npm
+    directory: /
+    target-branch: gc-updates
+    schedule:
+      interval: monthly
+    groups:
+      npm:
+        patterns: ["*"]
+    open-pull-requests-limit: 2

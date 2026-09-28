@@ -24,7 +24,9 @@ Agree on the task before editing shared navigation, global CSS or the same PSD.
 ## Make the change
 
 - Keep one purpose per pull request and preserve the surrounding code style.
-- Use existing navigation, tabs, popup styles and config/engine patterns.
+- Use the existing layout, page families, feature modules, the template popup
+  (`apps/web/src/lib/popup.ts`) and the shared helpers; the
+  [architecture decisions](docs/adr/README.md) explain why they look as they do.
 - Keep browser links canonical, for example `/msc-save-editor`.
 - Global styles live in `apps/web/src/styles/`, one partial per component;
   their order in `global.ts` is the cascade. Stylesheet and module URLs change
@@ -37,7 +39,46 @@ Agree on the task before editing shared navigation, global CSS or the same PSD.
   (`alt=""` for decoration); `npm run check:frontend` enforces both.
 - Keep design sources in `docs/source-assets/` and exported runtime files in
   `assets/`. Coordinate binary edits; avoid unrelated asset conversions.
+- A changed image, font or popup template keeps its URL, and browsers cache it:
+  bump its `?v=` cache tag where it is referenced or give it a new name, then
+  renew `apps/web/assets.lock.json` with `node tools/src/assets-lock.ts --write`.
+  `npm run check` fails until then.
 - Keep credentials, personal saves, database exports and local caches out of Git.
+
+## Common changes
+
+**A new page**
+
+1. Add it to `packages/shared/src/site/pages.ts`: title (the full game name
+   and at most 60 characters), description (120 to 160 characters), hidden
+   heading and robots.
+2. Place it in `navigation.ts` if it needs a menu entry or tab.
+3. Create `apps/web/src/pages/pages/<slug>.astro` with `SiteLayout` or a page
+   family from `src/components/pages/`.
+4. Run `npm run generate:nginx`, and `node tests/e2e/run.ts dom --update` for
+   its golden.
+
+**Behavior in the browser**
+
+- Put the code in `apps/web/src/features/<name>/` and load it from the page's
+  entry in `src/entries/` through the layout's `scripts` slot.
+- Keep data logic free of DOM code, so a Node test can cover it.
+- Write no inline `on...=` handlers or `<script>` blocks: the Content Security
+  Policy blocks them. Declare image fallbacks with `data-fallback-src` or
+  `data-on-error`.
+
+**An API response**
+
+- Use snake_case keys; convert from the service's camelCase at the route.
+- Cover the change in the module's tests. When the shape changes on purpose,
+  record it in `tests/e2e/specs/contract.deltas.ts` and update the browser
+  code in the same pull request.
+
+**An intended visual change**
+
+- List the affected screenshots with the reason in
+  `tests/e2e/approved-changes.json` against the current
+  `visual-reference.sha` (see [testing](docs/testing.md)).
 
 ## Check and submit
 

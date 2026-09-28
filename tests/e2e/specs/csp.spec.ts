@@ -81,6 +81,12 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     // The snapshot's onclick attribute, which the host turns into a listener.
     await page.locator("#mySelectLabel").dispatchEvent("click");
     await expect(page.locator("#mySelectOptions")).toHaveCSS("display", "block");
+    // The snapshot's onchange attributes, turned into listeners too: ticking a character names it.
+    await page.locator("#two").evaluate((box) => {
+      (box as HTMLInputElement).checked = true;
+      box.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await expect(page.locator("#mySelectLabel option").first()).toHaveText("Luigi");
     // Saving the card picture renders it with html2canvas (an inner frame and a canvas).
     const saved = page.waitForEvent("download").then(() => "saved" as const);
     await page.locator(`#${paneId} .savepic`).first().dispatchEvent("click");

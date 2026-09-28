@@ -242,7 +242,7 @@
                       #text "\n                      "
                       <div id="mySelectLabel" class="selectBox">
                         #text "\n                        "
-                        <select class="form-select">
+                        <select class="form-select" aria-label="Characters">
                           #text "\n                          "
                           <option>
                             #text "Select Character"
@@ -257,87 +257,87 @@
                       <div id="mySelectOptions">
                         #text "\n                        "
                         <label for="selectall">
-                          <input type="checkbox" id="selectall" class="selectall" onchange="checkboxStatusChange()" value="none"/>
+                          <input type="checkbox" id="selectall" class="selectall" value="none"/>
                           #text "Select All"
                         </label>
                         #text "\n                        "
                         <label for="one">
-                          <input type="checkbox" id="one" class="checkbox" onchange="checkboxStatusChange()" value="Mario"/>
+                          <input type="checkbox" id="one" class="checkbox" value="Mario"/>
                           #text "Mario"
                         </label>
                         #text "\n                        "
                         <label for="two">
-                          <input type="checkbox" id="two" class="checkbox" onchange="checkboxStatusChange()" value="Luigi"/>
+                          <input type="checkbox" id="two" class="checkbox" value="Luigi"/>
                           #text "Luigi"
                         </label>
                         #text "\n                        "
                         <label for="three">
-                          <input type="checkbox" id="three" class="checkbox" onchange="checkboxStatusChange()" value="Bowser"/>
+                          <input type="checkbox" id="three" class="checkbox" value="Bowser"/>
                           #text "Bowser"
                         </label>
                         #text "\n                        "
                         <label for="four">
-                          <input type="checkbox" id="four" class="checkbox" onchange="checkboxStatusChange()" value="Peach"/>
+                          <input type="checkbox" id="four" class="checkbox" value="Peach"/>
                           #text "Peach"
                         </label>
                         #text "\n                        "
                         <label for="five">
-                          <input type="checkbox" id="five" class="checkbox" onchange="checkboxStatusChange()" value="Rosalina"/>
+                          <input type="checkbox" id="five" class="checkbox" value="Rosalina"/>
                           #text "Rosalina"
                         </label>
                         #text "\n                        "
                         <label for="six">
-                          <input type="checkbox" id="six" class="checkbox" onchange="checkboxStatusChange()" value="Toad"/>
+                          <input type="checkbox" id="six" class="checkbox" value="Toad"/>
                           #text "Toad"
                         </label>
                         #text "\n                        "
                         <label for="seven">
-                          <input type="checkbox" id="seven" class="checkbox" onchange="checkboxStatusChange()" value="Yoshi"/>
+                          <input type="checkbox" id="seven" class="checkbox" value="Yoshi"/>
                           #text "Yoshi"
                         </label>
                         #text "\n                        "
                         <label for="eight">
-                          <input type="checkbox" id="eight" class="checkbox" onchange="checkboxStatusChange()" value="DK"/>
+                          <input type="checkbox" id="eight" class="checkbox" value="DK"/>
                           #text "DK"
                         </label>
                         #text "\n                        "
                         <label for="nine">
-                          <input type="checkbox" id="nine" class="checkbox" onchange="checkboxStatusChange()" value="Wario"/>
+                          <input type="checkbox" id="nine" class="checkbox" value="Wario"/>
                           #text "Wario"
                         </label>
                         #text "\n                        "
                         <label for="ten">
-                          <input type="checkbox" id="ten" class="checkbox" onchange="checkboxStatusChange()" value="Waluigi"/>
+                          <input type="checkbox" id="ten" class="checkbox" value="Waluigi"/>
                           #text "Waluigi"
                         </label>
                         #text "\n                        "
                         <label for="eleven">
-                          <input type="checkbox" id="eleven" class="checkbox" onchange="checkboxStatusChange()" value="Shy Guy"/>
+                          <input type="checkbox" id="eleven" class="checkbox" value="Shy Guy"/>
                           #text "Shy Guy"
                         </label>
                         #text "\n                        "
                         <label for="twelve">
-                          <input type="checkbox" id="twelve" class="checkbox" onchange="checkboxStatusChange()" value="Daisy"/>
+                          <input type="checkbox" id="twelve" class="checkbox" value="Daisy"/>
                           #text "Daisy"
                         </label>
                         #text "\n                        "
                         <label for="thirteen">
-                          <input type="checkbox" id="thirteen" class="checkbox" onchange="checkboxStatusChange()" value="Pauline"/>
+                          <input type="checkbox" id="thirteen" class="checkbox" value="Pauline"/>
                           #text "Pauline"
                         </label>
                         #text "\n                        "
                         <label for="fourteen">
-                          <input type="checkbox" id="fourteen" class="checkbox" onchange="checkboxStatusChange()" value="Diddy Kong"/>
+                          <input type="checkbox" id="fourteen" class="checkbox" value="Diddy Kong"/>
                           #text "Diddy Kong"
                         </label>
                         #text "\n                        "
                         <label for="fifteen">
-                          <input type="checkbox" id="fifteen" class="checkbox" onchange="checkboxStatusChange()" value="Bowser Jr"/>
+                          <input type="checkbox" id="fifteen" class="checkbox" value="Bowser Jr"/>
                           #text "Bowser Jr."
                         </label>
                         #text "\n                        "
                         <label for="sixteen">
-                          <input type="checkbox" id="sixteen" class="checkbox" onchange="checkboxStatusChange()" value="Birdo"/>
+                          <input type="checkbox" id="sixteen" class="checkbox" value="Birdo"/>
                           #text "Birdo"
                         </label>
                         #text "\n                      "
@@ -355,17 +355,17 @@
                         #text "\n                        "
                         <div/>
                         #text "\n                        "
-                        <input type="number" class="input-min" value="1" id="range1"/>
+                        <input type="number" class="input-min" value="1" id="range1" aria-label="Minimum strength"/>
                         #text "\n                      "
                       </div>
                       #text "\n                      "
-                      <img class="pic" src="/assets/gear-builder/images/icons/strength.png"/>
+                      <img class="pic" src="/assets/gear-builder/images/icons/strength.png" alt=""/>
                       #text "\n                      "
                       <div class="field max">
                         #text "\n                        "
                         <div/>
                         #text "\n                        "
-                        <input type="number" class="input-max" value="25" id="range2"/>
+                        <input type="number" class="input-max" value="25" id="range2" aria-label="Maximum strength"/>
                         #text "\n                      "
                       </div>
                       #text "\n                    "
@@ -379,9 +379,9 @@
                     #text "\n                    "
                     <div class="range-input" id="strslider">
                       #text "\n                      "
-                      <input type="range" class="sliders" min="1" max="25" value="1" id="strmin"/>
+                      <input type="range" class="sliders" min="1" max="25" value="1" id="strmin" aria-label="Minimum strength"/>
                       #text "\n                      "
-                      <input type="range" class="sliders" min="1" max="25" value="25" id="strmax"/>
+                      <input type="range" class="sliders" min="1" max="25" value="25" id="strmax" aria-label="Maximum strength"/>
                       #text "\n                    "
                     </div>
                     #text "\n                  "
@@ -395,17 +395,17 @@
                         #text "\n                        "
                         <div/>
                         #text "\n                        "
-                        <input type="number" class="input-min" value="1" id="range3"/>
+                        <input type="number" class="input-min" value="1" id="range3" aria-label="Minimum speed"/>
                         #text "\n                      "
                       </div>
                       #text "\n                      "
-                      <img class="pic" src="/assets/gear-builder/images/icons/speed.png"/>
+                      <img class="pic" src="/assets/gear-builder/images/icons/speed.png" alt=""/>
                       #text "\n                      "
                       <div class="field max">
                         #text "\n                        "
                         <div/>
                         #text "\n                        "
-                        <input type="number" class="input-max" value="25" id="range4"/>
+                        <input type="number" class="input-max" value="25" id="range4" aria-label="Maximum speed"/>
                         #text "\n                      "
                       </div>
                       #text "\n                    "
@@ -419,9 +419,9 @@
                     #text "\n                    "
                     <div class="range-input" id="spdslider">
                       #text "\n                      "
-                      <input type="range" class="sliders" min="1" max="25" value="1" id="spdmin"/>
+                      <input type="range" class="sliders" min="1" max="25" value="1" id="spdmin" aria-label="Minimum speed"/>
                       #text "\n                      "
-                      <input type="range" class="sliders" min="1" max="25" value="25" id="spdmax"/>
+                      <input type="range" class="sliders" min="1" max="25" value="25" id="spdmax" aria-label="Maximum speed"/>
                       #text "\n                    "
                     </div>
                     #text "\n                  "
@@ -439,17 +439,17 @@
                         #text "\n                      "
                         <div/>
                         #text "\n                      "
-                        <input type="number" class="input-min" value="1" id="range5"/>
+                        <input type="number" class="input-min" value="1" id="range5" aria-label="Minimum shooting"/>
                         #text "\n                    "
                       </div>
                       #text "\n                    "
-                      <img class="pic" src="/assets/gear-builder/images/icons/shot.png"/>
+                      <img class="pic" src="/assets/gear-builder/images/icons/shot.png" alt=""/>
                       #text "\n                    "
                       <div class="field max">
                         #text "\n                      "
                         <div/>
                         #text "\n                      "
-                        <input type="number" class="input-max" value="25" id="range6"/>
+                        <input type="number" class="input-max" value="25" id="range6" aria-label="Maximum shooting"/>
                         #text "\n                    "
                       </div>
                       #text "\n                  "
@@ -463,9 +463,9 @@
                     #text "\n                  "
                     <div class="range-input" id="shotslider">
                       #text "\n                    "
-                      <input type="range" class="sliders" min="1" max="25" value="1" id="shotmin"/>
+                      <input type="range" class="sliders" min="1" max="25" value="1" id="shotmin" aria-label="Minimum shooting"/>
                       #text "\n                    "
-                      <input type="range" class="sliders" min="1" max="25" value="25" id="shotmax"/>
+                      <input type="range" class="sliders" min="1" max="25" value="25" id="shotmax" aria-label="Maximum shooting"/>
                       #text "\n                  "
                     </div>
                     #text "\n                "
@@ -479,17 +479,17 @@
                         #text "\n                      "
                         <div/>
                         #text "\n                      "
-                        <input type="number" class="input-min" value="1" id="range7"/>
+                        <input type="number" class="input-min" value="1" id="range7" aria-label="Minimum passing"/>
                         #text "\n                    "
                       </div>
                       #text "\n                    "
-                      <img class="pic" src="/assets/gear-builder/images/icons/pass.png"/>
+                      <img class="pic" src="/assets/gear-builder/images/icons/pass.png" alt=""/>
                       #text "\n                    "
                       <div class="field max">
                         #text "\n                      "
                         <div/>
                         #text "\n                      "
-                        <input type="number" class="input-max" value="25" id="range8"/>
+                        <input type="number" class="input-max" value="25" id="range8" aria-label="Maximum passing"/>
                         #text "\n                    "
                       </div>
                       #text "\n                  "
@@ -503,9 +503,9 @@
                     #text "\n                  "
                     <div class="range-input" id="passslider">
                       #text "\n                    "
-                      <input type="range" class="sliders" min="1" max="25" value="1" id="passmin"/>
+                      <input type="range" class="sliders" min="1" max="25" value="1" id="passmin" aria-label="Minimum passing"/>
                       #text "\n                    "
-                      <input type="range" class="sliders" min="1" max="25" value="25" id="passmax"/>
+                      <input type="range" class="sliders" min="1" max="25" value="25" id="passmax" aria-label="Maximum passing"/>
                       #text "\n                  "
                     </div>
                     #text "\n                "
@@ -519,17 +519,17 @@
                         #text "\n                      "
                         <div/>
                         #text "\n                      "
-                        <input type="number" class="input-min" value="1" id="range9"/>
+                        <input type="number" class="input-min" value="1" id="range9" aria-label="Minimum technique"/>
                         #text "\n                    "
                       </div>
                       #text "\n                    "
-                      <img class="pic" src="/assets/gear-builder/images/icons/tech.png"/>
+                      <img class="pic" src="/assets/gear-builder/images/icons/tech.png" alt=""/>
                       #text "\n                    "
                       <div class="field max">
                         #text "\n                      "
                         <div/>
                         #text "\n                      "
-                        <input type="number" class="input-max" value="25" id="range10"/>
+                        <input type="number" class="input-max" value="25" id="range10" aria-label="Maximum technique"/>
                         #text "\n                    "
                       </div>
                       #text "\n                  "
@@ -543,9 +543,9 @@
                     #text "\n                  "
                     <div class="range-input" id="techslider">
                       #text "\n                    "
-                      <input type="range" class="sliders" min="1" max="25" value="1" id="techmin"/>
+                      <input type="range" class="sliders" min="1" max="25" value="1" id="techmin" aria-label="Minimum technique"/>
                       #text "\n                    "
-                      <input type="range" class="sliders" min="1" max="25" value="25" id="techmax"/>
+                      <input type="range" class="sliders" min="1" max="25" value="25" id="techmax" aria-label="Maximum technique"/>
                       #text "\n                  "
                     </div>
                     #text "\n                "

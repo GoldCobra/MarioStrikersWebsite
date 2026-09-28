@@ -2,7 +2,7 @@
 // (see docs/msbl-gear-builder-snapshot.md): loads its markup and scripts, loads each character's pane on
 // first use, keeps the stat overlays in sync and sizes the host to the visible pane.
 
-const TEMPLATE_VERSION = "20260508-lazy-v1";
+const TEMPLATE_VERSION = "20260928-a11y-v1";
 const TEMPLATE_URL = `/pages/templates/msbl-gear-builder.html?v=${TEMPLATE_VERSION}`;
 const CHARACTER_IMAGE_PATTERN = /(\.\.\/assets\/gear-builder\/images\/characters\/[^"'?#]+)\.png\b/gi;
 const CHARACTER_ICON_PATTERN = /(\.\.\/assets\/gear-builder\/images\/characters-icons\/[^"'?#]+)\.png\b/gi;
@@ -205,18 +205,21 @@ function runMissedLoadHandler(): void {
 }
 
 /**
- * The snapshot's markup calls its global functions from onclick attributes (a Content Security Policy
- * blocks those); they become listeners that call the same function when clicked.
+ * The snapshot's markup calls its global functions from inline handlers such as onclick="fn()" and
+ * onchange="fn()" (a Content Security Policy blocks those); each becomes a listener for the same event
+ * that calls the same function.
  */
-function bindInlineClicks(root: ParentNode): void {
-  for (const node of Array.from(root.querySelectorAll<HTMLElement>("[onclick]"))) {
-    const name = /^\s*([A-Za-z_$][\w$]*)\(\)\s*;?\s*$/.exec(node.getAttribute("onclick") ?? "")?.[1];
-    node.removeAttribute("onclick");
-    if (!name) continue;
-    node.addEventListener("click", () => {
-      const handler: unknown = Reflect.get(window, name);
-      if (typeof handler === "function") (handler as () => void)();
-    });
+function bindInlineHandlers(root: ParentNode): void {
+  for (const node of Array.from(root.querySelectorAll<HTMLElement>("*"))) {
+    for (const attribute of Array.from(node.attributes).filter((entry) => /^on[a-z]+$/.test(entry.name))) {
+      const name = /^\s*([A-Za-z_$][\w$]*)\(\)\s*;?\s*$/.exec(attribute.value)?.[1];
+      node.removeAttribute(attribute.name);
+      if (!name) continue;
+      node.addEventListener(attribute.name.slice(2), () => {
+        const handler: unknown = Reflect.get(window, name);
+        if (typeof handler === "function") (handler as () => void)();
+      });
+    }
   }
 }
 
@@ -296,7 +299,7 @@ export async function initGearBuilder(host: HTMLElement): Promise<void> {
     const response = await fetch(TEMPLATE_URL, { headers: { Accept: "text/html" } });
     if (!response.ok) throw new Error("Template request failed.");
     host.innerHTML = preferWebp(await response.text());
-    bindInlineClicks(host);
+    bindInlineHandlers(host);
     attachWebpFallbacks(host);
     for (const script of SCRIPTS) await loadScript(script);
     runMissedLoadHandler();

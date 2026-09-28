@@ -44,7 +44,7 @@
     #text "\n    "
     <section class="landing-club landing-club--competitive-season" aria-label="Competitive Season">
       #text "\n      "
-      <img class="landing-club-image" src="/assets/landing/comp-season-dusk.png" alt="Competitive Season Dusk" width="840" height="407" decoding="async" fetchpriority="high"/>
+      <img class="landing-club-image" src="/assets/landing/comp-season-dusk.webp" alt="Competitive Season Dusk" width="840" height="407" decoding="async" fetchpriority="high"/>
       #text "\n      "
       <p class="landing-club-label">
         #text "COMPETITIVE SEASON"
@@ -107,7 +107,7 @@
     #text "\n    "
     <section class="landing-club" aria-label="Mario Strikers Club">
       #text "\n      "
-      <img class="landing-club-image" src="/assets/landing/strikers-club.png" alt="Mario Strikers Club" width="840" height="407" decoding="async" fetchpriority="high"/>
+      <img class="landing-club-image" src="/assets/landing/strikers-club.webp" alt="Mario Strikers Club" width="840" height="407" decoding="async" fetchpriority="high"/>
       #text "\n      "
       <p class="landing-club-label">
         #text "STRIKERS CLUB"

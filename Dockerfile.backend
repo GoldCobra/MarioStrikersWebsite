@@ -1,4 +1,5 @@
-FROM node:24-alpine
+# Base images are pinned by digest; Dependabot proposes updates (.github/dependabot.yml).
+FROM node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1
 ARG RELEASE_SHA=development
 LABEL org.opencontainers.image.revision=$RELEASE_SHA
 
@@ -15,6 +16,11 @@ RUN npm ci --omit=dev --workspace=@ms/api --no-audit --no-fund
 # Node runs the TypeScript sources directly (type stripping); there is no build step.
 COPY packages/shared/src/ packages/shared/src/
 COPY apps/api/ apps/api/
+
+# The API runs as the unprivileged node user; only its cache directory is writable. A new cache
+# volume takes this ownership over; an existing one needs a one-time chown -R 1000:1000.
+RUN mkdir -p /app/.cache && chown node:node /app/.cache
+USER node
 
 EXPOSE 8787
 

@@ -45,7 +45,7 @@ export function initLandingCountdown(): void {
     if (!seasonImage) return;
     const name = competitiveSeasonImageName(season.display_name);
     if (!name || failedImages.has(name)) return;
-    const nextSrc = `${SEASON_IMAGE_BASE}${name}.png`;
+    const nextSrc = `${SEASON_IMAGE_BASE}${name}.webp`;
     const previousSrc = seasonImage.getAttribute("src");
     if (previousSrc === nextSrc) return;
     const previousAlt = seasonImage.getAttribute("alt");
