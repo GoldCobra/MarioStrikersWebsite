@@ -596,7 +596,7 @@
               </ol>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image51.png" width="66" height="50" alt="Graphics button in the Dolphin toolbar"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image51.webp" width="66" height="50" alt="Graphics button in the Dolphin toolbar"/>
               </figure>
               #text "\n    "
               <ol start="2">
@@ -608,7 +608,7 @@
               </ol>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image48.png" width="484" height="652" alt="Dolphin graphics settings, General tab with the Direct3D 12 backend"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image48.webp" width="484" height="652" alt="Dolphin graphics settings, General tab with the Direct3D 12 backend"/>
               </figure>
               #text "\n    "
               <p>
@@ -620,7 +620,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image64.png" width="429" height="26" alt="Dolphin adapter setting set to the gaming graphics card"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image64.webp" width="429" height="26" alt="Dolphin adapter setting set to the gaming graphics card"/>
               </figure>
               #text "\n    "
               <ol start="3">
@@ -645,7 +645,7 @@
               </ol>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image60.png" width="481" height="648" alt="Dolphin graphics settings, Enhancements tab with the internal resolution"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image60.webp" width="481" height="648" alt="Dolphin graphics settings, Enhancements tab with the internal resolution"/>
               </figure>
               #text "\n    "
               <p>
@@ -685,7 +685,7 @@
               </ol>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image39.png" width="452" height="92" alt="Dolphin texture cache set to Fast with GPU Texture Decoding ticked"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image39.webp" width="452" height="92" alt="Dolphin texture cache set to Fast with GPU Texture Decoding ticked"/>
               </figure>
               #text "\n    "
               <p>
@@ -708,7 +708,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image3.png" width="537" height="803" alt="Dolphin settings, General tab with Enable Dual Core ticked"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image3.webp" width="537" height="803" alt="Dolphin settings, General tab with Enable Dual Core ticked"/>
               </figure>
               #text "\n    "
               <p>
@@ -716,7 +716,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image61.png" width="621" height="237" alt="Dolphin settings, Paths tab with the games folder and the Wii NAND root"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image61.webp" width="621" height="237" alt="Dolphin settings, Paths tab with the games folder and the Wii NAND root"/>
               </figure>
               #text "\n    "
               <p>
@@ -724,7 +724,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image41.png" width="614" height="491" alt="Dolphin settings, Wii tab with Use PAL 60 Mode ticked"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image41.webp" width="614" height="491" alt="Dolphin settings, Wii tab with Use PAL 60 Mode ticked"/>
               </figure>
               #text "\n"
               <h3>
@@ -744,7 +744,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image13.png" width="348" height="25" alt="Folder path Dolphin Emulator > Config > Profiles > Wiimote"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image13.webp" width="348" height="25" alt="Folder path Dolphin Emulator > Config > Profiles > Wiimote"/>
               </figure>
               #text "\n    "
               <ol start="2">
@@ -760,7 +760,7 @@
               </figure>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image54.png" width="354" height="690" alt="Dolphin controller settings with an emulated Wii Remote on all four slots"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image54.webp" width="354" height="690" alt="Dolphin controller settings with an emulated Wii Remote on all four slots"/>
               </figure>
               #text "\n    "
               <p>
@@ -776,7 +776,7 @@
               </ol>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image40.png" width="977" height="794" alt="Dolphin Wii Remote 1 settings with the MotionPlus pointing profile selected"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image40.webp" width="977" height="794" alt="Dolphin Wii Remote 1 settings with the MotionPlus pointing profile selected"/>
               </figure>
               #text "\n    "
               <p>
@@ -963,7 +963,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image33.png" width="644" height="460" alt="Dolphin NetPlay setup, Connect tab with a host code"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image33.webp" width="644" height="460" alt="Dolphin NetPlay setup, Connect tab with a host code"/>
               </figure>
               #text "\n    "
               <p>
@@ -979,7 +979,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image4.png" width="644" height="462" alt="Dolphin NetPlay setup, Host tab with the Traversal Server connection type"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image4.webp" width="644" height="462" alt="Dolphin NetPlay setup, Host tab with the Traversal Server connection type"/>
               </figure>
               #text "\n    "
               <p>
@@ -987,7 +987,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image6.png" width="643" height="516" alt="NetPlay Data menu with Sync Saves and Load Saves ticked"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image6.webp" width="643" height="516" alt="NetPlay Data menu with Sync Saves and Load Saves ticked"/>
               </figure>
               #text "\n    "
               <p>
@@ -1003,7 +1003,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image50.png" width="642" height="506" alt="NetPlay Assign Controllers window mapping Wii Remote 1 to a player"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image50.webp" width="642" height="506" alt="NetPlay Assign Controllers window mapping Wii Remote 1 to a player"/>
               </figure>
               #text "\n    "
               <p>
@@ -1091,7 +1091,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image63.png" width="398" height="292" alt="BetterJoy folder with the Drivers folder and BetterJoyForCemu"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image63.webp" width="398" height="292" alt="BetterJoy folder with the Drivers folder and BetterJoyForCemu"/>
               </figure>
               #text "\n    "
               <p>
@@ -1103,11 +1103,11 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image49.png" width="667" height="233" alt="BetterJoy Drivers folder with HIDGuardian and the ViGEmBus installers"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image49.webp" width="667" height="233" alt="BetterJoy Drivers folder with HIDGuardian and the ViGEmBus installers"/>
               </figure>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image7.png" width="405" height="80" alt="HIDGuardian folder with the install script to run as administrator"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image7.webp" width="405" height="80" alt="HIDGuardian folder with the install script to run as administrator"/>
               </figure>
               #text "\n    "
               <p>
@@ -1115,7 +1115,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image2.png" width="392" height="301" alt="BetterJoyForCemu.exe selected in the BetterJoy folder"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image2.webp" width="392" height="301" alt="BetterJoyForCemu.exe selected in the BetterJoy folder"/>
               </figure>
               #text "\n    "
               <p>
@@ -1123,11 +1123,11 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image14.png" width="291" height="294" alt="BetterJoy window with a Pro Controller connected"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image14.webp" width="291" height="294" alt="BetterJoy window with a Pro Controller connected"/>
               </figure>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image34.png" width="333" height="294" alt="BetterJoy window with a left Joy-Con connected and the Config arrow"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image34.webp" width="333" height="294" alt="BetterJoy window with a left Joy-Con connected and the Config arrow"/>
               </figure>
               #text "\n    "
               <p>
@@ -1135,19 +1135,19 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image25.png" width="300" height="249" alt="BetterJoy config with port 26761, the motion server and rumble values"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image25.webp" width="300" height="249" alt="BetterJoy config with port 26761, the motion server and rumble values"/>
               </figure>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image1.png" width="323" height="262" alt="BetterJoy config with shake input delay, calibration, sensitivity and deadzone"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image1.webp" width="323" height="262" alt="BetterJoy config with shake input delay, calibration, sensitivity and deadzone"/>
               </figure>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image30.png" width="330" height="275" alt="BetterJoy config with deadzone, gyro sensitivity and HID options"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image30.webp" width="330" height="275" alt="BetterJoy config with deadzone, gyro sensitivity and HID options"/>
               </figure>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image58.png" width="333" height="267" alt="BetterJoy config with Show As XInput, Show As DS4 and the power options"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image58.webp" width="333" height="267" alt="BetterJoy config with Show As XInput, Show As DS4 and the power options"/>
               </figure>
               #text "\n    "
               <p>
@@ -1183,11 +1183,11 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image35.png" width="614" height="308" alt="BetterJoy with both Joy-Cons connected"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image35.webp" width="614" height="308" alt="BetterJoy with both Joy-Cons connected"/>
               </figure>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image14.png" width="291" height="294" alt="BetterJoy window with a Pro Controller connected"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image14.webp" width="291" height="294" alt="BetterJoy window with a Pro Controller connected"/>
               </figure>
               #text "\n    "
               <p>
@@ -1203,7 +1203,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image24.png" width="615" height="304" alt="BetterJoy with two Joy-Cons; clicking one joins or splits them"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image24.webp" width="615" height="304" alt="BetterJoy with two Joy-Cons; clicking one joins or splits them"/>
               </figure>
               #text "\n    "
               <p>
@@ -1211,7 +1211,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image37.png" width="291" height="36" alt="BetterJoy option DoNotRejoinJoycons ticked"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image37.webp" width="291" height="36" alt="BetterJoy option DoNotRejoinJoycons ticked"/>
               </figure>
               #text "\n    "
               <ol>
@@ -1239,7 +1239,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image56.png" width="311" height="469" alt="New DSU server at 127.0.0.1 on port 26761 in Dolphin"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image56.webp" width="311" height="469" alt="New DSU server at 127.0.0.1 on port 26761 in Dolphin"/>
               </figure>
               #text "\n    "
               <p>
@@ -1259,7 +1259,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image20.png" width="553" height="102" alt="Joy-Con preset folders for multiplayer, dual Joy-Cons and a single Joy-Con"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image20.webp" width="553" height="102" alt="Joy-Con preset folders for multiplayer, dual Joy-Cons and a single Joy-Con"/>
               </figure>
               #text "\n    "
               <p>
@@ -1287,7 +1287,7 @@
               </p>
               #text "\n    "
               <figure class="setup-guide-media">
-                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image13.png" width="348" height="25" alt="Folder path Dolphin Emulator > Config > Profiles > Wiimote"/>
+                <img loading="lazy" decoding="async" src="/assets/setup-guides/msc/image13.webp" width="348" height="25" alt="Folder path Dolphin Emulator > Config > Profiles > Wiimote"/>
               </figure>
               #text "\n    "
               <p>
