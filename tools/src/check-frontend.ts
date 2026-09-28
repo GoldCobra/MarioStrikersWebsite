@@ -4,6 +4,9 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { createStaticFiles } from "@ms/shared/site/node-static-files";
+import { resolveRoute } from "@ms/shared/site/routes";
+import { SITE_ORIGIN } from "@ms/shared/site/site";
 
 const root = path.resolve(import.meta.dirname, "../../apps/web/dist");
 if (!fs.existsSync(path.join(root, "index.html"))) {
@@ -105,14 +108,67 @@ for (const file of walk(path.join(root, "_astro")).filter((name) => name.endsWit
   }
 }
 
+// Ids must be unique within a document (the Gear Builder snapshot's template is its authors').
+function checkIds(file: string, source: string): void {
+  if (relative(file) === "pages/templates/msbl-gear-builder.html") return;
+  const seen = new Set<string>();
+  for (const [, id] of source.matchAll(/<[a-z][^>]*\sid="([^"]+)"/gi)) {
+    if (id && seen.has(id)) errors.push(`${relative(file)}: duplicate id "${id}"`);
+    if (id) seen.add(id);
+  }
+}
+
+// Links between pages must reach a page, directly or through a redirect, as production nginx routes them.
+const staticFiles = createStaticFiles(root);
+function checkPageLink(file: string, raw: string): void {
+  const value = raw.trim().replace(/&amp;/g, "&");
+  if (!value || /^(?:[a-z][a-z\d+.-]*:|\/\/|#)/i.test(value) || ASSET_EXTENSION.test(value.split(/[?#]/)[0] ?? ""))
+    return;
+  const url = new URL(value, servedUrl(file));
+  let route = resolveRoute(url.pathname, url.search, staticFiles);
+  if (route.kind === "redirect") {
+    const target = new URL(route.location, url);
+    route = resolveRoute(target.pathname, target.search, staticFiles);
+  }
+  if (route.kind !== "file") errors.push(`${relative(file)}: link to ${value} does not reach a page`);
+}
+
+// Every indexable page names itself as canonical, and the sitemap lists exactly those pages.
+const indexable = new Set<string>();
+function checkCanonical(file: string, source: string): void {
+  const name = relative(file);
+  const slug = name === "index.html" ? "" : /^pages\/([a-z\d-]+)\.html$/.exec(name)?.[1];
+  if (slug === undefined) return;
+  const canonical = /<link rel="canonical" href="([^"]+)">/.exec(source)?.[1];
+  const noindex = /<meta name="robots" content="[^"]*noindex/.test(source);
+  if (canonical !== undefined && canonical !== `${SITE_ORIGIN}/${slug}`) {
+    errors.push(`${name}: canonical ${canonical} is not the page's own URL`);
+  }
+  if (!noindex && canonical) indexable.add(canonical);
+}
+
 for (const file of htmlFiles) {
   const source = fs.readFileSync(file, "utf8").replace(/<!--[\s\S]*?-->/g, "");
   checkInlineCode(file, source);
+  checkIds(file, source);
+  checkCanonical(file, source);
   for (const match of source.matchAll(/\b(?:src|href|poster)\s*=\s*["']([^"']+)["']/gi)) {
     checkReference(file, match[1] ?? "");
   }
+  if (!relative(file).startsWith("pages/templates/")) {
+    for (const match of source.matchAll(/<a\b[^>]*\shref\s*=\s*["']([^"']+)["']/gi))
+      checkPageLink(file, match[1] ?? "");
+  }
   checkImages(file, source);
 }
+
+const sitemap = new Set(
+  [...fs.readFileSync(path.join(root, "sitemap.xml"), "utf8").matchAll(/<loc>([^<]+)<\/loc>/g)].map(
+    (match) => match[1],
+  ),
+);
+for (const url of sitemap) if (url && !indexable.has(url)) errors.push(`sitemap.xml: ${url} is not an indexable page`);
+for (const url of indexable) if (!sitemap.has(url)) errors.push(`sitemap.xml: indexable page ${url} is missing`);
 for (const file of cssFiles) {
   const source = fs.readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   for (const match of source.matchAll(/url\(\s*["']?([^\s"')]+)["']?\s*\)/gi)) checkReference(file, match[1] ?? "");
