@@ -2,8 +2,6 @@
 // when the file's content changes; every page that loads the file picks the new URL up.
 
 export const SCRIPTS = {
-  competitiveRulesConfig: "/js/competitive-rules-config.js?v=20260428-cleanup-v1",
-  competitiveRulesEngine: "/js/competitive-rules-engine.js?v=20260428-cleanup-v1",
   eventsEngine: "/js/events-engine.js?v=20260609-events-list-v17",
   gearBuilderHost: "/js/msbl-gear-builder-host.js?v=20260508-lazy-v1",
   landingCountdown: "/js/landing-countdown.js?v=20260902-season-visuals-v1",

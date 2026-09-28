@@ -1,18 +1,15 @@
 ---
-// Competitive rules pages; competitive-rules-config.js holds the rules of each game.
+// Competitive rules pages, rendered at build time from src/content/competitive-rules.
 import SiteLayout from "../../layouts/SiteLayout.astro";
+import { renderCompetitiveRules, type RulesGame } from "../../content/competitive-rules/render.ts";
 
 interface Props {
   slug: string;
-  game: "MSBL" | "MSC" | "SMS";
+  game: RulesGame;
 }
 
 const { slug, game } = Astro.props;
 ---
-<SiteLayout
-  slug={slug}
-  mainClass="competitive-rules-page"
-  scripts={["competitiveRulesConfig", "competitiveRulesEngine"]}
->
-    <section id="competitive-rules-root" aria-label={`${game} competitive rules`}></section>
+<SiteLayout slug={slug} mainClass="competitive-rules-page">
+    <section id="competitive-rules-root" aria-label={`${game.toUpperCase()} competitive rules`}><Fragment set:html={renderCompetitiveRules(game)} /></section>
   </SiteLayout>
