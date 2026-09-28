@@ -19,23 +19,13 @@ import {
   type PlayerProfile,
   type SeasonAward,
 } from "./profile-data.ts";
+import template from "./player-profile-popup.html?raw";
 
 const popup = new TemplatePopup({
-  templateUrl: "/pages/templates/player-profile-popup.html?v=20260902-season-visuals-v5",
+  template,
   openClass: "player-popup-open",
   closeButtonSelector: ".player-popup-close",
-  openError: {
-    id: "player-profile-feedback",
-    className: "players-note players-note-error",
-    message: "Could not open the player profile. ",
-    mountIds: ["players-root", "leaderboards-root"],
-  },
 });
-
-/** Loads the popup ahead of the first click. */
-export function ensurePopup(): Promise<HTMLElement> {
-  return popup.ensure();
-}
 
 function setSectionHidden(node: HTMLElement | undefined, hidden: boolean): void {
   const section = node?.closest<HTMLElement>(".player-popup-section");
@@ -193,8 +183,7 @@ export async function openPlayerPopup(playerId: number, opener: HTMLElement | nu
   if (!toPositiveInt(playerId)) return;
   const request = popup.begin();
   try {
-    await popup.ensure();
-    if (!popup.isCurrent(request)) return;
+    popup.ensure();
     popup.open(opener);
     popup.setText("player-name", "");
     const staleFlag = popup.slots["player-flag"];
@@ -211,9 +200,7 @@ export async function openPlayerPopup(playerId: number, opener: HTMLElement | nu
     renderProfile(profile ?? {});
     popup.showStatus(null);
   } catch {
-    if (!popup.isCurrent(request)) return;
-    if (popup.isOpen) popup.showStatus("Failed to load player profile.", true);
-    else popup.showOpenError(() => void openPlayerPopup(playerId, opener));
+    if (popup.isCurrent(request) && popup.isOpen) popup.showStatus("Failed to load player profile.", true);
   }
 }
 

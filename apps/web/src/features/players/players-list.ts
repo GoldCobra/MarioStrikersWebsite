@@ -4,7 +4,6 @@ import { toPositiveInt, toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
 import { fetchJson } from "../../lib/api.ts";
 import { flagTitleAttribute, flagUrl, normalizeCountryCode } from "../../lib/countries.ts";
-import { ensurePopup } from "./player-popup.ts";
 
 interface PlayerRow {
   readonly player_id?: unknown;
@@ -61,7 +60,6 @@ function rowHtml(row: PlayerRow): string {
 }
 
 export async function initPlayersList(mount: HTMLElement): Promise<void> {
-  ensurePopup().catch(() => undefined);
   mount.innerHTML = '<p class="players-note loading-note">Loading...</p>';
   try {
     const payload = await fetchJson<{ rows?: unknown } | null>("/api/players");

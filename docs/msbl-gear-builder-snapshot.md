@@ -43,10 +43,12 @@ Paths are relative to the web root `apps/web/public/` unless they start with `do
      `onclick`/`onchange` handlers into listeners, so the enforced CSP allows them)
 4. Remove the temporary monolith artifact after chunk generation:
    - delete `assets/gear-builder/builds.json`
-5. Run syntax checks:
+5. Run the checks:
    - `npm run check:frontend`
    - verify character selection, presets, screenshots and XML import into the Save Editor in a browser
-6. Bump changed browser asset cache tags, including dynamically loaded scripts.
+6. Bump the cache tags of changed files, including dynamically loaded scripts
+   (`apps/web/src/layouts/assets.ts`, `gear-builder-host.ts`), and renew the asset
+   lock (`node tools/src/assets-lock.ts --write`).
 
 ## Notes
 

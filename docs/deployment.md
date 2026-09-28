@@ -51,7 +51,8 @@ python3 scripts/deploy.py deploy FULL_40_CHARACTER_COMMIT_SHA
 The script fetches `origin/gc-updates` and requires the requested SHA to be
 that branch's current head. The local checkout must be clean, on `gc-updates`
 and an ancestor of the requested commit. It builds from `git archive` of the
-requested SHA, verifies the source again, then fast-forwards the clean checkout
+requested SHA, adding the date of each web source file's last commit for the
+sitemap's `lastmod` (`apps/web/.release/lastmod.json`), verifies the source again, then fast-forwards the clean checkout
 to that commit before activation.
 
 CI verification uses GitHub's API and requires successful jobs named

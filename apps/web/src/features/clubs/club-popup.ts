@@ -7,6 +7,7 @@ import { flagTitleAttribute, flagUrl, normalizeCountryCode } from "../../lib/cou
 import { scaleFitText } from "../../lib/fit-text.ts";
 import { TemplatePopup } from "../../lib/popup.ts";
 import { clubRegions, logoUrl, statusClass, statusHtml, statusVariant, textList, type Club } from "./club-data.ts";
+import template from "./club-profile-popup.html?raw";
 
 interface RosterEntry {
   readonly name?: unknown;
@@ -49,15 +50,9 @@ const REGION_BADGE_CLASSES: Readonly<Record<string, string>> = {
 };
 
 const popup = new TemplatePopup({
-  templateUrl: "/pages/templates/club-profile-popup.html?v=20260928-no-inline-handlers-v1",
+  template,
   openClass: "popup-open",
   closeButtonSelector: ".club-popup-close",
-  openError: {
-    id: "club-profile-feedback",
-    className: "msbl-clubs-note msbl-clubs-note-error",
-    message: "Could not open the club profile. ",
-    mountIds: ["msbl-clubs-root"],
-  },
 });
 const profileCache = new Map<number, { data: ClubProfile | null; time: number }>();
 
@@ -230,8 +225,7 @@ export async function openClubPopup(clubIdRaw: unknown, opener: HTMLElement | nu
   if (!clubId) return;
   const request = popup.begin();
   try {
-    await popup.ensure();
-    if (!popup.isCurrent(request)) return;
+    popup.ensure();
     popup.open(opener);
 
     popup.setText("club-name", "");
@@ -256,8 +250,6 @@ export async function openClubPopup(clubIdRaw: unknown, opener: HTMLElement | nu
     renderProfile(profile);
     popup.showStatus(null);
   } catch {
-    if (!popup.isCurrent(request)) return;
-    if (popup.isOpen) popup.showStatus("Failed to load club profile.", true);
-    else popup.showOpenError(() => void openClubPopup(clubId, opener));
+    if (popup.isCurrent(request) && popup.isOpen) popup.showStatus("Failed to load club profile.", true);
   }
 }

@@ -10,7 +10,7 @@ build instead. Both use the shared routing, so clean URLs, redirects and 404s
 match the live site.
 
 The development runner uses invented players, clubs, rankings, season data,
-events and Wiimmfi results from `apps/api/src/dev/fixtures.js`. It does not
+events and Wiimmfi results from `apps/api/src/fixtures/data-source.ts`. It does not
 require or use production credentials. Login with Discord is simulated locally:
 you can inspect a sample account and log out without contacting Discord.
 It does not validate real OAuth, guild membership or live database behavior.
@@ -60,7 +60,7 @@ Add tests for meaningful behavior changes rather than duplicating static text.
 | Symptom | Action |
 | --- | --- |
 | Clean page URL or `/api/...` returns 404 | Use `npm run dev` or local Compose; generic static servers do not implement the routes. |
-| Page templates fail to load | Open the HTTP URL instead of an HTML file on disk. |
+| The Gear Builder does not load | Open the HTTP URL instead of an HTML file on disk. |
 | Changes look stale | Reload; after changing a Gear Builder file, bump its tag (`assets.ts` or `gear-builder-host.ts`). |
 | Port already in use | Stop your earlier development server; the launcher does not terminate another application. |
 | Live data/login fails | Check the configured integration and server logs; first confirm the equivalent page works with fixtures. |

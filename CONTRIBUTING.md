@@ -24,14 +24,17 @@ Agree on the task before editing shared navigation, global CSS or the same PSD.
 ## Make the change
 
 - Keep one purpose per pull request and preserve the surrounding code style.
-- Use the existing layout, page families, feature modules, the template popup
-  (`apps/web/src/lib/popup.ts`) and the shared helpers; the
-  [architecture decisions](docs/adr/README.md) explain why they look as they do.
+- Fit the change into the existing structure: put it where things of its kind
+  already live ([where things live](README.md#where-things-live)) and reuse the
+  layout, page families, feature modules, the template popup
+  (`apps/web/src/lib/popup.ts`) and the shared helpers instead of copying them.
+  Something without a place yet gets one deliberately, named like its
+  neighbours and noted in [architecture](docs/architecture.md); the
+  [architecture decisions](docs/adr/README.md) explain the current shape.
 - Keep browser links canonical, for example `/msc-save-editor`.
 - Global styles live in `apps/web/src/styles/`, one partial per component;
   their order in `global.ts` is the cascade. Stylesheet and module URLs change
-  by themselves. Only Gear Builder files keep `?v=...` tags: bump them in
-  `apps/web/src/layouts/assets.ts` (styles) or `gear-builder-host.ts` (the rest).
+  by themselves.
 - Add meaningful coverage for changed behavior. Fixtures belong in
   `apps/api/src/fixtures/data-source.ts`; use invented data, never production exports.
 - Update the relevant short document when setup, behavior or operations change.
@@ -39,8 +42,9 @@ Agree on the task before editing shared navigation, global CSS or the same PSD.
   (`alt=""` for decoration); `npm run check:frontend` enforces both.
 - Keep design sources in `docs/source-assets/` and exported runtime files in
   `assets/`. Coordinate binary edits; avoid unrelated asset conversions.
-- A changed image, font or popup template keeps its URL, and browsers cache it:
-  bump its `?v=` cache tag where it is referenced or give it a new name, then
+- A changed image, font or Gear Builder file keeps its URL, and browsers cache it:
+  bump its `?v=` cache tag where it is referenced (Gear Builder files in
+  `apps/web/src/layouts/assets.ts` and `gear-builder-host.ts`) or give it a new name, then
   renew `apps/web/assets.lock.json` with `node tools/src/assets-lock.ts --write`.
   `npm run check` fails until then.
 - Keep credentials, personal saves, database exports and local caches out of Git.
@@ -55,8 +59,17 @@ Agree on the task before editing shared navigation, global CSS or the same PSD.
 2. Place it in `navigation.ts` if it needs a menu entry or tab.
 3. Create `apps/web/src/pages/pages/<slug>.astro` with `SiteLayout` or a page
    family from `src/components/pages/`.
-4. Run `npm run generate:nginx`, and `node tests/e2e/run.ts dom --update` for
-   its golden.
+4. Record its markup golden: `node tests/e2e/run.ts dom --update`.
+
+Renaming or removing a page keeps its old URL working: add it to
+`packages/shared/src/site/legacy-routes.ts` and run `npm run generate:nginx`.
+
+**Page text**
+
+- Competitive rules: `apps/web/src/content/competitive-rules/rules.ts`.
+- Tier lists: `apps/web/src/content/tier-lists.ts` holds the tiers as text next
+  to the image; update both, and bump the image's cache tag as described above.
+- Other pages: their file in `apps/web/src/pages/pages/`.
 
 **Behavior in the browser**
 

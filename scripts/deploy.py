@@ -22,6 +22,8 @@ REPOSITORY = "GoldCobra/MarioStrikersWebsite"
 BRANCH = "gc-updates"
 CHECKS = {"backend (ubuntu-latest)", "backend (windows-latest)", "frontend", "containers", "deployment"}
 SERVICES = ("backend", "frontend")
+# Read by the web build (apps/web/src/lib/lastmod.ts) for the sitemap.
+LASTMOD_FILE = Path("apps/web/.release/lastmod.json")
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 RELEASE = re.compile(r"(?:[0-9a-f]{40}|bootstrap-[0-9]{8}T[0-9]{6}Z)\Z")
 
@@ -231,6 +233,19 @@ if(p==='/api/health'){const j=await r.json();if(j.status!=='ok'||j.source!=='mss
             raise DeployError("Release failed; previous application images restored and verified.") from None
         self.record_current(release)
 
+    def write_lastmod(self, sha, source):
+        """Records the date of the last commit of each web source file for the sitemap's lastmod:
+        the image build works from an archive without history."""
+        dates, current = {}, None
+        for line in self.git("log", "--format=@%cI", "--name-only", sha, "--", "apps/web/src").splitlines():
+            if line.startswith("@"):
+                current = line[1:]
+            elif line and current and line not in dates:
+                dates[line] = current
+        target = source / LASTMOD_FILE
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(dates, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+
     def deploy(self, sha):
         if not self.current():
             raise DeployError("Run bootstrap once before the first deployment.")
@@ -250,6 +265,7 @@ if(p==='/api/health'){const j=await r.json();if(j.status!=='ok'||j.source!=='mss
             self.git("archive", "--format=tar", "--output=" + str(archive), sha)
             with tarfile.open(archive) as files:
                 files.extractall(source, filter="data")
+            self.write_lastmod(sha, source)
             images = {}
             for service in SERVICES:
                 tag = f"mario-strikers-website-{service}:{sha}"

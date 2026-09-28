@@ -9,6 +9,8 @@ apps/web/public/
 # The global stylesheet keeps its formatting until its cleanup; the partials must concatenate to the
 # delivered file unchanged.
 apps/web/src/styles/*.css
+# Popup markup: reformatting would add text between inline elements, which takes space.
+apps/web/src/features/*/*-popup.html
 docs/archive/
 
 # Documentation and CI files are formatted by hand.
