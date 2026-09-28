@@ -59,7 +59,7 @@ export default defineConfig({
     },
     {
       name: "contract",
-      testMatch: /contract\.spec\.ts/,
+      testMatch: /(contract|save-tools)\.spec\.ts/,
       use: { browserName: "chromium" },
     },
     {

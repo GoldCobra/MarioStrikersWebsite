@@ -17,7 +17,7 @@ npm ci
 npx playwright install chromium
 npm run test:visual     # screenshots: reference commit vs working tree
 npm run test:dom        # rendered markup and head vs committed goldens
-npm run test:contract   # every API response: reference commit vs working tree
+npm run test:contract   # every API response and the save tools: reference commit vs working tree
 node tests/e2e/run.ts routes   # status and Location of all URL shapes (needs ROUTES_URL)
 ```
 
@@ -40,6 +40,15 @@ node tests/e2e/run.ts routes   # status and Location of all URL shapes (needs RO
   intended change (`node tests/e2e/run.ts dom --update`, `... routes --update`)
   and review the diff in the pull request.
 - **Intended API changes** are listed in `tests/e2e/specs/contract.deltas.ts`.
+- **Save tools.** `specs/save-tools.spec.ts` (run with the contract check)
+  drives the MSBL and MSC save editors and the friendlist editor through fixed
+  flows on both stacks: loading valid and broken files, every edit, imports and
+  exports. Each step records the status line and the editor markup, and each
+  export its SHA-256; both runs must match exactly. The inputs are the sample
+  saves in `apps/web/public/assets/savegames/` plus files built by
+  `tests/e2e/lib/save-files.ts` (a synthetic `Online` friendlist, a save without
+  gear). `SAVE_TOOLS_DUMP=<file>` writes the recorded reference steps as JSON
+  lines for inspection.
 
 Screenshots and reports stay in the ignored `tests/e2e/.cache/`; CI uploads the
 report when a check fails.
