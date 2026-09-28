@@ -20,10 +20,11 @@ Legs, using Gear Builder values `0..9`. See
 [Gear Builder maintenance](msbl-gear-builder-snapshot.md) before importing
 upstream assets or scripts.
 
-Script paths are relative to the web root `apps/web/public/`.
+The editors live in `apps/web/src/features/save-editors/`: each has a pure
+core that reads and patches bytes (unit-tested in Node) and the page code.
 
 The save editor at `/msbl-save-editor` is implemented by
-`js/msbl-save-editor-contract.js` and `js/msbl-save-editor.js`. It loads
+`msbl/save-format.ts`, `msbl/save-core.ts` and `msbl/save-editor.ts`. It loads
 `strkrs.save`, edits Coins as an unsigned 32-bit value, imports Gear Builder
 presets and applies character loadouts. It can complete all Cups, unlock Bushido
 Gear and apply Have All Gear for all 16 characters. Export preserves the original
@@ -31,8 +32,8 @@ filename and byte length.
 
 ## MSC: Strikers2 saves
 
-The SAVE mode at `/msc-save-editor` uses `js/msc-save-editor-contract.js`
-and `js/msc-save-editor.js`.
+The SAVE mode at `/msc-save-editor` uses `msc/save-format.ts`,
+`msc/save-core.ts` and `msc/save-editor.ts`.
 
 | Property | Value |
 | --- | --- |
@@ -48,7 +49,8 @@ in-browser draft, updates the checksum and preserves the save length.
 
 ## MSC: Online friendlists
 
-The FRIENDLIST mode on the same page uses `js/msc-online-editor.js`.
+The FRIENDLIST mode on the same page uses `msc/online-core.ts` and
+`msc/online-editor.ts`.
 
 | Property | Value |
 | --- | --- |

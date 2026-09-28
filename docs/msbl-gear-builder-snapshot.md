@@ -8,8 +8,8 @@ Paths are relative to the web root `apps/web/public/` unless they start with `do
 
 - Assets: `assets/gear-builder/`
 - Template: `pages/templates/msbl-gear-builder.html`
-- Host page: `pages/msbl-gear-builder.html`
-- Host bootstrap: `js/msbl-gear-builder-host.js`
+- Host page: `apps/web/src/pages/pages/msbl-gear-builder.astro`
+- Host bootstrap: `apps/web/src/features/gear-builder/gear-builder-host.ts`
 - Original full-page snapshot archive: `docs/archive/gear-builder/index-original.html`
 
 ## Manual re-import steps

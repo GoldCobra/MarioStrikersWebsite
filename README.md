@@ -71,7 +71,7 @@ stay identical to a reference commit.
 
 | Location | Purpose |
 | --- | --- |
-| `apps/web/` | Astro site: layout, pages, page families and styles in `src/`; browser scripts and assets in `public/` |
+| `apps/web/` | Astro site: layout, pages, styles and browser modules in `src/`; assets and fetched fragments in `public/` |
 | `apps/api/` | Fastify API in TypeScript: one module per domain, integrations, fixtures and tests |
 | `packages/shared/` | Page registry, navigation model, URL routing and helpers shared by site and API |
 | `tools/` | Local servers, the nginx route generator and their tests |
@@ -80,7 +80,7 @@ stay identical to a reference commit.
 | `docs/` | Development notes, tool formats and design sources |
 
 The repository is an npm workspace; one `npm ci` at the root installs everything.
-Astro renders the pages to static HTML at build time; browser scripts load the
+Astro renders the pages to static HTML at build time; browser modules load the
 live data. One shared routing function serves clean URLs locally; production
 nginx mirrors it.
 Production uses Caddy, Nginx and the Fastify API;

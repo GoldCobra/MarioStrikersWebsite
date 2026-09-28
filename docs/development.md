@@ -61,7 +61,7 @@ Add tests for meaningful behavior changes rather than duplicating static text.
 | --- | --- |
 | Clean page URL or `/api/...` returns 404 | Use `npm run dev` or local Compose; generic static servers do not implement the routes. |
 | Page templates fail to load | Open the HTTP URL instead of an HTML file on disk. |
-| Changes look stale | Reload; after changing a browser script or style, bump its tag in `apps/web/src/layouts/assets.ts`. |
+| Changes look stale | Reload; after changing a Gear Builder file, bump its tag (`assets.ts` or `gear-builder-host.ts`). |
 | Port already in use | Stop your earlier development server; the launcher does not terminate another application. |
 | Live data/login fails | Check the configured integration and server logs; first confirm the equivalent page works with fixtures. |
 | An exported save is rejected | Verify size, region and checksum rules in [save tools](save-tools.md). |

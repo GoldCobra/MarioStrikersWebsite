@@ -1,6 +1,6 @@
 ---
 // The document around every page: head metadata from the page registry, the navigation, the content
-// tabs, the page's scripts and the footer. The page supplies the rest of <main> as its slot.
+// tabs, the page's module (slot "scripts") and the footer. The page supplies the rest of <main> as its slot.
 //
 // Whitespace in <body> is part of the rendered layout (text nodes between inline elements take space)
 // and must stay as the hand-written pages had it; the parts Astro would reflow are inserted as strings.
@@ -9,7 +9,7 @@ import { breadcrumbItems, pageLabel, resolvePageState } from "@ms/shared/site/pa
 import { NOT_FOUND_PAGE, canonicalUrl, findPage } from "@ms/shared/site/pages";
 import { SITE_NAME } from "@ms/shared/site/site";
 import { GLOBAL_CSS_PATH } from "../styles/global.ts";
-import { SCRIPTS, STYLESHEETS, type ScriptName, type StylesheetName } from "./assets.ts";
+import { STYLESHEETS, type StylesheetName } from "./assets.ts";
 import { renderContentTabs, renderFaviconLinks, renderFooter, renderMainNav, renderSubNav } from "./site-shell.ts";
 
 interface Props {
@@ -17,13 +17,11 @@ interface Props {
   /** Classes on <main> after "page-content". */
   mainClass?: string;
   mainLabel?: string;
-  /** Legacy scripts, in load order; all are deferred and run after the modules. */
-  scripts?: readonly ScriptName[];
   /** Loaded after the global stylesheet. */
   stylesheets?: readonly StylesheetName[];
 }
 
-const { slug, mainClass, mainLabel, scripts = [], stylesheets = [] } = Astro.props;
+const { slug, mainClass, mainLabel, stylesheets = [] } = Astro.props;
 const page = slug === NOT_FOUND_PAGE.slug ? NOT_FOUND_PAGE : findPage(slug);
 if (!page) throw new Error(`Page "${slug}" is not in the page registry.`);
 
@@ -36,9 +34,8 @@ const canonical = page === NOT_FOUND_PAGE ? undefined : canonicalUrl(slug);
 // The content tabs follow the hidden page heading, or open <main> when the page has none.
 const heading = page.hiddenHeading ? `\n    <h1 class="visually-hidden">${escapeHtml(page.hiddenHeading)}</h1>` : "";
 const mainStart = `${heading}<div id="global-content-tabs">${renderContentTabs(state)}</div>`;
-// The footer follows the scripts, after the line breaks that close the hand-written documents.
-const bodyEnd =
-  scripts.map((name) => `<script src="${SCRIPTS[name]}" defer></script>`).join("\n  ") + "\n\n\n" + renderFooter();
+// The footer follows the line breaks that closed the hand-written documents.
+const bodyEnd = "\n\n\n" + renderFooter();
 ---
 <!doctype html>
 <html lang="en-US">

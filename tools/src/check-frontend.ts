@@ -56,7 +56,8 @@ function checkReference(file: string, raw: string): void {
   }
 }
 
-const scripts = [...walk(path.join(root, "js")), ...walk(path.join(root, "assets/gear-builder"))].filter((file) =>
+// The bundled modules and the Gear Builder snapshot's own scripts.
+const scripts = [...walk(path.join(root, "_astro")), ...walk(path.join(root, "assets/gear-builder"))].filter((file) =>
   /\.(?:js|mjs)$/.test(file),
 );
 for (const file of scripts) {
