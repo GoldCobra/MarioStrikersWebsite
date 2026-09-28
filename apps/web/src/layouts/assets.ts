@@ -2,16 +2,12 @@
 // when the file's content changes; every page that loads the file picks the new URL up.
 
 export const SCRIPTS = {
-  eventsEngine: "/js/events-engine.js?v=20260609-events-list-v17",
   gearBuilderHost: "/js/msbl-gear-builder-host.js?v=20260508-lazy-v1",
-  landingCountdown: "/js/landing-countdown.js?v=20260902-season-visuals-v1",
   msblSaveEditorContract: "/js/msbl-save-editor-contract.js?v=20260501-msbl-gear-preset-v1",
   msblSaveEditor: "/js/msbl-save-editor.js?v=20260501-msbl-gear-preset-v1",
   mscOnlineEditor: "/js/msc-online-editor.js?v=20260429-delete-codes-v1",
   mscSaveEditor: "/js/msc-save-editor.js?v=20260501-export-applies-v1",
   mscSaveEditorContract: "/js/msc-save-editor-contract.js?v=20260428-cleanup-v1",
-  mscWiimmfi: "/js/msc-wiimmfi.js?v=20260502-wiimmfi-v1",
-  tabPlaceholder: "/js/tab-placeholder.js?v=20260428-cleanup-v1",
 } as const;
 
 export type ScriptName = keyof typeof SCRIPTS;

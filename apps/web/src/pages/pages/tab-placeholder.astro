@@ -1,11 +1,11 @@
 ---
 import SiteLayout from "../../layouts/SiteLayout.astro";
 ---
-<SiteLayout slug="tab-placeholder" mainClass="tab-placeholder-page" mainLabel="Placeholder content" scripts={["tabPlaceholder"]}>
+<SiteLayout slug="tab-placeholder" mainClass="tab-placeholder-page" mainLabel="Placeholder content">
     <p id="tab-placeholder-status" class="tab-placeholder-status">UNDER REVIEW...</p>
     <nav class="tab-placeholder-switches" aria-label="Placeholder state switcher">
       <a class="tab-placeholder-switch" href="?state=review" data-state="review">UNDER REVIEW...</a>
       <a class="tab-placeholder-switch" href="?state=construction" data-state="construction">UNDER CONSTRUCTION...</a>
       <a class="tab-placeholder-switch" href="?state=tba" data-state="tba">TBA...</a>
     </nav>
-  </SiteLayout>
+  <Fragment slot="scripts"><script src="../../entries/placeholder-page.ts"></script></Fragment></SiteLayout>
