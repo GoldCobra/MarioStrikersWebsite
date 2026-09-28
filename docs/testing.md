@@ -3,8 +3,9 @@
 ## Unit and smoke tests
 
 Run the [README checks](../README.md#checks) from the repository root. They use
-fixtures and need no production secrets. `npm run check` also type-checks,
-lints and format-checks the TypeScript code.
+fixtures and need no production secrets. `npm run check` type-checks, lints
+TypeScript and CSS, checks formatting and fails when the generated nginx routes
+or the asset lock are stale.
 
 ## Comparison checks
 

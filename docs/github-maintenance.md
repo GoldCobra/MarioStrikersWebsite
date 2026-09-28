@@ -11,9 +11,12 @@ files alone does not activate rules or send invitations.
 1. Set the default branch to `gc-updates`. Retain `main` and `master` as
    historical references; their histories must not be merged into this branch.
 2. Set the About description to:
-   "Community website for Mario Strikers: guides, live rankings, clubs,
-   profiles, events and browser-based save tools."
-   Set the website link to `https://mariostrikers.gg`.
+   "Community website for Mario Strikers (MSBL, MSC, SMS): guides, live
+   rankings, clubs, player profiles, events and browser-based save tools.
+   Static Astro site with a Fastify API, in TypeScript."
+   Set the website link to `https://mariostrikers.gg` and the topics to
+   `mario-strikers`, `mario-strikers-battle-league`, `mario-strikers-charged`,
+   `super-mario-strikers`, `community`, `astro`, `fastify` and `typescript`.
 3. Enable squash merging and automatic deletion of merged feature branches.
    Disable merge commits and rebase merging for pull requests.
 4. After the CI workflow has run successfully, import the three repository
