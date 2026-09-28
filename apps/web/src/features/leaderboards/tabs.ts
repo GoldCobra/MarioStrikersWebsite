@@ -33,7 +33,7 @@ function tabInner(tab: LeaderboardTab): string {
   const src = `${ASSET_PREFIX}/assets/nav-buttons/sub/${tab.icon.replace(/\.png$/i, ".webp")}`;
   return [
     '<span class="leaderboard-tab-inner">',
-    `<img class="leaderboard-tab-ball" src="${escapeHtml(src)}" width="${tab.iconSize}" height="${tab.iconSize}" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='${escapeHtml(fallback)}'">`,
+    `<img class="leaderboard-tab-ball" src="${escapeHtml(src)}" width="${tab.iconSize}" height="${tab.iconSize}" alt="" aria-hidden="true" data-fallback-src="${escapeHtml(fallback)}">`,
     `<span class="leaderboard-tab-label">${escapeHtml(tabLabel(tab.label))}</span>`,
     "</span>",
   ].join("");

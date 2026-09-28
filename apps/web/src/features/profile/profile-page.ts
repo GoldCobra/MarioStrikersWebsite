@@ -79,7 +79,7 @@ function ratingsPanel(ratings: Ratings): string {
 function ballImage(className: string, gameCode: unknown): string {
   const icon = gameBallIconUrl(gameCode);
   const fallback = icon.replace(/\.webp$/i, ".png");
-  return `<img class="${className}" src="${escapeHtml(icon)}" alt="" aria-hidden="true" loading="lazy" onerror="this.onerror=null;this.src='${escapeHtml(fallback)}'">`;
+  return `<img class="${className}" src="${escapeHtml(icon)}" alt="" aria-hidden="true" loading="lazy" data-fallback-src="${escapeHtml(fallback)}">`;
 }
 
 function collapsedPanel(kind: "season-awards" | "accolades", title: string, items: string): string {
@@ -131,7 +131,7 @@ function profileHtml(profile: PlayerProfile): string {
   const player = profile.player ?? {};
   const countryCode = normalizeCountryCode(player.country);
   const flag = countryCode
-    ? `<img class="profile-header-flag" src="${escapeHtml(flagUrl(countryCode))}" alt="" aria-hidden="true"${flagTitleAttribute(countryCode)} onerror="this.remove();">`
+    ? `<img class="profile-header-flag" src="${escapeHtml(flagUrl(countryCode))}" alt="" aria-hidden="true"${flagTitleAttribute(countryCode)} data-on-error="remove">`
     : "";
   const clubName = text(player.club_name).trim();
   const clubText = clubName

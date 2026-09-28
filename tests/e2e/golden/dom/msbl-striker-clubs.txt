@@ -5,26 +5,26 @@
     <div id="global-nav">
       <header id="2">
         <a class="nav-brand" href="/" aria-label="Mario Strikers Community home">
-          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src='./assets/logo/logo.png'"/>
+          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" data-fallback-src="./assets/logo/logo.png"/>
           <span class="nav-brand-est">
             #text "EST. 2017"
           </span>
         </a>
         <nav class="main-nav main-nav-text" aria-label="Main navigation">
           <a class="nav-top-link" href="/" data-top-key="home" aria-label="Home">
-            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-home.png'"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" data-fallback-src="./assets/nav-buttons/default/nav-home.png"/>
           </a>
           <a class="nav-top-link is-active" href="/games" data-top-key="games" aria-label="Games">
-            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-games-active.webp" width="733" height="198" alt="Games" onerror="this.onerror=null;this.src='./assets/nav-buttons/active/nav-games-active.png'"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-games-active.webp" width="733" height="198" alt="Games" data-fallback-src="./assets/nav-buttons/active/nav-games-active.png"/>
           </a>
           <a class="nav-top-link" href="/competitive" data-top-key="competitive" aria-label="Competitive">
-            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-competitive.webp" width="733" height="198" alt="Competitive" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-competitive.png'"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-competitive.webp" width="733" height="198" alt="Competitive" data-fallback-src="./assets/nav-buttons/default/nav-competitive.png"/>
           </a>
           <a class="nav-top-link" href="/players" data-top-key="players" aria-label="Players">
-            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-players.webp" width="733" height="198" alt="Players" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-players.png'"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-players.webp" width="733" height="198" alt="Players" data-fallback-src="./assets/nav-buttons/default/nav-players.png"/>
           </a>
           <a class="nav-top-link" href="/partners" data-top-key="partners" aria-label="Partners">
-            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-partners.png'"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" data-fallback-src="./assets/nav-buttons/default/nav-partners.png"/>
           </a>
         </nav>
         <div id="global-account" class="global-account" data-auth-state="logged-out"/>
@@ -79,7 +79,7 @@
       <section class="msbl-clubs-list" role="list" aria-label="MSBL clubs list">
         <article class="msbl-club-row" role="listitem" data-club-id="9" tabindex="0" aria-label="Open profile for Dummy Dynamos">
           <div class="msbl-club-logo-slot">
-            <img class="msbl-club-logo-img" src="/api/clubs/msbl/9/logo" alt="Dummy Dynamos club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/9/logo" alt="Dummy Dynamos club logo" loading="lazy" referrerpolicy="no-referrer" data-fallback-src="../assets/clubs/no-club-logo.png" data-fallback-alt="" data-fallback-class="msbl-club-logo-fallback"/>
           </div>
           <div class="msbl-club-main">
             <div class="msbl-club-primary">
@@ -110,7 +110,7 @@
         </article>
         <article class="msbl-club-row" role="listitem" data-club-id="3" tabindex="0" aria-label="Open profile for Fixture FC">
           <div class="msbl-club-logo-slot">
-            <img class="msbl-club-logo-img" src="/api/clubs/msbl/3/logo" alt="Fixture FC club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/3/logo" alt="Fixture FC club logo" loading="lazy" referrerpolicy="no-referrer" data-fallback-src="../assets/clubs/no-club-logo.png" data-fallback-alt="" data-fallback-class="msbl-club-logo-fallback"/>
           </div>
           <div class="msbl-club-main">
             <div class="msbl-club-primary">
@@ -141,7 +141,7 @@
         </article>
         <article class="msbl-club-row" role="listitem" data-club-id="1" tabindex="0" aria-label="Open profile for Sample Strikers">
           <div class="msbl-club-logo-slot">
-            <img class="msbl-club-logo-img" src="/api/clubs/msbl/1/logo" alt="Sample Strikers club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/1/logo" alt="Sample Strikers club logo" loading="lazy" referrerpolicy="no-referrer" data-fallback-src="../assets/clubs/no-club-logo.png" data-fallback-alt="" data-fallback-class="msbl-club-logo-fallback"/>
           </div>
           <div class="msbl-club-main">
             <div class="msbl-club-primary">
@@ -172,7 +172,7 @@
         </article>
         <article class="msbl-club-row" role="listitem" data-club-id="11" tabindex="0" aria-label="Open profile for Stub Stars">
           <div class="msbl-club-logo-slot">
-            <img class="msbl-club-logo-img" src="/api/clubs/msbl/11/logo" alt="Stub Stars club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/11/logo" alt="Stub Stars club logo" loading="lazy" referrerpolicy="no-referrer" data-fallback-src="../assets/clubs/no-club-logo.png" data-fallback-alt="" data-fallback-class="msbl-club-logo-fallback"/>
           </div>
           <div class="msbl-club-main">
             <div class="msbl-club-primary">
@@ -204,7 +204,7 @@
         </article>
         <article class="msbl-club-row" role="listitem" data-club-id="7" tabindex="0" aria-label="Open profile for Test Toads">
           <div class="msbl-club-logo-slot">
-            <img class="msbl-club-logo-img" src="/api/clubs/msbl/7/logo" alt="Test Toads club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/7/logo" alt="Test Toads club logo" loading="lazy" referrerpolicy="no-referrer" data-fallback-src="../assets/clubs/no-club-logo.png" data-fallback-alt="" data-fallback-class="msbl-club-logo-fallback"/>
           </div>
           <div class="msbl-club-main">
             <div class="msbl-club-primary">
@@ -235,7 +235,7 @@
         </article>
         <article class="msbl-club-row" role="listitem" data-club-id="2" tabindex="0" aria-label="Open profile for Demo United">
           <div class="msbl-club-logo-slot">
-            <img class="msbl-club-logo-img" src="/api/clubs/msbl/2/logo" alt="Demo United club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/2/logo" alt="Demo United club logo" loading="lazy" referrerpolicy="no-referrer" data-fallback-src="../assets/clubs/no-club-logo.png" data-fallback-alt="" data-fallback-class="msbl-club-logo-fallback"/>
           </div>
           <div class="msbl-club-main">
             <div class="msbl-club-primary">
@@ -267,7 +267,7 @@
         </article>
         <article class="msbl-club-row" role="listitem" data-club-id="4" tabindex="0" aria-label="Open profile for Placeholder Athletic">
           <div class="msbl-club-logo-slot">
-            <img class="msbl-club-logo-img" src="/api/clubs/msbl/4/logo" alt="Placeholder Athletic club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/4/logo" alt="Placeholder Athletic club logo" loading="lazy" referrerpolicy="no-referrer" data-fallback-src="../assets/clubs/no-club-logo.png" data-fallback-alt="" data-fallback-class="msbl-club-logo-fallback"/>
           </div>
           <div class="msbl-club-main">
             <div class="msbl-club-primary">
@@ -299,7 +299,7 @@
         </article>
         <article class="msbl-club-row is-inactive" role="listitem" data-club-id="5" tabindex="0" aria-label="Open profile for Mock Mushrooms">
           <div class="msbl-club-logo-slot">
-            <img class="msbl-club-logo-img" src="/api/clubs/msbl/5/logo" alt="Mock Mushrooms club logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='../assets/clubs/no-club-logo.png';this.alt='';this.classList.add('msbl-club-logo-fallback');"/>
+            <img class="msbl-club-logo-img" src="/api/clubs/msbl/5/logo" alt="Mock Mushrooms club logo" loading="lazy" referrerpolicy="no-referrer" data-fallback-src="../assets/clubs/no-club-logo.png" data-fallback-alt="" data-fallback-class="msbl-club-logo-fallback"/>
           </div>
           <div class="msbl-club-main">
             <div class="msbl-club-primary">

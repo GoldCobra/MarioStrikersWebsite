@@ -31,7 +31,7 @@ function topNavLink(item: TopNavItem, state: PageState): string {
     current ? ' aria-current="page"' : "",
     ">",
     `<img class="nav-top-icon" src="${topNavIcon(item.key, active, "webp")}" width="733" height="198" alt="${label}"`,
-    ` onerror="this.onerror=null;this.src='${topNavIcon(item.key, active, "png")}'">`,
+    ` data-fallback-src="${topNavIcon(item.key, active, "png")}">`,
     "</a>",
   ].join("");
 }
@@ -42,7 +42,7 @@ export function renderMainNav(state: PageState): string {
     '<header id="2">',
     `<a class="nav-brand" href="/" aria-label="Mario Strikers Community home">`,
     `<img class="nav-brand-logo" src="${ASSET_PREFIX}/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community"`,
-    ` onerror="this.onerror=null;this.src='${ASSET_PREFIX}/assets/logo/logo.png'">`,
+    ` data-fallback-src="${ASSET_PREFIX}/assets/logo/logo.png">`,
     '<span class="nav-brand-est">EST. 2017</span>',
     "</a>",
     '<nav class="main-nav main-nav-text" aria-label="Main navigation">',

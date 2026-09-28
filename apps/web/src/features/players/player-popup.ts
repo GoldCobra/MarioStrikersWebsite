@@ -69,7 +69,7 @@ function renderCodeLines(listKey: string, values: readonly unknown[]): void {
 function ballImage(className: string, gameCode: unknown): string {
   const icon = gameBallIconUrl(gameCode);
   const fallback = icon.replace(/\.webp$/i, ".png");
-  return `<img class="${className}" src="${escapeHtml(icon)}" alt="" aria-hidden="true" loading="lazy" onerror="this.onerror=null;this.src='${escapeHtml(fallback)}'">`;
+  return `<img class="${className}" src="${escapeHtml(icon)}" alt="" aria-hidden="true" loading="lazy" data-fallback-src="${escapeHtml(fallback)}">`;
 }
 
 /** Collapsed list inside a <details>: hidden when empty, closed on every new profile. */

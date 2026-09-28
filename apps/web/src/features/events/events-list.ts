@@ -18,7 +18,7 @@ function rowHtml(event: CommunityEvent | null | undefined): string {
   const name = toText(event?.display_name || event?.name).trim() || "EVENT";
   const imageUrl = toText(event?.image_url).trim();
   const icon = imageUrl
-    ? `<img class="events-game-ball" src="${escapeHtml(imageUrl)}" alt="" aria-hidden="true" onerror="this.onerror=null;this.remove();">`
+    ? `<img class="events-game-ball" src="${escapeHtml(imageUrl)}" alt="" aria-hidden="true" data-on-error="remove">`
     : "";
   return [
     '<article class="lb-row players-row events-row" role="listitem">',

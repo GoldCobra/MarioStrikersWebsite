@@ -5,26 +5,26 @@
     <div id="global-nav">
       <header id="2">
         <a class="nav-brand" href="/" aria-label="Mario Strikers Community home">
-          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" onerror="this.onerror=null;this.src='./assets/logo/logo.png'"/>
+          <img class="nav-brand-logo" src="/assets/logo/logo.webp" width="2172" height="1454" alt="Mario Strikers Community" data-fallback-src="./assets/logo/logo.png"/>
           <span class="nav-brand-est">
             #text "EST. 2017"
           </span>
         </a>
         <nav class="main-nav main-nav-text" aria-label="Main navigation">
           <a class="nav-top-link" href="/" data-top-key="home" aria-label="Home">
-            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-home.png'"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-home.webp" width="733" height="198" alt="Home" data-fallback-src="./assets/nav-buttons/default/nav-home.png"/>
           </a>
           <a class="nav-top-link" href="/games" data-top-key="games" aria-label="Games">
-            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-games.webp" width="733" height="198" alt="Games" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-games.png'"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-games.webp" width="733" height="198" alt="Games" data-fallback-src="./assets/nav-buttons/default/nav-games.png"/>
           </a>
           <a class="nav-top-link" href="/competitive" data-top-key="competitive" aria-label="Competitive">
-            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-competitive.webp" width="733" height="198" alt="Competitive" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-competitive.png'"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-competitive.webp" width="733" height="198" alt="Competitive" data-fallback-src="./assets/nav-buttons/default/nav-competitive.png"/>
           </a>
           <a class="nav-top-link is-active" href="/players" data-top-key="players" aria-label="Players">
-            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-players-active.webp" width="733" height="198" alt="Players" onerror="this.onerror=null;this.src='./assets/nav-buttons/active/nav-players-active.png'"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/active/nav-players-active.webp" width="733" height="198" alt="Players" data-fallback-src="./assets/nav-buttons/active/nav-players-active.png"/>
           </a>
           <a class="nav-top-link" href="/partners" data-top-key="partners" aria-label="Partners">
-            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" onerror="this.onerror=null;this.src='./assets/nav-buttons/default/nav-partners.png'"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" data-fallback-src="./assets/nav-buttons/default/nav-partners.png"/>
           </a>
         </nav>
         <div id="global-account" class="global-account" data-auth-state="logged-out"/>
@@ -49,7 +49,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/ca.png" alt="" aria-hidden="true" title="Canada" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/ca.png" alt="" aria-hidden="true" title="Canada" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -66,7 +66,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/gb-wls.png" alt="" aria-hidden="true" title="Wales" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/gb-wls.png" alt="" aria-hidden="true" title="Wales" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -83,7 +83,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/gb-wls.png" alt="" aria-hidden="true" title="Wales" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/gb-wls.png" alt="" aria-hidden="true" title="Wales" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -100,7 +100,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/jp.png" alt="" aria-hidden="true" title="Japan" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/jp.png" alt="" aria-hidden="true" title="Japan" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -117,7 +117,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/be.png" alt="" aria-hidden="true" title="Belgium" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/be.png" alt="" aria-hidden="true" title="Belgium" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -134,7 +134,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/mx.png" alt="" aria-hidden="true" title="Mexico" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/mx.png" alt="" aria-hidden="true" title="Mexico" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -151,7 +151,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/us.png" alt="" aria-hidden="true" title="United States" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/us.png" alt="" aria-hidden="true" title="United States" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -183,7 +183,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/es.png" alt="" aria-hidden="true" title="Spain" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/es.png" alt="" aria-hidden="true" title="Spain" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -200,7 +200,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/nl.png" alt="" aria-hidden="true" title="Netherlands" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/nl.png" alt="" aria-hidden="true" title="Netherlands" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -217,7 +217,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/se.png" alt="" aria-hidden="true" title="Sweden" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/se.png" alt="" aria-hidden="true" title="Sweden" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -234,7 +234,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/at.png" alt="" aria-hidden="true" title="Austria" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/at.png" alt="" aria-hidden="true" title="Austria" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -251,7 +251,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/it.png" alt="" aria-hidden="true" title="Italy" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/it.png" alt="" aria-hidden="true" title="Italy" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -268,7 +268,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/pt.png" alt="" aria-hidden="true" title="Portugal" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/pt.png" alt="" aria-hidden="true" title="Portugal" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -285,7 +285,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/gb-eng.png" alt="" aria-hidden="true" title="England" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/gb-eng.png" alt="" aria-hidden="true" title="England" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -302,7 +302,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/au.png" alt="" aria-hidden="true" title="Australia" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/au.png" alt="" aria-hidden="true" title="Australia" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -319,7 +319,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/us.png" alt="" aria-hidden="true" title="United States" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/us.png" alt="" aria-hidden="true" title="United States" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -336,7 +336,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/ch.png" alt="" aria-hidden="true" title="Switzerland" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/ch.png" alt="" aria-hidden="true" title="Switzerland" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -353,7 +353,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/de.png" alt="" aria-hidden="true" title="Germany" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/de.png" alt="" aria-hidden="true" title="Germany" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -370,7 +370,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/no.png" alt="" aria-hidden="true" title="Norway" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/no.png" alt="" aria-hidden="true" title="Norway" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -387,7 +387,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/de.png" alt="" aria-hidden="true" title="Germany" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/de.png" alt="" aria-hidden="true" title="Germany" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -404,7 +404,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/fr.png" alt="" aria-hidden="true" title="France" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/fr.png" alt="" aria-hidden="true" title="France" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -421,7 +421,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/gb.png" alt="" aria-hidden="true" title="United Kingdom" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/gb.png" alt="" aria-hidden="true" title="United Kingdom" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -438,7 +438,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/gb-sct.png" alt="" aria-hidden="true" title="Scotland" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/gb-sct.png" alt="" aria-hidden="true" title="Scotland" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -455,7 +455,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/gb.png" alt="" aria-hidden="true" title="United Kingdom" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/gb.png" alt="" aria-hidden="true" title="United Kingdom" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -472,7 +472,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/gb-sct.png" alt="" aria-hidden="true" title="Scotland" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/gb-sct.png" alt="" aria-hidden="true" title="Scotland" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -489,7 +489,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/kr.png" alt="" aria-hidden="true" title="South Korea" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/kr.png" alt="" aria-hidden="true" title="South Korea" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -506,7 +506,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/br.png" alt="" aria-hidden="true" title="Brazil" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/br.png" alt="" aria-hidden="true" title="Brazil" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -523,7 +523,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/br.png" alt="" aria-hidden="true" title="Brazil" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/br.png" alt="" aria-hidden="true" title="Brazil" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -540,7 +540,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/fr.png" alt="" aria-hidden="true" title="France" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/fr.png" alt="" aria-hidden="true" title="France" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -557,7 +557,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/ch.png" alt="" aria-hidden="true" title="Switzerland" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/ch.png" alt="" aria-hidden="true" title="Switzerland" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -574,7 +574,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/es.png" alt="" aria-hidden="true" title="Spain" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/es.png" alt="" aria-hidden="true" title="Spain" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -591,7 +591,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/gb-eng.png" alt="" aria-hidden="true" title="England" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/gb-eng.png" alt="" aria-hidden="true" title="England" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -608,7 +608,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/ve.png" alt="" aria-hidden="true" title="Venezuela" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/ve.png" alt="" aria-hidden="true" title="Venezuela" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -625,7 +625,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/pt.png" alt="" aria-hidden="true" title="Portugal" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/pt.png" alt="" aria-hidden="true" title="Portugal" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -642,7 +642,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/be.png" alt="" aria-hidden="true" title="Belgium" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/be.png" alt="" aria-hidden="true" title="Belgium" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -659,7 +659,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/at.png" alt="" aria-hidden="true" title="Austria" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/at.png" alt="" aria-hidden="true" title="Austria" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -676,7 +676,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/jp.png" alt="" aria-hidden="true" title="Japan" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/jp.png" alt="" aria-hidden="true" title="Japan" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -693,7 +693,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/no.png" alt="" aria-hidden="true" title="Norway" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/no.png" alt="" aria-hidden="true" title="Norway" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -710,7 +710,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/se.png" alt="" aria-hidden="true" title="Sweden" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/se.png" alt="" aria-hidden="true" title="Sweden" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -727,7 +727,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/mx.png" alt="" aria-hidden="true" title="Mexico" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/mx.png" alt="" aria-hidden="true" title="Mexico" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -744,7 +744,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/au.png" alt="" aria-hidden="true" title="Australia" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/au.png" alt="" aria-hidden="true" title="Australia" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -761,7 +761,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/nl.png" alt="" aria-hidden="true" title="Netherlands" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/nl.png" alt="" aria-hidden="true" title="Netherlands" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -778,7 +778,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/ca.png" alt="" aria-hidden="true" title="Canada" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/ca.png" alt="" aria-hidden="true" title="Canada" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -795,7 +795,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/it.png" alt="" aria-hidden="true" title="Italy" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/it.png" alt="" aria-hidden="true" title="Italy" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -827,7 +827,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/ve.png" alt="" aria-hidden="true" title="Venezuela" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/ve.png" alt="" aria-hidden="true" title="Venezuela" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">
@@ -844,7 +844,7 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/kr.png" alt="" aria-hidden="true" title="South Korea" loading="lazy" onerror="this.onerror=null;this.remove();"/>
+                  <img class="players-flag" src="/assets/flags/kr.png" alt="" aria-hidden="true" title="South Korea" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
               <span class="lb-player players-name">

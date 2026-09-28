@@ -204,6 +204,22 @@ function runMissedLoadHandler(): void {
   }
 }
 
+/**
+ * The snapshot's markup calls its global functions from onclick attributes (a Content Security Policy
+ * blocks those); they become listeners that call the same function when clicked.
+ */
+function bindInlineClicks(root: ParentNode): void {
+  for (const node of Array.from(root.querySelectorAll<HTMLElement>("[onclick]"))) {
+    const name = /^\s*([A-Za-z_$][\w$]*)\(\)\s*;?\s*$/.exec(node.getAttribute("onclick") ?? "")?.[1];
+    node.removeAttribute("onclick");
+    if (!name) continue;
+    node.addEventListener("click", () => {
+      const handler: unknown = Reflect.get(window, name);
+      if (typeof handler === "function") (handler as () => void)();
+    });
+  }
+}
+
 function paneStatusHtml(message: string, isError: boolean): string {
   return `<p class="msbl-gear-pane-state${isError ? " is-error" : ""}" role="status">${message}</p>`;
 }
@@ -280,6 +296,7 @@ export async function initGearBuilder(host: HTMLElement): Promise<void> {
     const response = await fetch(TEMPLATE_URL, { headers: { Accept: "text/html" } });
     if (!response.ok) throw new Error("Template request failed.");
     host.innerHTML = preferWebp(await response.text());
+    bindInlineClicks(host);
     attachWebpFallbacks(host);
     for (const script of SCRIPTS) await loadScript(script);
     runMissedLoadHandler();

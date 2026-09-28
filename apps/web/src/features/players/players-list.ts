@@ -40,7 +40,7 @@ function rowHtml(row: PlayerRow): string {
   const countryCode = normalizeCountryCode(row.country);
   const rowClass = isActive(row) ? "lb-row players-row" : "lb-row players-row is-inactive";
   const flag = countryCode
-    ? `<img class="players-flag" src="${escapeHtml(flagUrl(countryCode))}" alt="" aria-hidden="true"${flagTitleAttribute(countryCode)} loading="lazy" onerror="this.onerror=null;this.remove();">`
+    ? `<img class="players-flag" src="${escapeHtml(flagUrl(countryCode))}" alt="" aria-hidden="true"${flagTitleAttribute(countryCode)} loading="lazy" data-on-error="remove">`
     : "";
   const nameInner = playerId
     ? `<button type="button" class="players-name-trigger" data-player-id="${playerId}" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for ${escapeHtml(name)}">${escapeHtml(displayName)}</button>`
