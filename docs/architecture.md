@@ -77,9 +77,12 @@ generated from the indexable pages of the registry. Unknown URLs get the site's
 own not-found page (`src/pages/404.astro`) with status 404, and API responses
 carry `X-Robots-Tag: noindex`.
 
-The global stylesheet is delivered as one file named by its content hash
-(`/css/global.<hash>.css`), so browsers cache it for a year and a change
-always reaches them. Its partials are concatenated in the order listed in
+The global stylesheet is delivered as one minified file named by its content
+hash (`/css/global.<hash>.css`), so browsers cache it for a year and a change
+always reaches them. Minifying (lightningcss) removes comments, whitespace and
+declarations a later one in the same rule overrides; a test checks that every
+at-rule, prefixed declaration, `!important` and referenced file survives, and
+invalid CSS fails the build. Its partials are concatenated in the order listed in
 `src/styles/global.ts`; that order is the cascade, and the media blocks in
 `tablet.css` and `mobile.css` come last on purpose. Modules are bundled with
 content-hashed names. Only the Gear Builder snapshot keeps `?v=...` cache tags:

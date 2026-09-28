@@ -6,6 +6,7 @@
 // It is delivered as one file named by its content hash, so browsers may cache it forever.
 
 import { createHash } from "node:crypto";
+import { transform } from "lightningcss";
 import base from "./base.css?raw";
 import clubPopup from "./club-popup.css?raw";
 import clubs from "./clubs.css?raw";
@@ -64,7 +65,17 @@ export const GLOBAL_CSS = [
   wiimmfi,
 ].join("");
 
-export const GLOBAL_CSS_HASH = createHash("sha256").update(GLOBAL_CSS).digest("hex").slice(0, 12);
+/**
+ * What browsers get: the same rules in the same order without comments and whitespace, and with
+ * declarations that a later one in the same rule overrides dropped. Invalid CSS fails the build.
+ */
+export const GLOBAL_CSS_MINIFIED = transform({
+  filename: "global.css",
+  code: Buffer.from(GLOBAL_CSS),
+  minify: true,
+}).code.toString();
 
-/** Next to the former /css/global.css, so the relative url(../assets/...) references keep working. */
+export const GLOBAL_CSS_HASH = createHash("sha256").update(GLOBAL_CSS_MINIFIED).digest("hex").slice(0, 12);
+
+/** In /css/, so the relative url(../assets/...) references resolve to /assets/. */
 export const GLOBAL_CSS_PATH = `/css/global.${GLOBAL_CSS_HASH}.css`;
