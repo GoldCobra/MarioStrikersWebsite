@@ -5,13 +5,14 @@
     {
       "screenshots": [
         "pages/players-*",
+        "states/error-profile-popup-*",
         "states/players-popup-*",
         "states/leaderboard-popup-*",
         "states/whr-popup-*",
         "states/profile-linked-*",
         "states/club-popup-*"
       ],
-      "reason": "Owner request: flags are no longer cropped to 3:2; they keep their own proportions (headers: one height, the width follows; players list and club roster: the whole flag fits the slot)."
+      "reason": "Owner request: flags are no longer cropped to 3:2; they keep their own proportions (headers: one height, the width follows; players list and club roster: the whole flag fits the slot). The error popup's screenshot shows the players list behind it, so its flags change too."
     }
   ]
 }
