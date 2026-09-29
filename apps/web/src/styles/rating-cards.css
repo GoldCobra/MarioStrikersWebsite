@@ -140,9 +140,9 @@
 }
 
 /* The game's artwork (352x226, about twice the popup card) fills the card behind its content,
-   darkened so the text reads, at 88% saturation, and fades to 80% black over the bottom 30%. It is a
-   layer of its own, so an inactive card can desaturate it further (above); the popup's blanket
-   "filter: none" does not reach it. */
+   darkened so the text reads (active cards 8% more, by the filter), at 88% saturation, and fades to
+   80% black over the bottom 30%. It is a layer of its own, so an inactive card replaces the filter
+   with its desaturation (above); the popup's blanket "filter: none" does not reach it. */
 :is(.profile-rating-card, .player-popup-rating-card).is-compact-layout::before {
   content: "";
   position: absolute;
@@ -152,7 +152,7 @@
     linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent 30%),
     linear-gradient(rgba(0, 0, 0, 0.67), rgba(0, 0, 0, 0.67)),
     var(--rating-game-art) center / cover no-repeat;
-  filter: saturate(0.88);
+  filter: saturate(0.88) brightness(0.92);
 }
 
 .player-popup-rating-card.is-compact-layout {
