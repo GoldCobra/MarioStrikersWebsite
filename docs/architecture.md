@@ -45,6 +45,9 @@ API on the same origin (`/api/...`) and sets no globals.
 (`player-profile-popup.html`, `club-profile-popup.html`) sits next to their code
 and is bundled with it. Shared popup classes in `src/styles/popups.css` are
 `popup-overlay`, `popup-card`, `popup-header`, `popup-title` and `popup-close`.
+The hidden page `/player-card?player=<id>` shows the player popup as a compact
+card (`showPlayerCard`, class `is-card`) that the Discord bot screenshots for
+`/profile show`; `<html data-player-card>` turns `ready` once it has loaded.
 
 **No inline code.** Markup carries no inline scripts or event handlers, so the
 Content Security Policy can forbid them: an image states its fallback as

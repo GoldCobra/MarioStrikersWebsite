@@ -1,18 +1,10 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "d5df357c7884b77b835cee8fba920473778423db",
+  "reference": "416fd0e004cb585c624097db290972113a1cf1e3",
   "changes": [
     {
-      "screenshots": [
-        "pages/players-*",
-        "states/error-profile-popup-*",
-        "states/players-popup-*",
-        "states/leaderboard-popup-*",
-        "states/whr-popup-*",
-        "states/profile-linked-*",
-        "states/club-popup-*"
-      ],
-      "reason": "Owner request: flags are no longer cropped to 3:2; they keep their own proportions (headers: one height, the width follows; players list and club roster: the whole flag fits the slot). The error popup's screenshot shows the players list behind it, so its flags change too."
+      "screenshots": ["pages/player-card-*", "states/player-card-*"],
+      "reason": "New page /player-card: the compact player card the Discord bot screenshots for /profile show (not in the reference)."
     }
   ]
 }

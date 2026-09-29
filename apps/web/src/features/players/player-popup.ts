@@ -252,6 +252,56 @@ export async function openPlayerPopup(playerId: number, opener: HTMLElement | nu
   popup.open(opener);
 }
 
+/** Resolves once the fonts and every image the card shows, CSS backgrounds and masks included, are there. */
+async function cardAssetsLoaded(root: HTMLElement): Promise<void> {
+  const urls = new Set<string>();
+  const addUrls = (value: string): void => {
+    for (const match of value.matchAll(/url\("?([^")]+)"?\)/g)) if (match[1]) urls.add(match[1]);
+  };
+  for (const element of [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))]) {
+    if (!element.getClientRects().length) continue;
+    if (element instanceof HTMLImageElement && element.currentSrc) urls.add(element.currentSrc);
+    for (const pseudo of [null, "::before", "::after"]) {
+      const style = getComputedStyle(element, pseudo);
+      addUrls(style.backgroundImage);
+      addUrls(style.getPropertyValue("mask-image"));
+      addUrls(style.getPropertyValue("-webkit-mask-image"));
+    }
+  }
+  await Promise.all([
+    document.fonts.ready,
+    ...Array.from(urls, async (url) => {
+      const image = new Image();
+      image.src = url;
+      await image.decode().catch(() => undefined);
+    }),
+  ]);
+}
+
+/**
+ * The compact player card (/player-card?player=<id>; is-card in player-popup.css): the popup without its
+ * close button, season rewards, accolades and results link, which the Discord bot screenshots for
+ * /profile show. <html data-player-card> turns "ready" once the card, its images and fonts are there,
+ * or "error".
+ */
+export async function showPlayerCard(playerId: number): Promise<void> {
+  const state = document.documentElement.dataset;
+  try {
+    const id = toPositiveInt(playerId);
+    const profile = id ? await loadProfile(id) : null;
+    if (!profile?.player) throw new Error("Player not found.");
+    const root = popup.ensure();
+    root.classList.add("is-card");
+    renderProfile(profile);
+    popup.showStatus(null);
+    popup.open(null);
+    await cardAssetsLoaded(root);
+    state.playerCard = "ready";
+  } catch {
+    state.playerCard = "error";
+  }
+}
+
 let triggersBound = false;
 
 function playerTrigger(target: EventTarget | null): HTMLElement | null {

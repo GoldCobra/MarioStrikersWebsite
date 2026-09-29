@@ -366,6 +366,15 @@ export const PAGES: readonly PageDefinition[] = [
     hiddenHeading: "Partners",
   },
   {
+    // The compact player popup, screenshotted by the Discord bot for /profile show (?player=<id>).
+    slug: "player-card",
+    title: "Player Card | Mario Strikers Community",
+    description:
+      "A compact Mario Strikers player card with name, flag, friend codes and competitive ratings, as the community Discord bot shows it.",
+    hiddenHeading: "Player Card",
+    robots: "noindex, nofollow",
+  },
+  {
     slug: "players",
     title: "Players | Mario Strikers Community",
     description: "Browse Mario Strikers player resources, profiles, clubs, and competitive community information.",
