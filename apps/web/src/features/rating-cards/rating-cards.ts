@@ -201,8 +201,7 @@ function ratingReward(prefix: string, rewardLevel: SeasonRewardLevel | null | un
     `<div class="${prefix}-rating-reward-rule" aria-hidden="true"></div>`,
     `<p class="${prefix}-rating-reward-progress">`,
     `<span>${escapeHtml(progressLabel)}</span>`,
-    // The slash has its own span, so it can be set smaller than the counts (rating-cards.css).
-    `<strong>${escapeHtml(currentWins)}<span class="${prefix}-rating-reward-slash">/</span>${escapeHtml(requiredWins)}</strong>`,
+    `<strong>${escapeHtml(`${currentWins}/${requiredWins}`)}</strong>`,
     "</p>",
     "</div>",
   ].join("");

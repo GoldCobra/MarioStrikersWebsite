@@ -341,44 +341,53 @@
   text-shadow: none;
 }
 
+/* Tier colours of the reward icons (1 Bronze to 7 Strikers Titan). The compact rank icon of the same
+   tier glows in the same colour (rating-cards.css), as both show the same rank. */
 .profile-rating-reward.is-reward-tier-1,
-.player-popup-rating-reward.is-reward-tier-1 {
+.player-popup-rating-reward.is-reward-tier-1,
+:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-1 {
   --profile-rating-reward-accent: #d47a2d;
   --profile-rating-reward-glow: rgba(212, 122, 45, 0.42);
 }
 
 .profile-rating-reward.is-reward-tier-2,
-.player-popup-rating-reward.is-reward-tier-2 {
+.player-popup-rating-reward.is-reward-tier-2,
+:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-2 {
   --profile-rating-reward-accent: #dceaf2;
   --profile-rating-reward-glow: rgba(220, 234, 242, 0.48);
 }
 
 .profile-rating-reward.is-reward-tier-3,
-.player-popup-rating-reward.is-reward-tier-3 {
+.player-popup-rating-reward.is-reward-tier-3,
+:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-3 {
   --profile-rating-reward-accent: #f2b832;
   --profile-rating-reward-glow: rgba(242, 184, 50, 0.44);
 }
 
 .profile-rating-reward.is-reward-tier-4,
-.player-popup-rating-reward.is-reward-tier-4 {
+.player-popup-rating-reward.is-reward-tier-4,
+:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-4 {
   --profile-rating-reward-accent: #65dce4;
   --profile-rating-reward-glow: rgba(101, 220, 228, 0.42);
 }
 
 .profile-rating-reward.is-reward-tier-5,
-.player-popup-rating-reward.is-reward-tier-5 {
+.player-popup-rating-reward.is-reward-tier-5,
+:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-5 {
   --profile-rating-reward-accent: #82d8ff;
   --profile-rating-reward-glow: rgba(130, 216, 255, 0.44);
 }
 
 .profile-rating-reward.is-reward-tier-6,
-.player-popup-rating-reward.is-reward-tier-6 {
+.player-popup-rating-reward.is-reward-tier-6,
+:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-6 {
   --profile-rating-reward-accent: #a77cff;
   --profile-rating-reward-glow: rgba(167, 124, 255, 0.44);
 }
 
 .profile-rating-reward.is-reward-tier-7,
-.player-popup-rating-reward.is-reward-tier-7 {
+.player-popup-rating-reward.is-reward-tier-7,
+:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-7 {
   --profile-rating-reward-accent: #f05b6a;
   --profile-rating-reward-glow: rgba(240, 91, 106, 0.44);
 }
@@ -399,8 +408,8 @@
   line-height: 1.15;
 }
 
-.profile-rating-reward-progress > span,
-.player-popup-rating-reward-progress > span {
+.profile-rating-reward-progress span,
+.player-popup-rating-reward-progress span {
   letter-spacing: 0;
 }
 

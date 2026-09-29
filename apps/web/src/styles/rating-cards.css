@@ -114,8 +114,8 @@
   --rating-compact-text-gap: 9px;
   --rating-compact-pad-x: 0.25rem;
   --rating-compact-pad-y: 0.3rem;
-  /* A black glow like the rank icon's (a text-shadow blur of 6px equals drop-shadow's 3px). */
-  --rating-compact-title-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
+  /* A tight black glow close to the letters, doubled so it shows clearly on the artwork. */
+  --rating-compact-title-shadow: 0 0 2px #000, 0 0 2px #000;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   /* Row 1 keeps the icon's height even without an icon, so every card of a row has the same
@@ -160,8 +160,9 @@
   line-height: 1.22;
 }
 
-/* The rank icon glows faintly in its logo's main colour (is-rank-tier-<n> from rating-cards.ts; far
-   less than the reward icons). An inactive card's filter replaces the glow. */
+/* The rank icon glows faintly in its tier's reward colour (is-rank-tier-<n> from rating-cards.ts; the
+   colours are the reward tiers' in profile.css; one soft shadow, far less than the reward icons). An
+   inactive card's filter replaces the glow. */
 :is(.profile-rating-compact-rank, .player-popup-rating-compact-rank) {
   grid-area: 1 / 2;
   align-self: start;
@@ -169,35 +170,7 @@
   width: auto;
   height: var(--rating-compact-rank-size);
   object-fit: contain;
-  filter: drop-shadow(0 0 3px var(--rating-rank-glow, transparent));
-}
-
-:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-1 {
-  --rating-rank-glow: rgba(190, 80, 8, 0.45);
-}
-
-:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-2 {
-  --rating-rank-glow: rgba(175, 217, 229, 0.45);
-}
-
-:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-3 {
-  --rating-rank-glow: rgba(217, 172, 61, 0.45);
-}
-
-:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-4 {
-  --rating-rank-glow: rgba(151, 206, 233, 0.45);
-}
-
-:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-5 {
-  --rating-rank-glow: rgba(91, 123, 228, 0.45);
-}
-
-:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-6 {
-  --rating-rank-glow: rgba(145, 82, 229, 0.45);
-}
-
-:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-7 {
-  --rating-rank-glow: rgba(194, 37, 29, 0.45);
+  filter: drop-shadow(0 0 3px var(--profile-rating-reward-glow, transparent));
 }
 
 :is(.profile-rating-compact-title, .player-popup-rating-compact-title) {
@@ -390,7 +363,7 @@
 /* The blanket rule above also removes the rank icon's glow, the game code's shadow and an inactive
    card's desaturation, so they are re-asserted here. */
 #player-profile-popup .player-popup-rating-compact-rank {
-  filter: drop-shadow(0 0 3px var(--rating-rank-glow, transparent)) !important;
+  filter: drop-shadow(0 0 3px var(--profile-rating-reward-glow, transparent)) !important;
 }
 
 #player-profile-popup .player-popup-rating-compact-title {
@@ -430,11 +403,6 @@
 .profile-rating-reward.is-reward-complete .profile-rating-reward-progress strong,
 .player-popup-rating-reward.is-reward-complete .player-popup-rating-reward-progress strong {
   color: var(--profile-rating-reward-accent);
-}
-
-/* The slash of the progress count ("2/5") is set 3px smaller than the counts. */
-:is(.profile-rating-reward-slash, .player-popup-rating-reward-slash) {
-  font-size: calc(1em - 3px);
 }
 
 #player-profile-popup .player-popup-rating-reward.is-reward-complete .player-popup-rating-reward-progress strong {
