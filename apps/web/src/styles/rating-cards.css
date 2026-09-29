@@ -92,7 +92,8 @@
 .player-popup-rating-card {
   --rating-card-text-size: 15px;
   --rating-card-digit-height: 0.73em;
-  --rating-title-baseline: 17px;
+  /* The game code is set in ITC Grizzly here too (below), whose baseline sits at 15px at 19px. */
+  --rating-title-baseline: 15px;
   --rating-text-baseline: 13px;
   --rating-text-ink: 11px;
   --rating-compact-metric-tracking: 0.06em;
@@ -114,8 +115,8 @@
   --rating-compact-text-gap: 9px;
   --rating-compact-pad-x: 0.25rem;
   --rating-compact-pad-y: 0.3rem;
-  /* A tight black glow close to the letters, doubled so it shows clearly on the artwork. */
-  --rating-compact-title-shadow: 0 0 2px #000, 0 0 2px #000;
+  /* A dense black glow close to the letters (four thin layers), so it shows clearly on the artwork. */
+  --rating-compact-title-shadow: 0 0 1px #000, 0 0 2px #000, 0 0 3px #000, 0 0 4px #000;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   /* Row 1 keeps the icon's height even without an icon, so every card of a row has the same
@@ -160,17 +161,25 @@
   line-height: 1.22;
 }
 
-/* The rank icon glows faintly in its tier's reward colour (is-rank-tier-<n> from rating-cards.ts; the
-   colours are the reward tiers' in profile.css; one soft shadow, far less than the reward icons). An
+/* The popup's game code uses the profile page's ITC Grizzly; the rest of the card stays in Reporter. */
+.player-popup-rating-compact-title {
+  font-family: "ITC Grizzly", sans-serif;
+}
+
+/* The rank icon glows in its tier's reward colour (is-rank-tier-<n> from rating-cards.ts; the colours
+   are the reward tiers' in profile.css): one tight shadow at 70%, far less than the reward icons. An
    inactive card's filter replaces the glow. */
 :is(.profile-rating-compact-rank, .player-popup-rating-compact-rank) {
+  --rating-rank-glow: drop-shadow(
+    0 0 2px color-mix(in srgb, var(--profile-rating-reward-accent, transparent) 70%, transparent)
+  );
   grid-area: 1 / 2;
   align-self: start;
   justify-self: end;
   width: auto;
   height: var(--rating-compact-rank-size);
   object-fit: contain;
-  filter: drop-shadow(0 0 3px var(--profile-rating-reward-glow, transparent));
+  filter: var(--rating-rank-glow);
 }
 
 :is(.profile-rating-compact-title, .player-popup-rating-compact-title) {
@@ -227,7 +236,8 @@
   clip-path: polygon(0 0, calc(100% - var(--rating-compact-bar-slant)) 0, 100% 100%, 0 100%);
 }
 
-/* The ELO icon (230x200) is a little larger than the digits and centred on them. */
+/* The ELO icon (230x200, white on transparent) is a little larger than the digits and centred on
+   them. It is drawn as a mask filled with the game's colour, the colour of the game code. */
 :is(.profile-rating-compact-value, .player-popup-rating-compact-value)::before {
   content: "";
   display: inline-block;
@@ -235,7 +245,15 @@
   aspect-ratio: 230 / 200;
   margin-right: 0.3em;
   vertical-align: calc(var(--rating-card-digit-height) * (1 - var(--rating-compact-elo-scale)) / 2);
-  background: url("../assets/players/elo.png?v=20260926-elo-icon-v2") center / contain no-repeat;
+  background: var(--rating-game-color, #fff);
+  -webkit-mask-image: url("../assets/players/elo.png?v=20260926-elo-icon-v2");
+  mask-image: url("../assets/players/elo.png?v=20260926-elo-icon-v2");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 :is(.profile-rating-compact-metric, .player-popup-rating-compact-metric) {
@@ -363,7 +381,7 @@
 /* The blanket rule above also removes the rank icon's glow, the game code's shadow and an inactive
    card's desaturation, so they are re-asserted here. */
 #player-profile-popup .player-popup-rating-compact-rank {
-  filter: drop-shadow(0 0 3px var(--profile-rating-reward-glow, transparent)) !important;
+  filter: var(--rating-rank-glow) !important;
 }
 
 #player-profile-popup .player-popup-rating-compact-title {

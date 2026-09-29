@@ -1,6 +1,6 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "876480221e88e194c0746c312132a5a19e8e2e29",
+  "reference": "cb909dc370064a8f3ffa03bc1e69fe6ac64fa441",
   "changes": [
     {
       "screenshots": [
@@ -9,7 +9,7 @@
         "states/whr-popup-*",
         "states/profile-linked-*"
       ],
-      "reason": "Owner request: rating card artwork a little brighter and more saturated, the rating bar at one width for 3- and 4-digit ratings, a tight black glow around the game code, and the rank icon glowing in its reward tier's colour."
+      "reason": "Owner request: the popup's game code in ITC Grizzly, the ELO icon in the game colour, a tighter and stronger rank icon glow, and a clearly visible black glow around the game code."
     }
   ]
 }
