@@ -667,21 +667,21 @@
 
 .profile-msl-champion {
   right: 1rem;
-  height: 32px;
+  height: 29px;
 }
 
 .player-popup-msl-champion {
   right: 2.1rem;
-  height: 28px;
+  height: 25px;
 }
 
 /* Logo width (height x 172/128) plus a gap. */
 .profile-header-title.is-world-champion {
-  padding-right: calc(1rem + 43px + 0.5rem);
+  padding-right: calc(1rem + 39px + 0.5rem);
 }
 
 .player-popup-header.is-world-champion .player-popup-header-title {
-  max-width: calc(100% - 3.95rem);
+  max-width: calc(100% - 3.7rem);
 }
 
 .profile-msl-champion::before,
