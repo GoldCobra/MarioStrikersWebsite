@@ -3,6 +3,25 @@ body.player-popup-open {
   overflow: hidden;
 }
 
+/* The popup opens once the profile has loaded (player-popup.ts); until then the clicked name pulses. */
+:is(.players-name-trigger, .lb-player-trigger)[aria-busy="true"] {
+  cursor: progress;
+  animation: player-popup-loading 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes player-popup-loading {
+  to {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.players-name-trigger, .lb-player-trigger)[aria-busy="true"] {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
 .player-popup-header-title {
   display: flex;
   width: 100%;

@@ -188,43 +188,107 @@ function renderProfile(profile: PlayerProfile): void {
   }
 }
 
+// A profile takes about half a second to arrive, so each one is asked for once and kept for a few
+// minutes: hovering a name starts the request, and reopening a profile is instant.
+const PROFILE_CACHE_MS = 5 * 60_000;
+const profileRequests = new Map<number, { readonly at: number; readonly profile: Promise<PlayerProfile | null> }>();
+
+function loadProfile(playerId: number): Promise<PlayerProfile | null> {
+  const cached = profileRequests.get(playerId);
+  if (cached && Date.now() - cached.at < PROFILE_CACHE_MS) return cached.profile;
+  const profile = fetchJson<PlayerProfile | null>(`/api/players/${encodeURIComponent(String(playerId))}/profile`);
+  profileRequests.set(playerId, { at: Date.now(), profile });
+  // A failed request is not kept, so the next attempt asks again.
+  profile.catch(() => {
+    if (profileRequests.get(playerId)?.profile === profile) profileRequests.delete(playerId);
+  });
+  return profile;
+}
+
+function prefetchProfile(playerId: number): void {
+  loadProfile(playerId).catch(() => undefined);
+}
+
+// The name that was clicked shows that its profile is loading (aria-busy, player-popup.css).
+let busyTrigger: HTMLElement | null = null;
+
+function markBusy(trigger: HTMLElement | null): void {
+  busyTrigger?.removeAttribute("aria-busy");
+  busyTrigger = trigger;
+  busyTrigger?.setAttribute("aria-busy", "true");
+}
+
+function clearHeader(): void {
+  popup.setText("player-name", "");
+  renderFlag(null);
+  renderWorldChampion(false);
+}
+
+/**
+ * Opens the popup once the profile is there, so it never shows half empty; until then the clicked
+ * name shows that it is loading. Escape or another name cancels it.
+ */
 export async function openPlayerPopup(playerId: number, opener: HTMLElement | null): Promise<void> {
   if (!toPositiveInt(playerId)) return;
   const request = popup.begin();
+  markBusy(opener);
+  let profile: PlayerProfile | null = null;
+  let failed = false;
   try {
-    popup.ensure();
-    popup.open(opener);
-    popup.setText("player-name", "");
-    const staleFlag = popup.slots["player-flag"];
-    if (staleFlag) {
-      staleFlag.hidden = true;
-      staleFlag.removeAttribute("src");
-    }
-    renderWorldChampion(false);
-    popup.showStatus("Loading...");
-
-    const profile = await fetchJson<PlayerProfile | null>(
-      `/api/players/${encodeURIComponent(String(playerId))}/profile`,
-    );
-    if (!popup.isCurrent(request) || !popup.isOpen) return;
+    profile = await loadProfile(playerId);
+  } catch {
+    failed = true;
+  }
+  if (busyTrigger === opener) markBusy(null);
+  if (!popup.isCurrent(request)) return;
+  popup.ensure();
+  if (failed) {
+    clearHeader();
+    popup.showStatus("Failed to load player profile.", true);
+  } else {
     renderProfile(profile ?? {});
     popup.showStatus(null);
-  } catch {
-    if (popup.isCurrent(request) && popup.isOpen) popup.showStatus("Failed to load player profile.", true);
   }
+  popup.open(opener);
 }
 
 let triggersBound = false;
 
-/** Player names in the players list and the leaderboards open the popup. */
+function playerTrigger(target: EventTarget | null): HTMLElement | null {
+  const trigger = target instanceof Element ? target.closest(".players-name-trigger, .lb-player-trigger") : null;
+  return trigger instanceof HTMLElement ? trigger : null;
+}
+
+function triggerPlayerId(trigger: HTMLElement | null): number | null {
+  return trigger ? toPositiveInt(trigger.getAttribute("data-player-id")) : null;
+}
+
+/**
+ * Player names in the players list and the leaderboards open the popup. Resting the pointer or focus
+ * on a name for a moment (not sweeping over the list) or pressing it starts loading its profile.
+ */
 export function bindPlayerProfileTriggers(): void {
   if (triggersBound) return;
   triggersBound = true;
+  let prefetchTimer = 0;
+  const schedulePrefetch = (event: Event): void => {
+    window.clearTimeout(prefetchTimer);
+    const playerId = triggerPlayerId(playerTrigger(event.target));
+    if (playerId) {
+      prefetchTimer = window.setTimeout(() => {
+        prefetchProfile(playerId);
+      }, 120);
+    }
+  };
+  document.addEventListener("pointerover", schedulePrefetch);
+  document.addEventListener("focusin", schedulePrefetch);
+  document.addEventListener("pointerdown", (event) => {
+    const playerId = triggerPlayerId(playerTrigger(event.target));
+    if (playerId) prefetchProfile(playerId);
+  });
   document.addEventListener("click", (event) => {
-    const trigger =
-      event.target instanceof Element ? event.target.closest(".players-name-trigger, .lb-player-trigger") : null;
-    if (!(trigger instanceof HTMLElement)) return;
-    const playerId = toPositiveInt(trigger.getAttribute("data-player-id"));
+    const trigger = playerTrigger(event.target);
+    const playerId = triggerPlayerId(trigger);
     if (!playerId) return;
     event.preventDefault();
     void openPlayerPopup(playerId, trigger);
