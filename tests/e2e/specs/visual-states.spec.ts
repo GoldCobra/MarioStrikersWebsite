@@ -39,7 +39,10 @@ const STATES: VisualState[] = [
     name: "player-card",
     path: "/player-card?player=1",
     act: async (page) => {
-      await page.locator("html[data-player-card='ready']").waitFor();
+      // A reference commit from before the page shows its 404 page instead, without the card.
+      if (await page.locator("main.player-card-page").count()) {
+        await page.locator("html[data-player-card='ready']").waitFor();
+      }
       await settle(page, { eagerImages: true });
     },
   },
