@@ -56,11 +56,14 @@
   transform: translateX(clamp(9px, 1vw, 14px));
 }
 
+/* A flag keeps its own proportions (the files range from 0.82:1 to 2.55:1): it fits the slot whole,
+   centred by it, instead of being cropped to the slot's 3:2. */
 .players-flag {
   display: inline-block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   border: 1px solid rgba(0, 0, 0, 0.65);
   box-shadow: -1px 1px 0 rgba(0, 0, 0, 0.7);
   transform: translateY(1px);

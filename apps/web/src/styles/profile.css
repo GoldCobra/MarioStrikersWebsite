@@ -96,10 +96,10 @@
   white-space: nowrap;
 }
 
+/* One height, the width follows the flag's own proportions, so no flag is cropped. */
 .profile-header-flag {
-  width: 30px;
+  width: auto;
   height: 20px;
-  object-fit: cover;
   border: 1px solid rgba(0, 0, 0, 0.65);
 }
 

@@ -19,11 +19,12 @@ body.player-popup-open {
   overflow-wrap: anywhere;
 }
 
+/* Flags keep their own proportions (the files range from 0.82:1 to 2.55:1): one height, the width
+   follows, so no flag is cropped. */
 .player-popup-flag {
   flex: 0 0 auto;
-  width: 28px;
+  width: auto;
   height: 19px;
-  object-fit: cover;
   border: 1px solid rgba(0, 0, 0, 0.6);
   box-shadow: -1px 1px 0 rgba(0, 0, 0, 0.7);
   transform: translateY(-3px);

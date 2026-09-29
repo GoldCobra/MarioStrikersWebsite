@@ -325,7 +325,7 @@
   min-height: 0;
   height: 34px;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.38rem;
   padding: 0 0.5rem;
@@ -340,10 +340,14 @@
   color: rgba(255, 255, 255, 0.75);
 }
 
+/* A flag keeps its own proportions (the files range from 0.82:1 to 2.55:1): it fits the 18x12 box
+   whole, centred in its fixed column, instead of being cropped. */
 .club-popup-roster-flag {
-  width: 18px;
-  height: 12px;
-  object-fit: cover;
+  justify-self: center;
+  width: auto;
+  height: auto;
+  max-width: 18px;
+  max-height: 12px;
   border: 1px solid rgba(0, 0, 0, 0.6);
 }
 
