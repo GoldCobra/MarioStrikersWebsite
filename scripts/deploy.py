@@ -146,9 +146,7 @@ class Deployer:
         self.record_current(release)
         print("Preserved running images as " + release + "; containers were not restarted.")
 
-    def verify_source(self, sha):
-        if not SHA.fullmatch(sha):
-            raise DeployError("Supply the full lowercase 40-character commit SHA approved for release.")
+    def verify_checkout(self):
         remote = self.git("remote", "get-url", "origin").removesuffix(".git").rstrip("/")
         if remote not in ("https://github.com/" + REPOSITORY, "git@github.com:" + REPOSITORY):
             raise DeployError("Origin is not the canonical GoldCobra repository.")
@@ -157,9 +155,31 @@ class Deployer:
         if self.git("status", "--porcelain", "--untracked-files=all"):
             raise DeployError("Server checkout is not clean; preserve and resolve local changes first.")
         self.git("fetch", "--no-tags", "origin", f"refs/heads/{BRANCH}:refs/remotes/origin/{BRANCH}")
+
+    def verify_source(self, sha):
+        if not SHA.fullmatch(sha):
+            raise DeployError("Supply the full lowercase 40-character commit SHA approved for release.")
+        self.verify_checkout()
         if self.git("rev-parse", "refs/remotes/origin/" + BRANCH) != sha:
             raise DeployError("Approved SHA differs from the successfully fetched gc-updates HEAD.")
         self.git("merge-base", "--is-ancestor", "HEAD", sha)
+
+    def sync(self):
+        """Fast-forwards the clean checkout to origin/gc-updates, e.g. once an unmerged release is merged."""
+        self.verify_checkout()
+        self.git("merge", "--ff-only", "refs/remotes/origin/" + BRANCH)
+
+    def verify_unmerged(self, sha):
+        """The fast route: a commit that passed the local checks, is pushed to GitHub but not merged yet,
+        and is built on the current gc-updates. Its CI runs afterwards and is not waited for."""
+        if not SHA.fullmatch(sha):
+            raise DeployError("Supply the full lowercase 40-character commit SHA approved for release.")
+        self.sync()
+        self.git("fetch", "--no-tags", "origin", sha)
+        try:
+            self.git("merge-base", "--is-ancestor", "HEAD", sha)
+        except DeployError:
+            raise DeployError("The commit is not built on the current gc-updates; rebase it first.") from None
 
     def compose(self, release, *args):
         directory = self.state / "releases" / release
@@ -246,15 +266,19 @@ if(p==='/api/health'){const j=await r.json();if(j.status!=='ok'||j.source!=='mss
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(dates, indent=1, sort_keys=True) + "\n", encoding="utf-8")
 
-    def deploy(self, sha):
+    def deploy(self, sha, unmerged=False):
+        """Releases a gc-updates commit with green push CI, or with unmerged=True a commit that is not
+        merged yet (see verify_unmerged); the checkout then stays on gc-updates until sync."""
         if not self.current():
             raise DeployError("Run bootstrap once before the first deployment.")
-        self.verify_source(sha)
-        ci_url = verify_ci(sha)
+        verify = self.verify_unmerged if unmerged else self.verify_source
+        verify(sha)
+        ci_url = None if unmerged else verify_ci(sha)
         directory = self.state / "releases" / sha
         if directory.exists():
             # Exact release tags are immutable; reuse the saved images instead of rebuilding.
-            self.git("merge", "--ff-only", sha)
+            if not unmerged:
+                self.git("merge", "--ff-only", sha)
             self.change(sha)
             print("Released " + sha)
             return
@@ -277,8 +301,9 @@ if(p==='/api/health'){const j=await r.json();if(j.status!=='ok'||j.source!=='mss
                 images[service] = {"tag": tag, "id": image["Id"]}
             self.save(sha, images, source / "docker-compose.prod.yml", ci_url)
         # Catch an owner merge that happened while the builds were running.
-        self.verify_source(sha)
-        self.git("merge", "--ff-only", sha)
+        verify(sha)
+        if not unmerged:
+            self.git("merge", "--ff-only", sha)
         self.change(sha)
         print("Released " + sha)
 
@@ -290,7 +315,11 @@ def main(argv=None):
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("bootstrap")
     commands.add_parser("list")
-    commands.add_parser("deploy").add_argument("sha")
+    commands.add_parser("sync")
+    deploy_command = commands.add_parser("deploy")
+    deploy_command.add_argument("sha")
+    deploy_command.add_argument("--unmerged", action="store_true",
+                                help="release a pushed, not yet merged commit built on gc-updates, without waiting for CI")
     commands.add_parser("rollback").add_argument("release")
     args = parser.parse_args(argv)
     deployer = Deployer(Path(__file__).resolve().parent.parent, args.project, args.public_url)
@@ -303,8 +332,10 @@ def main(argv=None):
         with deployer.lock():
             if args.command == "bootstrap":
                 deployer.bootstrap()
+            elif args.command == "sync":
+                deployer.sync()
             elif args.command == "deploy":
-                deployer.deploy(args.sha)
+                deployer.deploy(args.sha, unmerged=args.unmerged)
             else:
                 deployer.read(args.release)
                 deployer.change(args.release)

@@ -72,6 +72,23 @@ public `/` plus `/api/health`. The health response must confirm the live MSSQL
 source. A failed activation attempts to restore the previous recorded release;
 inspect the output and server logs if either activation or recovery fails.
 
+### Fast route: live before the merge
+
+GoldCobra's default for their own changes is to see them live right after the
+local checks (`CONTRIBUTING.md`), and merge the PR afterwards:
+
+```sh
+python3 scripts/deploy.py deploy PR_HEAD_SHA --unmerged   # build, activate, health checks
+python3 scripts/deploy.py sync                            # after the squash merge
+```
+
+`--unmerged` fast-forwards the clean checkout to `origin/gc-updates`, fetches the
+pushed commit and requires it to be built on that head. It skips the CI check and
+leaves the checkout on `gc-updates`; build, activation, health checks and the
+automatic restore are as above, and the release is recorded under the PR head
+SHA. `sync` fast-forwards the checkout once the PR is merged. CI still runs on
+GitHub; a red run is fixed with the next change.
+
 ## Roll back
 
 List retained releases, then select a recorded SHA or bootstrap release ID:
