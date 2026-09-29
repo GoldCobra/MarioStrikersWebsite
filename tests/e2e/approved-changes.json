@@ -1,10 +1,15 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "416fd0e004cb585c624097db290972113a1cf1e3",
+  "reference": "5e6a8ed39569375634d17c4fd2446a35e25efedd",
   "changes": [
     {
-      "screenshots": ["pages/player-card-*", "states/player-card-*"],
-      "reason": "New page /player-card: the compact player card the Discord bot screenshots for /profile show (not in the reference)."
+      "screenshots": [
+        "states/players-popup-*",
+        "states/leaderboard-popup-*",
+        "states/whr-popup-*",
+        "states/profile-linked-*"
+      ],
+      "reason": "Owner request: the friend code rows of the player popup and the profile page are lower (26px instead of 34px, 44px on phones), like on the Discord card."
     }
   ]
 }

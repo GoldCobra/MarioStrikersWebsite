@@ -461,7 +461,6 @@
   }
 
   .player-popup-code-row {
-    min-height: 44px;
     flex-wrap: wrap;
     gap: 0.25rem 0.45rem;
   }
@@ -596,7 +595,6 @@
   }
 
   .profile-code-row {
-    min-height: 44px;
     flex-wrap: wrap;
   }
 

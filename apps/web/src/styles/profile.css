@@ -179,11 +179,11 @@
 }
 
 .profile-code-row {
-  min-height: 34px;
+  min-height: 26px;
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.38rem 0.55rem;
+  padding: 0.15rem 0.55rem;
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
 }
