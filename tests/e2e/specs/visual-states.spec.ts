@@ -35,6 +35,18 @@ const STATES: VisualState[] = [
     act: (page) => clickAndSettle(page, ".players-name-trigger[data-player-id]"),
   },
   {
+    // The compact card the Discord bot screenshots for /profile show; player 1 is a world champion.
+    name: "player-card",
+    path: "/player-card?player=1",
+    act: async (page) => {
+      // A reference commit from before the page shows its 404 page instead, without the card.
+      if (await page.locator("main.player-card-page").count()) {
+        await page.locator("html[data-player-card='ready']").waitFor();
+      }
+      await settle(page, { eagerImages: true });
+    },
+  },
+  {
     // The fixture player 4 has no match in the current season, so every rating card is greyed out.
     name: "players-popup-inactive",
     path: "/players",

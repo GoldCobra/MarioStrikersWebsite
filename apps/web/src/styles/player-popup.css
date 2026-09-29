@@ -258,3 +258,49 @@ body.player-popup-open {
   font-weight: 700;
 }
 
+
+/* The compact player card (/player-card; showPlayerCard in player-popup.ts), which the Discord bot
+   screenshots: the popup without its close button, season rewards, accolades and results link, at its
+   full height without scrolling, with lower friend code rows. It sits in the page's top left corner,
+   so the screenshot starts on a whole pixel, and without the black frame, as Discord rounds an
+   image's corners itself. Without the close button the MSL logo moves to the header's edge. */
+.player-popup.is-card :is(.player-popup-close, [data-slot="results-section"]),
+.player-popup.is-card
+  .player-popup-section:has(> .player-popup-season-awards-details, > .player-popup-accolades-details) {
+  display: none;
+}
+
+.player-popup.is-card {
+  place-items: start;
+  padding: 0;
+}
+
+.player-popup.is-card .popup-card {
+  border: 0;
+}
+
+.player-popup.is-card :is(.popup-card, .player-popup-content) {
+  max-height: none;
+}
+
+.player-popup.is-card .player-popup-code-row {
+  min-height: 26px;
+  padding-block: 0.15rem;
+}
+
+.player-popup.is-card .player-popup-content {
+  overflow: visible;
+}
+
+.player-popup.is-card .player-popup-header-title {
+  max-width: 100%;
+}
+
+.player-popup.is-card .player-popup-msl-champion {
+  right: 1rem;
+}
+
+/* Logo width (25px x 172/128) plus a gap. */
+.player-popup.is-card .player-popup-header.is-world-champion .player-popup-header-title {
+  max-width: calc(100% - 2.6rem);
+}

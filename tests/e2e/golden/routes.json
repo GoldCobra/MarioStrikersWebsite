@@ -1225,6 +1225,46 @@
     "location": null
   },
   {
+    "path": "/player-card",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/player-card/",
+    "status": 301,
+    "location": "/player-card"
+  },
+  {
+    "path": "/pages/player-card.html",
+    "status": 301,
+    "location": "/player-card"
+  },
+  {
+    "path": "/pages/player-card",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/player-card/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/player-card.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/PLAYER-CARD",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/player-card?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
     "path": "/players",
     "status": 200,
     "location": null
