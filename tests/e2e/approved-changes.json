@@ -10,6 +10,10 @@
         "states/profile-linked-*"
       ],
       "reason": "Owner request: the friend code rows of the player popup and the profile page are lower (26px instead of 34px, 44px on phones), like on the Discord card."
+    },
+    {
+      "screenshots": ["states/player-card-*"],
+      "reason": "Owner request: the Discord card fits Discord's 550 x 350px message preview, so Discord no longer shrinks and blurs it: 550px wide, friend code lists side by side, singles and doubles rating cards in one grid."
     }
   ]
 }
