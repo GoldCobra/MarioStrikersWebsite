@@ -115,6 +115,36 @@ class DeploymentTests(unittest.TestCase):
             self.deployer.verify_source(COMMIT)
         self.assertFalse(any("rev-parse" in call.args[0] for call in self.runner.call_args_list))
 
+    def test_sync_fast_forwards_the_verified_checkout_to_gc_updates(self):
+        self.runner.side_effect = self.source_runner
+        self.deployer.sync()
+        commands = [call.args[0][1:] for call in self.runner.call_args_list]
+        self.assertEqual(commands[-2:], [["fetch", "--no-tags", "origin", "refs/heads/gc-updates:refs/remotes/origin/gc-updates"],
+                                         ["merge", "--ff-only", "refs/remotes/origin/gc-updates"]])
+
+    def test_unmerged_commit_is_fetched_after_gc_updates_and_must_build_on_it(self):
+        def not_based(args, **kwargs):
+            if args[1] == "merge-base":
+                raise DeployError("Command failed")
+            return self.source_runner(args, **kwargs)
+        self.runner.side_effect = not_based
+        with self.assertRaisesRegex(DeployError, "rebase"):
+            self.deployer.verify_unmerged(COMMIT)
+        commands = [call.args[0][1:] for call in self.runner.call_args_list]
+        self.assertEqual(commands[-4:], [["fetch", "--no-tags", "origin", "refs/heads/gc-updates:refs/remotes/origin/gc-updates"],
+                                         ["merge", "--ff-only", "refs/remotes/origin/gc-updates"],
+                                         ["fetch", "--no-tags", "origin", COMMIT],
+                                         ["merge-base", "--is-ancestor", "HEAD", COMMIT]])
+
+    def test_unmerged_release_rejects_a_dirty_checkout_and_short_sha(self):
+        with self.assertRaises(DeployError):
+            self.deployer.verify_unmerged("abc")
+        self.runner.assert_not_called()
+        self.runner.side_effect = lambda args, **kwargs: " M index.html" if args[1] == "status" else self.source_runner(args)
+        with self.assertRaises(DeployError):
+            self.deployer.verify_unmerged(COMMIT)
+        self.assertFalse(any(call.args[0][1] in ("fetch", "merge") for call in self.runner.call_args_list))
+
     def test_dirty_checkout_and_non_head_release_are_rejected(self):
         for failed_command, result in (("status", " M index.html"), ("rev-parse", "b" * 40)):
             def altered(args, **kwargs):
@@ -198,6 +228,7 @@ class DeploymentTests(unittest.TestCase):
     def build_setup(self):
         self.prepare_current()
         self.deployer.verify_source = Mock()
+        self.deployer.verify_unmerged = Mock()
         self.deployer.change = Mock()
         self.deployer.image = Mock(side_effect=lambda tag: {"Id": "sha256:" + tag,
                                    "Config": {"Labels": {"org.opencontainers.image.revision": COMMIT}}})
@@ -225,6 +256,17 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(self.deployer.verify_source.call_count, 2)
         self.deployer.change.assert_called_once_with(COMMIT)
         self.assertEqual(self.deployer.read(COMMIT)["ci_url"], "https://example.test/ci")
+
+    def test_unmerged_release_skips_ci_and_leaves_the_checkout_on_gc_updates(self):
+        self.build_setup()
+        with patch("deploy.verify_ci") as ci:
+            self.deployer.deploy(COMMIT, unmerged=True)
+        ci.assert_not_called()
+        self.deployer.verify_source.assert_not_called()
+        self.assertEqual(self.deployer.verify_unmerged.call_count, 2)
+        self.assertFalse(any(c.args[0][:2] == ["git", "merge"] for c in self.runner.call_args_list))
+        self.deployer.change.assert_called_once_with(COMMIT)
+        self.assertIsNone(self.deployer.read(COMMIT)["ci_url"])
 
     def test_lastmod_records_the_newest_commit_date_per_web_file(self):
         log = "\n".join(["@2026-09-28T12:00:00+02:00", "", "apps/web/src/pages/pages/a.astro",
