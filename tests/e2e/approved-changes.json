@@ -1,6 +1,6 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "5a34ce95b7da589d9b64313345ca38defed80b10",
+  "reference": "f395aa5c93990f0141c673599d685e0f3cfefa39",
   "changes": [
     {
       "screenshots": [
@@ -9,7 +9,7 @@
         "states/whr-popup-*",
         "states/profile-linked-*"
       ],
-      "reason": "Owner request: compact rating cards show their game's artwork (profile-comp-<game>.webp), darkened and fading to black over the bottom fifth; on inactive cards (no match this season) it is faded and grey like the content."
+      "reason": "Owner request: on the compact rating cards the game code sits 14px (was 11px) and the rank name 9px (was 7px) above the next line, so the card grows by 5px; the artwork is darkened by 70% (was 60%) and fades to 80% black over the bottom 30% (was full black over 20%)."
     }
   ]
 }

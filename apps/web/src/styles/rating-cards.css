@@ -103,8 +103,8 @@
   /* Visible gaps: from the game code's baseline to the rank name's capitals (larger, so the game
      code reads as the card's heading), and from the rank name's baseline to the rating's digits
      (never the ELO icon). */
-  --rating-compact-title-gap: 11px;
-  --rating-compact-text-gap: 7px;
+  --rating-compact-title-gap: 14px;
+  --rating-compact-text-gap: 9px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   /* Row 1 keeps the icon's height even without an icon, so every card of a row has the same
@@ -127,17 +127,17 @@
   isolation: isolate;
 }
 
-/* The game's artwork (352x226, twice the popup card) fills the card behind its content, darkened
-   so the text reads, and turns black over the bottom fifth. It is a layer of its own, so an
-   inactive card can grey it out (above); the popup's blanket "filter: none" does not reach it. */
+/* The game's artwork (352x226, about twice the popup card) fills the card behind its content,
+   darkened so the text reads, and fades to 80% black over the bottom 30%. It is a layer of its own,
+   so an inactive card can grey it out (above); the popup's blanket "filter: none" does not reach it. */
 :is(.profile-rating-card, .player-popup-rating-card).is-compact-layout::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   background:
-    linear-gradient(to top, #000, transparent 20%),
-    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+    linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent 30%),
+    linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
     var(--rating-game-art) left center / cover no-repeat;
 }
 
