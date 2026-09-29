@@ -624,46 +624,64 @@
   margin: calc(-1 * var(--accolade-glow-room)) calc(-1 * var(--profile-rating-reward-glow-gutter));
 }
 
-/* An MSL World Champion's profile header (page and popup; isWorldChampion in profile-data.ts) is
-   bright metallic gold instead of the orange title image, with the MSL logo in gold at its right
-   end, left of the popup's close button. Name and logo get a drop shadow to stand out on the gold.
-   The popup's selector carries its id, as its header background is set with one (popups.css). */
+/* An MSL World Champion's profile header (page and popup; isWorldChampion in profile-data.ts) keeps
+   its orange title image, tinted gold: on ::before a gold layer in "color" blend mode gives the
+   image and the plain orange beyond it the gold hue while they keep their own light and texture,
+   then the layer is brightened. The name turns black. The popup's selectors carry its id, as its
+   header background is set with one (popups.css). */
 :is(.profile-header-title, #player-profile-popup .player-popup-header).is-world-champion {
-  background: linear-gradient(
-    100deg,
-    #6b4300 0%,
-    #b8860b 18%,
-    #f2c94c 38%,
-    #fff1a8 50%,
-    #f2c94c 62%,
-    #b8860b 82%,
-    #6b4300 100%
-  );
+  position: relative;
+  isolation: isolate;
+  background: none;
 }
 
-.profile-header-title.is-world-champion .profile-name,
-.player-popup-header.is-world-champion .player-popup-name,
-.profile-msl-champion,
-.player-popup-msl-champion {
-  filter: drop-shadow(-2px 2px 0 rgba(0, 0, 0, 0.85));
+:is(.profile-header-title, #player-profile-popup .player-popup-header).is-world-champion::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(#f0b72a, #f0b72a),
+    url("../assets/players/title.png") left top / auto no-repeat,
+    #993c00;
+  background-blend-mode: color, normal;
+  filter: brightness(2.2) saturate(1.1);
 }
 
-/* The logo (assets/msl/msl-logo.webp, a black silhouette) is the flag's height; the gold is a
-   gradient masked by it on ::before, so the drop shadow on the element follows the logo's outline. */
+:is(.profile-header-title, .player-popup-header).is-world-champion :is(.profile-name, .player-popup-name) {
+  color: #000;
+}
+
+/* The MSL logo (assets/msl/msl-logo.webp, a black silhouette, 172x128) sits at the header's right
+   end (popup: left of the close button), vertically centred on the whole header, with a 1px drop
+   shadow; the name's row keeps clear of it. The gold is a gradient masked by the logo on ::before,
+   so the shadow on the element follows the logo's outline. */
 .profile-msl-champion,
 .player-popup-msl-champion {
-  flex: 0 0 auto;
-  margin-left: auto;
+  position: absolute;
+  top: 50%;
   aspect-ratio: 172 / 128;
+  transform: translateY(-50%);
+  filter: drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.85));
 }
 
 .profile-msl-champion {
-  height: 20px;
+  right: 1rem;
+  height: 32px;
 }
 
 .player-popup-msl-champion {
-  height: 19px;
-  transform: translateY(-3px);
+  right: 2.1rem;
+  height: 28px;
+}
+
+/* Logo width (height x 172/128) plus a gap. */
+.profile-header-title.is-world-champion {
+  padding-right: calc(1rem + 43px + 0.5rem);
+}
+
+.player-popup-header.is-world-champion .player-popup-header-title {
+  max-width: calc(100% - 3.95rem);
 }
 
 .profile-msl-champion::before,
