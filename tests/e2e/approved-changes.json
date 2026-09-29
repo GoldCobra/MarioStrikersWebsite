@@ -1,6 +1,6 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "8aeb366f62fda8f43ed00ba3cd52228898de6866",
+  "reference": "7ee33cc2537b6bba682f6c8b7b81cfbdfa10f285",
   "changes": [
     {
       "screenshots": [
@@ -9,7 +9,7 @@
         "states/whr-popup-*",
         "states/profile-linked-*"
       ],
-      "reason": "Owner request: an MSL World Champion's profile header (popup and profile page) is gold and shows the MSL logo in gold at its right end; name and logo get a drop shadow."
+      "reason": "Owner request: the MSL World Champion header tints the orange title image gold instead of replacing it, the name is black, and the MSL logo is larger, centred on the header, with a 1px drop shadow."
     }
   ]
 }
