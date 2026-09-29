@@ -3,10 +3,11 @@
   <section class="player-popup-card popup-card" role="dialog" aria-modal="true" aria-labelledby="player-popup-name">
     <button class="player-popup-close popup-close" type="button" data-action="popup-close" aria-label="Close profile popup">×</button>
 
-    <header class="player-popup-header popup-header">
+    <header class="player-popup-header popup-header" data-slot="player-header">
       <div class="player-popup-header-title">
         <h2 id="player-popup-name" class="player-popup-name popup-title" data-slot="player-name">-</h2>
         <img class="player-popup-flag" data-slot="player-flag" src="" alt="" hidden>
+        <span class="player-popup-msl-champion" data-slot="player-msl-champion" role="img" aria-label="MSL World Champion" title="MSL World Champion" hidden></span>
       </div>
     </header>
 

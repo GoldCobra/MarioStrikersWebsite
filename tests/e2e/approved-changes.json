@@ -1,6 +1,6 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "7e58e0bcf7b464a89a3ea31c9bb56635fea06691",
+  "reference": "8aeb366f62fda8f43ed00ba3cd52228898de6866",
   "changes": [
     {
       "screenshots": [
@@ -9,7 +9,7 @@
         "states/whr-popup-*",
         "states/profile-linked-*"
       ],
-      "reason": "Owner request: the artwork of active rating cards is a little darker (brightness 0.92)."
+      "reason": "Owner request: an MSL World Champion's profile header (popup and profile page) is gold and shows the MSL logo in gold at its right end; name and logo get a drop shadow."
     }
   ]
 }

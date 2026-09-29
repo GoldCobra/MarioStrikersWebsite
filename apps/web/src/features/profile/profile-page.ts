@@ -8,6 +8,7 @@ import {
   dateText,
   gameBallIconUrl,
   hasDisplayText,
+  isWorldChampion,
   mscFriendCodeLines,
   parseCodeLine,
   switchFriendCodeLines,
@@ -141,12 +142,17 @@ function profileHtml(profile: PlayerProfile): string {
   const results = resultsUrl
     ? `<section class="profile-panel profile-results-panel"><p class="profile-meta-line profile-results-line"><a href="${escapeHtml(resultsUrl)}" target="_blank" rel="noopener noreferrer">Results at start.gg</a></p></section>`
     : "";
+  // An MSL World Champion's header turns gold and shows the MSL logo at its right end.
+  const champion = isWorldChampion(profile.accolades);
   return [
     '<section class="profile-shell">',
     '<header class="profile-header-panel">',
-    '<div class="profile-header-title">',
+    `<div class="profile-header-title${champion ? " is-world-champion" : ""}">`,
     `<h2 class="profile-name">${escapeHtml(toText(player.name || "Player Profile"))}</h2>`,
     flag,
+    champion
+      ? '<span class="profile-msl-champion" role="img" aria-label="MSL World Champion" title="MSL World Champion"></span>'
+      : "",
     "</div>",
     '<div class="profile-meta">',
     `<p class="profile-meta-line"><span>Club</span><strong>${escapeHtml(clubText)}</strong></p>`,

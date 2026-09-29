@@ -416,6 +416,12 @@
     drop-shadow(0 0 var(--accolade-champion-glow-far) var(--accolade-champion-tint-far)) !important;
 }
 
+/* The world champion's gold header: the name's and the MSL logo's drop shadow (profile.css). */
+#player-profile-popup .player-popup-header.is-world-champion .player-popup-name,
+#player-profile-popup .player-popup-msl-champion {
+  filter: drop-shadow(-2px 2px 0 rgba(0, 0, 0, 0.85)) !important;
+}
+
 /* At 5/5 only the progress count is tinted in the reached tier's colour (plain colour,
    no glow). The tier name and reward icon keep their normal per-tier glow. */
 .profile-rating-reward.is-reward-complete .profile-rating-reward-progress strong,
