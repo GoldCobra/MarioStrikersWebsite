@@ -4,19 +4,19 @@
 .profile-rating-card.is-msbl-rating,
 .player-popup-rating-card.is-msbl-rating {
   --rating-game-color: var(--game-color-msbl);
-  --rating-game-art: url("../assets/players/profile-comp-msbl.webp");
+  --rating-game-art: url("../assets/players/profile-comp-msbl.webp?v=20260929-art-v2");
 }
 
 .profile-rating-card.is-msc-rating,
 .player-popup-rating-card.is-msc-rating {
   --rating-game-color: var(--game-color-msc);
-  --rating-game-art: url("../assets/players/profile-comp-msc.webp");
+  --rating-game-art: url("../assets/players/profile-comp-msc.webp?v=20260929-art-v2");
 }
 
 .profile-rating-card.is-sms-rating,
 .player-popup-rating-card.is-sms-rating {
   --rating-game-color: var(--game-color-sms);
-  --rating-game-art: url("../assets/players/profile-comp-sms.webp");
+  --rating-game-art: url("../assets/players/profile-comp-sms.webp?v=20260929-art-v2");
 }
 
 /* Every rating card, on the profile page and in the popup, is framed in its game's colour. */
@@ -138,7 +138,7 @@
   background:
     linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent 30%),
     linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-    var(--rating-game-art) left center / cover no-repeat;
+    var(--rating-game-art) center / cover no-repeat;
 }
 
 .player-popup-rating-card.is-compact-layout {
