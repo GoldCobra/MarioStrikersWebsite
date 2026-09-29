@@ -19,23 +19,26 @@
   --rating-game-art: url("../assets/players/profile-comp-sms.webp?v=20260929-art-v2");
 }
 
-/* Every rating card, on the profile page and in the popup, is framed in its game's colour. */
+/* Every rating card, on the profile page and in the popup, is framed in its game's colour, which
+   darkens towards the bottom. */
 .profile-rating-card,
 .player-popup-rating-card {
-  border: 1px solid var(--rating-game-color, transparent);
+  --rating-border-color: var(--rating-game-color, transparent);
+  border: 1px solid var(--rating-border-color);
+  border-image: linear-gradient(var(--rating-border-color), color-mix(in srgb, var(--rating-border-color) 55%, #000)) 1;
 }
 
 /* A card without a match in the current season is greyed out: a grey frame, and content and
-   artwork that are faded and without colour. The content fades, not the card, so the card's
+   artwork that are faded and strongly desaturated. The content fades, not the card, so the card's
    background stays. The popup's classic card greys its text instead (below). */
 :is(.profile-rating-card, .player-popup-rating-card).is-inactive-rating {
-  border-color: #6b6b6b;
+  --rating-border-color: #6b6b6b;
 }
 
 :is(.profile-rating-card, .player-popup-rating-card.is-compact-layout).is-inactive-rating > *,
 :is(.profile-rating-card, .player-popup-rating-card).is-compact-layout.is-inactive-rating::before {
   opacity: 0.45;
-  filter: grayscale(1);
+  filter: saturate(0.3);
 }
 
 .player-popup-rating-card .player-popup-rating-title,
@@ -105,6 +108,9 @@
      (never the ELO icon). */
   --rating-compact-title-gap: 14px;
   --rating-compact-text-gap: 9px;
+  --rating-compact-pad-x: 0.25rem;
+  --rating-compact-pad-y: 0.3rem;
+  --rating-compact-title-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   /* Row 1 keeps the icon's height even without an icon, so every card of a row has the same
@@ -122,14 +128,15 @@
   row-gap: 0;
   min-height: 108px;
   /* Tighter than the classic card, so the ELO icon, rating and WHR fit the 130px profile cards. */
-  padding: 0.3rem 0.25rem;
+  padding: var(--rating-compact-pad-y) var(--rating-compact-pad-x);
   position: relative;
   isolation: isolate;
 }
 
 /* The game's artwork (352x226, about twice the popup card) fills the card behind its content,
-   darkened so the text reads, and fades to 80% black over the bottom 30%. It is a layer of its own,
-   so an inactive card can grey it out (above); the popup's blanket "filter: none" does not reach it. */
+   darkened so the text reads, at 80% saturation, and fades to 80% black over the bottom 30%. It is a
+   layer of its own, so an inactive card can desaturate it further (above); the popup's blanket
+   "filter: none" does not reach it. */
 :is(.profile-rating-card, .player-popup-rating-card).is-compact-layout::before {
   content: "";
   position: absolute;
@@ -139,6 +146,7 @@
     linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent 30%),
     linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
     var(--rating-game-art) center / cover no-repeat;
+  filter: saturate(0.8);
 }
 
 .player-popup-rating-card.is-compact-layout {
@@ -147,6 +155,8 @@
   line-height: 1.22;
 }
 
+/* The rank icon glows faintly in its logo's main colour (is-rank-tier-<n> from rating-cards.ts; far
+   less than the reward icons). An inactive card's filter replaces the glow. */
 :is(.profile-rating-compact-rank, .player-popup-rating-compact-rank) {
   grid-area: 1 / 2;
   align-self: start;
@@ -154,6 +164,35 @@
   width: auto;
   height: var(--rating-compact-rank-size);
   object-fit: contain;
+  filter: drop-shadow(0 0 3px var(--rating-rank-glow, transparent));
+}
+
+:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-1 {
+  --rating-rank-glow: rgba(190, 80, 8, 0.45);
+}
+
+:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-2 {
+  --rating-rank-glow: rgba(175, 217, 229, 0.45);
+}
+
+:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-3 {
+  --rating-rank-glow: rgba(217, 172, 61, 0.45);
+}
+
+:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-4 {
+  --rating-rank-glow: rgba(151, 206, 233, 0.45);
+}
+
+:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-5 {
+  --rating-rank-glow: rgba(91, 123, 228, 0.45);
+}
+
+:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-6 {
+  --rating-rank-glow: rgba(145, 82, 229, 0.45);
+}
+
+:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-7 {
+  --rating-rank-glow: rgba(194, 37, 29, 0.45);
 }
 
 :is(.profile-rating-compact-title, .player-popup-rating-compact-title) {
@@ -164,6 +203,7 @@
   font-size: var(--rating-compact-title-size);
   font-weight: 700;
   line-height: 1;
+  text-shadow: var(--rating-compact-title-shadow);
   white-space: nowrap;
 }
 
@@ -179,16 +219,31 @@
 }
 
 :is(.profile-rating-compact-value, .player-popup-rating-compact-value) {
+  --rating-compact-bar-slant: 6px;
   grid-area: 4 / 1;
   align-self: end;
   align-self: last baseline;
   justify-self: start;
+  position: relative;
   margin: 0;
   color: #fff;
   font-size: var(--rating-card-text-size);
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
+}
+
+/* A black bar, slightly lighter at the top, runs under the ELO icon and rating from the card's left
+   and bottom edges (the value sits on the content box's bottom) to a little past the digits; its
+   right end is cut at a slant. It lies in the card's isolated stack: above the artwork, below the text. */
+:is(.profile-rating-compact-value, .player-popup-rating-compact-value)::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -5px calc(-0.35em - var(--rating-compact-bar-slant)) calc(-1 * var(--rating-compact-pad-y))
+    calc(-1 * var(--rating-compact-pad-x));
+  background: linear-gradient(rgba(0, 0, 0, 0.78), #000);
+  clip-path: polygon(0 0, calc(100% - var(--rating-compact-bar-slant)) 0, 100% 100%, 0 100%);
 }
 
 /* The ELO icon (230x200) is a little larger than the digits and centred on them. */
@@ -324,9 +379,18 @@
     drop-shadow(0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow)) !important;
 }
 
-/* The blanket rule above also removes the grey of an inactive card, so it is re-asserted here. */
+/* The blanket rule above also removes the rank icon's glow, the game code's shadow and an inactive
+   card's desaturation, so they are re-asserted here. */
+#player-profile-popup .player-popup-rating-compact-rank {
+  filter: drop-shadow(0 0 3px var(--rating-rank-glow, transparent)) !important;
+}
+
+#player-profile-popup .player-popup-rating-compact-title {
+  text-shadow: var(--rating-compact-title-shadow) !important;
+}
+
 #player-profile-popup .player-popup-rating-card.is-compact-layout.is-inactive-rating > * {
-  filter: grayscale(1) !important;
+  filter: saturate(0.3) !important;
 }
 
 #player-profile-popup .player-popup-rating-reward:not(.is-reward-tier-0) .player-popup-rating-reward-name {
