@@ -399,8 +399,8 @@
   line-height: 1.15;
 }
 
-.profile-rating-reward-progress span,
-.player-popup-rating-reward-progress span {
+.profile-rating-reward-progress > span,
+.player-popup-rating-reward-progress > span {
   letter-spacing: 0;
 }
 

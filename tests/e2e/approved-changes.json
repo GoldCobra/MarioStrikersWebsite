@@ -1,6 +1,6 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "673d96c2f0f70105278a0b80e945c688402a3809",
+  "reference": "876480221e88e194c0746c312132a5a19e8e2e29",
   "changes": [
     {
       "screenshots": [
@@ -9,7 +9,7 @@
         "states/whr-popup-*",
         "states/profile-linked-*"
       ],
-      "reason": "Owner request: compact rating cards get a black bar under the ELO rating, artwork at 80% saturation, inactive cards desaturated instead of grey, a shadow on the game code, a glow on the rank icon in its logo colour and a border that darkens towards the bottom."
+      "reason": "Owner request: rating card artwork a little brighter and more saturated, the rating bar at one width for 3- and 4-digit ratings, a soft black glow around the game code, and a 3px smaller slash in the season reward count."
     }
   ]
 }

@@ -85,6 +85,8 @@
   --rating-text-baseline: 13px;
   --rating-text-ink: 12px;
   --rating-compact-metric-tracking: -0.02em;
+  /* ELO icon + widest 4-digit rating ("0000"; ITC Grizzly digits differ in width), measured. */
+  --rating-compact-value-width: 3.79em;
 }
 
 .player-popup-rating-card {
@@ -94,6 +96,8 @@
   --rating-text-baseline: 13px;
   --rating-text-ink: 11px;
   --rating-compact-metric-tracking: 0.06em;
+  /* ELO icon + any 4-digit rating (Reporter digits are all one width), measured. */
+  --rating-compact-value-width: 4.04em;
 }
 
 :is(.profile-rating-card, .player-popup-rating-card).is-compact-layout {
@@ -110,7 +114,8 @@
   --rating-compact-text-gap: 9px;
   --rating-compact-pad-x: 0.25rem;
   --rating-compact-pad-y: 0.3rem;
-  --rating-compact-title-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+  /* A black glow like the rank icon's (a text-shadow blur of 6px equals drop-shadow's 3px). */
+  --rating-compact-title-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   /* Row 1 keeps the icon's height even without an icon, so every card of a row has the same
@@ -134,7 +139,7 @@
 }
 
 /* The game's artwork (352x226, about twice the popup card) fills the card behind its content,
-   darkened so the text reads, at 80% saturation, and fades to 80% black over the bottom 30%. It is a
+   darkened so the text reads, at 88% saturation, and fades to 80% black over the bottom 30%. It is a
    layer of its own, so an inactive card can desaturate it further (above); the popup's blanket
    "filter: none" does not reach it. */
 :is(.profile-rating-card, .player-popup-rating-card).is-compact-layout::before {
@@ -144,9 +149,9 @@
   z-index: -1;
   background:
     linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent 30%),
-    linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    linear-gradient(rgba(0, 0, 0, 0.67), rgba(0, 0, 0, 0.67)),
     var(--rating-game-art) center / cover no-repeat;
-  filter: saturate(0.8);
+  filter: saturate(0.88);
 }
 
 .player-popup-rating-card.is-compact-layout {
@@ -234,14 +239,17 @@
 }
 
 /* A black bar, slightly lighter at the top, runs under the ELO icon and rating from the card's left
-   and bottom edges (the value sits on the content box's bottom) to a little past the digits; its
-   right end is cut at a slant. It lies in the card's isolated stack: above the artwork, below the text. */
+   and bottom edges (the value sits on the content box's bottom) to a little past a 4-digit rating,
+   so it keeps one width for 3-digit ratings; its right end is cut at a slant. It lies in the card's
+   isolated stack: above the artwork, below the text. */
 :is(.profile-rating-compact-value, .player-popup-rating-compact-value)::after {
   content: "";
   position: absolute;
   z-index: -1;
-  inset: -5px calc(-0.35em - var(--rating-compact-bar-slant)) calc(-1 * var(--rating-compact-pad-y))
-    calc(-1 * var(--rating-compact-pad-x));
+  inset: -5px auto calc(-1 * var(--rating-compact-pad-y)) calc(-1 * var(--rating-compact-pad-x));
+  width: calc(
+    var(--rating-compact-pad-x) + var(--rating-compact-value-width) + 0.35em + var(--rating-compact-bar-slant)
+  );
   background: linear-gradient(rgba(0, 0, 0, 0.78), #000);
   clip-path: polygon(0 0, calc(100% - var(--rating-compact-bar-slant)) 0, 100% 100%, 0 100%);
 }
@@ -422,6 +430,11 @@
 .profile-rating-reward.is-reward-complete .profile-rating-reward-progress strong,
 .player-popup-rating-reward.is-reward-complete .player-popup-rating-reward-progress strong {
   color: var(--profile-rating-reward-accent);
+}
+
+/* The slash of the progress count ("2/5") is set 3px smaller than the counts. */
+:is(.profile-rating-reward-slash, .player-popup-rating-reward-slash) {
+  font-size: calc(1em - 3px);
 }
 
 #player-profile-popup .player-popup-rating-reward.is-reward-complete .player-popup-rating-reward-progress strong {
