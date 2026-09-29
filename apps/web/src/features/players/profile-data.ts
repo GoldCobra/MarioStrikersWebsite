@@ -111,3 +111,8 @@ export function accoladeNameClasses(baseClass: string, entry: Accolade | null | 
   if (entry?.is_winner && WINNER_GAMES.has(game)) return `${baseClass} is-winner-${game}`;
   return baseClass;
 }
+
+/** At least one MSL World Championship win: the profile header turns gold and shows the MSL logo. */
+export function isWorldChampion(accolades: readonly Accolade[] | null | undefined): boolean {
+  return (accolades ?? []).some((entry) => Boolean(entry.is_world_champion));
+}

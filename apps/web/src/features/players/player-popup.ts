@@ -12,6 +12,7 @@ import {
   dateText,
   gameBallIconUrl,
   hasDisplayText,
+  isWorldChampion,
   mscFriendCodeLines,
   parseCodeLine,
   switchFriendCodeLines,
@@ -120,6 +121,13 @@ function renderFlag(country: unknown): void {
   }
 }
 
+/** An MSL World Champion's header turns gold and shows the MSL logo left of the close button. */
+function renderWorldChampion(champion: boolean): void {
+  popup.slots["player-header"]?.classList.toggle("is-world-champion", champion);
+  const logo = popup.slots["player-msl-champion"];
+  if (logo) logo.hidden = !champion;
+}
+
 function renderResultsLink(url: string): void {
   const section = popup.slots["results-section"];
   const link = popup.slots["results-link"] as HTMLAnchorElement | undefined;
@@ -159,6 +167,7 @@ function renderProfile(profile: PlayerProfile): void {
   const friendCodes = profile.friend_codes ?? {};
   popup.setText("player-name", toText(player.name || "-"));
   renderFlag(player.country);
+  renderWorldChampion(isWorldChampion(profile.accolades));
   renderCodeLines("fc-switch", switchFriendCodeLines(friendCodes));
   renderCodeLines("fc-msc", mscFriendCodeLines(friendCodes));
   renderResultsLink(toText(player.results_url).trim());
@@ -191,6 +200,7 @@ export async function openPlayerPopup(playerId: number, opener: HTMLElement | nu
       staleFlag.hidden = true;
       staleFlag.removeAttribute("src");
     }
+    renderWorldChampion(false);
     popup.showStatus("Loading...");
 
     const profile = await fetchJson<PlayerProfile | null>(
