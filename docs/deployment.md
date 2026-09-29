@@ -86,8 +86,9 @@ python3 scripts/deploy.py sync                            # after the squash mer
 pushed commit and requires it to be built on that head. It skips the CI check and
 leaves the checkout on `gc-updates`; build, activation, health checks and the
 automatic restore are as above, and the release is recorded under the PR head
-SHA. `sync` fast-forwards the checkout once the PR is merged. CI still runs on
-GitHub; a red run is fixed with the next change.
+SHA. The PR is merged once its CI passes (the quality rules have no bypass),
+then `sync` fast-forwards the checkout. A red run leaves the change live but
+unmerged until a fixed commit is released.
 
 ## Roll back
 
