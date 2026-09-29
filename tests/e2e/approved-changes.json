@@ -1,6 +1,6 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "a6860506bf5fcadc496e61dcccac762a69fd9ce4",
+  "reference": "673d96c2f0f70105278a0b80e945c688402a3809",
   "changes": [
     {
       "screenshots": [
@@ -9,7 +9,7 @@
         "states/whr-popup-*",
         "states/profile-linked-*"
       ],
-      "reason": "Owner request: new rating card artwork (the black bar bottom left is gone), now centred on the card instead of anchored left."
+      "reason": "Owner request: compact rating cards get a black bar under the ELO rating, artwork at 80% saturation, inactive cards desaturated instead of grey, a shadow on the game code, a glow on the rank icon in its logo colour and a border that darkens towards the bottom."
     }
   ]
 }

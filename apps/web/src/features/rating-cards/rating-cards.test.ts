@@ -54,7 +54,7 @@ test("a compact card shows the rank icon, game code, rank name, rating and WHR o
     card,
     [
       '<article class="profile-rating-card is-msbl-rating is-compact-layout">',
-      '<img class="profile-rating-compact-rank" src="/assets/leaderboards/rankicons/3-gold-I.png?v=1" alt="" aria-hidden="true" loading="lazy">',
+      '<img class="profile-rating-compact-rank is-rank-tier-3" src="/assets/leaderboards/rankicons/3-gold-I.png?v=1" alt="" aria-hidden="true" loading="lazy">',
       '<h4 class="profile-rating-compact-title">MSBL</h4>',
       '<p class="profile-rating-compact-rank-name">Gold I</p>',
       '<p class="profile-rating-compact-value"><span class="visually-hidden">Rating </span>1020</p>',
@@ -87,6 +87,24 @@ test("a compact card without a rank name keeps the icon and leaves the rank name
     /<img class="profile-rating-compact-rank" src="\/icon\.png" alt="" aria-hidden="true" loading="lazy">/,
   );
   assert.doesNotMatch(markup, /-rating-compact-rank-name/);
+});
+
+test("a compact rank icon carries its tier from the file name, other icons none", () => {
+  const icon = (url: string): string =>
+    /<img class="([^"]*)"/.exec(
+      ratingCards.buildSingles({ msbl: { rating: 900, sets: "1-0", rank_icon_url: url } }, "player-popup"),
+    )?.[1] ?? "";
+
+  assert.equal(
+    icon("/assets/leaderboards/rankicons/1-bronze-II.png?v=1"),
+    "player-popup-rating-compact-rank is-rank-tier-1",
+  );
+  assert.equal(
+    icon("/assets/leaderboards/rankicons/7-strikerstitan-b.png"),
+    "player-popup-rating-compact-rank is-rank-tier-7",
+  );
+  assert.equal(icon("/assets/players/rewardlevel/0-unranked.png?v=1"), "player-popup-rating-compact-rank");
+  assert.equal(icon("/assets/leaderboards/rankicons/9-unknown.png"), "player-popup-rating-compact-rank");
 });
 
 test("the season reward level sits above a compact card and below a classic one", () => {

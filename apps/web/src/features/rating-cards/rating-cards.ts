@@ -8,6 +8,7 @@
 
 import { toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
+import { COMPETITIVE_RANK_ICON_BASE_URL } from "@ms/shared/ranks";
 
 export type RatingCardLayout = "compact" | "classic";
 
@@ -140,13 +141,22 @@ function classicBody(prefix: string, card: Card): string {
   return `<h4 class="${prefix}-rating-title">${escapeHtml(card.definition.title)}</h4>${lines.join("")}`;
 }
 
+/** Tier of a competitive rank icon from its file name ("3-gold-I.png": 1 Bronze … 7 Strikers Titan); 0 for
+ * any other icon, such as the unranked one. The icon glows in its tier's colour (rating-cards.css). */
+function rankTier(iconUrl: string): number {
+  if (!iconUrl.startsWith(COMPETITIVE_RANK_ICON_BASE_URL)) return 0;
+  const tier = Number(iconUrl.charAt(COMPETITIVE_RANK_ICON_BASE_URL.length));
+  return tier >= 1 && tier <= 7 ? tier : 0;
+}
+
 /** Each element sits in a fixed grid cell (rating-cards.css), so a missing value leaves its spot empty. */
 function compactBody(prefix: string, card: Card): string {
   const parts: string[] = [];
   if (card.rankIconUrl) {
+    const tier = rankTier(card.rankIconUrl);
     // Decorative: the rank name is written out below the game code.
     parts.push(
-      `<img class="${prefix}-rating-compact-rank" src="${escapeHtml(card.rankIconUrl)}" alt="" aria-hidden="true" loading="lazy">`,
+      `<img class="${prefix}-rating-compact-rank${tier ? ` is-rank-tier-${tier}` : ""}" src="${escapeHtml(card.rankIconUrl)}" alt="" aria-hidden="true" loading="lazy">`,
     );
   }
   parts.push(`<h4 class="${prefix}-rating-compact-title">${escapeHtml(card.definition.title)}</h4>`);
