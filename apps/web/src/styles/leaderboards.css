@@ -16,8 +16,8 @@
 
 .lb-row {
   --lb-bar-height: 46px;
-  /* About 60% of the bar, in whole pixels whose count lets the icon sit centred on the field. */
-  --lb-rank-icon-height: 27px;
+  /* About 63% of the bar, in whole pixels whose count lets the icon sit centred on the field. */
+  --lb-rank-icon-height: 29px;
   --lb-text-zone-left: 1px;
   --lb-text-zone-right: 1px;
   --lb-text-zone-top: 2px;
@@ -200,10 +200,14 @@
 }
 
 .lb-points {
+  --lb-points-pad-right: calc(clamp(0.4rem, 2vw, 1.15rem) + 5px);
+  /* The widest 4-digit rating (ITC Grizzly digits differ in width; "0000", with the tracking),
+     measured, and the gap left of it. */
+  --lb-rating-width: 2.71em;
+  --lb-rank-icon-gap: 0.3em;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.5em;
   justify-self: end;
   align-self: stretch;
   min-height: 0;
@@ -211,7 +215,7 @@
   padding-top: 0;
   padding-bottom: 0;
   line-height: 1.1;
-  padding-right: calc(clamp(0.4rem, 2vw, 1.15rem) + 5px);
+  padding-right: var(--lb-points-pad-right);
   text-shadow: none;
   letter-spacing: 0.05em;
   text-align: right;
@@ -224,39 +228,42 @@
   transform: translateY(var(--lb-points-nudge-y));
 }
 
-/* The rank icon (ELO tabs) sits in the bar right before the rating, centred on the bar's coloured
-   field rather than on the rating's line: the bar images (1564 x 112) are coloured from row 5 to row
-   95, so the field's centre lies at 50/112 of the bar. The icon's top is a whole pixel of the row, so
-   the icon and the bar image land on the same pixels even where a row starts between two pixels. */
+/* The rank icon (ELO tabs) stands in one column in every row, whatever the rating's width: centred in
+   a slot as wide as the widest icon (diamond, 1.25 x its height), just left of where the widest
+   4-digit rating would start. It is placed against the text zone (.lb-inner-frame), whose top and
+   right edge are the rating cell's. Vertically it is centred on the bar's coloured field: the bar images
+   (1564 x 112) are coloured from row 5 to row 95, so the field's centre lies at 50/112 of the bar. Its
+   top is a whole pixel of the row, so the icon and the bar image land on the same pixels even where a
+   row starts between two pixels. */
 .lb-rank-icon {
-  flex: none;
-  align-self: flex-start;
-  margin-top: calc(
+  position: absolute;
+  top: calc(
     round(nearest, var(--lb-bar-height) * 50 / 112 - var(--lb-rank-icon-height) / 2, 1px) - var(--lb-text-zone-top)
   );
+  right: calc(var(--lb-points-pad-right) + var(--lb-rating-width) + var(--lb-rank-icon-gap));
+  width: calc(var(--lb-rank-icon-height) * 1.25);
   height: var(--lb-rank-icon-height);
-  width: auto;
   object-fit: contain;
 }
 
 @media (max-width: 1024px) {
   .lb-row {
     --lb-bar-height: 42px;
-    --lb-rank-icon-height: 25px;
+    --lb-rank-icon-height: 27px;
   }
 }
 
 @media (max-width: 700px) {
   .lb-row {
     --lb-bar-height: 38px;
-    --lb-rank-icon-height: 22px;
+    --lb-rank-icon-height: 24px;
   }
 }
 
 @media (max-width: 520px) {
   .lb-row {
     --lb-bar-height: 34px;
-    --lb-rank-icon-height: 20px;
+    --lb-rank-icon-height: 22px;
   }
 }
 
