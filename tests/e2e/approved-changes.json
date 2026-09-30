@@ -13,7 +13,7 @@
     },
     {
       "screenshots": ["states/player-card-*"],
-      "reason": "Owner request: the Discord card fits Discord's 550 x 350px message preview, so Discord no longer shrinks and blurs it: 550px wide, friend code lists side by side, singles and doubles rating cards in one grid."
+      "reason": "Owner request: the Discord card fits Discord's 550 x 350px message preview, so Discord no longer shrinks and blurs it: always 550 x 350px with tighter spacing, friend code lists side by side, singles and doubles rating cards in one grid."
     }
   ]
 }
