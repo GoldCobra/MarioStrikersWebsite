@@ -126,8 +126,7 @@
       </section>
       <section class="leaderboard-block" aria-label="Leaderboard rows">
         <div id="leaderboard-list" class="leaderboard-list" role="list">
-          <article class="lb-row lb-row-rank-1 lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/7-strikerstitan-b.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row lb-row-rank-1" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank-1">
@@ -154,12 +153,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/7-strikerstitan-b.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1855"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-rank-2 lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/7-strikerstitan-b.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row lb-row-rank-2" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -172,12 +171,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/7-strikerstitan-b.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1789"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-rank-3 lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/7-strikerstitan-b.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row lb-row-rank-3" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -190,12 +189,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/7-strikerstitan-b.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1763"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-III.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -208,12 +207,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-III.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1711"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-III.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -226,12 +225,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-III.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1682"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-II.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -244,12 +243,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-II.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1623"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-I.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -262,12 +261,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-I.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1597"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-I.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -280,12 +279,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-I.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1536"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-III.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -298,12 +297,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-III.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1502"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-II.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -316,12 +315,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-II.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1446"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-II.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -334,12 +333,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-II.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1420"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-I.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -352,12 +351,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-I.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1361"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-I.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -370,12 +369,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-I.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1331"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-III.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -388,12 +387,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-III.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1269"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-III.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -406,12 +405,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-III.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1246"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-II.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -424,12 +423,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-II.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1179"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-II.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -442,12 +441,12 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-II.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1160"
               </div>
             </div>
           </article>
-          <article class="lb-row lb-row-has-rank-icon" role="listitem">
-            <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-I.png" alt="" aria-hidden="true" loading="lazy"/>
+          <article class="lb-row" role="listitem">
             <div class="lb-inner-frame">
               <div class="lb-rank-cell">
                 <span class="lb-rank">
@@ -460,6 +459,7 @@
                 </button>
               </div>
               <div class="lb-points">
+                <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-I.png" alt="" aria-hidden="true" loading="lazy"/>
                 #text "1097"
               </div>
             </div>

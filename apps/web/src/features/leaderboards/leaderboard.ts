@@ -148,12 +148,12 @@ function formatRating(value: number): string {
   return value.toFixed(2).replace(/\.?0+$/, "");
 }
 
-function rowClass(rank: number, hasRankIcon: boolean): string {
+function rowClass(rank: number): string {
   let className = "lb-row";
   if (rank === 1) className += " lb-row-rank-1";
   else if (rank === 2) className += " lb-row-rank-2";
   else if (rank === 3) className += " lb-row-rank-3";
-  return hasRankIcon ? `${className} lb-row-has-rank-icon` : className;
+  return className;
 }
 
 function rankIconFile(row: Row): string {
@@ -190,17 +190,15 @@ function rankMarkup(rank: number): string {
 function rowsHtml(rows: readonly Row[]): string {
   return rows
     .map((row) => {
-      const icon = rankIcon(row);
       const name = row.player_id
         ? `<button type="button" class="lb-player-trigger" data-player-id="${row.player_id}" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for ${escapeHtml(row.display_name)}">${escapeHtml(row.display_name)}</button>`
         : `<span class="lb-player-static">${escapeHtml(row.display_name)}</span>`;
       return [
-        `<article class="${rowClass(row.rank, Boolean(icon))}" role="listitem">`,
-        icon,
+        `<article class="${rowClass(row.rank)}" role="listitem">`,
         '<div class="lb-inner-frame">',
         `<div class="lb-rank-cell">${rankMarkup(row.rank)}</div>`,
         `<div class="lb-player">${name}</div>`,
-        `<div class="lb-points">${escapeHtml(formatRating(row.rating))}</div>`,
+        `<div class="lb-points">${rankIcon(row)}${escapeHtml(formatRating(row.rating))}</div>`,
         "</div>",
         "</article>",
       ].join("");

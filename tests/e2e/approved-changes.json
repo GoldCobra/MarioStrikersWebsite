@@ -1,19 +1,33 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "5e6a8ed39569375634d17c4fd2446a35e25efedd",
+  "reference": "f4bf2a0d82c74cd7373f163fe2e346b99dfb91cd",
   "changes": [
     {
       "screenshots": [
         "states/players-popup-*",
         "states/leaderboard-popup-*",
         "states/whr-popup-*",
+        "states/player-card-*",
         "states/profile-linked-*"
       ],
-      "reason": "Owner request: the friend code rows of the player popup and the profile page are lower (26px instead of 34px, 44px on phones), like on the Discord card."
+      "reason": "Owner request: the game code (MSBL/MSC/SMS) of the rating cards is 24px instead of 22px, the same on the profile page, in the player popup and on the Discord card."
     },
     {
-      "screenshots": ["states/player-card-*"],
-      "reason": "Owner request: the Discord card fits Discord's 550 x 350px message preview, so Discord no longer shrinks and blurs it: always 550 x 350px with tighter spacing, friend code lists side by side, singles and doubles rating cards in one grid."
+      "screenshots": ["pages/msbl-elo1v1-*", "pages/msc-elo1v1-*", "pages/sms-elo1v1-*", "states/leaderboard-popup-*"],
+      "reason": "Owner request: in the ELO leaderboards the rank icon sits inside the bar right before the rating, smaller, instead of left of the row."
+    },
+    {
+      "screenshots": [
+        "pages/msl-320-*",
+        "pages/msl-390-*",
+        "pages/msl-768-*",
+        "pages/msl-1024-*",
+        "pages/msl-1280-*",
+        "pages/msl-1440-*",
+        "pages/msl-league-rules-*",
+        "pages/msl-schedule-*"
+      ],
+      "reason": "Owner request: Competitive > MSL no longer has the League Rules tab (the page itself stays)."
     }
   ]
 }
