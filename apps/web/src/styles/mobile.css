@@ -242,6 +242,7 @@
 
   .lb-row {
     --lb-bar-height: 31px;
+    --lb-rank-icon-height: 18px;
     width: min(82vw, 560px);
     max-width: 100%;
     font-size: clamp(0.72rem, 3.2vw, 0.84rem);
@@ -288,6 +289,9 @@
 
   .lb-points {
     padding-right: 0.5rem;
+  }
+
+  .lb-points-value {
     filter: drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.72));
   }
 

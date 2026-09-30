@@ -153,7 +153,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "2128"
+                <span class="lb-points-value">
+                  #text "2128"
+                </span>
               </div>
             </div>
           </article>
@@ -170,7 +172,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "2105"
+                <span class="lb-points-value">
+                  #text "2105"
+                </span>
               </div>
             </div>
           </article>
@@ -187,7 +191,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "2050"
+                <span class="lb-points-value">
+                  #text "2050"
+                </span>
               </div>
             </div>
           </article>
@@ -204,7 +210,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "2029"
+                <span class="lb-points-value">
+                  #text "2029"
+                </span>
               </div>
             </div>
           </article>
@@ -221,7 +229,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1988"
+                <span class="lb-points-value">
+                  #text "1988"
+                </span>
               </div>
             </div>
           </article>
@@ -238,7 +248,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1965"
+                <span class="lb-points-value">
+                  #text "1965"
+                </span>
               </div>
             </div>
           </article>
@@ -255,7 +267,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1914"
+                <span class="lb-points-value">
+                  #text "1914"
+                </span>
               </div>
             </div>
           </article>
@@ -272,7 +286,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1891"
+                <span class="lb-points-value">
+                  #text "1891"
+                </span>
               </div>
             </div>
           </article>
@@ -289,7 +305,9 @@
                 </span>
               </div>
               <div class="lb-points">
-                #text "1848"
+                <span class="lb-points-value">
+                  #text "1848"
+                </span>
               </div>
             </div>
           </article>
@@ -306,7 +324,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1826"
+                <span class="lb-points-value">
+                  #text "1826"
+                </span>
               </div>
             </div>
           </article>
@@ -323,7 +343,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1781"
+                <span class="lb-points-value">
+                  #text "1781"
+                </span>
               </div>
             </div>
           </article>
@@ -340,7 +362,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1752"
+                <span class="lb-points-value">
+                  #text "1752"
+                </span>
               </div>
             </div>
           </article>
@@ -357,7 +381,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1708"
+                <span class="lb-points-value">
+                  #text "1708"
+                </span>
               </div>
             </div>
           </article>
@@ -374,7 +400,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1689"
+                <span class="lb-points-value">
+                  #text "1689"
+                </span>
               </div>
             </div>
           </article>
@@ -391,7 +419,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1645"
+                <span class="lb-points-value">
+                  #text "1645"
+                </span>
               </div>
             </div>
           </article>
@@ -408,7 +438,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1613"
+                <span class="lb-points-value">
+                  #text "1613"
+                </span>
               </div>
             </div>
           </article>
@@ -425,7 +457,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1574"
+                <span class="lb-points-value">
+                  #text "1574"
+                </span>
               </div>
             </div>
           </article>
@@ -442,7 +476,9 @@
                 </span>
               </div>
               <div class="lb-points">
-                #text "1551"
+                <span class="lb-points-value">
+                  #text "1551"
+                </span>
               </div>
             </div>
           </article>
@@ -459,7 +495,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1506"
+                <span class="lb-points-value">
+                  #text "1506"
+                </span>
               </div>
             </div>
           </article>
@@ -476,7 +514,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1476"
+                <span class="lb-points-value">
+                  #text "1476"
+                </span>
               </div>
             </div>
           </article>
@@ -493,7 +533,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1436"
+                <span class="lb-points-value">
+                  #text "1436"
+                </span>
               </div>
             </div>
           </article>
@@ -510,7 +552,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1406"
+                <span class="lb-points-value">
+                  #text "1406"
+                </span>
               </div>
             </div>
           </article>
@@ -527,7 +571,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1368"
+                <span class="lb-points-value">
+                  #text "1368"
+                </span>
               </div>
             </div>
           </article>
@@ -544,7 +590,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1341"
+                <span class="lb-points-value">
+                  #text "1341"
+                </span>
               </div>
             </div>
           </article>
@@ -561,7 +609,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1294"
+                <span class="lb-points-value">
+                  #text "1294"
+                </span>
               </div>
             </div>
           </article>
@@ -578,7 +628,9 @@
                 </button>
               </div>
               <div class="lb-points">
-                #text "1275"
+                <span class="lb-points-value">
+                  #text "1275"
+                </span>
               </div>
             </div>
           </article>
