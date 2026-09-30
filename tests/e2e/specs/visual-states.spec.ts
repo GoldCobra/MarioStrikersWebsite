@@ -19,6 +19,14 @@ async function clickAndSettle(page: Page, selector: string): Promise<void> {
   await settle(page, { eagerImages: true });
 }
 
+async function showPlayerCard(page: Page): Promise<void> {
+  // A reference commit from before the page shows its 404 page instead, without the card.
+  if (await page.locator("main.player-card-page").count()) {
+    await page.locator("html[data-player-card='ready']").waitFor();
+  }
+  await settle(page, { eagerImages: true });
+}
+
 async function openGearBuilderPane(page: Page, which: "first" | "last"): Promise<void> {
   const tabs = page.locator('.tab-link-icon[aria-controls^="tab-"]');
   const tab = which === "first" ? tabs.first() : tabs.last();
@@ -35,16 +43,17 @@ const STATES: VisualState[] = [
     act: (page) => clickAndSettle(page, ".players-name-trigger[data-player-id]"),
   },
   {
-    // The compact card the Discord bot screenshots for /profile show; player 1 is a world champion.
+    // The compact card the Discord bot screenshots for /profile show; player 1 is a world champion
+    // with four rating cards, so the card is taller than 350px and scaled down to fit.
     name: "player-card",
     path: "/player-card?player=1",
-    act: async (page) => {
-      // A reference commit from before the page shows its 404 page instead, without the card.
-      if (await page.locator("main.player-card-page").count()) {
-        await page.locator("html[data-player-card='ready']").waitFor();
-      }
-      await settle(page, { eagerImages: true });
-    },
+    act: showPlayerCard,
+  },
+  {
+    // Player 3 has one friend code and one row of rating cards, so the card is only as tall as that.
+    name: "player-card-short",
+    path: "/player-card?player=3",
+    act: showPlayerCard,
   },
   {
     // The fixture player 4 has no match in the current season, so every rating card is greyed out.

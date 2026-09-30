@@ -154,7 +154,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/7-strikerstitan-b.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1855"
+                <span class="lb-points-value">
+                  #text "1855"
+                </span>
               </div>
             </div>
           </article>
@@ -172,7 +174,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/7-strikerstitan-b.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1789"
+                <span class="lb-points-value">
+                  #text "1789"
+                </span>
               </div>
             </div>
           </article>
@@ -190,7 +194,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/7-strikerstitan-b.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1763"
+                <span class="lb-points-value">
+                  #text "1763"
+                </span>
               </div>
             </div>
           </article>
@@ -208,7 +214,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-III.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1711"
+                <span class="lb-points-value">
+                  #text "1711"
+                </span>
               </div>
             </div>
           </article>
@@ -226,7 +234,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-III.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1682"
+                <span class="lb-points-value">
+                  #text "1682"
+                </span>
               </div>
             </div>
           </article>
@@ -244,7 +254,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-II.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1623"
+                <span class="lb-points-value">
+                  #text "1623"
+                </span>
               </div>
             </div>
           </article>
@@ -262,7 +274,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-I.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1597"
+                <span class="lb-points-value">
+                  #text "1597"
+                </span>
               </div>
             </div>
           </article>
@@ -280,7 +294,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/6-master-I.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1536"
+                <span class="lb-points-value">
+                  #text "1536"
+                </span>
               </div>
             </div>
           </article>
@@ -298,7 +314,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-III.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1502"
+                <span class="lb-points-value">
+                  #text "1502"
+                </span>
               </div>
             </div>
           </article>
@@ -316,7 +334,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-II.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1446"
+                <span class="lb-points-value">
+                  #text "1446"
+                </span>
               </div>
             </div>
           </article>
@@ -334,7 +354,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-II.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1420"
+                <span class="lb-points-value">
+                  #text "1420"
+                </span>
               </div>
             </div>
           </article>
@@ -352,7 +374,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-I.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1361"
+                <span class="lb-points-value">
+                  #text "1361"
+                </span>
               </div>
             </div>
           </article>
@@ -370,7 +394,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/5-diamond-I.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1331"
+                <span class="lb-points-value">
+                  #text "1331"
+                </span>
               </div>
             </div>
           </article>
@@ -388,7 +414,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-III.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1269"
+                <span class="lb-points-value">
+                  #text "1269"
+                </span>
               </div>
             </div>
           </article>
@@ -406,7 +434,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-III.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1246"
+                <span class="lb-points-value">
+                  #text "1246"
+                </span>
               </div>
             </div>
           </article>
@@ -424,7 +454,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-II.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1179"
+                <span class="lb-points-value">
+                  #text "1179"
+                </span>
               </div>
             </div>
           </article>
@@ -442,7 +474,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-II.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1160"
+                <span class="lb-points-value">
+                  #text "1160"
+                </span>
               </div>
             </div>
           </article>
@@ -460,7 +494,9 @@
               </div>
               <div class="lb-points">
                 <img class="lb-rank-icon" src="/assets/leaderboards/rankicons/4-platinum-I.png" alt="" aria-hidden="true" loading="lazy"/>
-                #text "1097"
+                <span class="lb-points-value">
+                  #text "1097"
+                </span>
               </div>
             </div>
           </article>

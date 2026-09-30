@@ -265,9 +265,10 @@ body.player-popup-open {
    whole pixel, and without the black frame, as Discord rounds an image's corners itself. Without the
    close button the MSL logo moves to the header's edge.
    Discord shows an image in a message at most 550 x 350px and shrinks a larger one, which blurs it.
-   So every card is 550 x 350px (it would only grow for more content than 1 Switch and 3 MSC codes
-   allow), with tighter spacing than the popup; the two friend code lists sit side by side where both
-   fit, and the singles and doubles rating cards run on in one grid. */
+   So the card is 550px wide and as tall as its content, at most 350px (player-card.ts sets the whole-
+   pixel height and scales a taller card down), with tighter spacing than the popup; the two friend
+   code lists sit side by side where both fit, and the singles and doubles rating cards run on in one
+   grid. */
 .player-popup.is-card :is(.player-popup-close, [data-slot="results-section"]),
 .player-popup.is-card
   .player-popup-section:has(> .player-popup-season-awards-details, > .player-popup-accolades-details) {
@@ -281,7 +282,6 @@ body.player-popup-open {
 
 .player-popup.is-card .popup-card {
   width: 550px;
-  min-height: 350px;
   border: 0;
 }
 

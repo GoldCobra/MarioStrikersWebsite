@@ -7,6 +7,7 @@ import { fetchJson } from "../../lib/api.ts";
 import { countryDisplayName, flagUrl, normalizeCountryCode } from "../../lib/countries.ts";
 import { TemplatePopup } from "../../lib/popup.ts";
 import { buildDoubles, buildSingles } from "../rating-cards/rating-cards.ts";
+import { fitPlayerCard } from "./player-card.ts";
 import {
   accoladeNameClasses,
   dateText,
@@ -281,8 +282,8 @@ async function cardAssetsLoaded(root: HTMLElement): Promise<void> {
 /**
  * The compact player card (/player-card?player=<id>; is-card in player-popup.css): the popup without its
  * close button, season rewards, accolades and results link, which the Discord bot screenshots for
- * /profile show. <html data-player-card> turns "ready" once the card, its images and fonts are there,
- * or "error".
+ * /profile show. <html data-player-card> turns "ready" once the card, its images and fonts are there
+ * and the card is sized (player-card.ts), or "error".
  */
 export async function showPlayerCard(playerId: number): Promise<void> {
   const state = document.documentElement.dataset;
@@ -296,6 +297,8 @@ export async function showPlayerCard(playerId: number): Promise<void> {
     popup.showStatus(null);
     popup.open(null);
     await cardAssetsLoaded(root);
+    const card = root.querySelector<HTMLElement>(".player-popup-card");
+    if (card) fitPlayerCard(card);
     state.playerCard = "ready";
   } catch {
     state.playerCard = "error";

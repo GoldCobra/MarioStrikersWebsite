@@ -198,7 +198,7 @@ function rowsHtml(rows: readonly Row[]): string {
         '<div class="lb-inner-frame">',
         `<div class="lb-rank-cell">${rankMarkup(row.rank)}</div>`,
         `<div class="lb-player">${name}</div>`,
-        `<div class="lb-points">${rankIcon(row)}${escapeHtml(formatRating(row.rating))}</div>`,
+        `<div class="lb-points">${rankIcon(row)}<span class="lb-points-value">${escapeHtml(formatRating(row.rating))}</span></div>`,
         "</div>",
         "</article>",
       ].join("");
