@@ -100,10 +100,10 @@
 
 :is(.profile-rating-card, .player-popup-rating-card).is-compact-layout {
   --rating-compact-rank-size: calc(var(--profile-rank-icon-height) * 2);
-  /* The game code is the same everywhere (profile page, popup, Discord card): ITC Grizzly at 22px,
-     whose baseline sits at 18px. */
-  --rating-compact-title-size: 22px;
-  --rating-title-baseline: 18px;
+  /* The game code is the same everywhere (profile page, popup, Discord card): ITC Grizzly at 24px,
+     whose baseline sits at 20px. */
+  --rating-compact-title-size: 24px;
+  --rating-title-baseline: 20px;
   --rating-compact-metric-size: calc(var(--rating-card-text-size) - 3px);
   --rating-compact-metric-label-size: calc(var(--rating-compact-metric-size) - 2px);
   --rating-compact-metric-color: rgba(255, 255, 255, 0.7);

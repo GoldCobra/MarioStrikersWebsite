@@ -71,9 +71,6 @@
     <div id="global-content-tabs">
       <section class="global-tabs-shell" aria-label="MSL tabs">
         <div class="global-tabs-list">
-          <a class="global-tab" href="/msl-league-rules" aria-label="League Rules">
-            #text "LEAGUE RULES"
-          </a>
           <a class="global-tab is-active" href="/msl-schedule" aria-label="Schedule" aria-current="page">
             #text "SCHEDULE"
           </a>

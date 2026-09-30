@@ -194,6 +194,7 @@ export const SECTION_MODELS: Readonly<Record<"games" | "competitive" | "players"
             key: "league-rules",
             label: "League Rules",
             slug: "msl-league-rules",
+            hidden: true,
           },
           {
             key: "league-site",

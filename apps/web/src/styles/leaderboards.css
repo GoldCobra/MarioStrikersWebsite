@@ -16,8 +16,7 @@
 
 .lb-row {
   --lb-bar-height: 46px;
-  --lb-rank-icon-height: calc(var(--lb-bar-height) * 0.78);
-  --lb-rank-icon-protrusion: calc(var(--lb-rank-icon-height) * 1.26);
+  --lb-rank-icon-height: calc(var(--lb-bar-height) * 0.6);
   --lb-text-zone-left: 1px;
   --lb-text-zone-right: 1px;
   --lb-text-zone-top: 2px;
@@ -37,27 +36,6 @@
   font-size: calc(clamp(0.55rem, 1.1vw, 0.95rem) + 6px);
   letter-spacing: 0.01em;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
-}
-
-.lb-row-has-rank-icon {
-  height: var(--lb-bar-height);
-  width: min(84%, 620px);
-  background-position: center;
-  background-size: 100% 100%;
-  transform: translateX(calc(var(--lb-rank-icon-protrusion) / 2));
-}
-
-.lb-rank-icon {
-  position: absolute;
-  left: calc(var(--lb-rank-icon-protrusion) * -1);
-  top: 50%;
-  z-index: 3;
-  height: var(--lb-rank-icon-height);
-  width: auto;
-  object-fit: contain;
-  transform: translateY(-50%);
-  pointer-events: none;
-  filter: drop-shadow(-3px 4px 0 rgba(0, 0, 0, 0.72));
 }
 
 .lb-inner-frame {
@@ -224,6 +202,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 0.3em;
   justify-self: end;
   align-self: center;
   min-height: 0;
@@ -238,6 +217,14 @@
   text-align: right;
   white-space: nowrap;
   transform: translateY(var(--lb-points-nudge-y));
+}
+
+/* The rank icon (ELO tabs) sits in the bar right before the rating and takes the rating's shadow. */
+.lb-rank-icon {
+  flex: none;
+  height: var(--lb-rank-icon-height);
+  width: auto;
+  object-fit: contain;
 }
 
 @media (max-width: 1024px) {
