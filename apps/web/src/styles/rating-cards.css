@@ -81,7 +81,6 @@
 .profile-rating-card {
   --rating-card-text-size: 16px;
   --rating-card-digit-height: 0.74em;
-  --rating-title-baseline: 16px;
   --rating-text-baseline: 13px;
   --rating-text-ink: 12px;
   --rating-compact-metric-tracking: -0.02em;
@@ -92,8 +91,6 @@
 .player-popup-rating-card {
   --rating-card-text-size: 15px;
   --rating-card-digit-height: 0.73em;
-  /* The game code is set in ITC Grizzly here too (below), whose baseline sits at 15px at 19px. */
-  --rating-title-baseline: 15px;
   --rating-text-baseline: 13px;
   --rating-text-ink: 11px;
   --rating-compact-metric-tracking: 0.06em;
@@ -103,7 +100,10 @@
 
 :is(.profile-rating-card, .player-popup-rating-card).is-compact-layout {
   --rating-compact-rank-size: calc(var(--profile-rank-icon-height) * 2);
-  --rating-compact-title-size: calc(var(--rating-card-text-size) + 4px);
+  /* The game code is the same everywhere (profile page, popup, Discord card): ITC Grizzly at 22px,
+     whose baseline sits at 18px. */
+  --rating-compact-title-size: 22px;
+  --rating-title-baseline: 18px;
   --rating-compact-metric-size: calc(var(--rating-card-text-size) - 3px);
   --rating-compact-metric-label-size: calc(var(--rating-compact-metric-size) - 2px);
   --rating-compact-metric-color: rgba(255, 255, 255, 0.7);
@@ -189,6 +189,8 @@
   color: var(--rating-game-color, #fff);
   font-size: var(--rating-compact-title-size);
   font-weight: 700;
+  /* The popup's tracking (desktop 1pt) on every surface and screen, so the game code looks alike. */
+  letter-spacing: 1pt;
   line-height: 1;
   text-shadow: var(--rating-compact-title-shadow);
   white-space: nowrap;
