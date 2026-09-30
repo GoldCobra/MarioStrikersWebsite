@@ -8,8 +8,6 @@ export interface FriendCodes {
   readonly msc?: unknown;
   readonly msc_pal?: unknown;
   readonly msc_ntsc?: unknown;
-  readonly msc_jpn?: unknown;
-  readonly msc_kor?: unknown;
 }
 
 export interface SeasonAward {
@@ -73,16 +71,14 @@ function regionLines(value: unknown, region: string): string[] {
     .map((line) => `${region}: ${parseCodeLine(line).code}`);
 }
 
+// The community does not need the codes of the Japanese and Korean versions, so they are not shown.
+const HIDDEN_MSC_REGION = /^NTSC-[JK]\b/;
+
 /** MSC codes; older profiles keep them per region, which get the region as prefix. */
 export function mscFriendCodeLines(data: FriendCodes): unknown[] {
-  const msc = lines(data.msc);
+  const msc = lines(data.msc).filter((line) => !HIDDEN_MSC_REGION.test(toText(line).trim()));
   if (msc.some(hasDisplayText)) return msc;
-  return [
-    ...regionLines(data.msc_pal, "PAL"),
-    ...regionLines(data.msc_ntsc, "NTSC-U"),
-    ...regionLines(data.msc_jpn, "NTSC-J"),
-    ...regionLines(data.msc_kor, "NTSC-K"),
-  ];
+  return [...regionLines(data.msc_pal, "PAL"), ...regionLines(data.msc_ntsc, "NTSC-U")];
 }
 
 /** An ISO date's day ("2026-03-10"), or the text itself when it is no date. */
