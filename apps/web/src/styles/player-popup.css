@@ -265,8 +265,9 @@ body.player-popup-open {
    whole pixel, and without the black frame, as Discord rounds an image's corners itself. Without the
    close button the MSL logo moves to the header's edge.
    Discord shows an image in a message at most 550 x 350px and shrinks a larger one, which blurs it.
-   So the card is 550px wide, the two friend code lists sit side by side where both fit, and the
-   singles and doubles rating cards run on in one grid. */
+   So every card is 550 x 350px (it would only grow for more content than 1 Switch and 3 MSC codes
+   allow), with tighter spacing than the popup; the two friend code lists sit side by side where both
+   fit, and the singles and doubles rating cards run on in one grid. */
 .player-popup.is-card :is(.player-popup-close, [data-slot="results-section"]),
 .player-popup.is-card
   .player-popup-section:has(> .player-popup-season-awards-details, > .player-popup-accolades-details) {
@@ -280,7 +281,16 @@ body.player-popup-open {
 
 .player-popup.is-card .popup-card {
   width: 550px;
+  min-height: 350px;
   border: 0;
+}
+
+.player-popup.is-card .popup-header {
+  padding-inline: 0.7rem;
+}
+
+.player-popup.is-card .player-popup-body {
+  padding: 0 0.65rem 0.6rem;
 }
 
 .player-popup.is-card :is(.popup-card, .player-popup-content) {
@@ -297,15 +307,20 @@ body.player-popup-open {
 /* A friend code list is as wide as its longest code; one that does not fit beside the other wraps. */
 .player-popup.is-card .player-popup-section {
   flex: 1 1 auto;
+  margin-top: 0.55rem;
 }
 
-/* The ratings grids' own top margin and row gap, now on the section. */
+.player-popup.is-card .player-popup-code-list {
+  margin-top: 0.3rem;
+}
+
+/* The ratings grids' row gap, now on the section. */
 .player-popup.is-card .player-popup-section:has(> .player-popup-ratings-grid) {
   flex-basis: 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
-  padding-top: 0.5rem;
+  padding-top: 0.2rem;
 }
 
 .player-popup.is-card .player-popup-ratings-grid {
@@ -317,7 +332,7 @@ body.player-popup-open {
 }
 
 .player-popup.is-card .player-popup-msl-champion {
-  right: 1rem;
+  right: 0.7rem;
 }
 
 /* Logo width (25px x 172/128) plus a gap. */

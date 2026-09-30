@@ -48,8 +48,8 @@ and is bundled with it. Shared popup classes in `src/styles/popups.css` are
 The hidden page `/player-card?player=<id>` shows the player popup as a compact
 card (`showPlayerCard`, class `is-card`) that the Discord bot screenshots for
 `/profile show`; `<html data-player-card>` turns `ready` once it has loaded. The
-card is laid out for Discord's message preview (at most 550 × 350 px) and the
-bot takes it at that size, so Discord shows it 1:1.
+card is always 550 × 350 px, Discord's largest message preview, and the bot
+takes it at that size, so Discord shows it 1:1.
 
 **No inline code.** Markup carries no inline scripts or event handlers, so the
 Content Security Policy can forbid them: an image states its fallback as
