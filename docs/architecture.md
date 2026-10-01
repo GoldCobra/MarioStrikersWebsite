@@ -41,11 +41,12 @@ Gear Builder (`gear-builder/`). Logic without DOM access (the season clock, the
 save cores, the rating cards) is unit-tested in Node. Browser code calls the
 API on the same origin (`/api/...`) and sets no globals.
 
-**Popups.** The player and club popups and the profile editor are built on
-`src/lib/popup.ts`; their markup (`player-profile-popup.html`,
-`club-profile-popup.html`, `profile-edit-popup.html`) sits next to their code
-and is bundled with it. A popup may refuse to close (`beforeClose`): the
-editor asks before unsaved changes are dropped. Shared popup classes in `src/styles/popups.css` are
+**Popups.** The player and club popups are built on `src/lib/popup.ts`; their
+markup (`player-profile-popup.html`, `club-profile-popup.html`) sits next to
+their code and is bundled with it. The profile page (`/profile`) shows the
+player popup's card as a section of the page (`#player-profile-page`): the same
+template, renderer (`features/players/player-profile-view.ts`) and styles, but
+no overlay, close button or dialog role. Shared popup classes in `src/styles/popups.css` are
 `popup-overlay`, `popup-card`, `popup-header`, `popup-title` and `popup-close`.
 The hidden page `/player-card?player=<id>` shows the player popup as a compact
 card (`showPlayerCard`, class `is-card`) that the Discord bot screenshots for
@@ -140,14 +141,18 @@ display name (nickname, else global name, else username, without a leading
 `[TAG]` of the bot's nickname sync) and logs it in `dbo.CommandLog`, so parallel
 logins and the bots' own inserts never create a second row. When that fails, the
 login still succeeds and the profile page asks again (`POST /api/profile/me`).
-The profile editor (`/profile`, `features/profile/`) changes the country and
-the friend codes in the tables robotic_nightmare's `/profile` commands use,
-in their exact form ([ADR 0007](adr/0007-profile-writes-in-shared-database.md)):
-one transaction per save, refused with `409 PROFILE_CHANGED` when the profile
-changed since the editor loaded it (a version hash), and with
-`409 FRIEND_CODE_TAKEN` for a code another profile has. The rules live once in
-`packages/shared/src/friend-codes.ts`. The editor shows the member's current
-server names, read with the bot token (`integrations/discord/members.ts`).
+On the profile page (`/profile`, `features/profile/`) the member changes the
+country and the friend codes in place: a pencil on each line, "+" and "−" for
+MSC codes, one line open at a time. Every save sends the whole profile with that
+one change to the tables robotic_nightmare's `/profile` commands use, in their
+exact form ([ADR 0007](adr/0007-profile-writes-in-shared-database.md)): one
+transaction, refused with `409 PROFILE_CHANGED` when the profile changed since
+the page loaded it (a version hash; the page then shows what is saved and keeps
+the change open), and with `409 FRIEND_CODE_TAKEN` for a code another profile
+has. The rules live once in `packages/shared/src/friend-codes.ts`; an older MSC
+code saved without a platform may stay so, a new or changed one needs it. Saves
+are refused for members who left the server, checked with the bot token
+(`integrations/discord/members.ts`).
 A bot token enables Discord name lookups and event discovery.
 
 Responses use snake_case keys throughout; code inside the API uses camelCase

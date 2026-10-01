@@ -258,6 +258,26 @@ test("invalid requests and former members change nothing", async () => {
   assert.equal(h.store.writes + left.store.writes, 0);
 });
 
+test("an older MSC code without a platform stays as it is while other parts change", async () => {
+  const h = harness();
+  const kept = [
+    { region: "PAL", platform: "Wii", code: "1111-2222-3333" },
+    { region: "NTSC", platform: "", code: "4444-5555-6666" },
+  ];
+  const saved = await h.service.saveEditableProfile(
+    IDENTITY,
+    request(await editable(h), { country: "us", msc_codes: kept }),
+  );
+  assert.ok(saved.kind === "saved" && saved.changed);
+  assert.equal(h.store.saved.country, "us");
+  assert.equal(h.store.saved.codes.find((row) => row.code === "4444-5555-6666")?.label, "");
+  const moved = await h.service.saveEditableProfile(
+    IDENTITY,
+    request(await editable(h), { msc_codes: [kept[0], { region: "PAL", platform: "", code: "4444-5555-6666" }] }),
+  );
+  assert.deepEqual(moved.kind === "invalid" && moved.errors.map((error) => error.code), ["PLATFORM_REQUIRED"]);
+});
+
 test("the plan keeps rows of unchanged codes and renumbers the rest from 1", () => {
   const current: StoredProfile = {
     playerId: 1,

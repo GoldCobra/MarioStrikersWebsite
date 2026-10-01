@@ -29,7 +29,8 @@ editor and the API.
 - Website and bot read each other's changes at once; there is nothing to
   synchronise.
 - A change made in Discord while the editor is open is never overwritten
-  unseen: the save answers `409 PROFILE_CHANGED` and the editor merges it.
+  unseen: the save answers `409 PROFILE_CHANGED`, and the page shows what is
+  saved and keeps the change open.
 - The unique indexes `IX_Player_DiscordID` and `UX_FriendCodes_GameType_Code`
   guard both writers against duplicate profiles and codes.
 - The bot's rules are duplicated in JavaScript; a change of limits, regions or

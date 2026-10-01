@@ -11,19 +11,14 @@
   margin: 0;
 }
 
-.profile-state-panel,
-.profile-header-panel,
-.profile-panel {
-  border: 4px solid #000;
-  border-radius: 0;
-  background: rgba(30, 33, 44, 0.9) url("../assets/players/profile-bg.jpg") center center / cover no-repeat;
-  color: #fff;
-}
-
 .profile-state-panel {
   width: min(620px, 100%);
   margin: 0 auto;
   padding: clamp(1rem, 2vw, 1.4rem);
+  border: 4px solid #000;
+  border-radius: 0;
+  background: rgba(30, 33, 44, 0.9) url("../assets/players/profile-bg.jpg") center center / cover no-repeat;
+  color: #fff;
   text-align: center;
 }
 
@@ -67,249 +62,6 @@
   color: var(--color-maroon);
 }
 
-.profile-shell {
-  display: grid;
-  gap: 0.8rem;
-}
-
-.profile-header-panel {
-  overflow: hidden;
-}
-
-.profile-header-title {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.75rem 1rem 0.48rem;
-  background-color: #993c00;
-  background-image: url("../assets/players/title.png");
-  background-position: left top;
-  background-repeat: no-repeat;
-}
-
-.profile-name {
-  margin: 0;
-  min-width: 0;
-  overflow: hidden;
-  color: #fff;
-  font-size: clamp(1.18rem, 2.2vw, 1.65rem);
-  line-height: 1.05;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* One height, the width follows the flag's own proportions, so no flag is cropped. */
-.profile-header-flag {
-  width: auto;
-  height: 20px;
-  border: 1px solid rgba(0, 0, 0, 0.65);
-}
-
-.profile-meta {
-  display: grid;
-  gap: 0.35rem;
-  padding: 0.75rem 1rem 0.9rem;
-}
-
-.profile-meta-line {
-  margin: 0;
-  display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
-  gap: 0.6rem;
-  align-items: start;
-  color: var(--color-text-light);
-  font-family: var(--reporter-font-stack);
-  font-weight: var(--reporter-font-weight);
-  font-size: var(--reporter-font-size-sm);
-  letter-spacing: var(--reporter-letter-spacing);
-  line-height: var(--reporter-line-height);
-}
-
-.profile-meta-line > span {
-  color: #d7d8de;
-}
-
-/* "Member of <club> [<tag>]" as one line of text, the club in the buttons' gold; without a club the
-   line stays, empty but one line tall. */
-.profile-club-line {
-  display: block;
-  min-height: calc(var(--reporter-line-height) * 1em);
-}
-
-.profile-club-line > .profile-club-name {
-  color: var(--color-gold);
-}
-
-.profile-meta-line > a {
-  min-width: 0;
-  color: #7ab6ff;
-  overflow-wrap: anywhere;
-  text-decoration: none;
-}
-
-.profile-meta-line > a:hover,
-.profile-meta-line > a:focus-visible {
-  text-decoration: underline;
-}
-
-/* The results line reuses .profile-meta-line for font and link colours but holds a
-   single clickable label, so it drops the 96px label column. */
-.profile-results-line {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.profile-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.72fr);
-  gap: 0.8rem;
-  align-items: start;
-}
-
-.profile-grid-main,
-.profile-grid-side {
-  display: grid;
-  gap: 0.8rem;
-  min-width: 0;
-}
-
-.profile-panel {
-  padding: 0.75rem 0.85rem 0.9rem;
-}
-
-.profile-panel-title {
-  margin: 0 0 0.48rem;
-  color: #d7d8de;
-  text-transform: uppercase;
-}
-
-.profile-muted {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.76);
-}
-
-.profile-code-list {
-  display: grid;
-  gap: 0.26rem;
-}
-
-/* The codes are written in the site's Reporter text font, like the club line. */
-.profile-code-row {
-  min-height: 26px;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.15rem 0.55rem;
-  background: rgba(0, 0, 0, 0.55);
-  color: #fff;
-  font-family: var(--reporter-font-stack);
-  font-weight: var(--reporter-font-weight);
-  font-size: var(--reporter-font-size-sm);
-  letter-spacing: var(--reporter-letter-spacing);
-  line-height: 1.25;
-}
-
-.profile-code-prefix {
-  flex: 0 0 auto;
-  color: #f4f4f4;
-}
-
-.profile-code-value {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.profile-ratings-panel {
-  display: grid;
-  gap: 0.55rem;
-  width: calc(100% + var(--profile-rating-reward-glow-gutter));
-  margin-left: calc(-1 * var(--profile-rating-reward-glow-gutter));
-  padding-left: var(--profile-rating-reward-glow-gutter);
-  overflow: visible;
-}
-
-.profile-ratings-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.5rem;
-}
-
-.profile-rating-unit {
-  min-width: 0;
-  display: grid;
-  gap: 0.32rem;
-  overflow: visible;
-}
-
-.profile-rating-card {
-  min-height: 108px;
-  padding: 0.42rem 0.4rem;
-  background: rgba(0, 0, 0, 0.32);
-}
-
-.profile-rating-title {
-  margin: 0 0 0.24rem;
-  color: #fff;
-}
-
-.profile-rating-line {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
-  color: var(--color-text-light);
-}
-
-.profile-rating-label {
-  color: #d7d8de;
-  font-weight: 400;
-}
-
-.profile-rating-value {
-  font-weight: 700;
-}
-
-.profile-rating-value.is-muted-stat-value {
-  color: rgba(255, 255, 255, 0.50);
-}
-
-.profile-rating-line:has(.is-muted-stat-value) .profile-rating-label {
-  color: rgba(255, 255, 255, 0.50);
-}
-
-.profile-rank-icon {
-  width: auto;
-  height: var(--profile-rank-icon-height);
-  object-fit: contain;
-  margin-right: 0.1rem;
-}
-
-.profile-rating-reward {
-  --profile-rating-reward-accent: #f4f4f4;
-  --profile-rating-reward-glow: rgba(244, 244, 244, 0.32);
-  --profile-rating-reward-glow-soft: 2px;
-  --profile-rating-reward-glow-strong: 7px;
-  min-width: 0;
-  display: grid;
-  gap: 0.18rem;
-  padding: 0 0.08rem;
-  overflow: visible;
-  color: var(--color-text-light);
-  font-family: var(--reporter-font-stack);
-  font-weight: var(--reporter-font-weight);
-  letter-spacing: var(--reporter-letter-spacing);
-}
-
-.profile-rating-reward-main {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.34rem;
-  overflow: visible;
-}
-
-.profile-rating-reward-icon-wrap,
 .player-popup-rating-reward-icon-wrap {
   flex: 0 0 auto;
   display: inline-flex;
@@ -320,7 +72,6 @@
   overflow: visible;
 }
 
-.profile-rating-reward-icon,
 .player-popup-rating-reward-icon {
   width: auto;
   height: var(--profile-rating-reward-icon-height);
@@ -331,124 +82,73 @@
   object-fit: contain;
 }
 
-.profile-rating-reward-name {
-  min-width: 0;
-  overflow: visible;
-  color: var(--profile-rating-reward-accent);
-  padding: 0 0.08rem;
-  text-shadow:
-    0 0 1px var(--profile-rating-reward-glow),
-    0 0 var(--profile-rating-reward-glow-soft) var(--profile-rating-reward-glow),
-    0 0 var(--profile-rating-reward-glow-strong) var(--profile-rating-reward-glow);
-  text-transform: uppercase;
-  transform: translateY(2px);
-  white-space: nowrap;
-}
-
-.profile-rating-reward.is-reward-tier-0,
 .player-popup-rating-reward.is-reward-tier-0 {
   --profile-rating-reward-accent: #d7d8de;
   --profile-rating-reward-glow: rgba(215, 216, 222, 0);
 }
 
-.profile-rating-reward.is-reward-tier-0 .profile-rating-reward-icon,
 .player-popup-rating-reward.is-reward-tier-0 .player-popup-rating-reward-icon {
   filter: none;
 }
 
-.profile-rating-reward.is-reward-tier-0 .profile-rating-reward-name,
 .player-popup-rating-reward.is-reward-tier-0 .player-popup-rating-reward-name {
   text-shadow: none;
 }
 
 /* Tier colours of the reward icons (1 Bronze to 7 Strikers Titan). The compact rank icon of the same
    tier glows in the same colour (rating-cards.css), as both show the same rank. */
-.profile-rating-reward.is-reward-tier-1,
 .player-popup-rating-reward.is-reward-tier-1,
-:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-1 {
+.player-popup-rating-compact-rank.is-rank-tier-1 {
   --profile-rating-reward-accent: #d47a2d;
   --profile-rating-reward-glow: rgba(212, 122, 45, 0.42);
 }
 
-.profile-rating-reward.is-reward-tier-2,
 .player-popup-rating-reward.is-reward-tier-2,
-:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-2 {
+.player-popup-rating-compact-rank.is-rank-tier-2 {
   --profile-rating-reward-accent: #dceaf2;
   --profile-rating-reward-glow: rgba(220, 234, 242, 0.48);
 }
 
-.profile-rating-reward.is-reward-tier-3,
 .player-popup-rating-reward.is-reward-tier-3,
-:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-3 {
+.player-popup-rating-compact-rank.is-rank-tier-3 {
   --profile-rating-reward-accent: #f2b832;
   --profile-rating-reward-glow: rgba(242, 184, 50, 0.44);
 }
 
-.profile-rating-reward.is-reward-tier-4,
 .player-popup-rating-reward.is-reward-tier-4,
-:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-4 {
+.player-popup-rating-compact-rank.is-rank-tier-4 {
   --profile-rating-reward-accent: #65dce4;
   --profile-rating-reward-glow: rgba(101, 220, 228, 0.42);
 }
 
-.profile-rating-reward.is-reward-tier-5,
 .player-popup-rating-reward.is-reward-tier-5,
-:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-5 {
+.player-popup-rating-compact-rank.is-rank-tier-5 {
   --profile-rating-reward-accent: #82d8ff;
   --profile-rating-reward-glow: rgba(130, 216, 255, 0.44);
 }
 
-.profile-rating-reward.is-reward-tier-6,
 .player-popup-rating-reward.is-reward-tier-6,
-:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-6 {
+.player-popup-rating-compact-rank.is-rank-tier-6 {
   --profile-rating-reward-accent: #a77cff;
   --profile-rating-reward-glow: rgba(167, 124, 255, 0.44);
 }
 
-.profile-rating-reward.is-reward-tier-7,
 .player-popup-rating-reward.is-reward-tier-7,
-:is(.profile-rating-compact-rank, .player-popup-rating-compact-rank).is-rank-tier-7 {
+.player-popup-rating-compact-rank.is-rank-tier-7 {
   --profile-rating-reward-accent: #f05b6a;
   --profile-rating-reward-glow: rgba(240, 91, 106, 0.44);
 }
 
-.profile-rating-reward-rule {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.28);
-}
-
-.profile-rating-reward-progress {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.45rem;
-  color: rgba(255, 255, 255, 0.68);
-  font-size: 0.78em;
-  line-height: 1.15;
-}
-
-.profile-rating-reward-progress span,
 .player-popup-rating-reward-progress span {
   letter-spacing: 0;
 }
 
-.profile-rating-reward-progress strong {
-  flex: 0 0 auto;
-  color: rgba(255, 255, 255, 0.86);
-  font-weight: 700;
-}
-
-.profile-accolades-details,
 .player-popup-accolades-details,
-.profile-season-awards-details,
 .player-popup-season-awards-details {
   min-width: 0;
 }
 
-.profile-accolades-details > summary,
 .player-popup-accolades-details > summary,
-.profile-season-awards-details > summary,
 .player-popup-season-awards-details > summary {
   cursor: pointer;
   display: flex;
@@ -459,31 +159,23 @@
   user-select: none;
 }
 
-.profile-accolades-details > summary::-webkit-details-marker,
 .player-popup-accolades-details > summary::-webkit-details-marker,
-.profile-season-awards-details > summary::-webkit-details-marker,
 .player-popup-season-awards-details > summary::-webkit-details-marker {
   display: none;
 }
 
-.profile-accolades-details > summary:focus-visible,
 .player-popup-accolades-details > summary:focus-visible,
-.profile-season-awards-details > summary:focus-visible,
 .player-popup-season-awards-details > summary:focus-visible {
   outline: 2px solid rgba(255, 180, 64, 0.72);
   outline-offset: 3px;
 }
 
-.profile-accolades-summary .profile-panel-title,
 .player-popup-accolades-summary .player-popup-section-title,
-.profile-season-awards-summary .profile-panel-title,
 .player-popup-season-awards-summary .player-popup-section-title {
   margin: 0;
 }
 
-.profile-accolades-details > summary::after,
 .player-popup-accolades-details > summary::after,
-.profile-season-awards-details > summary::after,
 .player-popup-season-awards-details > summary::after {
   content: "▶";
   color: #ff8a00;
@@ -493,14 +185,11 @@
   flex: 0 0 auto;
 }
 
-.profile-accolades-details[open] > summary::after,
 .player-popup-accolades-details[open] > summary::after,
-.profile-season-awards-details[open] > summary::after,
 .player-popup-season-awards-details[open] > summary::after {
   content: "▼";
 }
 
-.profile-season-awards,
 .player-popup-season-awards {
   margin: 0.42rem 0 0;
   padding: 0;
@@ -508,7 +197,6 @@
   display: grid;
   gap: 0.25rem;
 }
-.profile-season-award-item,
 .player-popup-season-award-item {
   display: grid;
   grid-template-columns: auto auto minmax(0, 1fr);
@@ -521,20 +209,17 @@
   letter-spacing: var(--reporter-letter-spacing);
   line-height: var(--reporter-line-height);
 }
-.profile-season-award-ball,
 .player-popup-season-award-ball {
   width: 16px;
   height: 16px;
   object-fit: contain;
 }
-.profile-season-award-season,
 .player-popup-season-award-season {
   white-space: nowrap;
   /* letter-spacing is also applied AFTER the last glyph, which pushed the ball 1.33px
      further right than the gap on its other side; cancel that trailing advance. */
   margin-right: calc(-1 * var(--reporter-letter-spacing));
 }
-.profile-season-award-name,
 .player-popup-season-award-name {
   min-width: 0;
   overflow: hidden;
@@ -545,79 +230,29 @@
 /* Reward and accolade entries read as full caps; the "Season Rewards" / "Tourney Accolades"
    headings above them stay as written. Done here rather than by upper-casing the strings, so the
    real text still reaches screen readers, copy/paste and the API. */
-.profile-season-award-season,
 .player-popup-season-award-season,
-.profile-season-award-name,
 .player-popup-season-award-name,
-.profile-accolade-name,
 .player-popup-accolade-name {
   text-transform: uppercase;
-}
-.profile-accolades {
-  margin: 0.42rem 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 0.25rem;
-}
-
-.profile-accolade-item {
-  display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.32rem;
-  color: var(--color-text-light);
-  font-family: var(--reporter-font-stack);
-  font-weight: var(--reporter-font-weight);
-  font-size: var(--reporter-font-size-sm);
-  letter-spacing: var(--reporter-letter-spacing);
-  line-height: var(--reporter-line-height);
-}
-
-.profile-accolade-ball {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-}
-
-.profile-accolade-medal {
-  width: 1.25em;
-  text-align: center;
-}
-
-.profile-accolade-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.profile-accolade-date {
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.92em;
 }
 
 /* Tournament winners are tinted in their game's colour - first place only, and deliberately
    without a glow: the glow is reserved for the world champion titles below, which is why the
    renderer never puts both classes on the same row. */
-.profile-accolade-name.is-winner-msbl,
 .player-popup-accolade-name.is-winner-msbl {
   color: var(--game-color-msbl);
 }
 
-.profile-accolade-name.is-winner-msc,
 .player-popup-accolade-name.is-winner-msc {
   color: var(--game-color-msc);
 }
 
-.profile-accolade-name.is-winner-sms,
 .player-popup-accolade-name.is-winner-sms {
   color: var(--game-color-sms);
 }
 
 /* Gold at an MSL World Championship is the top honour in the scene, so the title glows.
    Set by is_world_champion from the backend - see players-service.js. */
-.profile-accolade-name.is-world-champion,
 .player-popup-accolade-name.is-world-champion {
   color: #ffed60;
   text-shadow:
@@ -628,7 +263,6 @@
 
 /* The medal gets the same glow. drop-shadow works off the glyph's alpha channel, so the halo
    follows the medal's outline instead of its box - the same reason the reward icons use it. */
-.profile-accolade-medal.is-world-champion,
 .player-popup-accolade-medal.is-world-champion {
   filter:
     drop-shadow(0 0 var(--accolade-champion-glow-near) var(--accolade-champion-tint-near))
@@ -636,26 +270,18 @@
     drop-shadow(0 0 var(--accolade-champion-glow-far) var(--accolade-champion-tint-far));
 }
 
-/* .profile-accolade-name clips with overflow: hidden for its ellipsis, which would cut the
-   glow off. Widen the clip box sideways without moving the text - same trick the rating
-   cards use with --profile-rating-reward-glow-gutter. */
-.profile-accolade-name.is-world-champion {
-  padding: var(--accolade-glow-room) var(--profile-rating-reward-glow-gutter);
-  margin: calc(-1 * var(--accolade-glow-room)) calc(-1 * var(--profile-rating-reward-glow-gutter));
-}
-
 /* An MSL World Champion's profile header (page and popup; isWorldChampion in profile-data.ts) keeps
    its orange title image, tinted gold: on ::before a gold layer in "color" blend mode gives the
    image and the plain orange beyond it the gold hue while they keep their own light and texture,
    then the layer is brightened. The name turns black. The popup's selectors carry its id, as its
    header background is set with one (popups.css). */
-:is(.profile-header-title, #player-profile-popup .player-popup-header).is-world-champion {
+:is(#player-profile-popup, #player-profile-page) .player-popup-header.is-world-champion {
   position: relative;
   isolation: isolate;
   background: none;
 }
 
-:is(.profile-header-title, #player-profile-popup .player-popup-header).is-world-champion::before {
+:is(#player-profile-popup, #player-profile-page) .player-popup-header.is-world-champion::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -668,43 +294,29 @@
   filter: brightness(2.2) saturate(1.1);
 }
 
-:is(.profile-header-title, .player-popup-header).is-world-champion :is(.profile-name, .player-popup-name) {
+.player-popup-header.is-world-champion .player-popup-name {
   color: #000;
 }
 
 /* The MSL logo (assets/msl/msl-logo.webp, a black silhouette, 172x128) sits at the header's right
-   end (popup: left of the close button), vertically centred on the whole header, with a 1px drop
-   shadow; the name's row keeps clear of it. The gold is a gradient masked by the logo on ::before,
-   so the shadow on the element follows the logo's outline. */
-.profile-msl-champion,
+   end, left of the close button (on the profile page: of the pencil), vertically centred on the whole
+   header, with a 1px drop shadow; the name's row keeps clear of it. The gold is a gradient masked by
+   the logo on ::before, so the shadow on the element follows the logo's outline. */
 .player-popup-msl-champion {
   position: absolute;
   top: 50%;
+  right: 2.1rem;
+  height: 25px;
   aspect-ratio: 172 / 128;
   transform: translateY(-50%);
   filter: drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.85));
 }
 
-.profile-msl-champion {
-  right: 1rem;
-  height: 29px;
-}
-
-.player-popup-msl-champion {
-  right: 2.1rem;
-  height: 25px;
-}
-
-/* Logo width (height x 172/128) plus a gap. */
-.profile-header-title.is-world-champion {
-  padding-right: calc(1rem + 39px + 0.5rem);
-}
-
+/* Room for the logo and the close button. */
 .player-popup-header.is-world-champion .player-popup-header-title {
   max-width: calc(100% - 3.7rem);
 }
 
-.profile-msl-champion::before,
 .player-popup-msl-champion::before {
   content: "";
   display: block;
@@ -721,305 +333,178 @@
   mask-size: contain;
 }
 
+/* --- Editing on the profile page (features/profile/profile-edit.ts) --- */
 
-/* --- Profile editor (features/profile/profile-edit-popup.html) ------ */
-
-.profile-meta-actions {
-  margin: 0.4rem 0 0;
-}
-
-.profile-meta-actions .profile-action-button {
-  text-transform: uppercase;
-}
-
-.profile-action-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-#profile-edit-popup .profile-edit-card {
-  width: min(640px, calc(100vw - 1.8rem));
-}
-
-.profile-edit-close {
-  font-size: 1.6rem;
-  line-height: 1;
-}
-
-.profile-edit-body {
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-.profile-edit-loading {
-  margin: 0;
-  padding: 1rem;
-  color: #fff;
-}
-
-.profile-edit-loading.is-error {
-  color: #ff9f9f;
-}
-
-.profile-edit-form {
-  display: grid;
-  gap: 0.75rem;
-  padding: 0.9rem 1rem 1rem;
-  color: #fff;
-  font-family: var(--reporter-font-stack);
-  font-weight: var(--reporter-font-weight);
-  font-size: var(--reporter-font-size-xs);
-  line-height: 1.4;
-  letter-spacing: var(--reporter-letter-spacing);
-}
-
-.profile-edit-section {
-  display: grid;
-  gap: 0.4rem;
-  padding: 0.6rem 0.7rem;
-  border-left: 3px solid transparent;
-  background: rgba(0, 0, 0, 0.5);
-}
-
-/* After a merge: saved meanwhile elsewhere (amber), or changed here and elsewhere (red). */
-.profile-edit-section[data-conflict="updated"] {
-  border-left-color: var(--color-amber);
-}
-
-.profile-edit-section[data-conflict="contested"] {
-  border-left-color: #ff6b6b;
-}
-
-.profile-edit-section-title {
-  margin: 0;
-  color: var(--color-gold);
-  font-family: "ITC Grizzly", sans-serif;
-  font-weight: 400;
-  font-size: 1rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-.profile-edit-names {
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.6rem;
-}
-
-.profile-edit-name {
-  min-width: 0;
-}
-
-.profile-edit-name dt {
+/* "Member of <club> [<tag>]" in the popup's text, the club in the buttons' gold; without a club the
+   line stays, empty but one line tall. */
+#player-profile-page .profile-club-line {
+  min-height: 1.22em;
+  margin: 0.7rem 0 0;
   color: #d7d8de;
+  font-size: 15px;
+  line-height: 1.22;
 }
 
-.profile-edit-name dd {
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.profile-club-name {
+  color: var(--color-gold);
 }
 
-.profile-edit-note,
-.profile-edit-error,
 .profile-edit-status {
+  margin: 0.7rem 0 0;
+  color: #d7d8de;
+  font-size: 15px;
+  line-height: 1.22;
+}
+
+.profile-edit-status.is-success {
+  color: #8ee69a;
+}
+
+.profile-edit-status.is-error,
+.profile-edit-error {
+  color: #ff8a8a;
+}
+
+.profile-edit-status a {
+  color: var(--color-gold);
+}
+
+/* Pencils, "+", "−", ✓ and ✕. */
+.profile-edit-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #d7d8de;
+  cursor: pointer;
+}
+
+.profile-edit-icon:hover,
+.profile-edit-icon:focus-visible {
+  color: var(--color-gold);
+}
+
+.profile-edit-icon:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 1px;
+}
+
+.profile-edit-icon:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+.profile-edit-icon.is-save {
+  color: #8ee69a;
+}
+
+/* At the right end of a line. */
+.profile-row-actions,
+.profile-edit-actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 0.15rem;
+  margin-left: auto;
+}
+
+/* The country's pencil sits where the popup has its close button. */
+.profile-header-actions {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.45rem;
+  z-index: 2;
+}
+
+.profile-header-actions .profile-edit-icon {
+  color: #fff;
+}
+
+/* "+" at the right end of the MSC section's title. */
+#player-profile-page .player-popup-section:has(> .profile-section-actions) {
+  position: relative;
+}
+
+.profile-section-actions {
+  position: absolute;
+  top: -3px;
+  right: 0;
+}
+
+.profile-code-missing .player-popup-code-value {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.profile-row-hint {
   margin: 0;
+  color: #ffc46b;
+  font-size: 15px;
+  line-height: 1.22;
 }
 
-.profile-edit-note {
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.profile-edit-note.is-error,
-.profile-edit-error,
-.profile-edit-status.is-error {
-  color: #ff9f9f;
-}
-
-.profile-edit-country {
+/* An open line: the dark row of a code line, with the fields. */
+.profile-edit-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem 0.45rem;
+  padding: 0.3rem 0.55rem;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 15px;
+  line-height: 1.22;
+}
+
+#player-profile-page .player-popup-content > .profile-edit-row {
+  margin-top: 0.7rem;
+}
+
+.profile-edit-label,
+.profile-edit-prefix,
+.profile-edit-dash {
+  color: #d7d8de;
 }
 
 /* Fields keep 16px text, so phones do not zoom into them. */
 .profile-edit-select,
 .profile-edit-digits {
-  min-height: 36px;
-  border: 1px solid var(--color-amber);
+  min-height: 28px;
+  padding: 0.1rem 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 0;
-  background: rgba(20, 0, 0, 0.86);
+  background: #111;
   color: #fff;
-  font: inherit;
   font-size: 16px;
-  letter-spacing: normal;
 }
 
-.profile-edit-select {
-  min-width: 0;
-  padding: 0 0.42rem;
+.profile-edit-select:focus-visible,
+.profile-edit-digits:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 0;
 }
 
-#profile-edit-country {
-  width: min(320px, 100%);
+.profile-edit-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.profile-edit-digits {
+  width: 3.4em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
 /* One height, the width follows the flag's own proportions. */
 .profile-edit-flag {
   width: auto;
-  height: 20px;
-  border: 1px solid rgba(0, 0, 0, 0.65);
+  height: 18px;
+  border: 1px solid rgba(0, 0, 0, 0.6);
 }
 
-.profile-edit-code {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  min-width: 0;
-}
-
-.profile-edit-code-prefix,
-.profile-edit-code-dash {
-  flex: 0 0 auto;
-  color: #d7d8de;
-}
-
-.profile-edit-digits {
-  flex: 1 1 0;
-  width: 5em;
-  min-width: 3.4em;
-  max-width: 5em;
-  padding: 0 0.3rem;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.08em;
-}
-
-.profile-edit-select:focus-visible,
-.profile-edit-digits:focus-visible,
-.profile-edit-clear:focus-visible {
-  outline: 2px solid var(--color-gold);
-  outline-offset: 2px;
-}
-
-.profile-edit-select[aria-invalid="true"],
-.profile-edit-digits[aria-invalid="true"] {
-  border-color: #ff6b6b;
-}
-
-.profile-edit-clear {
-  flex: 0 0 auto;
-  width: 32px;
-  height: 32px;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: #d7d8de;
-  font: inherit;
-  font-size: 1.25rem;
-  cursor: pointer;
-}
-
-.profile-edit-clear:hover {
-  color: var(--color-gold);
-}
-
-.profile-edit-msc-list {
+.profile-edit-error {
+  flex-basis: 100%;
   margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.6rem;
-  list-style: none;
-}
-
-.profile-edit-msc-row {
-  display: grid;
-  grid-template-areas:
-    "number region platform"
-    ". code code"
-    ". error error";
-  /* The region's label ("NTSC-U (R4QE01)") is the longest. */
-  grid-template-columns: 1.6em minmax(0, 1.65fr) minmax(0, 1fr);
-  gap: 0.35rem 0.4rem;
-  align-items: center;
-}
-
-.profile-edit-msc-number {
-  grid-area: number;
-  color: #d7d8de;
-}
-
-.profile-edit-msc-row [data-field="region"] {
-  grid-area: region;
-}
-
-.profile-edit-msc-row [data-field="platform"] {
-  grid-area: platform;
-}
-
-.profile-edit-msc-row .profile-edit-code {
-  grid-area: code;
-}
-
-.profile-edit-msc-row .profile-edit-error {
-  grid-area: error;
-}
-
-.profile-edit-summary {
-  margin: 0;
-  padding: 0.5rem 0.7rem;
-  background: rgba(120, 0, 0, 0.6);
-}
-
-.profile-edit-summary a {
-  color: var(--color-gold);
-}
-
-.profile-edit-confirm {
-  display: grid;
-  gap: 0.5rem;
-  padding: 0.6rem 0.7rem;
-  border: 1px solid var(--color-amber);
-  background: rgba(0, 0, 0, 0.7);
-}
-
-.profile-edit-confirm-text {
-  margin: 0;
-}
-
-/* Status, the discard question and the buttons stay in view while the form scrolls. */
-.profile-edit-footer {
-  position: sticky;
-  bottom: 0;
-  z-index: 1;
-  display: grid;
-  gap: 0.5rem;
-  margin: 0 -1rem -1rem;
-  padding: 0.6rem 1rem 1rem;
-  border-top: 1px solid rgba(199, 118, 3, 0.45);
-  background: rgba(16, 8, 8, 0.96);
-}
-
-.profile-edit-confirm-actions,
-.profile-edit-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.profile-edit-actions {
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.profile-edit-status {
-  flex: 1 1 12rem;
-  color: #d7d8de;
-}
-
-.profile-edit-status.is-success {
-  color: var(--color-amber);
 }
