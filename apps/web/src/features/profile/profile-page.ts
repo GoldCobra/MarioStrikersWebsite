@@ -202,10 +202,31 @@ async function fetchEditable(): Promise<EditableProfile | null> {
   }
 }
 
+/**
+ * Whether the visitor is signed in (null when that is unknown). Asked first, so a visitor who is not
+ * signed in gets no refused profile requests (each one is an error in the browser's console).
+ */
+async function signedIn(): Promise<boolean | null> {
+  try {
+    const response = await fetch("/api/auth/me", {
+      credentials: "same-origin",
+      headers: { Accept: "application/json" },
+    });
+    const body = (await response.json().catch(() => null)) as { authenticated?: unknown } | null;
+    return response.ok ? body?.authenticated === true : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Shows the profile and its editing, both at once (the editable profile is loaded alongside). */
 async function loadProfile(mount: HTMLElement): Promise<void> {
   mount.innerHTML = '<p class="profile-loading loading-note">Loading...</p>';
   try {
+    if ((await signedIn()) === false) {
+      mount.innerHTML = loginRequiredHtml();
+      return;
+    }
     let [result, editable] = await Promise.all([fetchProfile(), fetchEditable()]);
     if (result.payload?.code === "PLAYER_PROFILE_NOT_LINKED" && (await createProfile())) {
       [result, editable] = await Promise.all([fetchProfile(), fetchEditable()]);
