@@ -36,6 +36,8 @@ export interface PublicDiscordUser {
 export interface Session {
   discord_user?: PublicDiscordUser;
   discord_user_id: string;
+  /** The server nickname at login; sessions from before it was stored have none. */
+  guild_nick?: string;
   issued_at?: number;
   expires_at?: number;
 }
@@ -94,13 +96,14 @@ export class SessionManager {
     });
   }
 
-  createSessionCookie(user: DiscordUser): string {
+  createSessionCookie(user: DiscordUser, guildNick = ""): string {
     const now = this.settings.now();
     const publicUser = toPublicDiscordUser(user);
     const token = createSignedToken(
       {
         discord_user: publicUser,
         discord_user_id: publicUser.id,
+        guild_nick: toText(guildNick).trim(),
         issued_at: now,
         expires_at: now + this.settings.ttlMs,
       },

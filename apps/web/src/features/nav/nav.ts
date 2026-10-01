@@ -127,9 +127,23 @@ function discordAvatarUrl(user: DiscordUser): string {
   return `https://cdn.discordapp.com/avatars/${encodeURIComponent(id)}/${encodeURIComponent(avatar)}.png?size=64`;
 }
 
-function renderLoggedOut(root: HTMLElement): void {
+/** Every login ends on the profile page, which also explains a failed one. */
+const LOGIN_URL = "/api/auth/discord/start?returnTo=%2Fprofile";
+// A person in the icon circle the signed-in button shows its avatar in; phones show the icon alone.
+const LOGIN_ICON =
+  '<svg class="global-account-login-glyph" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">' +
+  '<circle cx="8" cy="5" r="3" fill="currentColor"/><path d="M2.5 14.5c0-3.2 2.4-5.4 5.5-5.4s5.5 2.2 5.5 5.4z" fill="currentColor"/></svg>';
+
+function renderLoggedOut(root: HTMLElement, loginAvailable: boolean): void {
   root.setAttribute("data-auth-state", "logged-out");
-  root.innerHTML = "";
+  root.innerHTML = loginAvailable
+    ? [
+        `<a class="global-account-button global-account-login" href="${LOGIN_URL}" aria-label="Login with Discord">`,
+        `<span class="global-account-icon" aria-hidden="true">${LOGIN_ICON}</span>`,
+        '<span class="global-account-name" aria-hidden="true">Login</span>',
+        "</a>",
+      ].join("")
+    : "";
 }
 
 function renderLoggedIn(root: HTMLElement, user: DiscordUser): void {
@@ -188,7 +202,7 @@ function bindAccountInteractions(root: HTMLElement): void {
         .then((response) => {
           if (!response.ok) throw new Error("Logout failed.");
           if (pageSlug() === "profile") window.location.reload();
-          else renderLoggedOut(root);
+          else renderLoggedOut(root, true);
         })
         .catch(() => {
           // The session may still exist: stay signed in and let the user try again.
@@ -236,14 +250,18 @@ function initAccount(root: HTMLElement | null): void {
     .then((response) => {
       if (!response.ok) throw new Error("Auth status failed.");
       if (response.headers.get("X-Data-Source") === "fixtures") showFixtureNotice();
-      return response.json() as Promise<{ authenticated?: boolean; user?: DiscordUser } | null>;
+      return response.json() as Promise<{
+        authenticated?: boolean;
+        user?: DiscordUser;
+        login_available?: boolean;
+      } | null>;
     })
     .then((payload) => {
       if (payload?.authenticated) renderLoggedIn(root, payload.user ?? {});
-      else renderLoggedOut(root);
+      else renderLoggedOut(root, payload?.login_available === true);
     })
     .catch(() => {
-      renderLoggedOut(root);
+      renderLoggedOut(root, false);
     });
 }
 

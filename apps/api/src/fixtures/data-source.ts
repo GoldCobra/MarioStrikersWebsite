@@ -7,13 +7,14 @@ import path from "node:path";
 import { COMPETITIVE_SEASON_KEY, MSBL_CLUBS_KEY, PLAYERS_LIST_KEY } from "../cache/public-data-keys.ts";
 import type { CacheResult } from "../cache/public-data-cache.ts";
 import type { DataSource } from "../data-source.ts";
-import type { DiscordOAuthClient } from "../modules/auth/discord-oauth.ts";
+import type { DiscordLogin, DiscordOAuthClient } from "../modules/auth/discord-oauth.ts";
 import { SessionManager } from "../modules/auth/session.ts";
 import type { ClubListItem, ClubProfile, RosterRow } from "../modules/clubs/mappers.ts";
 import type { EventsPayload } from "../modules/events/service.ts";
 import { assertGameAndMode, parseLimit, parseOffset, type GameCode } from "../modules/leaderboards/params.ts";
 import type { LeaderboardRow } from "../modules/leaderboards/service.ts";
 import type { PlayerListItem, PlayerProfile, RatingBlock, SeasonRewardLevelDto } from "../modules/players/mappers.ts";
+import { createProfileService, type ProfileStore } from "../modules/profile/service.ts";
 
 const DAY_MS = 86_400_000;
 const ASSET_VERSION = "20260608-rank-crop-v1";
@@ -246,9 +247,9 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
     global_name: "Unlinked Sample",
     avatar: "",
   };
-  const usersByCode: Readonly<Record<string, typeof linkedUser>> = {
-    sample: linkedUser,
-    "sample-unlinked": unlinkedUser,
+  const loginsByCode: Readonly<Record<string, DiscordLogin>> = {
+    sample: { user: linkedUser, nick: "[SMP] Sample Player" },
+    "sample-unlinked": { user: unlinkedUser, nick: "" },
   };
 
   const clubs: ClubListItem[] = CLUB_DEFS.map(([name, tag, status, region, regions], index) => {
@@ -555,14 +556,50 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
   const findClub = (id: unknown): ClubListItem | undefined => clubs.find((row) => String(row.club_id) === String(id));
 
   // Discord login is simulated: "sample" logs in the linked player, "sample-unlinked" a Discord user
-  // without a profile. The session and state logic is the real one.
+  // without a profile, who gets a new one like on the live site. The session and state logic is the real one.
   const oauth: DiscordOAuthClient = {
     authorizeUrl: (state) => `/api/auth/discord/callback?code=sample&state=${encodeURIComponent(state)}`,
     completeLogin: (code) => {
-      const user = usersByCode[code];
-      return user ? Promise.resolve(user) : Promise.reject(new Error("Invalid sample login code."));
+      const login = loginsByCode[code];
+      return login ? Promise.resolve(login) : Promise.reject(new Error("Invalid sample login code."));
     },
   };
+
+  // Profiles created by simulated logins, by Discord id; they live as long as the process.
+  const createdPlayers = new Map<string, { readonly player_id: number; readonly name: string }>();
+  const profileStore: ProfileStore = {
+    ensurePlayer: (discordId, name) => {
+      if (discordId === linkedUser.id) return Promise.resolve({ playerId: 1, created: false });
+      const existing = createdPlayers.get(discordId);
+      if (existing) return Promise.resolve({ playerId: existing.player_id, created: false });
+      const player = { player_id: players.length + createdPlayers.size + 1, name };
+      createdPlayers.set(discordId, player);
+      return Promise.resolve({ playerId: player.player_id, created: true });
+    },
+  };
+
+  // A profile created at login: nothing in it yet but the name.
+  function buildNewPlayerProfile(player: { readonly player_id: number; readonly name: string }): PlayerProfile {
+    return {
+      player: {
+        id: player.player_id,
+        name: player.name,
+        country: "",
+        club_id: null,
+        club_name: "",
+        club_tag: "",
+        results_url: "",
+        activity: generatedAt,
+        is_active: true,
+      },
+      friend_codes: { switch: [], msc: [], msc_pal: [], msc_ntsc: [], msc_kor: [], msc_jpn: [] },
+      season_awards: [],
+      accolades: [],
+      ratings: { sms: {}, msc: {}, msbl: {}, sms2v2: {}, msc2v2: {}, msbl2v2: {} },
+      season_reward_level: rewardLevel(0),
+      highest_rank_banner_url: "",
+    };
+  }
   const sessions = new SessionManager({
     secret: crypto.randomBytes(32).toString("hex"),
     cookieName: "msc_dev_session",
@@ -638,8 +675,11 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
     },
     getPlayerProfileByDiscordId: (discordId) => {
       const player = findPlayer(1);
-      return Promise.resolve(discordId === linkedUser.id && player ? buildPlayerProfile(player) : null);
+      if (discordId === linkedUser.id && player) return Promise.resolve(buildPlayerProfile(player));
+      const created = createdPlayers.get(discordId);
+      return Promise.resolve(created ? buildNewPlayerProfile(created) : null);
     },
+    profiles: createProfileService(profileStore),
     getClubProfile: (clubId) => {
       const club = findClub(clubId);
       return Promise.resolve(club ? buildClubProfile(club) : null);

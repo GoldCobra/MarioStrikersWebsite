@@ -12,8 +12,10 @@ match the live site.
 The development runner uses invented players, clubs, rankings, season data,
 events and Wiimmfi results from `apps/api/src/fixtures/data-source.ts`. It does not
 require or use production credentials. Login with Discord is simulated locally:
-you can inspect a sample account and log out without contacting Discord.
-It does not validate real OAuth, guild membership or live database behavior.
+you can inspect a sample account and log out without contacting Discord; the
+second sample account has no profile and gets a new one at login, kept in
+memory until the API restarts. It does not validate real OAuth, guild
+membership or live database behavior.
 
 `npm run dev` selects fixtures explicitly; `npm start` remains the live API
 entrypoint. Production rejects fixture mode.

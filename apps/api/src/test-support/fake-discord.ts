@@ -19,6 +19,9 @@ export const DISCORD_TEST_USER = {
   avatar: "avatarhash",
 };
 
+/** The member's server nickname, as robotic_nightmare's nickname sync writes it for club members. */
+export const DISCORD_TEST_NICK = "[CE] GoldCobra";
+
 /** Discord's three OAuth endpoints; member=false answers the membership check with 404 Unknown Member. */
 export function createFakeDiscordFetch({ member = true } = {}): { fetch: typeof fetch; requests: string[] } {
   const requests: string[] = [];
@@ -39,7 +42,7 @@ export function createFakeDiscordFetch({ member = true } = {}): { fetch: typeof 
     if (url.pathname === "/api/users/@me" && authorized) return json(DISCORD_TEST_USER);
     if (url.pathname === "/api/users/@me/guilds/987654321/member" && authorized) {
       return member
-        ? json({ user: { id: DISCORD_TEST_USER.id }, roles: [] })
+        ? json({ user: { id: DISCORD_TEST_USER.id }, nick: DISCORD_TEST_NICK, roles: [] })
         : json({ message: "Unknown Member" }, 404);
     }
     return json({ message: "Not found" }, 404);

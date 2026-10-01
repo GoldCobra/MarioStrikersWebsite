@@ -55,6 +55,7 @@ test("session cookies round-trip and fail closed", () => {
     user: { id: "123", username: "tester", global_name: "Tester", avatar: "" },
     expires_at: new Date(1_060_000).toISOString(),
   });
+  assert.equal(session.guild_nick, "");
   assert.equal(manager.readSession(tamper(cookiePair(cookie))), null);
   assert.equal(manager.readSession("msc_session=%"), null);
   assert.match(
@@ -64,4 +65,10 @@ test("session cookies round-trip and fail closed", () => {
   clock.now += 60_001;
   assert.equal(manager.readSession(cookiePair(cookie)), null);
   assert.deepEqual(SessionManager.toAuthMeResponse(null), { authenticated: false });
+});
+
+test("the session keeps the server nickname of the login", () => {
+  const manager = createManager();
+  const cookie = manager.createSessionCookie({ id: "123", username: "tester" }, "  [CE] Tester  ");
+  assert.equal(manager.readSession(cookiePair(cookie))?.guild_nick, "[CE] Tester");
 });

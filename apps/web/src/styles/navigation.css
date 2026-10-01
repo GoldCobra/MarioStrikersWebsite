@@ -184,6 +184,11 @@
   letter-spacing: 0.02em;
 }
 
+/* Logged out: the login link has the signed-in button's shape, with a person glyph for the avatar. */
+.global-account-login-glyph {
+  display: block;
+}
+
 .global-account-menu {
   position: absolute;
   top: calc(100% + 0.36rem);
