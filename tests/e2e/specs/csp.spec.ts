@@ -126,6 +126,27 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await expect(page.locator("#profile-edit-popup")).toBeVisible();
     await settle(page);
   },
+  // An older MSC code saved without a platform asks for one as soon as the editor opens, without
+  // taking the focus.
+  "profile editor with a code without platform": async (page) => {
+    await watchViolations(page);
+    await preparePage(page);
+    await login(page, "linked");
+    await page.route("**/api/profile/me/editable", async (route) => {
+      const response = await route.fetch();
+      const profile = (await response.json()) as { msc_codes: { platform: string }[] };
+      profile.msc_codes = profile.msc_codes.map((entry, index) => (index === 0 ? { ...entry, platform: "" } : entry));
+      await route.fulfill({ response, json: profile });
+    });
+    await page.goto("/profile");
+    await settle(page, { eagerImages: true });
+    await page.locator("[data-profile-action='edit']").click();
+    await page.locator(".profile-edit-form:not([hidden])").waitFor();
+    await expect(page.locator("[data-error='msc.0']")).toHaveText("Select the platform.");
+    await expect(page.locator("[data-msc-row='0'] [data-field='platform']")).toHaveAttribute("aria-invalid", "true");
+    await expect(page.locator(".profile-edit-close")).toBeFocused();
+    await settle(page);
+  },
   "gear builder panes, character menu and card picture": async (page) => {
     await open(page, "/msbl-gear-builder");
     const tabs = page.locator('.tab-link-icon[aria-controls^="tab-"]');

@@ -1,18 +1,5 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "0d256eb762a7c5b6540ff026154c26e17ba17050",
-  "changes": [
-    {
-      "screenshots": ["states/profile-edit-*"],
-      "reason": "New states: the profile editor (existing profile, profile created at login, validation errors, a profile changed elsewhere meanwhile). The reference has no editor and shows the profile page."
-    },
-    {
-      "screenshots": ["states/profile-linked-*", "states/profile-unlinked-*"],
-      "reason": "The profile header has an 'Edit Profile' button, which moves the panels below it down."
-    },
-    {
-      "screenshots": ["states/account-menu-*"],
-      "reason": "The account menu was cut off by the header (overflow: hidden): it is now placed in the viewport and shows all three items; 'Modify Profile' opens the editor instead of being disabled."
-    }
-  ]
+  "reference": "e1728bd58fdae83fe99869d89b534f89df443b3b",
+  "changes": []
 }
