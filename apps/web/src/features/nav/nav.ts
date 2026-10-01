@@ -1,8 +1,8 @@
-// Behaviour of the navigation the layout renders into every page: the account widget, the page tabs,
-// centring of overflowing navigation, link prefetching and redirects of old ?tabs= and ?submenu= links.
+// Behaviour of the navigation the layout renders into every page: the login (the account button once
+// signed in), the page tabs, centring of overflowing navigation, link prefetching and redirects of old
+// ?tabs= and ?submenu= links.
 
 import { escapeHtml } from "@ms/shared/html";
-import { loginPath } from "@ms/shared/site/navigation";
 import { initTabsGroup } from "../tabs/tabs-engine.ts";
 
 interface DiscordUser {
@@ -121,122 +121,121 @@ function scheduleInitialPrefetch(): void {
   });
 }
 
+/** The member's Discord avatar; Discord's default one ((id >> 22) % 6) when they have set none. */
 function discordAvatarUrl(user: DiscordUser): string {
   const id = (user.id ?? "").trim();
   const avatar = (user.avatar ?? "").trim();
-  if (!id || !avatar) return "";
-  return `https://cdn.discordapp.com/avatars/${encodeURIComponent(id)}/${encodeURIComponent(avatar)}.png?size=64`;
+  if (!/^\d{15,20}$/.test(id)) return "";
+  if (!avatar) return `https://cdn.discordapp.com/embed/avatars/${String((BigInt(id) >> 22n) % 6n)}.png`;
+  return `https://cdn.discordapp.com/avatars/${id}/${encodeURIComponent(avatar)}.png?size=128`;
 }
 
-/** Every login ends on the profile page, which also explains a failed one. */
-const LOGIN_URL = loginPath();
-// A person in the icon circle the signed-in button shows its avatar in; phones show the icon alone.
-const LOGIN_ICON =
-  '<svg class="global-account-login-glyph" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">' +
-  '<circle cx="8" cy="5" r="3" fill="currentColor"/><path d="M2.5 14.5c0-3.2 2.4-5.4 5.5-5.4s5.5 2.2 5.5 5.4z" fill="currentColor"/></svg>';
-
-function renderLoggedOut(root: HTMLElement, loginAvailable: boolean): void {
-  root.setAttribute("data-auth-state", "logged-out");
-  root.innerHTML = loginAvailable
-    ? [
-        `<a class="global-account-button global-account-login" href="${LOGIN_URL}" aria-label="Login with Discord">`,
-        `<span class="global-account-icon" aria-hidden="true">${LOGIN_ICON}</span>`,
-        '<span class="global-account-name" aria-hidden="true">Login</span>',
-        "</a>",
-      ].join("")
-    : "";
-}
-
-function renderLoggedIn(root: HTMLElement, user: DiscordUser): void {
-  const name = (user.global_name || user.username || user.id || "Account").trim();
-  const avatarUrl = discordAvatarUrl(user);
-  const avatar = avatarUrl
-    ? `<img class="global-account-avatar" src="${escapeHtml(avatarUrl)}" alt="" aria-hidden="true" referrerpolicy="no-referrer" data-on-error="hide">`
-    : '<span class="global-account-icon" aria-hidden="true">D</span>';
-  root.setAttribute("data-auth-state", "logged-in");
-  root.innerHTML = [
-    '<button class="global-account-button global-account-trigger" type="button" aria-haspopup="menu" aria-expanded="false" data-account-action="toggle">',
-    avatar,
-    `<span class="global-account-name">${escapeHtml(name)}</span>`,
-    "</button>",
-    '<div class="global-account-menu" role="menu" hidden>',
-    '<a class="global-account-menu-item" role="menuitem" href="/profile">My Profile</a>',
-    '<a class="global-account-menu-item" role="menuitem" href="/profile?edit=1">Modify Profile</a>',
-    '<button class="global-account-menu-item" role="menuitem" type="button" data-account-action="logout">Logout</button>',
-    "</div>",
-  ].join("");
-}
-
-function closeAccountMenu(root: HTMLElement): void {
-  const menu = root.querySelector<HTMLElement>(".global-account-menu");
-  if (menu) menu.hidden = true;
-  root.querySelector(".global-account-trigger")?.setAttribute("aria-expanded", "false");
+interface Account {
+  /** The login button as the page has it (a link to the Discord login). */
+  readonly link: HTMLAnchorElement;
+  readonly button: HTMLButtonElement;
+  readonly menu: HTMLElement;
 }
 
 // The header clips whatever overflows it, so the open menu is placed in the viewport, under its button.
-function placeAccountMenu(menu: HTMLElement, trigger: Element): void {
-  const box = trigger.getBoundingClientRect();
+function placeAccountMenu({ button, menu }: Account): void {
+  const box = button.getBoundingClientRect();
   menu.style.top = `${Math.round(box.bottom + 6)}px`;
   menu.style.right = `${Math.max(0, Math.round(document.documentElement.clientWidth - box.right))}px`;
 }
 
-function toggleAccountMenu(root: HTMLElement): void {
-  const menu = root.querySelector<HTMLElement>(".global-account-menu");
-  const trigger = root.querySelector(".global-account-trigger");
-  if (!menu || !trigger) return;
-  const open = menu.hidden;
-  if (open) placeAccountMenu(menu, trigger);
-  menu.hidden = !open;
-  trigger.setAttribute("aria-expanded", open ? "true" : "false");
+function setMenuOpen(account: Account, open: boolean): void {
+  if (open) placeAccountMenu(account);
+  account.menu.hidden = !open;
+  account.button.setAttribute("aria-expanded", open ? "true" : "false");
 }
 
-function bindAccountInteractions(root: HTMLElement): void {
-  if (root.getAttribute("data-account-bound") === "true") return;
-  root.setAttribute("data-account-bound", "true");
+function logout(account: Account, item: Element): void {
+  void fetch("/api/auth/logout", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { Accept: "application/json" },
+  })
+    .then((response) => {
+      if (!response.ok) throw new Error("Logout failed.");
+      if (pageSlug() === "profile") {
+        window.location.reload();
+        return;
+      }
+      account.menu.remove();
+      account.button.replaceWith(account.link);
+    })
+    .catch(() => {
+      // The session may still exist: stay signed in and let the user try again.
+      item.textContent = "Logout failed, try again";
+    });
+}
 
-  root.addEventListener("click", (event) => {
-    const actionNode = event.target instanceof Element ? event.target.closest("[data-account-action]") : null;
-    if (!actionNode || !root.contains(actionNode)) return;
-    const action = actionNode.getAttribute("data-account-action");
-    if (action === "toggle") {
-      event.preventDefault();
-      toggleAccountMenu(root);
-    } else if (action === "logout") {
-      event.preventDefault();
-      void fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { Accept: "application/json" },
-      })
-        .then((response) => {
-          if (!response.ok) throw new Error("Logout failed.");
-          if (pageSlug() === "profile") window.location.reload();
-          else renderLoggedOut(root, true);
-        })
-        .catch(() => {
-          // The session may still exist: stay signed in and let the user try again.
-          actionNode.textContent = "Logout failed, try again";
-        });
-    }
+/**
+ * Signed in, the login button becomes the account button: the member's avatar covers the login figure,
+ * and a click opens the menu (My Profile, Logout). The menu lives in <body>, as the navigation's
+ * transform would hold a fixed menu inside the header, which clips it.
+ */
+function showSignedIn(link: HTMLAnchorElement, user: DiscordUser): void {
+  const name = (user.global_name || user.username || "your account").trim();
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `${link.className} is-signed-in`;
+  button.dataset.topKey = "login";
+  button.setAttribute("aria-haspopup", "menu");
+  button.setAttribute("aria-expanded", "false");
+  button.setAttribute("aria-label", `Account of ${name}`);
+  const art = document.createElement("span");
+  art.className = "nav-top-art";
+  const icon = link.querySelector(".nav-top-icon");
+  if (icon) art.append(icon.cloneNode(true));
+  const avatarUrl = discordAvatarUrl(user);
+  if (avatarUrl) {
+    art.insertAdjacentHTML(
+      "beforeend",
+      `<img class="nav-top-avatar" src="${escapeHtml(avatarUrl)}" alt="" referrerpolicy="no-referrer" data-on-error="hide">`,
+    );
+  }
+  button.append(art);
+
+  const menu = document.createElement("div");
+  menu.className = "global-account-menu";
+  menu.setAttribute("role", "menu");
+  menu.hidden = true;
+  menu.innerHTML = [
+    '<a class="global-account-menu-item" role="menuitem" href="/profile">My Profile</a>',
+    '<button class="global-account-menu-item" role="menuitem" type="button" data-account-action="logout">Logout</button>',
+  ].join("");
+  link.replaceWith(button);
+  document.body.append(menu);
+
+  const account: Account = { link, button, menu };
+  button.addEventListener("click", () => {
+    setMenuOpen(account, menu.hidden !== false);
+  });
+  menu.addEventListener("click", (event) => {
+    const item = event.target instanceof Element ? event.target.closest("[data-account-action='logout']") : null;
+    if (item) logout(account, item);
   });
   document.addEventListener("click", (event) => {
-    if (!(event.target instanceof Node) || !root.contains(event.target)) closeAccountMenu(root);
+    const target = event.target instanceof Node ? event.target : null;
+    if (!menu.hidden && target && !button.contains(target) && !menu.contains(target)) setMenuOpen(account, false);
   });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeAccountMenu(root);
+    if (event.key !== "Escape" || menu.hidden) return;
+    setMenuOpen(account, false);
+    button.focus();
   });
   // The placed menu would stay behind while the page moves.
   window.addEventListener(
     "scroll",
     () => {
-      closeAccountMenu(root);
+      if (!menu.hidden) setMenuOpen(account, false);
     },
     { passive: true },
   );
   window.addEventListener("resize", () => {
-    const menu = root.querySelector<HTMLElement>(".global-account-menu");
-    const trigger = root.querySelector(".global-account-trigger");
-    if (menu && trigger && !menu.hidden) placeAccountMenu(menu, trigger);
+    if (!menu.hidden) placeAccountMenu(account);
   });
 }
 
@@ -265,25 +264,20 @@ function showFixtureNotice(): void {
   notice.appendChild(close);
 }
 
-function initAccount(root: HTMLElement | null): void {
-  if (!root) return;
-  bindAccountInteractions(root);
+/** The login button (site-shell.ts) stays a link to the Discord login unless the visitor is signed in. */
+function initAccount(link: HTMLAnchorElement | null): void {
+  if (!link) return;
   fetch("/api/auth/me", { credentials: "same-origin", headers: { Accept: "application/json" } })
     .then((response) => {
       if (!response.ok) throw new Error("Auth status failed.");
       if (response.headers.get("X-Data-Source") === "fixtures") showFixtureNotice();
-      return response.json() as Promise<{
-        authenticated?: boolean;
-        user?: DiscordUser;
-        login_available?: boolean;
-      } | null>;
+      return response.json() as Promise<{ authenticated?: boolean; user?: DiscordUser } | null>;
     })
     .then((payload) => {
-      if (payload?.authenticated) renderLoggedIn(root, payload.user ?? {});
-      else renderLoggedOut(root, payload?.login_available === true);
+      if (payload?.authenticated) showSignedIn(link, payload.user ?? {});
     })
     .catch(() => {
-      renderLoggedOut(root, false);
+      // The login link stays.
     });
 }
 
@@ -336,7 +330,7 @@ export function initNavigation(): void {
   const subNavRoot = document.getElementById("global-subnav");
   const contentTabsRoot = document.getElementById("global-content-tabs");
   initContentTabs(contentTabsRoot);
-  initAccount(document.getElementById("global-account"));
+  initAccount(document.querySelector<HTMLAnchorElement>("a.nav-top-login"));
   syncSubNav();
   bindLinkPrefetch(navRoot);
   bindLinkPrefetch(subNavRoot);

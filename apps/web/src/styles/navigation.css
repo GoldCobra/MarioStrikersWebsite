@@ -9,6 +9,11 @@
 }
 
 #\32 {
+  /* The logo's place, which the buttons keep clear of, and a page button's width by design (its image
+     is 733x198); tablet.css and mobile.css change them. */
+  --nav-brand-left: clamp(0.42rem, 1.2vw, 0.85rem);
+  --nav-brand-width: clamp(62px, 6vw, 98px);
+  --nav-top-width-max: clamp(112px, 12vw, 198px);
   position: relative;
   width: var(--full-bleed-width);
   margin-left: calc(50% - (var(--full-bleed-width) / 2));
@@ -43,7 +48,14 @@
   flex-wrap: nowrap;
   justify-content: center;
   align-items: center;
-  gap: 0.01rem;
+  /* The six buttons (five pages and the login) stand exactly 1px apart and always fit between the logo
+     and the right edge: at their width by design, narrower where the screen is too narrow for that.
+     The images are 733 (pages) and 334 (login) by 198 pixels. */
+  --nav-top-width: min(
+    var(--nav-top-width-max),
+    calc((100vw - 2 * (var(--nav-brand-left) + var(--nav-brand-width) + 4px) - 5px) * 733 / 3999)
+  );
+  gap: 1px;
   padding-inline: 0;
   overflow: visible;
 }
@@ -51,9 +63,9 @@
 .nav-brand {
   position: absolute;
   top: 0.18rem;
-  left: clamp(0.42rem, 1.2vw, 0.85rem);
+  left: var(--nav-brand-left);
   z-index: 6;
-  width: clamp(62px, 6vw, 98px);
+  width: var(--nav-brand-width);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -99,97 +111,49 @@
   background: transparent;
   line-height: 0;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .nav-top-icon {
   display: block;
-  width: clamp(112px, 12vw, 198px);
+  width: var(--nav-top-width);
   height: auto;
+}
+
+/* As high as the page buttons. */
+.nav-top-login .nav-top-icon {
+  width: calc(var(--nav-top-width) * 334 / 733);
 }
 
 .nav-top-link.is-active {
   filter: none;
 }
 
-.global-account {
+/* Signed in, the member's Discord avatar covers the login figure (x 142-212, y 38-170 of the 334x198
+   image): a circle as high as the figure, around its centre (177.5, 104.5). */
+.nav-top-art {
+  position: relative;
+  display: block;
+}
+
+.nav-top-avatar {
   position: absolute;
-  top: clamp(0.45rem, 1vw, 0.75rem);
-  right: clamp(0.42rem, 1.2vw, 0.85rem);
-  z-index: 8;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-  min-width: 44px;
+  top: calc(100% * 38 / 198);
+  left: calc(100% * 111 / 334);
+  width: calc(100% * 133 / 334);
+  height: calc(100% * 133 / 198);
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px #000;
 }
 
-.global-account-button {
-  min-width: 42px;
-  min-height: 42px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.38rem;
-  padding: 0.2rem 0.55rem;
-  border: 2px solid var(--color-amber);
-  border-radius: 0;
-  background: var(--color-maroon);
-  color: var(--color-gold);
-  font: inherit;
-  line-height: 1;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.global-account-button:hover,
-.global-account-button:focus-visible {
-  background: var(--color-amber);
-  color: var(--color-maroon);
-}
-
-.global-account-button:focus-visible,
 .global-account-menu-item:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 2px;
 }
 
-.global-account-icon,
-.global-account-avatar {
-  width: 24px;
-  height: 24px;
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.global-account-icon {
-  border: 1px solid currentColor;
-  border-radius: 50%;
-  font-size: 16px;
-}
-
-.global-account-avatar {
-  object-fit: cover;
-  border: 1px solid rgba(0, 0, 0, 0.7);
-  border-radius: 50%;
-}
-
-.global-account-name {
-  display: inline-block;
-  max-width: 116px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.84rem;
-  letter-spacing: 0.02em;
-}
-
-/* Logged out: the login link has the signed-in button's shape, with a person glyph for the avatar. */
-.global-account-login-glyph {
-  display: block;
-}
-
-/* Fixed, because the header clips what overflows it; nav.ts places it under the account button. */
+/* In <body> and fixed, because the header clips what overflows it; nav.ts places it under the login
+   (account) button. */
 .global-account-menu {
   position: fixed;
   top: 0;
@@ -215,11 +179,14 @@
   border-radius: 0;
   background: transparent;
   color: #fff;
-  font: inherit;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
   font-size: 0.82rem;
+  letter-spacing: var(--reporter-letter-spacing);
   line-height: 1;
   text-align: left;
   text-decoration: none;
+  text-transform: uppercase;
   cursor: pointer;
 }
 
@@ -227,11 +194,6 @@
 .global-account-menu-item:focus-visible {
   color: var(--color-gold);
   background: rgba(199, 118, 3, 0.18);
-}
-
-.global-account-menu-item:disabled {
-  color: rgba(255, 255, 255, 0.4);
-  cursor: not-allowed;
 }
 
 .sub-nav {

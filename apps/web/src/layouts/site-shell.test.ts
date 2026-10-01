@@ -51,14 +51,21 @@ test("content tabs list visible leaves and skip leaderboards", () => {
   assert.equal(renderContentTabs(resolvePageState("games")), "");
 });
 
-test("the footer links the login, the community channels and the legal pages", () => {
+test("the login is the last button, active on the profile page only", () => {
+  const login =
+    /<a class="nav-top-link nav-top-login" href="\/api\/auth\/discord\/start\?returnTo=%2Fprofile" data-top-key="login" aria-label="Login" rel="nofollow"><img class="nav-top-icon" src="\.\/assets\/nav-buttons\/default\/nav-login\.webp" width="334" height="198" alt="Login" data-fallback-src="\.\/assets\/nav-buttons\/default\/nav-login\.png"><\/a><\/nav>/;
+  assert.match(renderMainNav(resolvePageState("partners")), login);
+  const profile = renderMainNav(resolvePageState("profile"));
+  assert.match(profile, /<a class="nav-top-link nav-top-login is-active" href=/);
+  assert.match(profile, /nav-buttons\/active\/nav-login-active\.webp/);
+  // No other button is active there.
+  assert.equal(profile.match(/is-active/g)?.length, 1);
+});
+
+test("the footer links the community channels and the legal pages", () => {
   const footer = renderFooter();
-  assert.equal(footer.match(/class="global-footer-link"/g)?.length, 7);
-  assert.equal(footer.match(/class="global-footer-sep"/g)?.length, 6);
-  assert.match(
-    footer,
-    /<p class="global-footer-links"><a href="\/api\/auth\/discord\/start\?returnTo=%2Fprofile" class="global-footer-link" rel="nofollow">LOGIN<\/a><span class="global-footer-sep">–<\/span><a href="https:\/\/discord\.gg\//,
-  );
+  assert.equal(footer.match(/class="global-footer-link"/g)?.length, 6);
+  assert.equal(footer.match(/class="global-footer-sep"/g)?.length, 5);
   assert.match(
     footer,
     /<a href="https:\/\/discord\.gg\/de2YaWg" class="global-footer-link" target="_blank" rel="noopener noreferrer">DISCORD<\/a>/,
