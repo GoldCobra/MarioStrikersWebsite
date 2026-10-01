@@ -11,6 +11,11 @@ const CONNECTION_LOST = /Failed to connect|Connection is closed|ESOCKET|ETIMEOUT
 export type Pool = mssql.ConnectionPool;
 export { mssql };
 
+/** What a query runs on: the pool, or one transaction on it. */
+export interface Queryable {
+  request(): mssql.Request;
+}
+
 export function createConnectionConfig(settings: MssqlConfig): mssql.config {
   assertMssqlConfigured(settings);
   return {
@@ -76,6 +81,23 @@ export class Database {
 
   withPool<T>(run: (pool: Pool) => Promise<T>): Promise<T> {
     return this.measurePool((pool) => run(pool));
+  }
+
+  /** Runs `run` in one transaction: committed when it returns, rolled back when it throws. */
+  withTransaction<T>(run: (transaction: Queryable) => Promise<T>): Promise<T> {
+    return this.withPool(async (pool) => {
+      const transaction = new mssql.Transaction(pool);
+      await transaction.begin();
+      try {
+        const result = await run(transaction);
+        await transaction.commit();
+        return result;
+      } catch (error) {
+        // With XACT_ABORT the server may have rolled back already.
+        await transaction.rollback().catch(() => undefined);
+        throw error;
+      }
+    });
   }
 
   async healthCheck(): Promise<void> {

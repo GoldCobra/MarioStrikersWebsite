@@ -27,6 +27,16 @@ async function showPlayerCard(page: Page): Promise<void> {
   await settle(page, { eagerImages: true });
 }
 
+// The profile editor (a reference commit from before it has no "Edit Profile" button: then nothing opens).
+async function openProfileEditor(page: Page): Promise<boolean> {
+  const button = page.locator("[data-profile-action='edit']");
+  if (!(await button.count())) return false;
+  await button.click();
+  await page.locator(".profile-edit-form:not([hidden])").waitFor();
+  await settle(page, { eagerImages: true });
+  return true;
+}
+
 async function openGearBuilderPane(page: Page, which: "first" | "last"): Promise<void> {
   const tabs = page.locator('.tab-link-icon[aria-controls^="tab-"]');
   const tab = which === "first" ? tabs.first() : tabs.last();
@@ -75,6 +85,59 @@ const STATES: VisualState[] = [
   { name: "account-menu", path: "/", login: "linked", act: (page) => clickAndSettle(page, ".global-account-trigger") },
   { name: "profile-linked", path: "/profile", login: "linked", fullPage: true },
   { name: "profile-unlinked", path: "/profile", login: "unlinked", fullPage: true },
+  {
+    name: "profile-edit",
+    path: "/profile",
+    login: "linked",
+    act: (page) => openProfileEditor(page).then(() => undefined),
+  },
+  {
+    // A profile created at login: every field empty.
+    name: "profile-edit-new",
+    path: "/profile",
+    login: "unlinked",
+    act: (page) => openProfileEditor(page).then(() => undefined),
+  },
+  {
+    name: "profile-edit-errors",
+    path: "/profile",
+    login: "linked",
+    act: async (page) => {
+      if (!(await openProfileEditor(page))) return;
+      await page.locator("[data-msc-row='1'] .profile-edit-digits").first().fill("12");
+      await page.locator("[data-msc-row='1'] [data-field='region']").selectOption("NTSC");
+      await page.locator("[data-action='apply']").click();
+      await settle(page);
+    },
+  },
+  {
+    // Saved elsewhere meanwhile: the API answers 409 with the newer profile, which the editor merges in.
+    name: "profile-edit-conflict",
+    path: "/profile",
+    login: "linked",
+    act: async (page) => {
+      if (!(await openProfileEditor(page))) return;
+      await page.route("**/api/profile/me/editable", async (route) => {
+        if (route.request().method() !== "PUT") {
+          await route.continue();
+          return;
+        }
+        const current = (await (await route.fetch({ method: "GET" })).json()) as { switch_code: string };
+        await route.fulfill({
+          status: 409,
+          contentType: "application/json",
+          body: JSON.stringify({
+            error: "The profile was changed elsewhere since it was loaded.",
+            code: "PROFILE_CHANGED",
+            current: { ...current, version: "newer", switch_code: "0000-1111-2222" },
+          }),
+        });
+      });
+      await page.locator("[data-slot='country']").selectOption("us");
+      await page.locator("[data-action='apply']").click();
+      await settle(page);
+    },
+  },
   { name: "error-leaderboard", path: "/msbl-elo1v1", failApi: true, fullPage: true },
   { name: "error-players", path: "/players", failApi: true, fullPage: true },
   { name: "error-clubs", path: "/msbl-striker-clubs", failApi: true, fullPage: true },

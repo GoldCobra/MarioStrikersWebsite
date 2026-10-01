@@ -1,33 +1,18 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "d2c747213e8c8671c3186b1819204528be7dec56",
+  "reference": "0d256eb762a7c5b6540ff026154c26e17ba17050",
   "changes": [
     {
-      "screenshots": ["pages/privacy-policy-*"],
-      "reason": "Privacy policy: the Discord login's data (and the profile it creates), friend codes and the 7-day session cookie are described; plus the header's Login button."
+      "screenshots": ["states/profile-edit-*"],
+      "reason": "New states: the profile editor (existing profile, profile created at login, validation errors, a profile changed elsewhere meanwhile). The reference has no editor and shows the profile page."
     },
     {
-      "screenshots": ["pages/profile-*"],
-      "reason": "Logged-out profile page: 'Login with Discord to open your player profile.' (profiles are created at login, not linked by staff); plus the header's Login button."
+      "screenshots": ["states/profile-linked-*", "states/profile-unlinked-*"],
+      "reason": "The profile header has an 'Edit Profile' button, which moves the panels below it down."
     },
     {
-      "screenshots": ["states/profile-unlinked-*"],
-      "reason": "A Discord member without a player profile gets a new, empty one at login instead of the 'No Linked Player Profile' notice."
-    },
-    {
-      "screenshots": [
-        "pages/*",
-        "states/club-popup-*",
-        "states/error-*",
-        "states/gear-builder-*",
-        "states/leaderboard-popup-*",
-        "states/nav-hover-*",
-        "states/placeholder-*",
-        "states/player-card-*",
-        "states/players-popup-*",
-        "states/whr-popup-*"
-      ],
-      "reason": "Discord login: while logged out, the header shows a Login button (person icon, 'Login' on wide screens) where the signed-in account button sits, because the fixtures simulate an available login. Measured: only that box differs (x 1341-1425, y 12-53 at 1440px). On /player-card only the header behind the card changes; the card is identical."
+      "screenshots": ["states/account-menu-*"],
+      "reason": "The account menu was cut off by the header (overflow: hidden): it is now placed in the viewport and shows all three items; 'Modify Profile' opens the editor instead of being disabled."
     }
   ]
 }

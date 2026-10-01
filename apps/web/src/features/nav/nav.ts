@@ -160,7 +160,7 @@ function renderLoggedIn(root: HTMLElement, user: DiscordUser): void {
     "</button>",
     '<div class="global-account-menu" role="menu" hidden>',
     '<a class="global-account-menu-item" role="menuitem" href="/profile">My Profile</a>',
-    '<button class="global-account-menu-item" role="menuitem" type="button" disabled>Modify Profile</button>',
+    '<a class="global-account-menu-item" role="menuitem" href="/profile?edit=1">Modify Profile</a>',
     '<button class="global-account-menu-item" role="menuitem" type="button" data-account-action="logout">Logout</button>',
     "</div>",
   ].join("");
@@ -172,11 +172,19 @@ function closeAccountMenu(root: HTMLElement): void {
   root.querySelector(".global-account-trigger")?.setAttribute("aria-expanded", "false");
 }
 
+// The header clips whatever overflows it, so the open menu is placed in the viewport, under its button.
+function placeAccountMenu(menu: HTMLElement, trigger: Element): void {
+  const box = trigger.getBoundingClientRect();
+  menu.style.top = `${Math.round(box.bottom + 6)}px`;
+  menu.style.right = `${Math.max(0, Math.round(document.documentElement.clientWidth - box.right))}px`;
+}
+
 function toggleAccountMenu(root: HTMLElement): void {
   const menu = root.querySelector<HTMLElement>(".global-account-menu");
   const trigger = root.querySelector(".global-account-trigger");
   if (!menu || !trigger) return;
   const open = menu.hidden;
+  if (open) placeAccountMenu(menu, trigger);
   menu.hidden = !open;
   trigger.setAttribute("aria-expanded", open ? "true" : "false");
 }
@@ -215,6 +223,19 @@ function bindAccountInteractions(root: HTMLElement): void {
   });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeAccountMenu(root);
+  });
+  // The placed menu would stay behind while the page moves.
+  window.addEventListener(
+    "scroll",
+    () => {
+      closeAccountMenu(root);
+    },
+    { passive: true },
+  );
+  window.addEventListener("resize", () => {
+    const menu = root.querySelector<HTMLElement>(".global-account-menu");
+    const trigger = root.querySelector(".global-account-trigger");
+    if (menu && trigger && !menu.hidden) placeAccountMenu(menu, trigger);
   });
 }
 

@@ -1,5 +1,6 @@
 // The signed-in player's own profile (/profile), from /api/profile/me, or the reason it cannot be shown.
-// The login creates a missing profile; when that failed, the page asks for it once more.
+// The login creates a missing profile; when that failed, the page asks for it once more. "Edit Profile"
+// (or ?edit=1, the account menu's "Modify Profile") opens the editor (profile-edit.ts).
 
 import { toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
@@ -19,6 +20,7 @@ import {
   type SeasonAward,
 } from "../players/profile-data.ts";
 import { buildDoubles, buildSingles, type Ratings } from "../rating-cards/rating-cards.ts";
+import { openProfileEditor } from "./profile-edit.ts";
 
 const DISCORD_LINK =
   '<a class="profile-action-button" href="https://discord.gg/de2YaWg" target="_blank" rel="noopener noreferrer">Open Discord</a>';
@@ -165,6 +167,7 @@ function profileHtml(profile: PlayerProfile): string {
     "</div>",
     '<div class="profile-meta">',
     `<p class="profile-meta-line"><span>Club</span><strong>${escapeHtml(clubText)}</strong></p>`,
+    '<p class="profile-meta-actions"><button class="profile-action-button" type="button" data-profile-action="edit">Edit Profile</button></p>',
     "</div>",
     "</header>",
     '<div class="profile-grid">',
@@ -225,12 +228,16 @@ function authErrorHtml(payload: { code?: unknown } | null, status: number): stri
   );
 }
 
-/** The login flow returns with ?auth=<result>; the address bar drops it once the profile shows. */
-function removeAuthQuery(): void {
+/**
+ * The login flow returns with ?auth=<result> and the account menu opens the editor with ?edit=1; the
+ * address bar drops both once the profile shows.
+ */
+function removeProfileQuery(): void {
   if (!window.location.search) return;
   const params = new URLSearchParams(window.location.search);
-  if (!params.has("auth")) return;
+  if (!params.has("auth") && !params.has("edit")) return;
   params.delete("auth");
+  params.delete("edit");
   const query = params.toString();
   window.history.replaceState(null, "", window.location.pathname + (query ? `?${query}` : "") + window.location.hash);
 }
@@ -263,26 +270,38 @@ async function createProfile(): Promise<boolean> {
   }
 }
 
-async function loadProfile(mount: HTMLElement): Promise<void> {
-  mount.innerHTML = '<p class="profile-loading loading-note">Loading...</p>';
+/** Shows the profile; true when it is shown. A quiet load (after a save) keeps the old view meanwhile. */
+async function loadProfile(mount: HTMLElement, quiet = false): Promise<boolean> {
+  if (!quiet) mount.innerHTML = '<p class="profile-loading loading-note">Loading...</p>';
   try {
     let result = await fetchProfile();
     if (result.payload?.code === "PLAYER_PROFILE_NOT_LINKED" && (await createProfile())) result = await fetchProfile();
     if (result.status !== 200) {
-      mount.innerHTML = authErrorHtml(result.payload, result.status);
-      return;
+      if (!quiet) mount.innerHTML = authErrorHtml(result.payload, result.status);
+      return false;
     }
     mount.innerHTML = profileHtml(result.payload?.profile ?? {});
-    removeAuthQuery();
+    removeProfileQuery();
+    return true;
   } catch {
-    mount.innerHTML = authErrorHtml(null, 500);
+    if (!quiet) mount.innerHTML = authErrorHtml(null, 500);
+    return false;
   }
+}
+
+function openEditor(mount: HTMLElement, opener: HTMLElement | null): void {
+  void openProfileEditor(opener, () => void loadProfile(mount, true));
 }
 
 export async function initProfilePage(mount: HTMLElement): Promise<void> {
   mount.addEventListener("click", (event) => {
-    const retry = event.target instanceof Element ? event.target.closest("[data-profile-action='retry']") : null;
-    if (retry && mount.contains(retry)) void loadProfile(mount);
+    const action = event.target instanceof Element ? event.target.closest("[data-profile-action]") : null;
+    if (!action || !mount.contains(action)) return;
+    const name = action.getAttribute("data-profile-action");
+    if (name === "retry") void loadProfile(mount);
+    else if (name === "edit") openEditor(mount, action instanceof HTMLElement ? action : null);
   });
-  await loadProfile(mount);
+  const openOnLoad = new URLSearchParams(window.location.search).get("edit") === "1";
+  if (!(await loadProfile(mount))) return;
+  if (openOnLoad) openEditor(mount, mount.querySelector<HTMLElement>("[data-profile-action='edit']"));
 }

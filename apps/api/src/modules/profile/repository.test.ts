@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createFakeDatabase } from "../../test-support/fake-database.ts";
-import { buildEnsurePlayerQuery, createSqlProfileStore, isUniqueViolation } from "./repository.ts";
+import { isUniqueViolation } from "../../lib/sql-errors.ts";
+import {
+  buildApplyQuery,
+  buildEnsurePlayerQuery,
+  buildProfileQuery,
+  buildTakenCodesQuery,
+  createSqlProfileStore,
+} from "./repository.ts";
 
 const DISCORD_ID = "709777875686916210";
 
@@ -67,4 +74,100 @@ test("duplicate key errors are recognised in both forms mssql reports", () => {
   assert.equal(isUniqueViolation({ originalError: { info: { number: 2627 } } }), true);
   assert.equal(isUniqueViolation(new Error("Timeout")), false);
   assert.equal(isUniqueViolation(null), false);
+});
+
+test("the editor reads the profile, under update locks when it saves", () => {
+  assert.doesNotMatch(buildProfileQuery(false), /UPDLOCK/);
+  const locked = buildProfileQuery(true);
+  assert.match(locked, /FROM dbo\.Player p WITH \(UPDLOCK, HOLDLOCK\) WHERE p\.ID = @playerId;/);
+  assert.match(locked, /FROM dbo\.FriendCodes fc WITH \(UPDLOCK, HOLDLOCK\) WHERE fc\.Player = @playerId/);
+  assert.equal(buildTakenCodesQuery(0), "");
+  assert.equal(
+    buildTakenCodesQuery(2),
+    "SELECT fc.GameType, fc.Code FROM dbo.FriendCodes fc WHERE fc.Player <> @playerId AND " +
+      "((fc.GameType = @takenGame0 AND fc.Code = @takenCode0) OR (fc.GameType = @takenGame1 AND fc.Code = @takenCode1));",
+  );
+});
+
+test("a plan becomes deletes, ascending updates, inserts and the audit row, all parameterised", () => {
+  const inputs: Record<string, unknown> = {};
+  const request = {
+    input(name: string, _type: unknown, value: unknown) {
+      inputs[name] = value;
+      return request;
+    },
+  } as unknown as Parameters<typeof buildApplyQuery>[1];
+  const row = (lineSeq: number, code: string) => ({ gameType: 1, region: "PAL", lineSeq, label: "Wii", code });
+  const sql = buildApplyQuery(
+    {
+      country: "us",
+      deletes: [row(1, "1111-1111-1111")],
+      updates: [{ row: row(2, "2222-2222-2222"), label: "Dolphin", lineSeq: 1 }],
+      inserts: [{ gameType: 3, region: "SW", lineSeq: 1, label: "", code: "0001-0002-0003" }],
+    },
+    request,
+  );
+  const statements = sql.split(/;\s*/).filter(Boolean);
+  assert.deepEqual(
+    statements.map((statement) => statement.split(" ").slice(0, 2).join(" ")),
+    ["SET XACT_ABORT", "UPDATE dbo.Player", "DELETE FROM", "UPDATE dbo.FriendCodes", "INSERT INTO", "INSERT INTO"],
+  );
+  assert.match(sql, /INSERT INTO dbo\.CommandLog \(Command, Parameters\) VALUES \(N'WebsiteProfileSave', @audit\);$/);
+  assert.equal(inputs.country, "us");
+  assert.equal(inputs.delSeq0, 1);
+  assert.deepEqual([inputs.updSeq0, inputs.updNewSeq0, inputs.updLabel0], [2, 1, "Dolphin"]);
+  assert.equal(inputs.insCode0, "0001-0002-0003");
+  assert.doesNotMatch(sql, /0001-0002-0003|Dolphin/);
+});
+
+test("a save reads, decides and writes in one transaction; a failure rolls it back", async () => {
+  const profileSets = [
+    [{ country: "de" }],
+    [{ GameType: 3, Region: "SW", LineSeq: 1, Label: "", Code: "0012-0000-0340" }],
+    [],
+  ];
+  const database = createFakeDatabase((sql) =>
+    sql.includes("UPDLOCK") ? { recordsets: profileSets } : { recordset: [] },
+  );
+  const store = createSqlProfileStore(database);
+  const result = await store.saveProfile(223, [{ gameType: 3, code: "0001-0002-0003" }], (current, taken) => {
+    assert.deepEqual(current, {
+      playerId: 223,
+      country: "de",
+      codes: [{ gameType: 3, region: "SW", lineSeq: 1, label: "", code: "0012-0000-0340" }],
+    });
+    assert.deepEqual(taken, []);
+    return { plan: { country: "us", deletes: [], updates: [], inserts: [] }, audit: "{}", result: "done" };
+  });
+  assert.equal(result, "done");
+  assert.deepEqual(database.transactions, ["begin", "commit"]);
+  assert.equal(database.queries.length, 2);
+  assert.equal(database.queries[0]?.inputs.takenCode0, "0001-0002-0003");
+
+  const failing = createFakeDatabase((sql) => {
+    if (sql.includes("UPDLOCK")) return { recordsets: profileSets };
+    throw Object.assign(new Error("duplicate key"), { number: 2601 });
+  });
+  await assert.rejects(
+    createSqlProfileStore(failing).saveProfile(223, [], () => ({
+      plan: { country: "us", deletes: [], updates: [], inserts: [] },
+      audit: "{}",
+      result: "done",
+    })),
+    /duplicate key/,
+  );
+  assert.deepEqual(failing.transactions, ["begin", "rollback"]);
+});
+
+test("countries come from dbo.Enumeration in lower case and are read once an hour", async () => {
+  const database = createFakeDatabase(() => ({
+    recordset: [
+      { Code: "DE", Description: "Germany " },
+      { Code: "", Description: "nothing" },
+    ],
+  }));
+  const store = createSqlProfileStore(database);
+  assert.deepEqual(await store.countries(), [{ code: "de", name: "Germany" }]);
+  await store.countries();
+  assert.equal(database.queries.length, 1);
 });

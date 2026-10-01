@@ -13,6 +13,7 @@ import { PublicDataCache, type PublicDataSource } from "./cache/public-data-cach
 import type { Config } from "./config.ts";
 import { isDiscordLoginConfigured } from "./config.ts";
 import { Database } from "./db/database.ts";
+import { DiscordMemberDirectory } from "./integrations/discord/members.ts";
 import { DiscordUserDirectory } from "./integrations/discord/users.ts";
 import type { Logger } from "./lib/logger.ts";
 import { createDiscordOAuthClient, type DiscordOAuthClient } from "./modules/auth/discord-oauth.ts";
@@ -41,7 +42,7 @@ export interface DataSource {
   getPlayerProfile(playerId: number): Promise<PlayerProfile | null>;
   /** null when no player is linked to this Discord account. */
   getPlayerProfileByDiscordId(discordId: string): Promise<PlayerProfile | null>;
-  /** The signed-in player's own profile: created at the first login. */
+  /** The signed-in player's own profile: created at the first login, changed in the profile editor. */
   readonly profiles: ProfileService;
   /** null when no club has this (validated) id. */
   getClubProfile(clubId: number): Promise<ClubProfile | null>;
@@ -134,7 +135,22 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     getLeaderboardRows: (query) => getLeaderboardRows(database, query, limits),
     getPlayerProfile: (playerId) => getPlayerProfile(database, log, playerId),
     getPlayerProfileByDiscordId: (discordId) => getPlayerProfileByDiscordId(database, log, discordId),
-    profiles: createProfileService(createSqlProfileStore(database)),
+    profiles: createProfileService({
+      store: createSqlProfileStore(database),
+      // The editor shows the member's current server names; they are asked again after a minute.
+      members: new DiscordMemberDirectory({
+        ...discordRest,
+        guildId: config.discord.guildId,
+        cacheTtlMs: 60_000,
+        failureCacheTtlMs: 15_000,
+      }),
+      // A new country or friend code shows in the player list at once, not after the next refresh.
+      onChange: () => {
+        publicData.refresh(PLAYERS_LIST_KEY).catch((err: unknown) => {
+          log.warn({ err }, "[profile] Player list refresh after a profile change failed");
+        });
+      },
+    }),
     getClubProfile: (clubId) => getMsblClubProfile(database, { logoCache: logos, users }, clubId),
     getClubLogoFile: (clubIdRaw) => logos.getLogoFile(clubIdRaw),
     getCommunityEvents: () => events.get(),

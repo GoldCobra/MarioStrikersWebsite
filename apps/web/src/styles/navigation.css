@@ -189,9 +189,10 @@
   display: block;
 }
 
+/* Fixed, because the header clips what overflows it; nav.ts places it under the account button. */
 .global-account-menu {
-  position: absolute;
-  top: calc(100% + 0.36rem);
+  position: fixed;
+  top: 0;
   right: 0;
   width: 168px;
   padding: 0.28rem;
