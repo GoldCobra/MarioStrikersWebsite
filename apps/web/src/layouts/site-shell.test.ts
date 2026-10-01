@@ -51,10 +51,14 @@ test("content tabs list visible leaves and skip leaderboards", () => {
   assert.equal(renderContentTabs(resolvePageState("games")), "");
 });
 
-test("the footer links the community channels and the legal pages", () => {
+test("the footer links the login, the community channels and the legal pages", () => {
   const footer = renderFooter();
-  assert.equal(footer.match(/class="global-footer-link"/g)?.length, 6);
-  assert.equal(footer.match(/class="global-footer-sep"/g)?.length, 5);
+  assert.equal(footer.match(/class="global-footer-link"/g)?.length, 7);
+  assert.equal(footer.match(/class="global-footer-sep"/g)?.length, 6);
+  assert.match(
+    footer,
+    /<p class="global-footer-links"><a href="\/api\/auth\/discord\/start\?returnTo=%2Fprofile" class="global-footer-link" rel="nofollow">LOGIN<\/a><span class="global-footer-sep">–<\/span><a href="https:\/\/discord\.gg\//,
+  );
   assert.match(
     footer,
     /<a href="https:\/\/discord\.gg\/de2YaWg" class="global-footer-link" target="_blank" rel="noopener noreferrer">DISCORD<\/a>/,

@@ -119,12 +119,14 @@ function checkIds(file: string, source: string): void {
 }
 
 // Links between pages must reach a page, directly or through a redirect, as production nginx routes them.
+// /api/ belongs to the API (the footer's login link), so it is no page link.
 const staticFiles = createStaticFiles(root);
 function checkPageLink(file: string, raw: string): void {
   const value = raw.trim().replace(/&amp;/g, "&");
   if (!value || /^(?:[a-z][a-z\d+.-]*:|\/\/|#)/i.test(value) || ASSET_EXTENSION.test(value.split(/[?#]/)[0] ?? ""))
     return;
   const url = new URL(value, servedUrl(file));
+  if (url.pathname.startsWith("/api/")) return;
   let route = resolveRoute(url.pathname, url.search, staticFiles);
   if (route.kind === "redirect") {
     const target = new URL(route.location, url);

@@ -6,6 +6,7 @@
 import { escapeHtml } from "@ms/shared/html";
 import {
   EXTERNAL_LINKS,
+  loginPath,
   TOP_NAV_ITEMS,
   type NavLeaf,
   type NavSecond,
@@ -104,16 +105,17 @@ export function renderContentTabs(state: PageState): string {
 
 /** The footer at the end of <body>, in the attribute order the runtime script's DOM calls produced. */
 export function renderFooter(): string {
+  const external = ' target="_blank" rel="noopener noreferrer"';
   const links = [
-    ...EXTERNAL_LINKS.map((link) => ({ label: link.label.toUpperCase(), href: link.href, external: true })),
-    { label: "ABOUT US", href: pagePath("about-us"), external: false },
-    { label: "PRIVACY POLICY", href: pagePath("privacy-policy"), external: false },
+    // The login is no page for search engines: they are kept off its redirect to Discord.
+    { label: "LOGIN", href: loginPath(), attributes: ' rel="nofollow"' },
+    ...EXTERNAL_LINKS.map((link) => ({ label: link.label.toUpperCase(), href: link.href, attributes: external })),
+    { label: "ABOUT US", href: pagePath("about-us"), attributes: "" },
+    { label: "PRIVACY POLICY", href: pagePath("privacy-policy"), attributes: "" },
   ]
     .map(
       (link) =>
-        `<a href="${escapeHtml(link.href)}" class="global-footer-link"` +
-        (link.external ? ' target="_blank" rel="noopener noreferrer"' : "") +
-        `>${escapeHtml(link.label)}</a>`,
+        `<a href="${escapeHtml(link.href)}" class="global-footer-link"${link.attributes}>${escapeHtml(link.label)}</a>`,
     )
     .join('<span class="global-footer-sep">–</span>');
   return [
