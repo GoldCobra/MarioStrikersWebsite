@@ -130,10 +130,13 @@ responses also use `no-store`: season data remains cached internally, but
 Discord OAuth requests `identify` and `guilds.members.read`, checks membership
 in the configured guild, and sets a signed HTTP-only session cookie (with the
 member's server nickname at login). The access token is used only during the
-callback and never stored. `/api/auth/me` says whether login is available
-(`login_available`); the header shows its Login button only then. The footer's
-LOGIN link (`rel="nofollow"`) is static and always there; without a configured
-login it leads to the profile page's explanation.
+callback and never stored. The main navigation's last button, LOGIN (after
+PARTNERS, `rel="nofollow"`, active on `/profile`), is static and starts the
+login; without a configured login it leads to the profile page's explanation.
+Signed in (`/api/auth/me`), `features/nav/nav.ts` turns it into the account
+button: the member's Discord avatar covers its login figure, and a click opens
+MY PROFILE and LOGOUT. All six buttons stand 1px apart and shrink only where the
+row would otherwise reach the logo.
 `/api/profile/me` maps the Discord user to `Player.DiscordID` (unique). A member
 without a player profile gets one at login (`modules/profile/`): one batch locks
 the Discord id's key range, inserts `dbo.Player` named after the member's server

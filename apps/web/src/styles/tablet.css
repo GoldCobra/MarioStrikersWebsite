@@ -11,8 +11,8 @@
     padding: 0;
   }
 
-  .nav-top-icon {
-    width: clamp(100px, 12.8vw, 172px);
+  #\32 {
+    --nav-top-width-max: clamp(100px, 12.8vw, 172px);
   }
 
   .global-tabs-shell {
@@ -30,26 +30,21 @@
   }
 
   #\32 {
+    --nav-brand-left: 0.28rem;
+    --nav-brand-width: clamp(50px, 13vw, 68px);
     padding-inline: 0.32rem;
   }
 
   .nav-brand {
     top: 0.16rem;
-    left: 0.28rem;
-    width: clamp(50px, 13vw, 68px);
   }
 
   .main-nav-text {
     max-width: min(840px, calc(100vw - 36px));
-    gap: 0.01rem;
   }
 
   .nav-top-link {
     padding: 0;
-  }
-
-  .nav-top-icon {
-    width: clamp(82px, 21vw, 142px);
   }
 
   .sub-nav {

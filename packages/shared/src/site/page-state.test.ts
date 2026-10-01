@@ -15,13 +15,15 @@ test("pages resolve to their place in the navigation", () => {
   assert.deepEqual(path("msbl-gear-builder"), ["games", "msbl", "gear-builder"]);
   // Every mode of a leaderboard belongs to its game's leaf.
   assert.deepEqual(path("msbl-whr"), ["competitive", "leaderboards", "msbl"]);
-  assert.deepEqual(path("profile"), ["players", "-", "-"]);
   assert.deepEqual(path("players-profiles"), ["players", "-", "-"]);
   // Pages outside every section fall back to home, as the runtime script did.
   assert.deepEqual(path("about-us"), ["home", "-", "-"]);
-  // The not-found page marks no navigation entry.
+  // The not-found page marks no navigation entry; the profile page is marked by the login button.
   assert.deepEqual(path("404"), ["", "-", "-"]);
-  for (const page of PAGES) assert.notEqual(resolvePageState(page.slug).topKey, "", page.slug);
+  assert.deepEqual(path("profile"), ["", "-", "-"]);
+  for (const page of PAGES) {
+    if (page.slug !== "profile") assert.notEqual(resolvePageState(page.slug).topKey, "", page.slug);
+  }
 });
 
 test("breadcrumbs follow the navigation and are omitted on noindex pages", () => {

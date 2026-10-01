@@ -56,8 +56,9 @@ function stateFromMap(pageSlug: string): PageState | null {
 
 export function resolvePageState(pageSlug: string): PageState {
   const empty = { pageSlug, section: null, secondItem: null, leafItem: null };
-  // The not-found page belongs to no section, so no navigation entry is marked.
-  if (pageSlug === NOT_FOUND_PAGE.slug) return { ...empty, topKey: "" };
+  // The not-found page belongs to no section, so no navigation entry is marked; neither does the profile
+  // page, which the login button (the account) marks instead.
+  if (pageSlug === NOT_FOUND_PAGE.slug || pageSlug === "profile") return { ...empty, topKey: "" };
   if (pageSlug === "index") return { ...empty, topKey: "home" };
   if (pageSlug === "partners") return { ...empty, topKey: "partners" };
 

@@ -26,20 +26,10 @@
           <a class="nav-top-link" href="/partners" data-top-key="partners" aria-label="Partners">
             <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" data-fallback-src="./assets/nav-buttons/default/nav-partners.png"/>
           </a>
-        </nav>
-        <div id="global-account" class="global-account" data-auth-state="logged-out">
-          <a class="global-account-button global-account-login" href="/api/auth/discord/start?returnTo=%2Fprofile" aria-label="Login with Discord">
-            <span class="global-account-icon" aria-hidden="true">
-              <svg class="global-account-login-glyph" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
-                <circle cx="8" cy="5" r="3" fill="currentColor"/>
-                <path d="M2.5 14.5c0-3.2 2.4-5.4 5.5-5.4s5.5 2.2 5.5 5.4z" fill="currentColor"/>
-              </svg>
-            </span>
-            <span class="global-account-name" aria-hidden="true">
-              #text "Login"
-            </span>
+          <a class="nav-top-link nav-top-login" href="/api/auth/discord/start?returnTo=%2Fprofile" data-top-key="login" aria-label="Login" rel="nofollow">
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-login.webp" width="334" height="198" alt="Login" data-fallback-src="./assets/nav-buttons/default/nav-login.png"/>
           </a>
-        </div>
+        </nav>
       </header>
     </div>
     #text "\n    "
@@ -89,12 +79,6 @@
       #text "This website is not affiliated with Nintendo. All product names, logos, and brands are property of their respective owners."
     </p>
     <p class="global-footer-links">
-      <a href="/api/auth/discord/start?returnTo=%2Fprofile" class="global-footer-link" rel="nofollow">
-        #text "LOGIN"
-      </a>
-      <span class="global-footer-sep">
-        #text "–"
-      </span>
       <a href="https://discord.gg/de2YaWg" class="global-footer-link" target="_blank" rel="noopener noreferrer">
         #text "DISCORD"
       </a>

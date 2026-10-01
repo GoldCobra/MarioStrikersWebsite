@@ -83,11 +83,6 @@ export interface ProfileEditorOptions {
   readonly reload: () => Promise<void>;
 }
 
-export interface ProfileEditor {
-  /** Focuses the first pencil (the account menu's "Modify Profile"). */
-  focusFirst(): void;
-}
-
 function countryName(code: string, profile: EditableProfile): string {
   const fallback = profile.countries.find((country) => country.code === code)?.name ?? code;
   return countryDisplayName(normalizeCountryCode(code)) || fallback;
@@ -134,7 +129,7 @@ function lineText(row: Element): string {
 }
 
 /** Adds editing to the profile card; the card is rendered anew after every save (`reload`). */
-export function createProfileEditor({ root, profile: initial, reload }: ProfileEditorOptions): ProfileEditor {
+export function createProfileEditor({ root, profile: initial, reload }: ProfileEditorOptions): void {
   let profile = initial;
   let open: OpenEdit | null = null;
   let saving = false;
@@ -602,10 +597,4 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
   } catch {
     // A broken or unavailable draft is dropped.
   }
-
-  return {
-    focusFirst() {
-      root.querySelector<HTMLElement>("[data-edit]")?.focus();
-    },
-  };
 }

@@ -425,7 +425,4 @@ export const PAGE_CONTEXT_MAP: Readonly<Record<string, PageContext>> = {
     secondKey: "tournaments",
     leafKey: "community",
   },
-  profile: {
-    topKey: "players",
-  },
 };

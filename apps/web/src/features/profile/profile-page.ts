@@ -10,7 +10,7 @@ import { templateView, type TemplateView } from "../../lib/popup.ts";
 import { renderPlayerProfile } from "../players/player-profile-view.ts";
 import type { PlayerProfile } from "../players/profile-data.ts";
 import template from "../players/player-profile-popup.html?raw";
-import { createProfileEditor, type ProfileEditor } from "./profile-edit.ts";
+import { createProfileEditor } from "./profile-edit.ts";
 import type { EditableProfile } from "./profile-edit-state.ts";
 
 const DISCORD_LINK =
@@ -126,10 +126,7 @@ function authErrorHtml(payload: { code?: unknown } | null, status: number): stri
   );
 }
 
-/**
- * The login flow returns with ?auth=<result> and the account menu's "Modify Profile" adds ?edit=1; the
- * address bar drops both once the profile shows.
- */
+/** The login flow returns with ?auth=<result>; the address bar drops it (and an old ?edit=1) once the profile shows. */
 function removeProfileQuery(): void {
   if (!window.location.search) return;
   const params = new URLSearchParams(window.location.search);
@@ -180,18 +177,15 @@ async function fetchEditable(): Promise<EditableProfile | null> {
   }
 }
 
-let editor: ProfileEditor | null = null;
-
-/** Shows the profile and its editing; true when the profile is shown. */
-async function loadProfile(mount: HTMLElement): Promise<boolean> {
-  editor = null;
+/** Shows the profile and its editing. */
+async function loadProfile(mount: HTMLElement): Promise<void> {
   mount.innerHTML = '<p class="profile-loading loading-note">Loading...</p>';
   try {
     let result = await fetchProfile();
     if (result.payload?.code === "PLAYER_PROFILE_NOT_LINKED" && (await createProfile())) result = await fetchProfile();
     if (result.status !== 200) {
       mount.innerHTML = authErrorHtml(result.payload, result.status);
-      return false;
+      return;
     }
     const card = createProfileCard();
     renderCard(card, result.payload?.profile ?? {});
@@ -205,9 +199,9 @@ async function loadProfile(mount: HTMLElement): Promise<boolean> {
           "afterbegin",
           '<p class="profile-edit-status">Your profile cannot be changed right now. Please try again later.</p>',
         );
-      return true;
+      return;
     }
-    editor = createProfileEditor({
+    createProfileEditor({
       root: card.root,
       profile: editable,
       reload: async () => {
@@ -215,10 +209,8 @@ async function loadProfile(mount: HTMLElement): Promise<boolean> {
         if (next.status === 200) renderCard(card, next.payload?.profile ?? {});
       },
     });
-    return true;
   } catch {
     mount.innerHTML = authErrorHtml(null, 500);
-    return false;
   }
 }
 
@@ -229,6 +221,5 @@ export async function initProfilePage(mount: HTMLElement): Promise<void> {
       void loadProfile(mount);
     }
   });
-  const focusEditing = new URLSearchParams(window.location.search).get("edit") === "1";
-  if ((await loadProfile(mount)) && focusEditing) editor?.focusFirst();
+  await loadProfile(mount);
 }

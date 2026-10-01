@@ -20,13 +20,13 @@
   }
 
   #\32 {
+    --nav-top-width-max: clamp(58px, 18.2vw, 74px);
     padding-inline: 0.25rem;
   }
 
   .main-nav-text {
     max-width: calc(100vw - 16px);
     justify-content: center;
-    gap: 0;
     overflow: visible;
     padding-inline: 0;
     transform: translateY(-6px);
@@ -40,25 +40,6 @@
     min-width: 0;
     min-height: 44px;
     touch-action: manipulation;
-  }
-
-  .nav-top-icon {
-    width: clamp(58px, 18.2vw, 74px);
-  }
-
-  .global-account {
-    top: 0.22rem;
-    right: 0.28rem;
-  }
-
-  .global-account-button {
-    min-width: 36px;
-    min-height: 36px;
-    padding: 0.15rem 0.28rem;
-  }
-
-  .global-account-name {
-    display: none;
   }
 
   .global-account-menu {
@@ -633,7 +614,11 @@
     --msbl-club-meta-slot-height: clamp(7px, 2vw, 9px);
   }
 
+  /* No logo here, so the buttons only keep clear of the screen's edges. */
   #\32 {
+    --nav-brand-left: 0px;
+    --nav-brand-width: 0px;
+    --nav-top-width-max: clamp(62px, 19.2vw, 78px);
     align-items: flex-start;
     padding: 0.1rem 0.32rem 0.32rem;
   }
@@ -651,16 +636,11 @@
     max-width: none;
     height: 36px;
     justify-content: center;
-    gap: 0.04rem;
     transform: translateY(-10px);
   }
 
   .nav-top-link {
     min-height: 36px;
-  }
-
-  .nav-top-icon {
-    width: clamp(62px, 19.2vw, 78px);
   }
 
   .global-footer-disclaimer {

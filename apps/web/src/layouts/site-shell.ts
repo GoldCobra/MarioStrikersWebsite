@@ -37,7 +37,21 @@ function topNavLink(item: TopNavItem, state: PageState): string {
   ].join("");
 }
 
-/** Content of #global-nav: logo, the five top-level buttons and the account widget. */
+/**
+ * The last button: the Discord login, which nav.ts turns into the account menu (with the member's avatar)
+ * once signed in. It is active on the profile page; search engines are kept off its redirect.
+ */
+function loginNavLink(state: PageState): string {
+  const active = state.pageSlug === "profile";
+  return [
+    `<a class="nav-top-link nav-top-login${active ? " is-active" : ""}" href="${escapeHtml(loginPath())}" data-top-key="login" aria-label="Login" rel="nofollow">`,
+    `<img class="nav-top-icon" src="${topNavIcon("login", active, "webp")}" width="334" height="198" alt="Login"`,
+    ` data-fallback-src="${topNavIcon("login", active, "png")}">`,
+    "</a>",
+  ].join("");
+}
+
+/** Content of #global-nav: logo, the five top-level buttons and the login. */
 export function renderMainNav(state: PageState): string {
   return [
     '<header id="2">',
@@ -48,8 +62,8 @@ export function renderMainNav(state: PageState): string {
     "</a>",
     '<nav class="main-nav main-nav-text" aria-label="Main navigation">',
     TOP_NAV_ITEMS.map((item) => topNavLink(item, state)).join(""),
+    loginNavLink(state),
     "</nav>",
-    '<div id="global-account" class="global-account" data-auth-state="loading"></div>',
     "</header>",
   ].join("");
 }
@@ -105,17 +119,16 @@ export function renderContentTabs(state: PageState): string {
 
 /** The footer at the end of <body>, in the attribute order the runtime script's DOM calls produced. */
 export function renderFooter(): string {
-  const external = ' target="_blank" rel="noopener noreferrer"';
   const links = [
-    // The login is no page for search engines: they are kept off its redirect to Discord.
-    { label: "LOGIN", href: loginPath(), attributes: ' rel="nofollow"' },
-    ...EXTERNAL_LINKS.map((link) => ({ label: link.label.toUpperCase(), href: link.href, attributes: external })),
-    { label: "ABOUT US", href: pagePath("about-us"), attributes: "" },
-    { label: "PRIVACY POLICY", href: pagePath("privacy-policy"), attributes: "" },
+    ...EXTERNAL_LINKS.map((link) => ({ label: link.label.toUpperCase(), href: link.href, external: true })),
+    { label: "ABOUT US", href: pagePath("about-us"), external: false },
+    { label: "PRIVACY POLICY", href: pagePath("privacy-policy"), external: false },
   ]
     .map(
       (link) =>
-        `<a href="${escapeHtml(link.href)}" class="global-footer-link"${link.attributes}>${escapeHtml(link.label)}</a>`,
+        `<a href="${escapeHtml(link.href)}" class="global-footer-link"` +
+        (link.external ? ' target="_blank" rel="noopener noreferrer"' : "") +
+        `>${escapeHtml(link.label)}</a>`,
     )
     .join('<span class="global-footer-sep">–</span>');
   return [

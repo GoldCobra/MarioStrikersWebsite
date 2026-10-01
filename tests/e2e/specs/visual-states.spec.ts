@@ -83,7 +83,17 @@ const STATES: VisualState[] = [
     path: "/msbl-striker-clubs",
     act: (page) => clickAndSettle(page, ".msbl-club-row[data-club-id]"),
   },
-  { name: "account-menu", path: "/", login: "linked", act: (page) => clickAndSettle(page, ".global-account-trigger") },
+  {
+    // Signed in, the login button shows the avatar and opens the account menu (a reference commit from before
+    // has the account widget at the top right instead).
+    name: "account-menu",
+    path: "/",
+    login: "linked",
+    act: async (page) => {
+      const trigger = page.locator("button.nav-top-login");
+      await clickAndSettle(page, (await trigger.count()) ? "button.nav-top-login" : ".global-account-trigger");
+    },
+  },
   { name: "profile-linked", path: "/profile", login: "linked", fullPage: true },
   { name: "profile-unlinked", path: "/profile", login: "unlinked", fullPage: true },
   {
