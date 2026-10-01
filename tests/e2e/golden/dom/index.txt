@@ -27,7 +27,7 @@
             <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" data-fallback-src="./assets/nav-buttons/default/nav-partners.png"/>
           </a>
           <a class="nav-top-link nav-top-login" href="/api/auth/discord/start?returnTo=%2Fprofile" data-top-key="login" aria-label="Login" rel="nofollow">
-            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-login.webp" width="334" height="198" alt="Login" data-fallback-src="./assets/nav-buttons/default/nav-login.png"/>
+            <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-login.webp" width="334" height="198" alt="Login" data-fallback-src="./assets/nav-buttons/default/nav-login.png?v=20261001-login-v2"/>
           </a>
         </nav>
       </header>

@@ -3,12 +3,8 @@
     --nav-shell-height: 92px;
   }
 
-  .main-nav-text {
+  .main-nav {
     max-width: min(980px, calc(100vw - 24px));
-  }
-
-  .nav-top-link {
-    padding: 0;
   }
 
   #\32 {
@@ -25,26 +21,16 @@
 @media (max-width: 600px) {
   :root {
     --nav-shell-height: 92px;
-    --nav-main-offset-y: clamp(-0.4rem, -0.4vw, -0.24rem);
     --subnav-reserve-height: 42px;
   }
 
   #\32 {
     --nav-brand-left: 0.28rem;
     --nav-brand-width: clamp(50px, 13vw, 68px);
-    padding-inline: 0.32rem;
   }
 
   .nav-brand {
     top: 0.16rem;
-  }
-
-  .main-nav-text {
-    max-width: min(840px, calc(100vw - 36px));
-  }
-
-  .nav-top-link {
-    padding: 0;
   }
 
   .sub-nav {

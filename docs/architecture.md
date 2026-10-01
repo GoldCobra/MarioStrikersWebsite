@@ -46,7 +46,10 @@ markup (`player-profile-popup.html`, `club-profile-popup.html`) sits next to
 their code and is bundled with it. The profile page (`/profile`) shows the
 player popup's card as a section of the page (`#player-profile-page`): the same
 template, renderer (`features/players/player-profile-view.ts`) and styles, but
-no overlay, close button or dialog role. Shared popup classes in `src/styles/popups.css` are
+no overlay, close button or dialog role; there all text is in MLSBY (the
+"Reporter" face) except the name (ITC Grizzly) and the rating cards, and the
+background starts at the card's top at the card's width, so it never moves when
+the card grows. Shared popup classes in `src/styles/popups.css` are
 `popup-overlay`, `popup-card`, `popup-header`, `popup-title` and `popup-close`.
 The hidden page `/player-card?player=<id>` shows the player popup as a compact
 card (`showPlayerCard`, class `is-card`) that the Discord bot screenshots for
@@ -101,7 +104,8 @@ plus one `--game-color-*` per game). Its partials are concatenated in the order 
 content-hashed names. Files under `public/` (images, fonts, the Gear Builder
 snapshot) keep their URL: a changed one needs its `?v=` tag bumped where it is
 referenced (the Gear Builder's in `src/layouts/assets.ts` and
-`src/features/gear-builder/gear-builder-host.ts`), and
+`src/features/gear-builder/gear-builder-host.ts`, a navigation button's in
+`NAV_ICON_VERSIONS` of `src/layouts/site-shell.ts`), and
 `apps/web/assets.lock.json` makes `npm run check` fail until that is done.
 PNG/WebP pairs in the Gear Builder include intentional fallback behavior.
 
@@ -145,14 +149,20 @@ display name (nickname, else global name, else username, without a leading
 logins and the bots' own inserts never create a second row. When that fails, the
 login still succeeds and the profile page asks again (`POST /api/profile/me`).
 On the profile page (`/profile`, `features/profile/`) the member changes the
-country and the friend codes in place: a pencil on each line, "+" and "−" for
-MSC codes, one line open at a time. Every save sends the whole profile with that
-one change to the tables robotic_nightmare's `/profile` commands use, in their
-exact form ([ADR 0007](adr/0007-profile-writes-in-shared-database.md)): one
+country and the friend codes in place: a pencil opens one field (the country,
+the Switch code, an MSC code) without saving it, "+" adds an MSC code and "−"
+removes an open one. Changes collect in a draft (`profile-edit-state.ts`), are
+marked unsaved, and SAVE sends the whole profile in one request, DISCARD (after a
+confirmation) drops them; leaving with unsaved changes warns. The country is a
+combobox with the local flags (`country-select.ts`, `dbo.Enumeration`'s list);
+messages are toasts at the bottom right (`profile-toasts.ts`, `aria-live`). The
+page also shows the member's server nickname and global Discord name. A save
+goes to the tables robotic_nightmare's `/profile` commands use, in their exact
+form ([ADR 0007](adr/0007-profile-writes-in-shared-database.md)): one
 transaction, refused with `409 PROFILE_CHANGED` when the profile changed since
-the page loaded it (a version hash; the page then shows what is saved and keeps
-the change open), and with `409 FRIEND_CODE_TAKEN` for a code another profile
-has. The rules live once in `packages/shared/src/friend-codes.ts`; an older MSC
+the page loaded it (a version hash; the page then lays the draft on top of what
+is saved now and marks what was changed on both sides), and with
+`409 FRIEND_CODE_TAKEN` for a code another profile has. The rules live once in `packages/shared/src/friend-codes.ts`; an older MSC
 code saved without a platform may stay so, a new or changed one needs it. Saves
 are refused for members who left the server, checked with the bot token
 (`integrations/discord/members.ts`).

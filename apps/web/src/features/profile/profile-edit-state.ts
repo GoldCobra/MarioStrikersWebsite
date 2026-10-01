@@ -1,6 +1,7 @@
-// The profile page's inline editing as data, without DOM: the one change that is open (the country, the
-// Switch code, an MSC code to change, add or delete), the whole profile it asks the API to save, whether it
-// changes anything, and what is left of it when the profile was changed elsewhere (in Discord) meanwhile.
+// The profile page's editing as data, without DOM: the draft (country, Switch code and MSC codes as the
+// member has changed them so far), which of its fields differ from what is saved, the whole profile one
+// SAVE sends, the errors of each field, and what is left of the draft when the profile was changed
+// elsewhere (in Discord) meanwhile.
 
 import {
   FIELD_ERROR_MESSAGES,
@@ -9,6 +10,7 @@ import {
   friendCodeFromBlocks,
   validateEditableProfile,
   type EditableProfileInput,
+  type FieldError,
   type MscCodeInput,
 } from "@ms/shared/friend-codes";
 
@@ -31,52 +33,61 @@ export interface EditableProfile {
   readonly countries: readonly { readonly code: string; readonly name: string }[];
 }
 
+/** What is saved of a profile; the base a draft is compared with. */
+export type SavedProfile = Pick<EditableProfile, "country" | "switch_code" | "msc_codes">;
+
 export type Blocks = readonly [string, string, string];
 
 export const EMPTY_BLOCKS: Blocks = ["", "", ""];
 
-export type Edit =
-  | { readonly kind: "country"; readonly country: string }
-  | { readonly kind: "switch"; readonly blocks: Blocks }
-  /** An MSC code; `original` is the saved code it replaces, null for a new one. */
-  | {
-      readonly kind: "msc";
-      readonly original: string | null;
-      readonly region: string;
-      readonly platform: string;
-      readonly blocks: Blocks;
-    }
-  | { readonly kind: "msc-delete"; readonly code: string };
+/** An MSC code of the draft; `original` is the saved code it stands for, null for a new one. */
+export interface DraftMsc {
+  readonly key: string;
+  readonly original: string | null;
+  readonly region: string;
+  readonly platform: string;
+  readonly blocks: Blocks;
+}
 
-/** What a pencil, "+" or "−" opens. */
-export type EditTarget =
-  | { readonly kind: "country" }
-  | { readonly kind: "switch" }
-  | { readonly kind: "msc"; readonly code: string | null }
-  | { readonly kind: "msc-delete"; readonly code: string };
+export interface Draft {
+  readonly country: string;
+  readonly switchBlocks: Blocks;
+  readonly msc: readonly DraftMsc[];
+}
 
-/** The edit of a target, filled with what is saved. */
-export function startEdit(profile: EditableProfile, target: EditTarget): Edit {
-  switch (target.kind) {
-    case "country":
-      return { kind: "country", country: profile.country };
-    case "switch":
-      return { kind: "switch", blocks: friendCodeBlocks(profile.switch_code) };
-    case "msc-delete":
-      return { kind: "msc-delete", code: target.code };
-    case "msc": {
-      const saved = profile.msc_codes.find((entry) => entry.code === target.code);
-      return saved
-        ? {
-            kind: "msc",
-            original: saved.code,
-            region: saved.region,
-            platform: saved.platform,
-            blocks: friendCodeBlocks(saved.code),
-          }
-        : { kind: "msc", original: null, region: "", platform: "", blocks: EMPTY_BLOCKS };
-    }
-  }
+/** Field keys: "country", "switch", "msc" (the list) and "msc:<row key>". */
+export const COUNTRY_FIELD = "country";
+export const SWITCH_FIELD = "switch";
+export const MSC_LIST_FIELD = "msc";
+
+export function mscField(row: Pick<DraftMsc, "key">): string {
+  return `msc:${row.key}`;
+}
+
+/** The draft of a saved profile: nothing changed yet. */
+export function createDraft(saved: SavedProfile): Draft {
+  return {
+    country: saved.country,
+    switchBlocks: friendCodeBlocks(saved.switch_code),
+    msc: saved.msc_codes.map((entry) => ({
+      key: `saved:${entry.code}`,
+      original: entry.code,
+      region: entry.region,
+      platform: entry.platform,
+      blocks: friendCodeBlocks(entry.code),
+    })),
+  };
+}
+
+/** An empty MSC code to add, with a key no other row of the draft has. */
+export function newMscRow(draft: Draft): DraftMsc {
+  let index = 1;
+  while (draft.msc.some((row) => row.key === `new:${String(index)}`)) index += 1;
+  return { key: `new:${String(index)}`, original: null, region: "", platform: "", blocks: EMPTY_BLOCKS };
+}
+
+function blocksText(blocks: Blocks): string {
+  return blocks.join("");
 }
 
 function codeOf(blocks: Blocks): string {
@@ -84,129 +95,255 @@ function codeOf(blocks: Blocks): string {
   return entry.kind === "complete" ? entry.code : "";
 }
 
-/** The whole profile with the one change, as PUT /api/profile/me/editable takes it (without version). */
-export function requestFor(profile: EditableProfile, edit: Edit): EditableProfileInput {
-  const saved = { country: profile.country, switch_code: profile.switch_code, msc_codes: profile.msc_codes };
-  switch (edit.kind) {
-    case "country":
-      return { ...saved, country: edit.country };
-    case "switch":
-      return { ...saved, switch_code: codeOf(edit.blocks) };
-    case "msc-delete":
-      return { ...saved, msc_codes: profile.msc_codes.filter((entry) => entry.code !== edit.code) };
-    case "msc": {
-      const row = { region: edit.region, platform: edit.platform, code: codeOf(edit.blocks) };
-      const codes =
-        edit.original === null
-          ? [...profile.msc_codes, row]
-          : profile.msc_codes.map((entry) => (entry.code === edit.original ? row : entry));
-      return { ...saved, msc_codes: codes };
-    }
-  }
+/** A row added with "+" that has nothing in it yet: it changes nothing and is not sent. */
+export function isBlankNewRow(row: DraftMsc): boolean {
+  return row.original === null && !row.region && !row.platform && !blocksText(row.blocks);
 }
 
-export type EditCheck =
-  | { readonly ok: true; readonly request: EditableProfileInput }
-  | { readonly ok: false; readonly errors: readonly string[] };
+function savedRowOf(saved: SavedProfile, row: DraftMsc): MscCodeInput | undefined {
+  return row.original === null ? undefined : saved.msc_codes.find((entry) => entry.code === row.original);
+}
 
-/** The change checked with the rules the API applies; errors are the messages to show at the open line. */
-export function checkEdit(profile: EditableProfile, edit: Edit): EditCheck {
-  const errors: string[] = [];
-  if (edit.kind === "switch" || edit.kind === "msc") {
-    const entry = friendCodeFromBlocks(edit.blocks);
-    // An MSC code is deleted with "−", so its line needs all 12 digits; the Switch line may be emptied.
-    if (entry.kind === "incomplete" || (edit.kind === "msc" && entry.kind === "empty")) {
-      errors.push(FIELD_ERROR_MESSAGES.INCOMPLETE);
-    }
+function rowChanged(saved: SavedProfile, row: DraftMsc): boolean {
+  const stored = savedRowOf(saved, row);
+  if (!stored) return !isBlankNewRow(row);
+  return (
+    row.region !== stored.region ||
+    row.platform !== stored.platform ||
+    blocksText(row.blocks) !== blocksText(friendCodeBlocks(stored.code))
+  );
+}
+
+/** The fields whose draft differs from what is saved ("msc" when a saved code was removed). */
+export function changedFields(draft: Draft, saved: SavedProfile): Set<string> {
+  const fields = new Set<string>();
+  if (draft.country !== saved.country) fields.add(COUNTRY_FIELD);
+  if (blocksText(draft.switchBlocks) !== blocksText(friendCodeBlocks(saved.switch_code))) fields.add(SWITCH_FIELD);
+  for (const row of draft.msc) if (rowChanged(saved, row)) fields.add(mscField(row));
+  const kept = new Set(draft.msc.map((row) => row.original));
+  if (saved.msc_codes.some((entry) => !kept.has(entry.code))) fields.add(MSC_LIST_FIELD);
+  return fields;
+}
+
+export function isDirty(draft: Draft, saved: SavedProfile): boolean {
+  return changedFields(draft, saved).size > 0;
+}
+
+/** Whether "+" can add another MSC code to the draft. */
+export function canAddMscCode(draft: Draft): boolean {
+  return draft.msc.length < MAX_MSC_CODES;
+}
+
+export interface DraftRequest {
+  /** The whole profile as PUT /api/profile/me/editable takes it (without version). */
+  readonly request: EditableProfileInput;
+  /** The draft row of each msc_codes entry, to place the API's errors ("msc_codes.<index>.code"). */
+  readonly rowKeys: readonly string[];
+}
+
+export function draftRequest(draft: Draft): DraftRequest {
+  const rows = draft.msc.filter((row) => !isBlankNewRow(row));
+  return {
+    request: {
+      country: draft.country,
+      switch_code: codeOf(draft.switchBlocks),
+      msc_codes: rows.map((row) => ({ region: row.region, platform: row.platform, code: codeOf(row.blocks) })),
+    },
+    rowKeys: rows.map((row) => row.key),
+  };
+}
+
+/** The field an API error is about: "country", "switch", "msc:<row key>" or the list ("msc"). */
+export function fieldOfError(path: string, rowKeys: readonly string[]): string {
+  if (path === "country") return COUNTRY_FIELD;
+  if (path === "switch_code") return SWITCH_FIELD;
+  const match = /^msc_codes\.(\d+)(?:\.|$)/.exec(path);
+  const key = match ? rowKeys[Number(match[1])] : undefined;
+  return key ? `msc:${key}` : MSC_LIST_FIELD;
+}
+
+/** Messages per field. */
+export type FieldErrors = ReadonlyMap<string, readonly string[]>;
+
+/** The API's (or the shared rules') errors, placed at their fields. */
+export function errorsByField(errors: readonly FieldError[], rowKeys: readonly string[]): FieldErrors {
+  const byField = new Map<string, string[]>();
+  for (const error of errors) {
+    const field = fieldOfError(error.field, rowKeys);
+    const messages = byField.get(field) ?? [];
+    if (!messages.includes(error.message)) messages.push(error.message);
+    byField.set(field, messages);
   }
-  const request = requestFor(profile, edit);
-  const stored = new Map(profile.msc_codes.map((entry) => [`${entry.region}:${entry.code}`, entry.platform]));
+  return byField;
+}
+
+export type DraftCheck =
+  | { readonly ok: true; readonly request: EditableProfileInput; readonly rowKeys: readonly string[] }
+  | { readonly ok: false; readonly errors: FieldErrors; readonly rowKeys: readonly string[] };
+
+/** The draft checked with the rules the API applies, before anything is sent. */
+export function checkDraft(draft: Draft, saved: SavedProfile, countries: EditableProfile["countries"]): DraftCheck {
+  const { request, rowKeys } = draftRequest(draft);
+  const errors = new Map<string, string[]>();
+  const add = (field: string, message: string): void => {
+    const messages = errors.get(field) ?? [];
+    if (!messages.includes(message)) messages.push(message);
+    errors.set(field, messages);
+  };
+  // Typed digits that are no whole code; the shared rules would only see an empty code.
+  if (friendCodeFromBlocks(draft.switchBlocks).kind === "incomplete")
+    add(SWITCH_FIELD, FIELD_ERROR_MESSAGES.INCOMPLETE);
+  for (const row of draft.msc) {
+    if (isBlankNewRow(row)) continue;
+    // A saved code is removed with "−", so its line needs all 12 digits.
+    if (friendCodeFromBlocks(row.blocks).kind !== "complete") add(mscField(row), FIELD_ERROR_MESSAGES.INCOMPLETE);
+  }
+  const stored = new Map(saved.msc_codes.map((entry) => [`${entry.region}:${entry.code}`, entry.platform]));
   const checked = validateEditableProfile(request, {
-    isAllowedCountry: (code) => code === profile.country || profile.countries.some((country) => country.code === code),
+    isAllowedCountry: (code) => code === saved.country || countries.some((country) => country.code === code),
     storedPlatform: (region, code) => stored.get(`${region}:${code}`) ?? null,
   });
   if (!checked.ok) {
     for (const error of checked.errors) {
+      const field = fieldOfError(error.field, rowKeys);
       // The missing digits are already reported in the form's own words.
-      if (error.code === "INCOMPLETE" && errors.length) continue;
-      if (!errors.includes(error.message)) errors.push(error.message);
+      if (error.code === "INCOMPLETE" && errors.has(field)) continue;
+      add(field, error.message);
     }
   }
-  return errors.length || !checked.ok ? { ok: false, errors } : { ok: true, request: checked.value };
-}
-
-/** Whether the open edit would change what is saved, so closing it would drop typed input. */
-export function isChanged(profile: EditableProfile, edit: Edit): boolean {
-  switch (edit.kind) {
-    case "country":
-      return edit.country !== profile.country;
-    case "switch":
-      return edit.blocks.join("") !== friendCodeBlocks(profile.switch_code).join("");
-    case "msc-delete":
-      return false;
-    case "msc": {
-      const saved = edit.original === null ? null : profile.msc_codes.find((entry) => entry.code === edit.original);
-      if (!saved) return Boolean(edit.region || edit.platform || edit.blocks.join(""));
-      return (
-        edit.region !== saved.region ||
-        edit.platform !== saved.platform ||
-        edit.blocks.join("") !== friendCodeBlocks(saved.code).join("")
-      );
-    }
-  }
-}
-
-/** Whether "+" can add another MSC code. */
-export function canAddMscCode(profile: EditableProfile): boolean {
-  return profile.msc_codes.length < MAX_MSC_CODES;
-}
-
-/** The saved value an edit is about, in words, e.g. to show what was saved elsewhere meanwhile. */
-export function savedText(profile: EditableProfile, edit: Edit, countryName: (code: string) => string): string {
-  switch (edit.kind) {
-    case "country":
-      return profile.country ? countryName(profile.country) : "no country";
-    case "switch":
-      return profile.switch_code ? `SW-${profile.switch_code}` : "no code";
-    case "msc":
-    case "msc-delete": {
-      const code = edit.kind === "msc" ? edit.original : edit.code;
-      const saved = profile.msc_codes.find((entry) => entry.code === code);
-      return saved ? `${saved.region}${saved.platform ? ` (${saved.platform})` : ""}: ${saved.code}` : "no code";
-    }
-  }
+  if (errors.size || !checked.ok) return { ok: false, errors, rowKeys };
+  return { ok: true, request: checked.value, rowKeys };
 }
 
 export interface Rebased {
-  /** The edit to keep open, or null when nothing is left of it. */
-  readonly edit: Edit | null;
-  /** Why it changed or closed, when it did. */
-  readonly note: string;
+  readonly draft: Draft;
+  /** Why the draft changed, in words, when it did. */
+  readonly notes: readonly string[];
+  /** Fields both the member and someone elsewhere changed: the member's value stays and needs a look. */
+  readonly conflicts: ReadonlySet<string>;
 }
 
 /**
- * The open edit on the profile saved elsewhere meanwhile: a change of a code that is gone becomes a new
- * code (if there is room), a deletion of a code that is gone is done already.
+ * The draft on top of the profile as it is saved now (after a 409, or a draft kept over a login): what the
+ * member did not touch follows the newly saved profile, what they changed stays. A changed MSC code that
+ * was removed elsewhere becomes a new code; codes added elsewhere join the list.
  */
-export function rebaseEdit(edit: Edit, current: EditableProfile): Rebased {
-  if (edit.kind === "msc-delete" && !current.msc_codes.some((entry) => entry.code === edit.code)) {
-    return { edit: null, note: "This code was already deleted elsewhere." };
-  }
-  if (
-    edit.kind === "msc" &&
-    edit.original !== null &&
-    !current.msc_codes.some((entry) => entry.code === edit.original)
-  ) {
-    if (!canAddMscCode(current)) {
-      return { edit: null, note: `This code was removed elsewhere, and ${MAX_MSC_CODES} MSC codes are saved now.` };
+export function rebaseDraft(
+  draft: Draft,
+  base: SavedProfile,
+  current: SavedProfile,
+  describeCountry: (code: string) => string,
+): Rebased {
+  const notes: string[] = [];
+  const conflicts = new Set<string>();
+  const baseDraft = createDraft(base);
+  const currentDraft = createDraft(current);
+
+  let country = current.country;
+  if (draft.country !== base.country) {
+    country = draft.country;
+    if (current.country !== base.country && current.country !== draft.country) {
+      conflicts.add(COUNTRY_FIELD);
+      notes.push(`Country saved now: ${current.country ? describeCountry(current.country) : "no country"}.`);
     }
-    return {
-      edit: { ...edit, original: null },
-      note: "This code was removed elsewhere; saving adds yours as a new code.",
-    };
   }
-  if (edit.kind === "msc" && edit.original === null && !canAddMscCode(current)) {
-    return { edit: null, note: `${MAX_MSC_CODES} MSC codes are saved now, so no code can be added.` };
+
+  let switchBlocks = currentDraft.switchBlocks;
+  if (blocksText(draft.switchBlocks) !== blocksText(baseDraft.switchBlocks)) {
+    switchBlocks = draft.switchBlocks;
+    if (current.switch_code !== base.switch_code && codeOf(draft.switchBlocks) !== current.switch_code) {
+      conflicts.add(SWITCH_FIELD);
+      notes.push(`Switch code saved now: ${current.switch_code ? `SW-${current.switch_code}` : "no code"}.`);
+    }
   }
-  return { edit, note: "" };
+
+  const rows: DraftMsc[] = [];
+  const inDraft = new Set<string>();
+  for (const row of draft.msc) {
+    if (row.original === null) {
+      rows.push(row);
+      continue;
+    }
+    inDraft.add(row.original);
+    const now = currentDraft.msc.find((entry) => entry.original === row.original);
+    if (!rowChanged(base, row)) {
+      // Untouched: as it is saved now, or gone when it was removed elsewhere.
+      if (now) rows.push(now);
+      continue;
+    }
+    if (now) {
+      rows.push(row);
+      if (rowChanged(base, now)) {
+        conflicts.add(mscField(row));
+        notes.push(`MSC code ${row.original} was also changed elsewhere.`);
+      }
+    } else {
+      rows.push({ ...row, key: `new:moved:${row.original}`, original: null });
+      conflicts.add(`msc:new:moved:${row.original}`);
+      notes.push(`MSC code ${row.original} was removed elsewhere; saving adds yours as a new code.`);
+    }
+  }
+  // Removed in the draft stays removed; added elsewhere joins the list.
+  const removedHere = new Set(base.msc_codes.map((entry) => entry.code).filter((code) => !inDraft.has(code)));
+  for (const entry of currentDraft.msc) {
+    if (entry.original !== null && !inDraft.has(entry.original) && !removedHere.has(entry.original)) {
+      rows.splice(rows.filter((row) => row.original !== null).length, 0, entry);
+      notes.push(`MSC code ${entry.original} was added elsewhere.`);
+    }
+  }
+  return { draft: { country, switchBlocks, msc: rows }, notes, conflicts };
+}
+
+/** The draft as sessionStorage keeps it over an expired login. */
+export interface StoredDraft {
+  readonly v: 2;
+  readonly id: string;
+  readonly base: SavedProfile;
+  readonly draft: Draft;
+}
+
+function isBlocks(value: unknown): value is Blocks {
+  return Array.isArray(value) && value.length === 3 && value.every((part) => typeof part === "string");
+}
+
+function isMscInput(value: unknown): value is MscCodeInput {
+  const entry = value as Partial<MscCodeInput> | null;
+  return (
+    typeof entry === "object" &&
+    entry !== null &&
+    typeof entry.region === "string" &&
+    typeof entry.platform === "string" &&
+    typeof entry.code === "string"
+  );
+}
+
+/** A stored draft of this member, or null for anything else (an older format included). */
+export function parseStoredDraft(raw: string | null, discordId: string): StoredDraft | null {
+  if (!raw) return null;
+  try {
+    const value = JSON.parse(raw) as Partial<StoredDraft> | null;
+    if (value?.v !== 2 || value.id !== discordId) return null;
+    const { base, draft } = value;
+    if (!base || typeof base.country !== "string" || typeof base.switch_code !== "string") return null;
+    if (!Array.isArray(base.msc_codes) || !base.msc_codes.every(isMscInput)) return null;
+    if (!draft || typeof draft.country !== "string" || !isBlocks(draft.switchBlocks) || !Array.isArray(draft.msc)) {
+      return null;
+    }
+    const rows = draft.msc as unknown[];
+    const valid = rows.every((row) => {
+      const entry = row as Partial<DraftMsc> | null;
+      return (
+        typeof entry === "object" &&
+        entry !== null &&
+        typeof entry.key === "string" &&
+        (entry.original === null || typeof entry.original === "string") &&
+        typeof entry.region === "string" &&
+        typeof entry.platform === "string" &&
+        isBlocks(entry.blocks)
+      );
+    });
+    return valid ? { v: 2, id: discordId, base, draft } : null;
+  } catch {
+    return null;
+  }
 }

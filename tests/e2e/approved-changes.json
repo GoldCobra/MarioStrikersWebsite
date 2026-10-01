@@ -1,10 +1,14 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "32c255e2a3ea05a8eacff5bfd75b0f727378c542",
+  "reference": "c5d21af7b4a183e9cf33922788f3831808cae805",
   "changes": [
     {
+      "screenshots": ["pages/profile-*", "states/profile-*", "states/account-menu-*"],
+      "reason": "Owner request: the profile page in MLSBY (name in ITC Grizzly, rating cards unchanged), background anchored at the card's top, club names in capitals, server nickname and global Discord name, Country as its own line with a flag combobox, draft editing with SAVE/DISCARD (floating while changes are out of sight), toasts at the bottom right; the profile area is at least a screen tall (no shift while it loads), so the logged-out page is taller. Account menu: the avatar covers the new, smaller login figure (smallest enclosing circle)."
+    },
+    {
       "screenshots": ["pages/*", "states/*"],
-      "reason": "Owner request: LOGIN is the sixth navigation button (after PARTNERS, active on /profile; signed in it shows the Discord avatar and opens MY PROFILE / LOGOUT), every navigation button stands exactly 1px apart, the old account widget and the footer LOGIN link are gone. Checked: in all 334 screenshots every differing pixel lies in the header band (top 100px) or the footer line (bottom 34px), plus the menu on account-menu; no size changes; inside the Discord card (/player-card, 413x350 and 411x350) no pixel differs."
+      "reason": "Owner request: new LOGIN button art, built like the other navigation buttons, and its stray grey 1px column at x = 0 removed. Checked: in 302 of the 305 other differing screenshots every differing pixel lies in the header band (y <= 100, the login button); the remaining 3 (msbl-striker-clubs, club-popup; which ones varies between runs) differ below it by at most 2 of 255 per channel (rendering noise). No size changes; the Discord card (/player-card) is unchanged."
     }
   ]
 }

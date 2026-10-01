@@ -100,7 +100,11 @@ function accoladeItem(entry: Accolade | null | undefined): string {
 
 function renderFlag(view: TemplateView, country: unknown): void {
   const flag = view.slots["player-flag"] as HTMLImageElement | undefined;
-  if (!flag) return;
+  if (flag) showFlag(flag, country);
+}
+
+/** The flag next to the name: the country's flag with its name as title, hidden without a country. */
+export function showFlag(flag: HTMLImageElement, country: unknown): void {
   const code = normalizeCountryCode(country);
   if (code) {
     const name = countryDisplayName(code);

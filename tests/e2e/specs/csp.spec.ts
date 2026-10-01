@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { login, preparePage, settle } from "../lib/browser.ts";
+import { hideDevNotice, login, preparePage, settle } from "../lib/browser.ts";
 import { MSBL_SAVE, MSC_SAVE_PAL, buildOnlineFile } from "../lib/save-files.ts";
 import { DOM_WIDTH, PAGE_SLUGS, pagePath } from "../lib/site.ts";
 
@@ -80,28 +80,56 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await page.goto("/profile");
     await settle(page, { eagerImages: true });
   },
-  // Editing in the browser: digits only, whole codes pasted with their leading zeros, one save per click
-  // on ✓. The save is answered here, so the shared fixture stack keeps its data.
+  // Editing in the browser: digits only, whole codes pasted with their leading zeros, the country picked
+  // by typing, a new MSC code; every change waits in the draft and SAVE sends them all in one request
+  // (once, also on a double click). The save is answered here, so the shared fixture stack keeps its data.
   "profile editor": async (page) => {
     await watchViolations(page);
     await preparePage(page);
     await login(page, "linked");
     await page.goto("/profile");
     await settle(page, { eagerImages: true });
-    await page.locator("[data-edit='switch']").click();
-    const fields = page.locator("[data-edit-row] .profile-edit-digits");
-    const error = page.locator("[data-edit-row] .profile-edit-error");
+    // The local notice sits where the save bar floats.
+    await hideDevNotice(page);
+    const save = page.locator("[data-edit-action='save']");
+    const discard = page.locator("[data-edit-action='discard']");
+    await expect(save).toBeDisabled();
+    await expect(discard).toBeDisabled();
 
+    await page.locator("[data-edit-open='switch']").click();
+    const fields = page.locator("[data-field-row='switch'] .profile-edit-digits");
+    const error = page.locator("[data-field-row='switch'] .profile-edit-error");
     await fields.first().fill("");
     await fields.first().pressSequentially("1a2b");
     await expect(fields.first()).toHaveValue("12");
-
     await fields.nth(1).focus();
     await paste(page, "SW-0001-0020-0300");
     for (const [index, value] of ["0001", "0020", "0300"].entries()) await expect(fields.nth(index)).toHaveValue(value);
     await paste(page, "12ab");
     await expect(error).toHaveText("Paste a 12-digit friend code (digits only).");
     await expect(fields.first()).toHaveValue("0001");
+    await expect(page.locator("[data-field-row='switch']")).toHaveClass(/is-unsaved/);
+    await expect(save).toBeEnabled();
+
+    // The country: a combobox with flags; typing jumps to the country, Enter takes it.
+    await page.locator("[data-edit-open='country']").click();
+    const combobox = page.locator("[role='combobox']");
+    await expect(combobox).toBeFocused();
+    await combobox.press("ArrowDown");
+    await expect(combobox).toHaveAttribute("aria-expanded", "true");
+    await page.keyboard.type("united s");
+    await expect(page.locator("[role='option'].is-active")).toHaveText("United States");
+    await page.keyboard.press("Enter");
+    await expect(combobox).toHaveAttribute("aria-expanded", "false");
+    await expect(combobox).toContainText("United States");
+    await expect(page.locator(".player-popup-flag")).toHaveAttribute("src", /flags\/us\.png$/);
+
+    await page.locator("[data-edit-action='add']").click();
+    const added = page.locator("[data-edit-row].is-msc").last();
+    await added.locator("[data-field='region']").selectOption("PAL");
+    await added.locator("[data-field='platform']").selectOption("Dolphin");
+    await added.locator(".profile-edit-digits").first().focus();
+    await paste(page, "0000-1111-2222");
 
     let saves = 0;
     await page.route("**/api/profile/me/editable", async (route) => {
@@ -110,20 +138,61 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
         return;
       }
       saves += 1;
-      const sent = route.request().postDataJSON() as { switch_code?: string };
+      const sent = route.request().postDataJSON() as {
+        country?: string;
+        switch_code?: string;
+        msc_codes?: { region: string; platform: string; code: string }[];
+      };
+      expect(sent.country).toBe("us");
       expect(sent.switch_code).toBe("0001-0020-0300");
+      expect(sent.msc_codes?.at(-1)).toEqual({ region: "PAL", platform: "Dolphin", code: "0000-1111-2222" });
       const current = (await (await route.fetch({ method: "GET" })).json()) as Record<string, unknown>;
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ ...current, switch_code: sent.switch_code, changed: true }),
+        body: JSON.stringify({ ...current, ...sent, changed: true }),
       });
     });
-    await page.locator("[data-edit-action='save']").dblclick();
-    await expect(page.locator(".profile-edit-status")).toHaveText("Changes saved.");
+    await save.dblclick();
+    await expect(page.locator(".profile-toast")).toHaveText(/Changes saved\./);
+    await expect(page.locator(".profile-toasts")).toHaveAttribute("aria-live", "polite");
+    await expect(page.locator(".profile-toasts")).toHaveAttribute("role", "status");
     expect(saves).toBe(1);
     await expect(page.locator("[data-edit-row]")).toHaveCount(0);
-    await expect(page.locator("[data-edit='switch']")).toBeFocused();
+    await expect(save).toBeDisabled();
+    await settle(page);
+  },
+  // DISCARD asks first and then shows what is saved; leaving with unsaved changes warns.
+  "profile editor discard": async (page) => {
+    await watchViolations(page);
+    await preparePage(page);
+    await login(page, "linked");
+    await page.goto("/profile");
+    await settle(page, { eagerImages: true });
+    await hideDevNotice(page);
+    const value = page.locator("[data-field-row='switch'] .player-popup-code-value");
+    const saved = await value.textContent();
+    await page.locator("[data-edit-open='switch']").click();
+    await page.locator("[data-field-row='switch'] .profile-edit-digits").first().fill("9999");
+    const unload = (): Promise<boolean> =>
+      page.evaluate(() => {
+        const event = new Event("beforeunload", { cancelable: true });
+        window.dispatchEvent(event);
+        return event.defaultPrevented;
+      });
+    expect(await unload()).toBe(true);
+    await page.locator("[data-edit-action='discard']").click();
+    await expect(page.locator(".profile-edit-bar-text")).toHaveText("Discard all unsaved changes?");
+    await expect(page.locator("[data-edit-action='discard-confirm']")).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(page.locator("[data-edit-action='discard']")).toBeVisible();
+    await expect(page.locator("[data-field-row='switch'] .profile-edit-digits").first()).toHaveValue("9999");
+    await page.locator("[data-edit-action='discard']").click();
+    await page.locator("[data-edit-action='discard-confirm']").click();
+    await expect(page.locator(".profile-toast")).toHaveText(/Changes discarded\./);
+    await expect(value).toHaveText(saved ?? "");
+    await expect(page.locator("[data-edit-action='save']")).toBeDisabled();
+    expect(await unload()).toBe(false);
     await settle(page);
   },
   // An older MSC code saved without a platform asks for one, and another change is saved while that code
@@ -146,11 +215,13 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     });
     await page.goto("/profile");
     await settle(page, { eagerImages: true });
+    await hideDevNotice(page);
     await expect(page.locator(".profile-row-hint")).toHaveText("Select the platform.");
-    await page.locator("[data-edit='country']").click();
-    await page.locator("[data-edit-row] [data-field='country']").selectOption("us");
+    await page.locator("[data-edit-open='country']").click();
+    await page.locator("[role='combobox']").click();
+    await page.locator("[role='option']", { hasText: "United States" }).click();
     await page.locator("[data-edit-action='save']").click();
-    await expect(page.locator(".profile-edit-status")).toHaveText("Changes saved.");
+    await expect(page.locator(".profile-toast")).toHaveText(/Changes saved\./);
     expect(saved.body?.msc_codes?.[0]?.platform).toBe("");
     await settle(page);
   },
