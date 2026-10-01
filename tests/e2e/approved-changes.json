@@ -1,14 +1,5 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "c5d21af7b4a183e9cf33922788f3831808cae805",
-  "changes": [
-    {
-      "screenshots": ["pages/profile-*", "states/profile-*", "states/account-menu-*"],
-      "reason": "Owner request: the profile page in MLSBY (name in ITC Grizzly, rating cards unchanged), background anchored at the card's top, club names in capitals, server nickname and global Discord name, Country as its own line with a flag combobox, draft editing with SAVE/DISCARD (floating while changes are out of sight), toasts at the bottom right; the profile area is at least a screen tall (no shift while it loads), so the logged-out page is taller. Account menu: the avatar covers the new, smaller login figure (smallest enclosing circle)."
-    },
-    {
-      "screenshots": ["pages/*", "states/*"],
-      "reason": "Owner request: new LOGIN button art, built like the other navigation buttons, and its stray grey 1px column at x = 0 removed. Checked: in 302 of the 305 other differing screenshots every differing pixel lies in the header band (y <= 100, the login button); the remaining 3 (msbl-striker-clubs, club-popup; which ones varies between runs) differ below it by at most 2 of 255 per channel (rendering noise). No size changes; the Discord card (/player-card) is unchanged."
-    }
-  ]
+  "reference": "df2f56003467b95c14b7b05c90d51f443f39646d",
+  "changes": []
 }
