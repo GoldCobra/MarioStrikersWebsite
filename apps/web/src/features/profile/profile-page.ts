@@ -145,18 +145,23 @@ function profileHtml(profile: PlayerProfile): string {
   const flag = countryCode
     ? `<img class="profile-header-flag" src="${escapeHtml(flagUrl(countryCode))}" alt="" aria-hidden="true"${flagTitleAttribute(countryCode)} data-on-error="remove">`
     : "";
+  // "Member of <club> [<tag>]"; without a club the line stays, empty, so every header is equally tall.
   const clubName = toText(player.club_name).trim();
-  const clubText = clubName
-    ? clubName + (player.club_tag ? ` [${toText(player.club_tag)}]` : "")
-    : "No club membership listed.";
+  const clubTag = toText(player.club_tag).trim();
+  const club = clubName
+    ? `Member of <span class="profile-club-name">${escapeHtml(clubName + (clubTag ? ` [${clubTag}]` : ""))}</span>`
+    : "";
   const resultsUrl = toText(player.results_url).trim();
   const results = resultsUrl
     ? `<section class="profile-panel profile-results-panel"><p class="profile-meta-line profile-results-line"><a href="${escapeHtml(resultsUrl)}" target="_blank" rel="noopener noreferrer">Results at start.gg</a></p></section>`
     : "";
   // An MSL World Champion's header turns gold and shows the MSL logo at its right end.
   const champion = isWorldChampion(profile.accolades);
+  // The header is the first box of the main column, as wide as the boxes below it.
   return [
     '<section class="profile-shell">',
+    '<div class="profile-grid">',
+    '<div class="profile-grid-main">',
     '<header class="profile-header-panel">',
     `<div class="profile-header-title${champion ? " is-world-champion" : ""}">`,
     `<h2 class="profile-name">${escapeHtml(toText(player.name || "Player Profile"))}</h2>`,
@@ -166,12 +171,10 @@ function profileHtml(profile: PlayerProfile): string {
       : "",
     "</div>",
     '<div class="profile-meta">',
-    `<p class="profile-meta-line"><span>Club</span><strong>${escapeHtml(clubText)}</strong></p>`,
+    `<p class="profile-meta-line profile-club-line">${club}</p>`,
     '<p class="profile-meta-actions"><button class="profile-action-button" type="button" data-profile-action="edit">Edit Profile</button></p>',
     "</div>",
     "</header>",
-    '<div class="profile-grid">',
-    '<div class="profile-grid-main">',
     friendCodes(profile.friend_codes ?? {}),
     seasonAwards(profile.season_awards ?? []),
     accolades(profile.accolades ?? []),

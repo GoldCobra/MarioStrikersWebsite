@@ -1,25 +1,10 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "e1728bd58fdae83fe99869d89b534f89df443b3b",
+  "reference": "b7d4e1ab29e133932dfc8429fe4f6a3c48962ace",
   "changes": [
     {
-      "screenshots": [
-        "pages/*",
-        "states/account-menu-*",
-        "states/club-popup-*",
-        "states/error-clubs-*",
-        "states/error-events-*",
-        "states/error-home-*",
-        "states/error-leaderboard-*",
-        "states/error-players-*",
-        "states/error-wiimmfi-*",
-        "states/gear-builder-*",
-        "states/nav-hover-*",
-        "states/placeholder-*",
-        "states/player-card-*",
-        "states/profile-*"
-      ],
-      "reason": "Owner request: a LOGIN link before DISCORD in the footer, to test the Discord login. Only the footer link line changes: in all 310 differing screenshots the first differing row is at most 30 px above the bottom and no size changes; on the player card pages the change lies below the card (y >= 870), which is all the bot photographs. Covered but identical without this approval: msc-setup-guide and the editor states at 390px."
+      "screenshots": ["states/profile-linked-*", "states/profile-unlinked-*", "states/profile-edit-*"],
+      "reason": "Owner request for the profile page: the header box is the first box of the left column, as wide as the boxes below (the ratings start at the top of the right column); \"Member of <club> [<tag>]\" with the club in gold, an empty line without a club; friend code rows in the Reporter font with their normal case; panel titles and EDIT PROFILE in capitals. Only these 18 screenshots differed (316 others identical); in the editor states no pixel inside the editor card differs, only the page behind the backdrop."
     }
   ]
 }
