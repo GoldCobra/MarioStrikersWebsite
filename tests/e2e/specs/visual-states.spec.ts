@@ -27,15 +27,25 @@ async function showPlayerCard(page: Page): Promise<void> {
   await settle(page, { eagerImages: true });
 }
 
-// Editing on the profile page: a pencil, "+" or "−" opens one line (a reference commit from before the
-// inline editing has no such buttons: then nothing opens).
-async function openProfileLine(page: Page, selector: string): Promise<boolean> {
+// Editing on the profile page: a pencil or "+" opens a field (a reference commit from before the draft
+// editing has no such buttons: then nothing opens).
+async function openProfileField(page: Page, selector: string): Promise<boolean> {
   const button = page.locator(selector).first();
   if (!(await button.count())) return false;
+  // The local notice sits where the save bar floats.
+  await hideDevNotice(page);
   await button.click();
-  await page.locator("[data-edit-row]").waitFor();
+  await page.locator("[data-edit-row]").first().waitFor();
   await settle(page, { eagerImages: true });
   return true;
+}
+
+/** The country picked in the open country field, as typed. */
+async function pickCountry(page: Page, typed: string): Promise<void> {
+  const combobox = page.locator("[role='combobox']");
+  await combobox.press("ArrowDown");
+  await page.keyboard.type(typed);
+  await page.keyboard.press("Enter");
 }
 
 async function openGearBuilderPane(page: Page, which: "first" | "last"): Promise<void> {
@@ -97,38 +107,67 @@ const STATES: VisualState[] = [
   { name: "profile-linked", path: "/profile", login: "linked", fullPage: true },
   { name: "profile-unlinked", path: "/profile", login: "unlinked", fullPage: true },
   {
-    // An MSC code open for changing.
+    // An MSC code open for changing, its platform changed: marked unsaved, SAVE and DISCARD on.
     name: "profile-edit",
     path: "/profile",
     login: "linked",
-    act: (page) => openProfileLine(page, "[data-edit='msc']").then(() => undefined),
+    act: async (page) => {
+      if (!(await openProfileField(page, "[data-edit-open^='msc:']"))) return;
+      await page.locator("[data-edit-row] [data-field='platform']").selectOption("Dolphin");
+      await settle(page);
+    },
   },
   {
     // A profile created at login: no codes yet, the first MSC code being added.
     name: "profile-edit-new",
     path: "/profile",
     login: "unlinked",
-    act: (page) => openProfileLine(page, "[data-edit='msc-add']").then(() => undefined),
+    act: (page) => openProfileField(page, "[data-edit-action='add']").then(() => undefined),
   },
   {
     name: "profile-edit-errors",
     path: "/profile",
     login: "linked",
     act: async (page) => {
-      if (!(await openProfileLine(page, "[data-edit='switch']"))) return;
+      if (!(await openProfileField(page, "[data-edit-open='switch']"))) return;
       await page.locator("[data-edit-row] .profile-edit-digits").first().fill("12");
       await page.locator("[data-edit-action='save']").click();
+      await page.locator(".profile-toast").waitFor();
       await settle(page);
     },
   },
   {
-    // Saved elsewhere meanwhile: the API answers 409 with the newer profile; the line stays open and
-    // names what is saved now.
+    // The country field open with its flags, "s" typed.
+    name: "profile-country-list",
+    path: "/profile",
+    login: "linked",
+    act: async (page) => {
+      if (!(await openProfileField(page, "[data-edit-open='country']"))) return;
+      await page.locator("[role='combobox']").press("ArrowDown");
+      await page.keyboard.type("s");
+      await settle(page, { eagerImages: true });
+    },
+  },
+  {
+    // DISCARD asks first.
+    name: "profile-discard",
+    path: "/profile",
+    login: "linked",
+    act: async (page) => {
+      if (!(await openProfileField(page, "[data-edit-open='switch']"))) return;
+      await page.locator("[data-edit-row] .profile-edit-digits").first().fill("9999");
+      await page.locator("[data-edit-action='discard']").click();
+      await settle(page);
+    },
+  },
+  {
+    // Saved elsewhere meanwhile: the API answers 409 with the newer profile; the member's change stays,
+    // marked, and a message names what is saved now.
     name: "profile-edit-conflict",
     path: "/profile",
     login: "linked",
     act: async (page) => {
-      if (!(await openProfileLine(page, "[data-edit='country']"))) return;
+      if (!(await openProfileField(page, "[data-edit-open='country']"))) return;
       await page.route("**/api/profile/me/editable", async (route) => {
         if (route.request().method() !== "PUT") {
           await route.continue();
@@ -145,7 +184,7 @@ const STATES: VisualState[] = [
           }),
         });
       });
-      await page.locator("[data-edit-row] [data-field='country']").selectOption("us");
+      await pickCountry(page, "united s");
       await page.locator("[data-edit-action='save']").click();
       await page.locator("[data-edit-row] .profile-edit-error:not([hidden])").waitFor();
       await settle(page);

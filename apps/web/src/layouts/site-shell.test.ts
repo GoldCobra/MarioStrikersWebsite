@@ -53,11 +53,13 @@ test("content tabs list visible leaves and skip leaderboards", () => {
 
 test("the login is the last button, active on the profile page only", () => {
   const login =
-    /<a class="nav-top-link nav-top-login" href="\/api\/auth\/discord\/start\?returnTo=%2Fprofile" data-top-key="login" aria-label="Login" rel="nofollow"><img class="nav-top-icon" src="\.\/assets\/nav-buttons\/default\/nav-login\.webp" width="334" height="198" alt="Login" data-fallback-src="\.\/assets\/nav-buttons\/default\/nav-login\.png"><\/a><\/nav>/;
+    /<a class="nav-top-link nav-top-login" href="\/api\/auth\/discord\/start\?returnTo=%2Fprofile" data-top-key="login" aria-label="Login" rel="nofollow"><img class="nav-top-icon" src="\.\/assets\/nav-buttons\/default\/nav-login\.webp\?v=20261001-login-v2" width="334" height="198" alt="Login" data-fallback-src="\.\/assets\/nav-buttons\/default\/nav-login\.png\?v=20261001-login-v2"><\/a><\/nav>/;
   assert.match(renderMainNav(resolvePageState("partners")), login);
   const profile = renderMainNav(resolvePageState("profile"));
   assert.match(profile, /<a class="nav-top-link nav-top-login is-active" href=/);
-  assert.match(profile, /nav-buttons\/active\/nav-login-active\.webp/);
+  assert.match(profile, /nav-buttons\/active\/nav-login-active\.webp\?v=20261001-login-v2"/);
+  // Only the login carries a cache tag (its image changed); the page buttons keep their plain URLs.
+  assert.match(profile, /nav-buttons\/default\/nav-home\.webp"/);
   // No other button is active there.
   assert.equal(profile.match(/is-active/g)?.length, 1);
 });

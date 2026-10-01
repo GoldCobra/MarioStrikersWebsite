@@ -2,13 +2,19 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   canAddMscCode,
-  checkEdit,
-  isChanged,
-  rebaseEdit,
-  requestFor,
-  savedText,
-  startEdit,
+  changedFields,
+  checkDraft,
+  createDraft,
+  draftRequest,
+  errorsByField,
+  fieldOfError,
+  isDirty,
+  newMscRow,
+  parseStoredDraft,
+  rebaseDraft,
+  type Draft,
   type EditableProfile,
+  type SavedProfile,
 } from "./profile-edit-state.ts";
 
 const PROFILE: EditableProfile = {
@@ -35,170 +41,206 @@ const PROFILE: EditableProfile = {
   ],
 };
 
-test("an edit starts from what is saved", () => {
-  assert.deepEqual(startEdit(PROFILE, { kind: "country" }), { kind: "country", country: "de" });
-  assert.deepEqual(startEdit(PROFILE, { kind: "switch" }), { kind: "switch", blocks: ["0012", "0000", "0340"] });
-  assert.deepEqual(startEdit(PROFILE, { kind: "msc", code: "4444-5555-6666" }), {
-    kind: "msc",
-    original: "4444-5555-6666",
-    region: "NTSC",
-    platform: "",
-    blocks: ["4444", "5555", "6666"],
-  });
-  assert.deepEqual(startEdit(PROFILE, { kind: "msc", code: null }), {
-    kind: "msc",
-    original: null,
-    region: "",
-    platform: "",
-    blocks: ["", "", ""],
+const SAVED: SavedProfile = PROFILE;
+const name = (code: string): string => code.toUpperCase();
+
+function withNewCode(draft: Draft, region: string, platform: string, code: string): Draft {
+  const row = newMscRow(draft);
+  return {
+    ...draft,
+    msc: [...draft.msc, { ...row, region, platform, blocks: code.split("-") as [string, string, string] }],
+  };
+}
+
+test("a new draft is the saved profile and changes nothing", () => {
+  const draft = createDraft(SAVED);
+  assert.equal(draft.country, "de");
+  assert.deepEqual(draft.switchBlocks, ["0012", "0000", "0340"]);
+  assert.deepEqual(
+    draft.msc.map((row) => [row.key, row.original, row.region, row.platform]),
+    [
+      ["saved:1111-2222-3333", "1111-2222-3333", "PAL", "Wii"],
+      ["saved:4444-5555-6666", "4444-5555-6666", "NTSC", ""],
+    ],
+  );
+  assert.equal(isDirty(draft, SAVED), false);
+  assert.deepEqual(draftRequest(draft).request, {
+    country: "de",
+    switch_code: "0012-0000-0340",
+    msc_codes: SAVED.msc_codes,
   });
 });
 
-test("the request is the saved profile with the one change", () => {
-  assert.deepEqual(requestFor(PROFILE, { kind: "country", country: "us" }), {
+test("several changes are kept together and sent in one request", () => {
+  let draft = createDraft(SAVED);
+  draft = { ...draft, country: "us", switchBlocks: ["9999", "8888", "7777"] };
+  draft = { ...draft, msc: draft.msc.filter((row) => row.original !== "4444-5555-6666") };
+  draft = withNewCode(draft, "PAL", "Dolphin", "0001-0002-0003");
+  const fields = changedFields(draft, SAVED);
+  assert.deepEqual([...fields].sort(), ["country", "msc", "msc:new:1", "switch"]);
+  const { request, rowKeys } = draftRequest(draft);
+  assert.deepEqual(request, {
+    country: "us",
+    switch_code: "9999-8888-7777",
+    msc_codes: [
+      { region: "PAL", platform: "Wii", code: "1111-2222-3333" },
+      { region: "PAL", platform: "Dolphin", code: "0001-0002-0003" },
+    ],
+  });
+  assert.deepEqual(rowKeys, ["saved:1111-2222-3333", "new:1"]);
+  const checked = checkDraft(draft, SAVED, PROFILE.countries);
+  assert.equal(checked.ok, true);
+});
+
+test("a row added with + and left empty changes nothing and is not sent", () => {
+  const draft = { ...createDraft(SAVED), msc: [...createDraft(SAVED).msc, newMscRow(createDraft(SAVED))] };
+  assert.equal(isDirty(draft, SAVED), false);
+  assert.equal(draftRequest(draft).request.msc_codes.length, 2);
+  assert.equal(checkDraft(draft, SAVED, PROFILE.countries).ok, true);
+});
+
+test("errors are placed at their fields", () => {
+  let draft = createDraft(SAVED);
+  draft = { ...draft, country: "xx", switchBlocks: ["12", "", ""] };
+  draft = withNewCode(draft, "", "", "1234-5678-9012");
+  const checked = checkDraft(draft, SAVED, PROFILE.countries);
+  assert.equal(checked.ok, false);
+  assert.deepEqual(checked.errors.get("country"), ["Select a country from the list."]);
+  assert.deepEqual(checked.errors.get("switch"), [
+    "Enter all 12 digits (4 in each field) or leave all three fields empty.",
+  ]);
+  assert.deepEqual(checked.errors.get("msc:new:1"), ["Select the MSC region.", "Select the platform."]);
+  // The older code saved without a platform may stay as it is.
+  assert.equal(checked.errors.has("msc:saved:4444-5555-6666"), false);
+});
+
+test("a saved code changed or emptied needs its platform and all digits", () => {
+  const draft = createDraft(SAVED);
+  const changed: Draft = {
+    ...draft,
+    msc: draft.msc.map((row) =>
+      row.original === "4444-5555-6666"
+        ? { ...row, blocks: ["4444", "5555", "6667"] }
+        : row.original
+          ? { ...row, blocks: ["", "", ""] }
+          : row,
+    ),
+  };
+  const checked = checkDraft(changed, SAVED, PROFILE.countries);
+  assert.equal(checked.ok, false);
+  assert.deepEqual(checked.errors.get("msc:saved:4444-5555-6666"), ["Select the platform."]);
+  assert.deepEqual(checked.errors.get("msc:saved:1111-2222-3333"), [
+    "Enter all 12 digits (4 in each field) or leave all three fields empty.",
+  ]);
+});
+
+test("the same code twice and a fourth MSC code are refused", () => {
+  let draft = withNewCode(createDraft(SAVED), "PAL", "Wii", "1111-2222-3333");
+  let checked = checkDraft(draft, SAVED, PROFILE.countries);
+  assert.equal(checked.ok, false);
+  assert.deepEqual(checked.errors.get("msc:new:1"), ["This friend code is entered twice."]);
+  draft = withNewCode(createDraft(SAVED), "PAL", "Wii", "0000-0000-0001");
+  assert.equal(canAddMscCode(draft), false);
+  draft = withNewCode(draft, "PAL", "Wii", "0000-0000-0002");
+  checked = checkDraft(draft, SAVED, PROFILE.countries);
+  assert.equal(checked.ok, false);
+  assert.deepEqual(checked.errors.get("msc"), ["At most 3 MSC friend codes can be saved."]);
+});
+
+test("API errors map to the draft's rows", () => {
+  const keys = ["saved:1111-2222-3333", "new:1"];
+  assert.equal(fieldOfError("country", keys), "country");
+  assert.equal(fieldOfError("switch_code", keys), "switch");
+  assert.equal(fieldOfError("msc_codes.1.code", keys), "msc:new:1");
+  assert.equal(fieldOfError("msc_codes", keys), "msc");
+  assert.equal(fieldOfError("msc_codes.7.code", keys), "msc");
+  const errors = errorsByField(
+    [
+      { field: "msc_codes.1.code", code: "TAKEN", message: "Taken." },
+      { field: "msc_codes.1.code", code: "TAKEN", message: "Taken." },
+    ],
+    keys,
+  );
+  assert.deepEqual([...errors], [["msc:new:1", ["Taken."]]]);
+});
+
+test("a legacy NTSC-J code may stay, but no new code gets that region", () => {
+  const saved: SavedProfile = { ...SAVED, msc_codes: [{ region: "JPN", platform: "", code: "2222-3333-4444" }] };
+  assert.equal(checkDraft({ ...createDraft(saved), country: "us" }, saved, PROFILE.countries).ok, true);
+  const draft = withNewCode(createDraft(saved), "JPN", "Wii", "5555-6666-7777");
+  const checked = checkDraft(draft, saved, PROFILE.countries);
+  assert.equal(checked.ok, false);
+  assert.deepEqual(checked.errors.get("msc:new:1"), ["This value is not valid."]);
+});
+
+test("after a change elsewhere, untouched fields follow it and changed ones stay", () => {
+  let draft = createDraft(SAVED);
+  draft = { ...draft, switchBlocks: ["9999", "8888", "7777"] };
+  const current: SavedProfile = {
     country: "us",
     switch_code: "0012-0000-0340",
-    msc_codes: PROFILE.msc_codes,
-  });
-  assert.equal(requestFor(PROFILE, { kind: "switch", blocks: ["", "", ""] }).switch_code, "");
-  assert.deepEqual(
-    requestFor(PROFILE, {
-      kind: "msc",
-      original: "1111-2222-3333",
-      region: "PAL",
-      platform: "Dolphin",
-      blocks: ["0001", "0002", "0003"],
-    }).msc_codes,
-    [
-      { region: "PAL", platform: "Dolphin", code: "0001-0002-0003" },
-      { region: "NTSC", platform: "", code: "4444-5555-6666" },
-    ],
-  );
-  assert.equal(
-    requestFor(PROFILE, {
-      kind: "msc",
-      original: null,
-      region: "PAL",
-      platform: "Wii",
-      blocks: ["7777", "8888", "9999"],
-    }).msc_codes.length,
-    3,
-  );
-  assert.deepEqual(requestFor(PROFILE, { kind: "msc-delete", code: "1111-2222-3333" }).msc_codes, [
-    { region: "NTSC", platform: "", code: "4444-5555-6666" },
-  ]);
-});
-
-test("a change is checked like the API checks it; an older code may keep its missing platform", () => {
-  const errors = (edit: Parameters<typeof checkEdit>[1]): readonly string[] => {
-    const result = checkEdit(PROFILE, edit);
-    return result.ok ? [] : result.errors;
-  };
-  assert.deepEqual(errors({ kind: "country", country: "us" }), []);
-  assert.deepEqual(errors({ kind: "country", country: "fr" }), ["Select a country from the list."]);
-  assert.deepEqual(errors({ kind: "switch", blocks: ["12", "", ""] }), [
-    "Enter all 12 digits (4 in each field) or leave all three fields empty.",
-  ]);
-  assert.deepEqual(errors({ kind: "switch", blocks: ["", "", ""] }), []);
-  assert.deepEqual(
-    errors({ kind: "msc", original: null, region: "PAL", platform: "", blocks: ["7777", "8888", "9999"] }),
-    ["Select the platform."],
-  );
-  assert.deepEqual(errors({ kind: "msc", original: null, region: "PAL", platform: "Wii", blocks: ["", "", ""] }), [
-    "Enter all 12 digits (4 in each field) or leave all three fields empty.",
-  ]);
-  assert.deepEqual(
-    errors({ kind: "msc", original: null, region: "PAL", platform: "Wii", blocks: ["1111", "2222", "3333"] }),
-    ["This friend code is entered twice."],
-  );
-  // Changing the country keeps the older NTSC code without a platform as it is.
-  const saved = checkEdit(PROFILE, { kind: "country", country: "us" });
-  assert.ok(saved.ok);
-  assert.deepEqual(saved.request.msc_codes[1], { region: "NTSC", platform: "", code: "4444-5555-6666" });
-  // Changing that code itself needs its platform.
-  assert.deepEqual(
-    errors({ kind: "msc", original: "4444-5555-6666", region: "PAL", platform: "", blocks: ["4444", "5555", "6666"] }),
-    ["Select the platform."],
-  );
-});
-
-test("an edit counts as changed once it differs from what is saved", () => {
-  assert.equal(isChanged(PROFILE, { kind: "country", country: "de" }), false);
-  assert.equal(isChanged(PROFILE, { kind: "country", country: "us" }), true);
-  assert.equal(isChanged(PROFILE, { kind: "switch", blocks: ["0012", "0000", "0340"] }), false);
-  assert.equal(isChanged(PROFILE, { kind: "switch", blocks: ["0012", "0000", "034"] }), true);
-  assert.equal(
-    isChanged(PROFILE, { kind: "msc", original: null, region: "", platform: "", blocks: ["", "", ""] }),
-    false,
-  );
-  assert.equal(
-    isChanged(PROFILE, { kind: "msc", original: null, region: "PAL", platform: "", blocks: ["", "", ""] }),
-    true,
-  );
-  assert.equal(
-    isChanged(PROFILE, {
-      kind: "msc",
-      original: "4444-5555-6666",
-      region: "NTSC",
-      platform: "Wii",
-      blocks: ["4444", "5555", "6666"],
-    }),
-    true,
-  );
-  assert.equal(isChanged(PROFILE, { kind: "msc-delete", code: "1111-2222-3333" }), false);
-});
-
-test("at most three MSC codes can be saved", () => {
-  assert.equal(canAddMscCode(PROFILE), true);
-  const full = {
-    ...PROFILE,
-    msc_codes: [...PROFILE.msc_codes, { region: "PAL", platform: "Wii", code: "7777-8888-9999" }],
-  };
-  assert.equal(canAddMscCode(full), false);
-});
-
-test("the saved value of an edit in words", () => {
-  const name = (code: string): string => (code === "de" ? "Germany" : code);
-  assert.equal(savedText(PROFILE, { kind: "country", country: "us" }, name), "Germany");
-  assert.equal(savedText({ ...PROFILE, country: "" }, { kind: "country", country: "us" }, name), "no country");
-  assert.equal(savedText(PROFILE, { kind: "switch", blocks: ["", "", ""] }, name), "SW-0012-0000-0340");
-  assert.equal(savedText(PROFILE, { kind: "msc-delete", code: "4444-5555-6666" }, name), "NTSC: 4444-5555-6666");
-  assert.equal(
-    savedText(
-      PROFILE,
-      { kind: "msc", original: "1111-2222-3333", region: "", platform: "", blocks: ["", "", ""] },
-      name,
-    ),
-    "PAL (Wii): 1111-2222-3333",
-  );
-});
-
-test("after a change elsewhere, what is left of the open edit", () => {
-  const change = {
-    kind: "msc",
-    original: "1111-2222-3333",
-    region: "PAL",
-    platform: "Dolphin",
-    blocks: ["1111", "2222", "3333"],
-  } as const;
-  const gone = { ...PROFILE, msc_codes: PROFILE.msc_codes.slice(1) };
-  assert.deepEqual(rebaseEdit(change, PROFILE), { edit: change, note: "" });
-  assert.deepEqual(rebaseEdit(change, gone), {
-    edit: { ...change, original: null },
-    note: "This code was removed elsewhere; saving adds yours as a new code.",
-  });
-  assert.deepEqual(rebaseEdit({ kind: "msc-delete", code: "1111-2222-3333" }, gone), {
-    edit: null,
-    note: "This code was already deleted elsewhere.",
-  });
-  const full = {
-    ...PROFILE,
     msc_codes: [
-      { region: "NTSC", platform: "", code: "4444-5555-6666" },
-      { region: "PAL", platform: "Wii", code: "7777-8888-9999" },
-      { region: "PAL", platform: "Wii", code: "0000-0000-0001" },
+      { region: "PAL", platform: "Dolphin", code: "1111-2222-3333" },
+      { region: "NTSC", platform: "Wii", code: "4444-5555-6666" },
+      { region: "PAL", platform: "Wii", code: "7777-7777-7777" },
     ],
   };
-  assert.equal(rebaseEdit(change, full).edit, null);
-  assert.equal(rebaseEdit({ ...change, original: null }, full).edit, null);
+  const rebased = rebaseDraft(draft, SAVED, current, name);
+  assert.equal(rebased.draft.country, "us");
+  assert.deepEqual(rebased.draft.switchBlocks, ["9999", "8888", "7777"]);
+  assert.deepEqual(
+    rebased.draft.msc.map((row) => [row.original, row.platform]),
+    [
+      ["1111-2222-3333", "Dolphin"],
+      ["4444-5555-6666", "Wii"],
+      ["7777-7777-7777", "Wii"],
+    ],
+  );
+  assert.equal(rebased.conflicts.size, 0);
+  assert.deepEqual(rebased.notes, ["MSC code 7777-7777-7777 was added elsewhere."]);
+  assert.deepEqual([...changedFields(rebased.draft, current)], ["switch"]);
+});
+
+test("a change of a field changed elsewhere too is a conflict, a removed code comes back as new", () => {
+  let draft = createDraft(SAVED);
+  draft = {
+    ...draft,
+    country: "us",
+    msc: draft.msc.map((row) => (row.original === "4444-5555-6666" ? { ...row, platform: "Wii U" } : row)),
+  };
+  const current: SavedProfile = {
+    country: "fr",
+    switch_code: "0012-0000-0340",
+    msc_codes: [{ region: "PAL", platform: "Wii", code: "1111-2222-3333" }],
+  };
+  const rebased = rebaseDraft(draft, SAVED, current, name);
+  assert.equal(rebased.draft.country, "us");
+  assert.deepEqual([...rebased.conflicts].sort(), ["country", "msc:new:moved:4444-5555-6666"]);
+  const moved = rebased.draft.msc.find((row) => row.key === "new:moved:4444-5555-6666");
+  assert.ok(moved);
+  assert.equal(moved.original, null);
+  assert.equal(moved.platform, "Wii U");
+  assert.ok(rebased.notes.includes("Country saved now: FR."));
+});
+
+test("a removed code stays removed when it is still saved", () => {
+  const draft = { ...createDraft(SAVED), msc: createDraft(SAVED).msc.slice(0, 1) };
+  const rebased = rebaseDraft(draft, SAVED, { ...SAVED, country: "us" }, name);
+  assert.deepEqual(
+    rebased.draft.msc.map((row) => row.original),
+    ["1111-2222-3333"],
+  );
+  assert.equal(rebased.draft.country, "us");
+});
+
+test("a stored draft is used only in its own format and for the same member", () => {
+  const stored = JSON.stringify({ v: 2, id: PROFILE.discord.id, base: SAVED, draft: createDraft(SAVED) });
+  assert.ok(parseStoredDraft(stored, PROFILE.discord.id));
+  assert.equal(parseStoredDraft(stored, "123"), null);
+  assert.equal(
+    parseStoredDraft(JSON.stringify({ id: PROFILE.discord.id, target: {}, edit: {} }), PROFILE.discord.id),
+    null,
+  );
+  assert.equal(parseStoredDraft("{broken", PROFILE.discord.id), null);
+  assert.equal(parseStoredDraft(null, PROFILE.discord.id), null);
 });

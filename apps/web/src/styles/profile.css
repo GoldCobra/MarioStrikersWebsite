@@ -2,8 +2,11 @@
   padding-bottom: var(--space-5);
 }
 
+/* At least a screen tall: the profile is loaded after the page, and the footer starts below the screen,
+   so nothing moves when it arrives. */
 .profile-root {
   width: min(1040px, 100%);
+  min-height: 100vh;
   margin: 0 auto;
 }
 
@@ -333,43 +336,111 @@
   mask-size: contain;
 }
 
-/* --- Editing on the profile page (features/profile/profile-edit.ts) --- */
+/* --- The profile page (/profile): fonts, background, club, Discord names, editing --- */
 
-/* "Member of <club> [<tag>]" in the popup's text, the club in the buttons' gold; without a club the
-   line stays, empty but one line tall. */
+/* All text in MLSBY (the "Reporter" face); the name next to the flag stays in ITC Grizzly and the rating
+   cards keep their fonts, like in the popup and on the Discord card. Fields and buttons take the card's
+   font instead of the browser's own. */
+#player-profile-page {
+  --profile-muted-color: #d7d8de;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  letter-spacing: var(--reporter-letter-spacing);
+}
+
+#player-profile-page :is(button, input, select, textarea) {
+  font-family: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+}
+
+#player-profile-page .player-popup-name {
+  letter-spacing: normal;
+}
+
+#player-profile-page .player-popup-rating-unit {
+  font-family: "ITC Grizzly", sans-serif;
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
+/* A square place for a season reward icon until it has loaded (then its own proportions), so the name
+   next to it does not move. */
+#player-profile-page .player-popup-rating-reward-icon {
+  aspect-ratio: auto 1 / 1;
+}
+
+/* The background starts at the top and is as wide as the card, so a card that grows or shrinks never
+   moves or scales it; below the image's end (about 990px) its bottom colour carries on. */
+#player-profile-page .popup-card {
+  background-color: #303030;
+  background-position: center top;
+  background-size: 100% auto;
+}
+
+/* No close button and no pencil in the title bar here: the name and the MSL logo use the whole width. */
+#player-profile-page .player-popup-header-title {
+  max-width: 100%;
+}
+
+#player-profile-page .player-popup-msl-champion {
+  right: 0.7rem;
+}
+
+#player-profile-page .player-popup-header.is-world-champion .player-popup-header-title {
+  max-width: calc(100% - 2.6rem);
+}
+
+/* "Member of <CLUB> [<TAG>]" in the popup's text, the club in the buttons' gold and in capitals (only
+   shown that way, saved as it is); without a club the line stays, empty but one line tall. */
 #player-profile-page .profile-club-line {
   min-height: 1.22em;
   margin: 0.7rem 0 0;
-  color: #d7d8de;
+  color: var(--profile-muted-color);
   font-size: 15px;
   line-height: 1.22;
 }
 
 .profile-club-name {
   color: var(--color-gold);
+  text-transform: uppercase;
 }
 
-.profile-edit-status {
-  margin: 0.7rem 0 0;
-  color: #d7d8de;
+/* Server nickname and global Discord name, grey, under the club line. */
+.profile-discord-lines {
+  margin: 0.2rem 0 0;
+  color: var(--profile-muted-color);
   font-size: 15px;
   line-height: 1.22;
 }
 
-.profile-edit-status.is-success {
-  color: #8ee69a;
+.profile-discord-line {
+  display: flex;
+  gap: 0.35em;
+  min-width: 0;
 }
 
-.profile-edit-status.is-error,
-.profile-edit-error {
-  color: #ff8a8a;
+.profile-discord-line dt {
+  flex: 0 0 auto;
 }
 
-.profile-edit-status a {
-  color: var(--color-gold);
+.profile-discord-line dd {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Pencils, "+", "−", ✓ and ✕. */
+/* A lasting state of the editor (not a member, editing unavailable). */
+.profile-edit-notice {
+  margin: 0.7rem 0 0;
+  color: var(--profile-muted-color);
+  font-size: 15px;
+  line-height: 1.22;
+}
+
+/* Pencils, "+", "−" and the clear button. */
 .profile-edit-icon {
   display: inline-grid;
   place-items: center;
@@ -378,7 +449,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: #d7d8de;
+  color: var(--profile-muted-color);
   cursor: pointer;
 }
 
@@ -392,34 +463,12 @@
   outline-offset: 1px;
 }
 
-.profile-edit-icon:disabled {
-  opacity: 0.5;
-  cursor: progress;
-}
-
-.profile-edit-icon.is-save {
-  color: #8ee69a;
-}
-
 /* At the right end of a line. */
-.profile-row-actions,
-.profile-edit-actions {
+.profile-row-actions {
   display: inline-flex;
   flex: 0 0 auto;
   gap: 0.15rem;
   margin-left: auto;
-}
-
-/* The country's pencil sits where the popup has its close button. */
-.profile-header-actions {
-  position: absolute;
-  top: 0.35rem;
-  right: 0.45rem;
-  z-index: 2;
-}
-
-.profile-header-actions .profile-edit-icon {
-  color: #fff;
 }
 
 /* "+" at the right end of the MSC section's title. */
@@ -444,6 +493,33 @@
   line-height: 1.22;
 }
 
+/* Flags in the country line and its list: one box, the flag fits inside (no shift while it loads). */
+.profile-country-flag {
+  flex: 0 0 auto;
+  width: 27px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.profile-country-flag.is-empty {
+  display: inline-block;
+}
+
+.profile-country-row .profile-country-flag {
+  margin-right: 0.4rem;
+}
+
+/* Unsaved: a quiet amber edge on the left of the line, and a dot after the list's title. */
+#player-profile-page :is(.player-popup-code-row, .profile-edit-row).is-unsaved {
+  border-left: 3px solid var(--color-amber);
+  padding-left: calc(0.55rem - 3px);
+}
+
+#player-profile-page .player-popup-section-title.is-unsaved::after {
+  content: " •";
+  color: var(--color-amber);
+}
+
 /* An open line: the dark row of a code line, with the fields. */
 .profile-edit-row {
   display: flex;
@@ -457,19 +533,15 @@
   line-height: 1.22;
 }
 
-#player-profile-page .player-popup-content > .profile-edit-row {
-  margin-top: 0.7rem;
-}
-
-.profile-edit-label,
 .profile-edit-prefix,
 .profile-edit-dash {
-  color: #d7d8de;
+  color: var(--profile-muted-color);
 }
 
 /* Fields keep 16px text, so phones do not zoom into them. */
 .profile-edit-select,
-.profile-edit-digits {
+.profile-edit-digits,
+.profile-country-trigger {
   min-height: 28px;
   padding: 0.1rem 0.35rem;
   border: 1px solid rgba(255, 255, 255, 0.35);
@@ -479,10 +551,13 @@
   font-size: 16px;
 }
 
-.profile-edit-select:focus-visible,
-.profile-edit-digits:focus-visible {
+:is(.profile-edit-select, .profile-edit-digits, .profile-country-trigger):focus-visible {
   outline: 2px solid var(--color-gold);
   outline-offset: 0;
+}
+
+:is(.profile-edit-select, .profile-edit-digits, .profile-country-trigger)[aria-invalid="true"] {
+  border-color: #ff8a8a;
 }
 
 .profile-edit-code {
@@ -497,14 +572,281 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* One height, the width follows the flag's own proportions. */
-.profile-edit-flag {
-  width: auto;
-  height: 18px;
-  border: 1px solid rgba(0, 0, 0, 0.6);
-}
-
 .profile-edit-error {
   flex-basis: 100%;
   margin: 0;
+  color: #ff8a8a;
+  font-size: 15px;
+  line-height: 1.22;
+}
+
+/* The country field: a combobox with the flags (features/profile/country-select.ts). */
+.profile-country-select {
+  position: relative;
+  flex: 1 1 16rem;
+  min-width: 0;
+  max-width: 22rem;
+}
+
+.profile-country-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  cursor: pointer;
+}
+
+.profile-country-trigger .profile-country-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-country-caret {
+  flex: 0 0 auto;
+  width: 0;
+  height: 0;
+  border-inline: 5px solid transparent;
+  border-top: 6px solid currentColor;
+}
+
+.profile-country-listbox {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: min(280px, 50vh);
+  margin: 0;
+  padding: 0.2rem 0;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: #111;
+  list-style: none;
+  overscroll-behavior: contain;
+}
+
+.profile-country-select.opens-up .profile-country-listbox {
+  top: auto;
+  bottom: calc(100% + 2px);
+}
+
+.profile-country-listbox[hidden] {
+  display: none;
+}
+
+.profile-country-option {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 32px;
+  padding: 0.15rem 0.5rem;
+  color: #fff;
+  font-size: 16px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.profile-country-option.is-active {
+  background: rgba(199, 118, 3, 0.35);
+}
+
+.profile-country-option[aria-selected="true"] {
+  color: var(--color-gold);
+}
+
+/* SAVE and DISCARD at the end of the card. The slot keeps the bar's height, so nothing moves when the
+   bar floats at the bottom of the screen (profile-edit.ts) while unsaved changes are out of sight. */
+.profile-edit-bar-slot {
+  min-height: 56px;
+}
+
+.profile-edit-bar-slot[hidden] {
+  display: none;
+}
+
+.profile-edit-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  min-height: 56px;
+  padding: 0.45rem 0.9rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--profile-muted-color);
+  font-size: 15px;
+  line-height: 1.22;
+}
+
+.profile-edit-bar.is-floating {
+  position: fixed;
+  bottom: 0;
+  z-index: 900;
+  padding-bottom: calc(0.45rem + env(safe-area-inset-bottom, 0px));
+  border: 4px solid #000;
+  border-bottom: 0;
+  background: rgba(10, 4, 4, 0.96);
+}
+
+.profile-edit-bar-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.profile-edit-bar .profile-action-button {
+  min-width: 6.5rem;
+  text-transform: uppercase;
+}
+
+.profile-edit-bar .profile-action-button[hidden] {
+  display: none;
+}
+
+.profile-action-button.is-primary {
+  background: var(--color-amber);
+  color: #000;
+}
+
+.profile-action-button.is-primary:hover,
+.profile-action-button.is-primary:focus-visible {
+  background: var(--color-gold);
+  color: #000;
+}
+
+.profile-action-button.is-danger {
+  border-color: #ff8a8a;
+}
+
+.profile-edit-bar .profile-action-button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.profile-action-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.profile-action-button:disabled:hover {
+  background: var(--color-maroon);
+  color: var(--color-gold);
+}
+
+.profile-action-button.is-primary:disabled:hover {
+  background: var(--color-amber);
+  color: #000;
+}
+
+.profile-action-button[aria-disabled="true"] {
+  cursor: progress;
+}
+
+/* Status messages (features/profile/profile-toasts.ts): bottom right, above the floating bar. */
+.profile-toasts {
+  --profile-toast-lift: 0px;
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: calc(max(16px, env(safe-area-inset-bottom, 0px)) + var(--profile-toast-lift));
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  width: min(380px, calc(100vw - 32px));
+  pointer-events: none;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  letter-spacing: var(--reporter-letter-spacing);
+}
+
+.profile-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.6rem 0.5rem 0.6rem 0.8rem;
+  border: 2px solid var(--color-amber);
+  border-left-width: 6px;
+  background: rgba(10, 4, 4, 0.96);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 15px;
+  line-height: 1.3;
+  pointer-events: auto;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.profile-toast.is-success {
+  border-color: #8ee69a;
+}
+
+.profile-toast.is-error {
+  border-color: #ff8a8a;
+}
+
+.profile-toast.is-leaving {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.profile-toast-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.profile-toast-link {
+  color: var(--color-gold);
+}
+
+.profile-toast-close {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #d7d8de;
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.profile-toast-close:hover,
+.profile-toast-close:focus-visible {
+  color: var(--color-gold);
+}
+
+.profile-toast-close:focus-visible,
+.profile-toast-link:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-toast {
+    transition: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-toasts {
+    left: max(16px, env(safe-area-inset-left, 0px));
+    width: auto;
+  }
+
+  .profile-edit-bar {
+    padding-inline: 0.6rem;
+  }
+
+  .profile-edit-bar .profile-action-button {
+    min-width: 0;
+  }
 }

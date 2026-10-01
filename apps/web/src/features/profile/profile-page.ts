@@ -1,7 +1,7 @@
 // The signed-in player's own profile (/profile), from /api/profile/me, or the reason it cannot be shown.
-// It is formatted exactly like the player popup (the same template, renderer and styles; the page itself
-// is no popup) and edited in place (profile-edit.ts). The login creates a missing profile; when that
-// failed, the page asks for it once more.
+// It is formatted like the player popup (the same template, renderer and styles; the page itself is no
+// popup), shows the member's Discord names and is edited in place (profile-edit.ts). The login creates a
+// missing profile; when that failed, the page asks for it once more.
 
 import { toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
@@ -79,6 +79,29 @@ function renderClubLine(card: ProfileCard, player: PlayerProfile["player"]): voi
 function renderCard(card: ProfileCard, profile: PlayerProfile): void {
   renderPlayerProfile(card.view, profile);
   renderClubLine(card, profile.player);
+}
+
+/**
+ * The member's server nickname and global Discord name under the club line, each only when Discord has
+ * one (without a nickname, the server shows the global name).
+ */
+function renderDiscordNames(card: ProfileCard, discord: EditableProfile["discord"]): void {
+  const club = card.root.querySelector(".player-popup-content > .profile-club-line");
+  if (!club) return;
+  const lines = [
+    { label: "Server name", value: toText(discord.nick).trim() },
+    { label: "Discord name", value: toText(discord.global_name).trim() },
+  ].filter((line) => line.value);
+  if (!lines.length) return;
+  const list = document.createElement("dl");
+  list.className = "profile-discord-lines";
+  list.innerHTML = lines
+    .map(
+      (line) =>
+        `<div class="profile-discord-line"><dt>${escapeHtml(line.label)}:</dt><dd>${escapeHtml(line.value)}</dd></div>`,
+    )
+    .join("");
+  club.after(list);
 }
 
 /** The result of the login flow, which returns with ?auth=<result>. */
@@ -171,18 +194,22 @@ async function fetchEditable(): Promise<EditableProfile | null> {
       credentials: "same-origin",
       headers: { Accept: "application/json" },
     });
-    return response.ok ? ((await response.json()) as EditableProfile) : null;
+    // Read also when refused (signed out), so the request ends.
+    const body = (await response.json().catch(() => null)) as EditableProfile | null;
+    return response.ok ? body : null;
   } catch {
     return null;
   }
 }
 
-/** Shows the profile and its editing. */
+/** Shows the profile and its editing, both at once (the editable profile is loaded alongside). */
 async function loadProfile(mount: HTMLElement): Promise<void> {
   mount.innerHTML = '<p class="profile-loading loading-note">Loading...</p>';
   try {
-    let result = await fetchProfile();
-    if (result.payload?.code === "PLAYER_PROFILE_NOT_LINKED" && (await createProfile())) result = await fetchProfile();
+    let [result, editable] = await Promise.all([fetchProfile(), fetchEditable()]);
+    if (result.payload?.code === "PLAYER_PROFILE_NOT_LINKED" && (await createProfile())) {
+      [result, editable] = await Promise.all([fetchProfile(), fetchEditable()]);
+    }
     if (result.status !== 200) {
       mount.innerHTML = authErrorHtml(result.payload, result.status);
       return;
@@ -191,16 +218,16 @@ async function loadProfile(mount: HTMLElement): Promise<void> {
     renderCard(card, result.payload?.profile ?? {});
     mount.replaceChildren(card.root);
     removeProfileQuery();
-    const editable = await fetchEditable();
     if (!editable) {
       card.root
-        .querySelector(".player-popup-content")
+        .querySelector(".player-popup-content > .profile-club-line")
         ?.insertAdjacentHTML(
-          "afterbegin",
-          '<p class="profile-edit-status">Your profile cannot be changed right now. Please try again later.</p>',
+          "afterend",
+          '<p class="profile-edit-notice">Your profile cannot be changed right now. Please try again later.</p>',
         );
       return;
     }
+    renderDiscordNames(card, editable.discord);
     createProfileEditor({
       root: card.root,
       profile: editable,

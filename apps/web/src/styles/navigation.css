@@ -41,9 +41,6 @@
 .main-nav {
   position: relative;
   z-index: 3;
-  width: auto;
-  margin: 0 auto;
-  transform: translateY(var(--nav-main-offset-y));
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
@@ -51,13 +48,15 @@
   /* The six buttons (five pages and the login) stand exactly 1px apart and always fit between the logo
      and the right edge: at their width by design, narrower where the screen is too narrow for that.
      The images are 733 (pages) and 334 (login) by 198 pixels. */
+  gap: 1px;
+  width: 100%;
+  max-width: min(1240px, calc(100vw - 24px));
+  margin: 0 auto;
+  transform: translateY(var(--nav-main-offset-y));
   --nav-top-width: min(
     var(--nav-top-width-max),
     calc((100vw - 2 * (var(--nav-brand-left) + var(--nav-brand-width) + 4px) - 5px) * 733 / 3999)
   );
-  gap: 1px;
-  padding-inline: 0;
-  overflow: visible;
 }
 
 .nav-brand {
@@ -94,24 +93,24 @@
   text-decoration: none;
 }
 
-.main-nav-text {
-  max-width: min(1240px, calc(100vw - 24px));
-  width: 100%;
-  justify-content: center;
-}
-
+/* A link, or the account button once signed in (nav.ts): no button look of its own. */
 .nav-top-link {
   display: inline-block;
   width: max-content;
   min-height: 0;
   padding: 0;
   border: 0;
-  outline: 0;
   border-radius: 0;
   background: transparent;
   line-height: 0;
   text-decoration: none;
   cursor: pointer;
+}
+
+/* Keyboard focus only; a click shows nothing. */
+.nav-top-link:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
 }
 
 .nav-top-icon {
@@ -125,12 +124,8 @@
   width: calc(var(--nav-top-width) * 334 / 733);
 }
 
-.nav-top-link.is-active {
-  filter: none;
-}
-
-/* Signed in, the member's Discord avatar covers the login figure (x 142-212, y 38-170 of the 334x198
-   image): a circle as high as the figure, around its centre (177.5, 104.5). */
+/* Signed in, the member's Discord avatar covers the login figure (x 144-204, y 49-157 of the 334x198 image,
+   yellow edge included): the smallest circle around all of its pixels, centre (172.5, 106.75), 118 wide. */
 .nav-top-art {
   position: relative;
   display: block;
@@ -138,10 +133,10 @@
 
 .nav-top-avatar {
   position: absolute;
-  top: calc(100% * 38 / 198);
-  left: calc(100% * 111 / 334);
-  width: calc(100% * 133 / 334);
-  height: calc(100% * 133 / 198);
+  top: calc(100% * 47.75 / 198);
+  left: calc(100% * 113.5 / 334);
+  width: calc(100% * 118 / 334);
+  height: calc(100% * 118 / 198);
   border-radius: 50%;
   object-fit: cover;
   box-shadow: 0 0 0 1px #000;

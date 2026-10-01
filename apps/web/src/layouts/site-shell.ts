@@ -18,9 +18,13 @@ import { pagePath } from "@ms/shared/site/pages";
 // Asset URLs are relative to the page, as the runtime script wrote them; every page URL is one level deep.
 const ASSET_PREFIX = ".";
 
+// Images keep their URL when they change, so a changed one carries a cache tag (docs/architecture.md).
+const NAV_ICON_VERSIONS: Readonly<Record<string, string>> = { login: "20261001-login-v2" };
+
 function topNavIcon(key: string, active: boolean, extension: "png" | "webp"): string {
   const state = active ? "active" : "default";
-  return `${ASSET_PREFIX}/assets/nav-buttons/${state}/nav-${key}${active ? "-active" : ""}.${extension}`;
+  const version = NAV_ICON_VERSIONS[key];
+  return `${ASSET_PREFIX}/assets/nav-buttons/${state}/nav-${key}${active ? "-active" : ""}.${extension}${version ? `?v=${version}` : ""}`;
 }
 
 function topNavLink(item: TopNavItem, state: PageState): string {

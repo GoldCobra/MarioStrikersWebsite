@@ -5,7 +5,7 @@
     --shell-inline-pad: 0.45rem;
     --content-inline-pad: clamp(0.45rem, 2vw, 0.65rem);
     --nav-shell-height: 92px;
-    --nav-main-offset-y: -0.2rem;
+    --nav-main-offset-y: -6px;
     --subnav-reserve-height: 42px;
     --tabs-head-height-fluid: 44px;
     --tabs-panel-height-fluid: 48px;
@@ -24,12 +24,8 @@
     padding-inline: 0.25rem;
   }
 
-  .main-nav-text {
+  .main-nav {
     max-width: calc(100vw - 16px);
-    justify-content: center;
-    overflow: visible;
-    padding-inline: 0;
-    transform: translateY(-6px);
   }
 
   .nav-top-link {
@@ -594,7 +590,7 @@
 @media (max-width: 430px) {
   :root {
     --nav-shell-height: 68px;
-    --nav-main-offset-y: 0px;
+    --nav-main-offset-y: -10px;
     --tabs-head-height-fluid: 38px;
     --tabs-panel-height-fluid: 40px;
     --tabs-tab-width-fluid: clamp(104px, 31vw, 124px);
@@ -627,7 +623,7 @@
     display: none;
   }
 
-  .main-nav-text {
+  .main-nav {
     position: absolute;
     left: 0;
     right: 0;
@@ -635,8 +631,6 @@
     width: auto;
     max-width: none;
     height: 36px;
-    justify-content: center;
-    transform: translateY(-10px);
   }
 
   .nav-top-link {
