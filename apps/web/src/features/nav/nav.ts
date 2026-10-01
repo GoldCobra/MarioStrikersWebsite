@@ -2,6 +2,7 @@
 // centring of overflowing navigation, link prefetching and redirects of old ?tabs= and ?submenu= links.
 
 import { escapeHtml } from "@ms/shared/html";
+import { loginPath } from "@ms/shared/site/navigation";
 import { initTabsGroup } from "../tabs/tabs-engine.ts";
 
 interface DiscordUser {
@@ -128,7 +129,7 @@ function discordAvatarUrl(user: DiscordUser): string {
 }
 
 /** Every login ends on the profile page, which also explains a failed one. */
-const LOGIN_URL = "/api/auth/discord/start?returnTo=%2Fprofile";
+const LOGIN_URL = loginPath();
 // A person in the icon circle the signed-in button shows its avatar in; phones show the icon alone.
 const LOGIN_ICON =
   '<svg class="global-account-login-glyph" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">' +

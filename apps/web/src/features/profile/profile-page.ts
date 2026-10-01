@@ -4,6 +4,7 @@
 
 import { toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
+import { loginPath } from "@ms/shared/site/navigation";
 import { flagTitleAttribute, flagUrl, normalizeCountryCode } from "../../lib/countries.ts";
 import {
   accoladeNameClasses,
@@ -24,8 +25,7 @@ import { openProfileEditor } from "./profile-edit.ts";
 
 const DISCORD_LINK =
   '<a class="profile-action-button" href="https://discord.gg/de2YaWg" target="_blank" rel="noopener noreferrer">Open Discord</a>';
-const LOGIN_LINK =
-  '<a class="profile-action-button" href="/api/auth/discord/start?returnTo=%2Fprofile">Login with Discord</a>';
+const LOGIN_LINK = `<a class="profile-action-button" href="${loginPath()}">Login with Discord</a>`;
 const RETRY_BUTTON =
   '<button class="profile-action-button" type="button" data-profile-action="retry">Try again</button>';
 

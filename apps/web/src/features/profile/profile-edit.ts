@@ -11,6 +11,7 @@ import {
   MSC_REGIONS,
   type FieldError,
 } from "@ms/shared/friend-codes";
+import { loginPath } from "@ms/shared/site/navigation";
 import { countryDisplayName, flagUrl, normalizeCountryCode } from "../../lib/countries.ts";
 import { TemplatePopup } from "../../lib/popup.ts";
 import { bindFriendCodeInput } from "./friend-code-input.ts";
@@ -30,7 +31,7 @@ import {
 import template from "./profile-edit-popup.html?raw";
 
 const API_URL = "/api/profile/me/editable";
-const LOGIN_AGAIN_URL = "/api/auth/discord/start?returnTo=%2Fprofile%3Fedit%3D1";
+const LOGIN_AGAIN_URL = loginPath("/profile?edit=1");
 const DRAFT_KEY = "ms-profile-edit-draft";
 
 const MESSAGES = {

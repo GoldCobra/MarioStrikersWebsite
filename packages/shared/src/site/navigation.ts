@@ -45,6 +45,11 @@ export interface PageContext {
   readonly leafKey?: string;
 }
 
+/** The Discord login (footer, header, profile page); afterwards the member lands on `returnTo`. */
+export function loginPath(returnTo = "/profile"): string {
+  return `/api/auth/discord/start?returnTo=${encodeURIComponent(returnTo)}`;
+}
+
 export const EXTERNAL_LINKS: readonly ExternalLink[] = [
   {
     label: "Discord",

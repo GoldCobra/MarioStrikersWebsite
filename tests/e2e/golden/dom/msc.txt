@@ -92,6 +92,12 @@
       #text "This website is not affiliated with Nintendo. All product names, logos, and brands are property of their respective owners."
     </p>
     <p class="global-footer-links">
+      <a href="/api/auth/discord/start?returnTo=%2Fprofile" class="global-footer-link" rel="nofollow">
+        #text "LOGIN"
+      </a>
+      <span class="global-footer-sep">
+        #text "–"
+      </span>
       <a href="https://discord.gg/de2YaWg" class="global-footer-link" target="_blank" rel="noopener noreferrer">
         #text "DISCORD"
       </a>

@@ -130,7 +130,9 @@ Discord OAuth requests `identify` and `guilds.members.read`, checks membership
 in the configured guild, and sets a signed HTTP-only session cookie (with the
 member's server nickname at login). The access token is used only during the
 callback and never stored. `/api/auth/me` says whether login is available
-(`login_available`); the header shows its Login button only then.
+(`login_available`); the header shows its Login button only then. The footer's
+LOGIN link (`rel="nofollow"`) is static and always there; without a configured
+login it leads to the profile page's explanation.
 `/api/profile/me` maps the Discord user to `Player.DiscordID` (unique). A member
 without a player profile gets one at login (`modules/profile/`): one batch locks
 the Discord id's key range, inserts `dbo.Player` named after the member's server
