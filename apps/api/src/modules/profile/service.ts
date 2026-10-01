@@ -10,7 +10,6 @@
 import { createHash } from "node:crypto";
 import {
   FIELD_ERROR_MESSAGES,
-  LEGACY_MSC_REGIONS,
   validateEditableProfile,
   type EditableProfileInput,
   type FieldError,
@@ -380,17 +379,14 @@ export function createProfileService({ store, members, onChange }: ProfileServic
       const decide = (current: StoredProfile, taken: readonly CodeKey[]): SaveDecision<Decided> => {
         const currentCountry = normalizeText(current.country).toLowerCase();
         const allowed = new Set(offeredCountries(countries, currentCountry).map((country) => country.code));
-        const legacy = new Set(
+        const stored = new Map(
           current.codes
-            .filter(
-              (row) =>
-                row.gameType === MSC_GAME_TYPE && Object.hasOwn(LEGACY_MSC_REGIONS, row.region.trim().toUpperCase()),
-            )
-            .map((row) => `${row.region.trim().toUpperCase()}:${row.code.trim()}`),
+            .filter((row) => row.gameType === MSC_GAME_TYPE)
+            .map((row) => [`${row.region.trim().toUpperCase()}:${row.code.trim()}`, row.label.trim()]),
         );
         const checked = validateEditableProfile(body, {
           isAllowedCountry: (code) => allowed.has(code),
-          isKeptLegacyCode: (region, code) => legacy.has(`${region}:${code}`),
+          storedPlatform: (region, code) => stored.get(`${region}:${code}`) ?? null,
         });
         if (!checked.ok) return { plan: null, audit: "", result: { kind: "invalid", errors: checked.errors } };
         const desired = desiredCodes(checked.value);

@@ -1,10 +1,10 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "b7d4e1ab29e133932dfc8429fe4f6a3c48962ace",
+  "reference": "339124c13acfba5fdae1fc8d3441c5dabc27dc48",
   "changes": [
     {
       "screenshots": ["states/profile-linked-*", "states/profile-unlinked-*", "states/profile-edit-*"],
-      "reason": "Owner request for the profile page: the header box is the first box of the left column, as wide as the boxes below (the ratings start at the top of the right column); \"Member of <club> [<tag>]\" with the club in gold, an empty line without a club; friend code rows in the Reporter font with their normal case; panel titles and EDIT PROFILE in capitals. Only these 18 screenshots differed (316 others identical); in the editor states no pixel inside the editor card differs, only the page behind the backdrop."
+      "reason": "Owner request: the profile page takes the player popup's formatting (the same card, centred; the page is no popup) and is edited in place: pencils on the country, the Switch code and each MSC code, + and - for MSC codes, one line open at a time. Only these 18 screenshots differed; every popup, both player-card states and all pages are identical."
     }
   ]
 }

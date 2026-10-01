@@ -1,19 +1,28 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { spreadDigits } from "./friend-code-input.ts";
 import {
-  EMPTY_ROW,
-  changedGroups,
-  fromEditable,
-  isDirty,
-  mergeChanges,
-  toFormField,
-  toRequest,
+  canAddMscCode,
+  checkEdit,
+  isChanged,
+  rebaseEdit,
+  requestFor,
+  savedText,
+  startEdit,
   type EditableProfile,
-  type FormState,
 } from "./profile-edit-state.ts";
 
-const PROFILE: Pick<EditableProfile, "country" | "switch_code" | "msc_codes" | "countries"> = {
+const PROFILE: EditableProfile = {
+  player_id: 1,
+  version: "v1",
+  discord: {
+    id: "900000000000000001",
+    server_name: "Sample",
+    username: "sample",
+    global_name: "",
+    nick: "",
+    membership: "member",
+    source: "live",
+  },
   country: "de",
   switch_code: "0012-0000-0340",
   msc_codes: [
@@ -26,104 +35,170 @@ const PROFILE: Pick<EditableProfile, "country" | "switch_code" | "msc_codes" | "
   ],
 };
 
-test("the form shows the saved profile with leading zeros and three MSC rows", () => {
-  const state = fromEditable(PROFILE);
-  assert.deepEqual(state.switchBlocks, ["0012", "0000", "0340"]);
-  assert.deepEqual(state.msc[0], { region: "PAL", platform: "Wii", blocks: ["1111", "2222", "3333"] });
-  assert.deepEqual(state.msc[2], EMPTY_ROW);
-});
-
-test("an unchanged form is no change; selections in a row without digits are none either", () => {
-  const base = fromEditable(PROFILE);
-  assert.equal(isDirty(base, base), false);
-  const selected: FormState = { ...base, msc: [base.msc[0], base.msc[1], { ...EMPTY_ROW, region: "PAL" }] };
-  assert.equal(isDirty(base, selected), false);
-  assert.deepEqual(changedGroups(base, { ...base, country: "us" }), ["country"]);
-});
-
-test("the request carries complete codes only, in the API's form", () => {
-  const base = fromEditable(PROFILE);
-  const state: FormState = {
-    country: "us",
-    switchBlocks: ["", "", ""],
-    msc: [base.msc[0], { ...base.msc[1], platform: "Dolphin" }, { region: "", platform: "", blocks: ["", "", ""] }],
-  };
-  assert.deepEqual(toRequest(state, PROFILE), {
-    ok: true,
-    request: {
-      country: "us",
-      switch_code: "",
-      msc_codes: [
-        { region: "PAL", platform: "Wii", code: "1111-2222-3333" },
-        { region: "NTSC", platform: "Dolphin", code: "4444-5555-6666" },
-      ],
-    },
+test("an edit starts from what is saved", () => {
+  assert.deepEqual(startEdit(PROFILE, { kind: "country" }), { kind: "country", country: "de" });
+  assert.deepEqual(startEdit(PROFILE, { kind: "switch" }), { kind: "switch", blocks: ["0012", "0000", "0340"] });
+  assert.deepEqual(startEdit(PROFILE, { kind: "msc", code: "4444-5555-6666" }), {
+    kind: "msc",
+    original: "4444-5555-6666",
+    region: "NTSC",
+    platform: "",
+    blocks: ["4444", "5555", "6666"],
+  });
+  assert.deepEqual(startEdit(PROFILE, { kind: "msc", code: null }), {
+    kind: "msc",
+    original: null,
+    region: "",
+    platform: "",
+    blocks: ["", "", ""],
   });
 });
 
-test("incomplete codes and missing choices name the form fields", () => {
-  const base = fromEditable(PROFILE);
-  const state: FormState = {
-    country: "fr",
-    switchBlocks: ["0012", "0000", "034"],
-    msc: [EMPTY_ROW, { ...base.msc[1] }, { region: "", platform: "Wii", blocks: ["9", "", ""] }],
-  };
-  const result = toRequest(state, PROFILE);
-  assert.ok(!result.ok);
-  assert.deepEqual(result.errors.map((error) => `${error.field}:${error.code}`).sort(), [
-    "country:UNKNOWN_COUNTRY",
-    "msc.1.platform:PLATFORM_REQUIRED",
-    "msc.2.code:INCOMPLETE",
-    "msc.2.region:REGION_REQUIRED",
-    "switch_code:INCOMPLETE",
+test("the request is the saved profile with the one change", () => {
+  assert.deepEqual(requestFor(PROFILE, { kind: "country", country: "us" }), {
+    country: "us",
+    switch_code: "0012-0000-0340",
+    msc_codes: PROFILE.msc_codes,
+  });
+  assert.equal(requestFor(PROFILE, { kind: "switch", blocks: ["", "", ""] }).switch_code, "");
+  assert.deepEqual(
+    requestFor(PROFILE, {
+      kind: "msc",
+      original: "1111-2222-3333",
+      region: "PAL",
+      platform: "Dolphin",
+      blocks: ["0001", "0002", "0003"],
+    }).msc_codes,
+    [
+      { region: "PAL", platform: "Dolphin", code: "0001-0002-0003" },
+      { region: "NTSC", platform: "", code: "4444-5555-6666" },
+    ],
+  );
+  assert.equal(
+    requestFor(PROFILE, {
+      kind: "msc",
+      original: null,
+      region: "PAL",
+      platform: "Wii",
+      blocks: ["7777", "8888", "9999"],
+    }).msc_codes.length,
+    3,
+  );
+  assert.deepEqual(requestFor(PROFILE, { kind: "msc-delete", code: "1111-2222-3333" }).msc_codes, [
+    { region: "NTSC", platform: "", code: "4444-5555-6666" },
   ]);
 });
 
-test("request fields map back to the form rows they came from", () => {
-  assert.equal(toFormField("msc_codes.0.code", [2]), "msc.2.code");
-  assert.equal(toFormField("msc_codes", [0]), "msc");
-  assert.equal(toFormField("country", []), "country");
+test("a change is checked like the API checks it; an older code may keep its missing platform", () => {
+  const errors = (edit: Parameters<typeof checkEdit>[1]): readonly string[] => {
+    const result = checkEdit(PROFILE, edit);
+    return result.ok ? [] : result.errors;
+  };
+  assert.deepEqual(errors({ kind: "country", country: "us" }), []);
+  assert.deepEqual(errors({ kind: "country", country: "fr" }), ["Select a country from the list."]);
+  assert.deepEqual(errors({ kind: "switch", blocks: ["12", "", ""] }), [
+    "Enter all 12 digits (4 in each field) or leave all three fields empty.",
+  ]);
+  assert.deepEqual(errors({ kind: "switch", blocks: ["", "", ""] }), []);
+  assert.deepEqual(
+    errors({ kind: "msc", original: null, region: "PAL", platform: "", blocks: ["7777", "8888", "9999"] }),
+    ["Select the platform."],
+  );
+  assert.deepEqual(errors({ kind: "msc", original: null, region: "PAL", platform: "Wii", blocks: ["", "", ""] }), [
+    "Enter all 12 digits (4 in each field) or leave all three fields empty.",
+  ]);
+  assert.deepEqual(
+    errors({ kind: "msc", original: null, region: "PAL", platform: "Wii", blocks: ["1111", "2222", "3333"] }),
+    ["This friend code is entered twice."],
+  );
+  // Changing the country keeps the older NTSC code without a platform as it is.
+  const saved = checkEdit(PROFILE, { kind: "country", country: "us" });
+  assert.ok(saved.ok);
+  assert.deepEqual(saved.request.msc_codes[1], { region: "NTSC", platform: "", code: "4444-5555-6666" });
+  // Changing that code itself needs its platform.
+  assert.deepEqual(
+    errors({ kind: "msc", original: "4444-5555-6666", region: "PAL", platform: "", blocks: ["4444", "5555", "6666"] }),
+    ["Select the platform."],
+  );
 });
 
-test("a profile changed elsewhere is merged without losing anything typed here", () => {
-  const base = fromEditable(PROFILE);
-  const mine: FormState = { ...base, country: "us" };
-  const theirs = fromEditable({ ...PROFILE, switch_code: "9999-8888-7777" });
-  const merged = mergeChanges(base, mine, theirs);
-  assert.equal(merged.state.country, "us");
-  assert.deepEqual(merged.state.switchBlocks, ["9999", "8888", "7777"]);
-  assert.deepEqual(merged.updated, ["switch"]);
-  assert.deepEqual(merged.contested, []);
-
-  const bothChanged = mergeChanges(base, mine, fromEditable({ ...PROFILE, country: "" }));
-  assert.equal(bothChanged.state.country, "us");
-  assert.deepEqual(bothChanged.contested, ["country"]);
+test("an edit counts as changed once it differs from what is saved", () => {
+  assert.equal(isChanged(PROFILE, { kind: "country", country: "de" }), false);
+  assert.equal(isChanged(PROFILE, { kind: "country", country: "us" }), true);
+  assert.equal(isChanged(PROFILE, { kind: "switch", blocks: ["0012", "0000", "0340"] }), false);
+  assert.equal(isChanged(PROFILE, { kind: "switch", blocks: ["0012", "0000", "034"] }), true);
+  assert.equal(
+    isChanged(PROFILE, { kind: "msc", original: null, region: "", platform: "", blocks: ["", "", ""] }),
+    false,
+  );
+  assert.equal(
+    isChanged(PROFILE, { kind: "msc", original: null, region: "PAL", platform: "", blocks: ["", "", ""] }),
+    true,
+  );
+  assert.equal(
+    isChanged(PROFILE, {
+      kind: "msc",
+      original: "4444-5555-6666",
+      region: "NTSC",
+      platform: "Wii",
+      blocks: ["4444", "5555", "6666"],
+    }),
+    true,
+  );
+  assert.equal(isChanged(PROFILE, { kind: "msc-delete", code: "1111-2222-3333" }), false);
 });
 
-test("digits spread over the three fields like one text", () => {
-  assert.deepEqual(spreadDigits(["12", "", ""], 0, "34"), { values: ["1234", "", ""], field: 0, caret: 4 });
-  assert.deepEqual(spreadDigits(["12", "", ""], 0, "345678"), { values: ["1234", "5678", ""], field: 1, caret: 4 });
-  assert.deepEqual(spreadDigits(["", "", ""], 0, "001200000340", { start: 0, end: 0 }), {
-    values: ["0012", "0000", "0340"],
-    field: 2,
-    caret: 4,
+test("at most three MSC codes can be saved", () => {
+  assert.equal(canAddMscCode(PROFILE), true);
+  const full = {
+    ...PROFILE,
+    msc_codes: [...PROFILE.msc_codes, { region: "PAL", platform: "Wii", code: "7777-8888-9999" }],
+  };
+  assert.equal(canAddMscCode(full), false);
+});
+
+test("the saved value of an edit in words", () => {
+  const name = (code: string): string => (code === "de" ? "Germany" : code);
+  assert.equal(savedText(PROFILE, { kind: "country", country: "us" }, name), "Germany");
+  assert.equal(savedText({ ...PROFILE, country: "" }, { kind: "country", country: "us" }, name), "no country");
+  assert.equal(savedText(PROFILE, { kind: "switch", blocks: ["", "", ""] }, name), "SW-0012-0000-0340");
+  assert.equal(savedText(PROFILE, { kind: "msc-delete", code: "4444-5555-6666" }, name), "NTSC: 4444-5555-6666");
+  assert.equal(
+    savedText(
+      PROFILE,
+      { kind: "msc", original: "1111-2222-3333", region: "", platform: "", blocks: ["", "", ""] },
+      name,
+    ),
+    "PAL (Wii): 1111-2222-3333",
+  );
+});
+
+test("after a change elsewhere, what is left of the open edit", () => {
+  const change = {
+    kind: "msc",
+    original: "1111-2222-3333",
+    region: "PAL",
+    platform: "Dolphin",
+    blocks: ["1111", "2222", "3333"],
+  } as const;
+  const gone = { ...PROFILE, msc_codes: PROFILE.msc_codes.slice(1) };
+  assert.deepEqual(rebaseEdit(change, PROFILE), { edit: change, note: "" });
+  assert.deepEqual(rebaseEdit(change, gone), {
+    edit: { ...change, original: null },
+    note: "This code was removed elsewhere; saving adds yours as a new code.",
   });
-  // What follows an insertion moves along; nothing typed is lost before the last field.
-  assert.deepEqual(spreadDigits(["", "5678", "9012"], 0, "12", { start: 0, end: 0 }), {
-    values: ["1256", "7890", "12"],
-    field: 0,
-    caret: 2,
+  assert.deepEqual(rebaseEdit({ kind: "msc-delete", code: "1111-2222-3333" }, gone), {
+    edit: null,
+    note: "This code was already deleted elsewhere.",
   });
-  // A selection is replaced, fields before the insertion keep their digits.
-  assert.deepEqual(spreadDigits(["1234", "5678", "9012"], 1, "00", { start: 1, end: 3 }), {
-    values: ["1234", "5008", "9012"],
-    field: 1,
-    caret: 3,
-  });
-  assert.deepEqual(spreadDigits(["1234", "5678", ""], 2, "9012345", { start: 0, end: 0 }), {
-    values: ["1234", "5678", "9012"],
-    field: 2,
-    caret: 4,
-  });
-  assert.deepEqual(spreadDigits(["", "", ""], 0, "a1b2", { start: 0, end: 0 }).values, ["12", "", ""]);
+  const full = {
+    ...PROFILE,
+    msc_codes: [
+      { region: "NTSC", platform: "", code: "4444-5555-6666" },
+      { region: "PAL", platform: "Wii", code: "7777-8888-9999" },
+      { region: "PAL", platform: "Wii", code: "0000-0000-0001" },
+    ],
+  };
+  assert.equal(rebaseEdit(change, full).edit, null);
+  assert.equal(rebaseEdit({ ...change, original: null }, full).edit, null);
 });

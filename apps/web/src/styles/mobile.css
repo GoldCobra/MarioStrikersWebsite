@@ -75,7 +75,7 @@
   }
 
   .sub-nav::-webkit-scrollbar,
-  .global-tabs-list::-webkit-scrollbar {
+.global-tabs-list::-webkit-scrollbar {
     width: 0;
     height: 0;
     display: none;
@@ -184,8 +184,8 @@
   }
 
   .competitive-rules-page,
-  .competitive-rules-page #competitive-rules-root,
-  .competitive-rules {
+.competitive-rules-page #competitive-rules-root,
+.competitive-rules {
     max-width: 100%;
     min-width: 0;
     overflow-wrap: anywhere;
@@ -196,7 +196,7 @@
   }
 
   .cr-page-title,
-  .cr-page-revised {
+.cr-page-revised {
     white-space: normal;
     overflow-wrap: anywhere;
     word-break: normal;
@@ -225,7 +225,7 @@
   }
 
   .competitive-rules ul,
-  .competitive-rules ol {
+.competitive-rules ol {
     margin-left: 1.05rem;
   }
 
@@ -278,7 +278,7 @@
   }
 
   .lb-row-rank-2 .lb-rank,
-  .lb-row-rank-3 .lb-rank {
+.lb-row-rank-3 .lb-rank {
     filter: drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.72));
   }
 
@@ -314,7 +314,7 @@
   }
 
   .save-editor-actions,
-  .save-editor-friendlist-actions {
+.save-editor-friendlist-actions {
     grid-template-columns: minmax(0, 1fr);
     gap: 0.45rem;
   }
@@ -339,20 +339,20 @@
   }
 
   .save-editor-description,
-  .save-editor-note,
-  .save-editor-field > .msbl-save-editor-coin-hint {
+.save-editor-note,
+.save-editor-field > .msbl-save-editor-coin-hint {
     overflow-wrap: anywhere;
   }
 
   .online-editor-field,
-  .online-editor-results {
+.online-editor-results {
     width: 100%;
   }
 
   .online-editor-profile-trigger,
-  .online-editor-profile-option,
-  .online-editor-popup-field > input,
-  .online-editor-popup-field > textarea {
+.online-editor-profile-option,
+.online-editor-popup-field > input,
+.online-editor-popup-field > textarea {
     min-height: 44px;
   }
 
@@ -366,14 +366,14 @@
   }
 
   .online-editor-table thead,
-  .online-editor-separator-row {
+.online-editor-separator-row {
     display: none;
   }
 
   .online-editor-table,
-  .online-editor-table tbody,
-  .online-editor-table tr,
-  .online-editor-table td {
+.online-editor-table tbody,
+.online-editor-table tr,
+.online-editor-table td {
     display: block;
     width: 100%;
   }
@@ -385,17 +385,17 @@
   }
 
   .online-editor-table th,
-  .online-editor-table td,
-  .online-editor-table th:first-child,
-  .online-editor-table td:first-child,
-  .online-editor-table th:last-child,
-  .online-editor-table td:last-child {
+.online-editor-table td,
+.online-editor-table th:first-child,
+.online-editor-table td:first-child,
+.online-editor-table th:last-child,
+.online-editor-table td:last-child {
     padding: 0.1rem 0;
     text-align: left;
   }
 
   .online-editor-roster-name,
-  .online-editor-roster-code {
+.online-editor-roster-code {
     transform: none;
     white-space: normal;
     overflow-wrap: anywhere;
@@ -464,7 +464,7 @@
   }
 
   .player-popup-code-value,
-  .player-popup-results-link {
+.player-popup-results-link {
     white-space: normal;
     overflow-wrap: anywhere;
   }
@@ -560,9 +560,9 @@
   }
 
   .msbl-club-meta-item,
-  .msbl-club-status,
-  .msbl-club-extra,
-  .msbl-club-members {
+.msbl-club-status,
+.msbl-club-extra,
+.msbl-club-members {
     min-height: 20px;
     padding: 0;
     justify-content: flex-start;
@@ -572,43 +572,23 @@
     transform: none;
   }
 
-  .profile-grid {
-    grid-template-columns: 1fr;
-  }
+  
 
-  .profile-header-title,
-  .profile-meta,
-  .profile-panel,
   .profile-state-panel {
     padding-inline: 0.72rem;
   }
 
-  .profile-meta-line {
-    grid-template-columns: 1fr;
-    gap: 0.12rem;
-  }
+  
 
-  .profile-ratings-grid {
-    grid-template-columns: 1fr;
-  }
+  
 
-  .profile-code-row {
-    flex-wrap: wrap;
-  }
+  
 
-  .profile-code-value {
-    white-space: normal;
-    overflow-wrap: anywhere;
-  }
+  
 
-  .profile-accolade-item {
-    grid-template-columns: auto auto minmax(0, 1fr);
-    min-height: 32px;
-  }
+  
 
-  .profile-accolade-date {
-    grid-column: 3;
-  }
+  
 
   #global-footer {
     height: auto;
@@ -742,7 +722,7 @@
   }
 
   .leaderboard-tabs-shell .global-tabs-list,
-  .leaderboard-tabs-shell .global-tabs-list.is-overflowing {
+.leaderboard-tabs-shell .global-tabs-list.is-overflowing {
     justify-content: flex-start;
     padding-inline: 0.34rem;
     scroll-padding-inline: 0.34rem;
@@ -861,8 +841,8 @@
   }
 
   .setup-guide-page .content-box-top-main,
-  .setup-guide-page .content-box-center,
-  .setup-guide-page .content-box-bottom {
+.setup-guide-page .content-box-center,
+.setup-guide-page .content-box-bottom {
     width: 100%;
     max-width: 100%;
     margin-left: 0;
@@ -890,7 +870,7 @@
   }
 
   .setup-guide-page .competitive-rules :is(h1, h2, h3, h4, p, li, a, span, strong, em),
-  .setup-guide-page .cr-link {
+.setup-guide-page .cr-link {
     white-space: normal;
     overflow-wrap: anywhere;
     word-break: normal;
@@ -1088,9 +1068,9 @@
   }
 
   .msbl-club-tag-meta,
-  .msbl-club-status,
-  .msbl-club-extra,
-  .msbl-club-members {
+.msbl-club-status,
+.msbl-club-extra,
+.msbl-club-members {
     min-height: 0;
     padding-left: 0;
     font-size: clamp(4.8px, 1.45vw, 6.3px);
@@ -1149,4 +1129,3 @@
     --lb-points-pad-right: 0.45rem;
   }
 }
-

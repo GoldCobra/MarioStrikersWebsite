@@ -217,7 +217,7 @@ body.player-popup-open {
   color: var(--color-text-light);
 }
 
-#player-profile-popup :is(
+:is(#player-profile-popup, #player-profile-page) :is(
   .player-popup-close,
   .player-popup-status,
   .player-popup-section-title,
@@ -232,7 +232,7 @@ body.player-popup-open {
   font-size: var(--reporter-font-size-sm);
 }
 
-#player-profile-popup :is(
+:is(#player-profile-popup, #player-profile-page) :is(
   .player-popup-status,
   .player-popup-section-title,
   .player-popup-code-row,
@@ -338,4 +338,23 @@ body.player-popup-open {
 /* Logo width (25px x 172/128) plus a gap. */
 .player-popup.is-card .player-popup-header.is-world-champion .player-popup-header-title {
   max-width: calc(100% - 2.6rem);
+}
+
+/* The signed-in player's profile page (/profile; profile-page.ts) shows this card as a section of the
+   page: the same markup and styles (#player-profile-page next to #player-profile-popup), centred and as
+   tall as its content, without overlay, close button or a scroll area of its own. */
+#player-profile-page .popup-card {
+  width: min(580px, 100%);
+  max-height: none;
+  margin-inline: auto;
+}
+
+#player-profile-page .player-popup-content {
+  max-height: none;
+}
+
+/* The template hides its parts with the hidden attribute, which the popup enforces on .popup-overlay
+   (popups.css). */
+#player-profile-page [hidden] {
+  display: none !important;
 }

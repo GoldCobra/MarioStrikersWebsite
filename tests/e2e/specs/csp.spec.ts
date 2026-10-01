@@ -80,18 +80,17 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await page.goto("/profile");
     await settle(page, { eagerImages: true });
   },
-  // The editor's rules in the browser: digits only, whole codes pasted with their leading zeros, one save
-  // per Apply. The save is answered here, so the shared fixture stack keeps its data.
+  // Editing in the browser: digits only, whole codes pasted with their leading zeros, one save per click
+  // on ✓. The save is answered here, so the shared fixture stack keeps its data.
   "profile editor": async (page) => {
     await watchViolations(page);
     await preparePage(page);
     await login(page, "linked");
     await page.goto("/profile");
     await settle(page, { eagerImages: true });
-    await page.locator("[data-profile-action='edit']").click();
-    await page.locator(".profile-edit-form:not([hidden])").waitFor();
-    const fields = page.locator("[data-code='switch'] .profile-edit-digits");
-    const status = page.locator("[data-slot='save-status']");
+    await page.locator("[data-edit='switch']").click();
+    const fields = page.locator("[data-edit-row] .profile-edit-digits");
+    const error = page.locator("[data-edit-row] .profile-edit-error");
 
     await fields.first().fill("");
     await fields.first().pressSequentially("1a2b");
@@ -101,7 +100,7 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await paste(page, "SW-0001-0020-0300");
     for (const [index, value] of ["0001", "0020", "0300"].entries()) await expect(fields.nth(index)).toHaveValue(value);
     await paste(page, "12ab");
-    await expect(status).toHaveText("Paste a 12-digit friend code (digits only).");
+    await expect(error).toHaveText("Paste a 12-digit friend code (digits only).");
     await expect(fields.first()).toHaveValue("0001");
 
     let saves = 0;
@@ -120,31 +119,39 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
         body: JSON.stringify({ ...current, switch_code: sent.switch_code, changed: true }),
       });
     });
-    await page.locator("[data-action='apply']").dblclick();
-    await expect(status).toHaveText("Changes saved.");
+    await page.locator("[data-edit-action='save']").dblclick();
+    await expect(page.locator(".profile-edit-status")).toHaveText("Changes saved.");
     expect(saves).toBe(1);
-    await expect(page.locator("#profile-edit-popup")).toBeVisible();
+    await expect(page.locator("[data-edit-row]")).toHaveCount(0);
+    await expect(page.locator("[data-edit='switch']")).toBeFocused();
     await settle(page);
   },
-  // An older MSC code saved without a platform asks for one as soon as the editor opens, without
-  // taking the focus.
+  // An older MSC code saved without a platform asks for one, and another change is saved while that code
+  // stays as it is.
   "profile editor with a code without platform": async (page) => {
     await watchViolations(page);
     await preparePage(page);
     await login(page, "linked");
+    const saved: { body?: { msc_codes?: { platform: string }[] } } = {};
     await page.route("**/api/profile/me/editable", async (route) => {
-      const response = await route.fetch();
+      const response = await route.fetch({ method: "GET" });
       const profile = (await response.json()) as { msc_codes: { platform: string }[] };
       profile.msc_codes = profile.msc_codes.map((entry, index) => (index === 0 ? { ...entry, platform: "" } : entry));
+      if (route.request().method() === "PUT") {
+        saved.body = route.request().postDataJSON() as { msc_codes?: { platform: string }[] };
+        await route.fulfill({ response, json: { ...profile, ...saved.body, changed: true } });
+        return;
+      }
       await route.fulfill({ response, json: profile });
     });
     await page.goto("/profile");
     await settle(page, { eagerImages: true });
-    await page.locator("[data-profile-action='edit']").click();
-    await page.locator(".profile-edit-form:not([hidden])").waitFor();
-    await expect(page.locator("[data-error='msc.0']")).toHaveText("Select the platform.");
-    await expect(page.locator("[data-msc-row='0'] [data-field='platform']")).toHaveAttribute("aria-invalid", "true");
-    await expect(page.locator(".profile-edit-close")).toBeFocused();
+    await expect(page.locator(".profile-row-hint")).toHaveText("Select the platform.");
+    await page.locator("[data-edit='country']").click();
+    await page.locator("[data-edit-row] [data-field='country']").selectOption("us");
+    await page.locator("[data-edit-action='save']").click();
+    await expect(page.locator(".profile-edit-status")).toHaveText("Changes saved.");
+    expect(saved.body?.msc_codes?.[0]?.platform).toBe("");
     await settle(page);
   },
   "gear builder panes, character menu and card picture": async (page) => {

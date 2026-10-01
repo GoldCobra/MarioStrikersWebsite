@@ -130,8 +130,12 @@ function textOf(record: Record<string, unknown>, key: string): string | null {
 export interface ValidationOptions {
   /** A selectable country, or the profile's current one (which stays valid even when no longer offered). */
   isAllowedCountry(code: string): boolean;
-  /** A legacy MSC code (region JPN or KOR) the profile has now: it may stay, but none can be added. */
-  isKeptLegacyCode(region: string, code: string): boolean;
+  /**
+   * The platform the profile has saved for this MSC code in this region, or null when it has no such
+   * code. A saved code may keep a legacy region (NTSC-J/K, which no new code gets) and, while it is left
+   * unchanged, its missing platform.
+   */
+  storedPlatform(region: string, code: string): string | null;
 }
 
 export type ValidationResult =
@@ -140,8 +144,8 @@ export type ValidationResult =
 
 /**
  * The editor's rules: a code is empty or exactly twelve digits; an MSC code also needs its region and its
- * platform; at most three MSC codes, none twice; the country is one of the list. The API applies them to
- * every request, the site already while the dialog is open.
+ * platform (an older code saved without one may stay as it is); at most three MSC codes, none twice; the
+ * country is one of the list. The API applies them to every request, the site already before it sends.
  */
 export function validateEditableProfile(raw: unknown, options: ValidationOptions): ValidationResult {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
@@ -180,17 +184,19 @@ export function validateEditableProfile(raw: unknown, options: ValidationOptions
         errors.push(fieldError(at, "INVALID"));
         return;
       }
-      // A row with nothing in it is no code; the dialog leaves such rows out.
+      // A row with nothing in it is no code.
       if (!region && !platform && !code) return;
       if (!code) errors.push(fieldError(`${at}.code`, "INCOMPLETE"));
       else if (!FRIEND_CODE_PATTERN.test(code)) {
         errors.push(fieldError(`${at}.code`, digitsOnly(code).length < 12 ? "INCOMPLETE" : "INVALID"));
       }
-      const legacyKept = Object.hasOwn(LEGACY_MSC_REGIONS, region) && options.isKeptLegacyCode(region, code);
+      const stored = region && code ? options.storedPlatform(region, code) : null;
+      const legacyKept = stored !== null && Object.hasOwn(LEGACY_MSC_REGIONS, region);
       if (!region) errors.push(fieldError(`${at}.region`, "REGION_REQUIRED"));
       else if (!isMscRegion(region) && !legacyKept) errors.push(fieldError(`${at}.region`, "INVALID"));
-      if (!platform) errors.push(fieldError(`${at}.platform`, "PLATFORM_REQUIRED"));
-      else if (!isMscPlatform(platform)) errors.push(fieldError(`${at}.platform`, "INVALID"));
+      // Only an older code left exactly as saved may go without a platform.
+      if (!platform && stored !== "") errors.push(fieldError(`${at}.platform`, "PLATFORM_REQUIRED"));
+      else if (platform && !isMscPlatform(platform)) errors.push(fieldError(`${at}.platform`, "INVALID"));
       if (code && seen.has(code)) errors.push(fieldError(`${at}.code`, "DUPLICATE"));
       if (code) seen.add(code);
       mscCodes.push({ region, platform, code });

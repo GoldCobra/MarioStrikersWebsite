@@ -1,27 +1,17 @@
 // The signed-in player's own profile (/profile), from /api/profile/me, or the reason it cannot be shown.
-// The login creates a missing profile; when that failed, the page asks for it once more. "Edit Profile"
-// (or ?edit=1, the account menu's "Modify Profile") opens the editor (profile-edit.ts).
+// It is formatted exactly like the player popup (the same template, renderer and styles; the page itself
+// is no popup) and edited in place (profile-edit.ts). The login creates a missing profile; when that
+// failed, the page asks for it once more.
 
 import { toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
 import { loginPath } from "@ms/shared/site/navigation";
-import { flagTitleAttribute, flagUrl, normalizeCountryCode } from "../../lib/countries.ts";
-import {
-  accoladeNameClasses,
-  dateText,
-  gameBallIconUrl,
-  hasDisplayText,
-  isWorldChampion,
-  mscFriendCodeLines,
-  parseCodeLine,
-  switchFriendCodeLines,
-  type Accolade,
-  type FriendCodes,
-  type PlayerProfile,
-  type SeasonAward,
-} from "../players/profile-data.ts";
-import { buildDoubles, buildSingles, type Ratings } from "../rating-cards/rating-cards.ts";
-import { openProfileEditor } from "./profile-edit.ts";
+import { templateView, type TemplateView } from "../../lib/popup.ts";
+import { renderPlayerProfile } from "../players/player-profile-view.ts";
+import type { PlayerProfile } from "../players/profile-data.ts";
+import template from "../players/player-profile-popup.html?raw";
+import { createProfileEditor, type ProfileEditor } from "./profile-edit.ts";
+import type { EditableProfile } from "./profile-edit-state.ts";
 
 const DISCORD_LINK =
   '<a class="profile-action-button" href="https://discord.gg/de2YaWg" target="_blank" rel="noopener noreferrer">Open Discord</a>';
@@ -43,147 +33,52 @@ function statePanel(title: string, message: string, actionHtml = ""): string {
   ].join("");
 }
 
-function codeSection(title: string, values: readonly unknown[]): string {
-  const rows = values.filter(hasDisplayText);
-  if (!rows.length) return "";
-  const lines = rows
-    .map((line) => {
-      const { prefix, code } = parseCodeLine(line);
-      const prefixHtml = prefix ? `<span class="profile-code-prefix">${escapeHtml(prefix)}</span>` : "";
-      return `<div class="profile-code-row">${prefixHtml}<span class="profile-code-value">${escapeHtml(code)}</span></div>`;
-    })
-    .join("");
-  return [
-    '<section class="profile-panel profile-code-panel">',
-    `<h3 class="profile-panel-title">${escapeHtml(title)}</h3>`,
-    `<div class="profile-code-list">${lines}</div>`,
-    "</section>",
-  ].join("");
+interface ProfileCard {
+  readonly root: HTMLElement;
+  readonly view: TemplateView;
 }
 
-function friendCodes(data: FriendCodes): string {
-  const sections = [
-    codeSection("Switch Friend Code", switchFriendCodeLines(data)),
-    codeSection("MSC Friend Codes", mscFriendCodeLines(data)),
-  ].filter(Boolean);
-  if (sections.length) return sections.join("");
-  return [
-    '<section class="profile-panel">',
-    '<h3 class="profile-panel-title">Friend Codes</h3>',
-    '<p class="profile-muted">No friend codes are listed for this profile.</p>',
-    "</section>",
-  ].join("");
+/**
+ * The player popup's card as a section of the page: the same markup, so the same styles apply
+ * (#player-profile-page next to #player-profile-popup), without what makes the popup a popup: no
+ * overlay, no close button, no dialog role, no loading line.
+ */
+function createProfileCard(): ProfileCard {
+  const host = document.createElement("div");
+  host.innerHTML = template.trim();
+  const card = host.querySelector<HTMLElement>(".player-popup-card");
+  if (!card) throw new Error("Invalid profile template.");
+  card.removeAttribute("role");
+  card.removeAttribute("aria-modal");
+  card.querySelector(".player-popup-close")?.remove();
+  card.querySelector("[data-slot='popup-status']")?.remove();
+  card.querySelector("[data-slot='popup-content']")?.removeAttribute("hidden");
+  const root = document.createElement("div");
+  root.id = "player-profile-page";
+  root.append(card);
+  return { root, view: templateView(root) };
 }
 
-function ratingsPanel(ratings: Ratings): string {
-  const singles = buildSingles(ratings, "profile");
-  const doubles = buildDoubles(ratings, "profile");
-  if (!singles && !doubles) return "";
-  return [
-    '<section class="profile-panel profile-ratings-panel">',
-    '<h3 class="profile-panel-title">Ratings</h3>',
-    singles ? `<div class="profile-ratings-grid">${singles}</div>` : "",
-    doubles ? `<div class="profile-ratings-grid">${doubles}</div>` : "",
-    "</section>",
-  ].join("");
-}
-
-function ballImage(className: string, gameCode: unknown): string {
-  const icon = gameBallIconUrl(gameCode);
-  const fallback = icon.replace(/\.webp$/i, ".png");
-  return `<img class="${className}" src="${escapeHtml(icon)}" alt="" aria-hidden="true" loading="lazy" data-fallback-src="${escapeHtml(fallback)}">`;
-}
-
-function collapsedPanel(kind: "season-awards" | "accolades", title: string, items: string): string {
-  return [
-    `<section class="profile-panel profile-${kind}-panel">`,
-    `<details class="profile-${kind}-details">`,
-    `<summary class="profile-${kind}-summary"><span class="profile-panel-title">${title}</span></summary>`,
-    `<ul class="profile-${kind}">${items}</ul>`,
-    "</details>",
-    "</section>",
-  ].join("");
-}
-
-function seasonAwards(awards: readonly SeasonAward[]): string {
-  if (!awards.length) return "";
-  const items = awards
-    .map((entry) =>
-      [
-        '<li class="profile-season-award-item">',
-        `<span class="profile-season-award-season">${escapeHtml(toText(entry.season_name))}</span>`,
-        ballImage("profile-season-award-ball", entry.game_code),
-        `<span class="profile-season-award-name">${escapeHtml(toText(entry.award_name || "-"))}</span>`,
-        "</li>",
-      ].join(""),
-    )
-    .join("");
-  return collapsedPanel("season-awards", "Season Rewards", items);
-}
-
-function accolades(entries: readonly Accolade[]): string {
-  if (!entries.length) return "";
-  const items = entries
-    .map((entry) => {
-      const date = dateText(entry.start_date);
-      return [
-        '<li class="profile-accolade-item">',
-        ballImage("profile-accolade-ball", entry.game_code),
-        `<span class="profile-accolade-medal${entry.is_world_champion ? " is-world-champion" : ""}">${escapeHtml(toText(entry.place_medal))}</span>`,
-        `<span class="${escapeHtml(accoladeNameClasses("profile-accolade-name", entry))}">${escapeHtml(toText(entry.tournament_name || "-"))}</span>`,
-        date ? `<span class="profile-accolade-date">${escapeHtml(date)}</span>` : "",
-        "</li>",
-      ].join("");
-    })
-    .join("");
-  return collapsedPanel("accolades", "Tourney Accolades", items);
-}
-
-function profileHtml(profile: PlayerProfile): string {
-  const player = profile.player ?? {};
-  const countryCode = normalizeCountryCode(player.country);
-  const flag = countryCode
-    ? `<img class="profile-header-flag" src="${escapeHtml(flagUrl(countryCode))}" alt="" aria-hidden="true"${flagTitleAttribute(countryCode)} data-on-error="remove">`
+/** "Member of <club> [<tag>]" as the first line; without a club the line stays, empty. */
+function renderClubLine(card: ProfileCard, player: PlayerProfile["player"]): void {
+  const content = card.root.querySelector(".player-popup-content");
+  if (!content) return;
+  let line = content.querySelector<HTMLElement>(":scope > .profile-club-line");
+  if (!line) {
+    line = document.createElement("p");
+    line.className = "profile-club-line";
+    content.prepend(line);
+  }
+  const name = toText(player?.club_name).trim();
+  const tag = toText(player?.club_tag).trim();
+  line.innerHTML = name
+    ? `Member of <span class="profile-club-name">${escapeHtml(tag ? `${name} [${tag}]` : name)}</span>`
     : "";
-  // "Member of <club> [<tag>]"; without a club the line stays, empty, so every header is equally tall.
-  const clubName = toText(player.club_name).trim();
-  const clubTag = toText(player.club_tag).trim();
-  const club = clubName
-    ? `Member of <span class="profile-club-name">${escapeHtml(clubName + (clubTag ? ` [${clubTag}]` : ""))}</span>`
-    : "";
-  const resultsUrl = toText(player.results_url).trim();
-  const results = resultsUrl
-    ? `<section class="profile-panel profile-results-panel"><p class="profile-meta-line profile-results-line"><a href="${escapeHtml(resultsUrl)}" target="_blank" rel="noopener noreferrer">Results at start.gg</a></p></section>`
-    : "";
-  // An MSL World Champion's header turns gold and shows the MSL logo at its right end.
-  const champion = isWorldChampion(profile.accolades);
-  // The header is the first box of the main column, as wide as the boxes below it.
-  return [
-    '<section class="profile-shell">',
-    '<div class="profile-grid">',
-    '<div class="profile-grid-main">',
-    '<header class="profile-header-panel">',
-    `<div class="profile-header-title${champion ? " is-world-champion" : ""}">`,
-    `<h2 class="profile-name">${escapeHtml(toText(player.name || "Player Profile"))}</h2>`,
-    flag,
-    champion
-      ? '<span class="profile-msl-champion" role="img" aria-label="MSL World Champion" title="MSL World Champion"></span>'
-      : "",
-    "</div>",
-    '<div class="profile-meta">',
-    `<p class="profile-meta-line profile-club-line">${club}</p>`,
-    '<p class="profile-meta-actions"><button class="profile-action-button" type="button" data-profile-action="edit">Edit Profile</button></p>',
-    "</div>",
-    "</header>",
-    friendCodes(profile.friend_codes ?? {}),
-    seasonAwards(profile.season_awards ?? []),
-    accolades(profile.accolades ?? []),
-    results,
-    "</div>",
-    `<div class="profile-grid-side">${ratingsPanel(profile.ratings ?? {})}</div>`,
-    "</div>",
-    "</section>",
-  ].join("");
+}
+
+function renderCard(card: ProfileCard, profile: PlayerProfile): void {
+  renderPlayerProfile(card.view, profile);
+  renderClubLine(card, profile.player);
 }
 
 /** The result of the login flow, which returns with ?auth=<result>. */
@@ -232,7 +127,7 @@ function authErrorHtml(payload: { code?: unknown } | null, status: number): stri
 }
 
 /**
- * The login flow returns with ?auth=<result> and the account menu opens the editor with ?edit=1; the
+ * The login flow returns with ?auth=<result> and the account menu's "Modify Profile" adds ?edit=1; the
  * address bar drops both once the profile shows.
  */
 function removeProfileQuery(): void {
@@ -273,38 +168,67 @@ async function createProfile(): Promise<boolean> {
   }
 }
 
-/** Shows the profile; true when it is shown. A quiet load (after a save) keeps the old view meanwhile. */
-async function loadProfile(mount: HTMLElement, quiet = false): Promise<boolean> {
-  if (!quiet) mount.innerHTML = '<p class="profile-loading loading-note">Loading...</p>';
+async function fetchEditable(): Promise<EditableProfile | null> {
+  try {
+    const response = await fetch("/api/profile/me/editable", {
+      credentials: "same-origin",
+      headers: { Accept: "application/json" },
+    });
+    return response.ok ? ((await response.json()) as EditableProfile) : null;
+  } catch {
+    return null;
+  }
+}
+
+let editor: ProfileEditor | null = null;
+
+/** Shows the profile and its editing; true when the profile is shown. */
+async function loadProfile(mount: HTMLElement): Promise<boolean> {
+  editor = null;
+  mount.innerHTML = '<p class="profile-loading loading-note">Loading...</p>';
   try {
     let result = await fetchProfile();
     if (result.payload?.code === "PLAYER_PROFILE_NOT_LINKED" && (await createProfile())) result = await fetchProfile();
     if (result.status !== 200) {
-      if (!quiet) mount.innerHTML = authErrorHtml(result.payload, result.status);
+      mount.innerHTML = authErrorHtml(result.payload, result.status);
       return false;
     }
-    mount.innerHTML = profileHtml(result.payload?.profile ?? {});
+    const card = createProfileCard();
+    renderCard(card, result.payload?.profile ?? {});
+    mount.replaceChildren(card.root);
     removeProfileQuery();
+    const editable = await fetchEditable();
+    if (!editable) {
+      card.root
+        .querySelector(".player-popup-content")
+        ?.insertAdjacentHTML(
+          "afterbegin",
+          '<p class="profile-edit-status">Your profile cannot be changed right now. Please try again later.</p>',
+        );
+      return true;
+    }
+    editor = createProfileEditor({
+      root: card.root,
+      profile: editable,
+      reload: async () => {
+        const next = await fetchProfile();
+        if (next.status === 200) renderCard(card, next.payload?.profile ?? {});
+      },
+    });
     return true;
   } catch {
-    if (!quiet) mount.innerHTML = authErrorHtml(null, 500);
+    mount.innerHTML = authErrorHtml(null, 500);
     return false;
   }
-}
-
-function openEditor(mount: HTMLElement, opener: HTMLElement | null): void {
-  void openProfileEditor(opener, () => void loadProfile(mount, true));
 }
 
 export async function initProfilePage(mount: HTMLElement): Promise<void> {
   mount.addEventListener("click", (event) => {
     const action = event.target instanceof Element ? event.target.closest("[data-profile-action]") : null;
-    if (!action || !mount.contains(action)) return;
-    const name = action.getAttribute("data-profile-action");
-    if (name === "retry") void loadProfile(mount);
-    else if (name === "edit") openEditor(mount, action instanceof HTMLElement ? action : null);
+    if (action && mount.contains(action) && action.getAttribute("data-profile-action") === "retry") {
+      void loadProfile(mount);
+    }
   });
-  const openOnLoad = new URLSearchParams(window.location.search).get("edit") === "1";
-  if (!(await loadProfile(mount))) return;
-  if (openOnLoad) openEditor(mount, mount.querySelector<HTMLElement>("[data-profile-action='edit']"));
+  const focusEditing = new URLSearchParams(window.location.search).get("edit") === "1";
+  if ((await loadProfile(mount)) && focusEditing) editor?.focusFirst();
 }

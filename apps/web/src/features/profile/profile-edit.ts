@@ -1,93 +1,97 @@
-// The profile editor, a dialog on /profile: the member's Discord names (read only, from Discord), the
-// country and the friend codes. Apply saves through PUT /api/profile/me/editable and keeps the dialog open
-// with the saved values; Close (also ×, Escape and the backdrop) asks before unsaved changes are dropped.
-// A profile changed elsewhere meanwhile (in Discord) is merged into the form instead of being overwritten.
+// Editing on the profile page itself: a pencil on every line that can change (the country in the title
+// bar, the Switch code, each MSC code), "−" to delete an MSC code and "+" to add one (at most three). One
+// line is open at a time; Save (✓, Enter) sends the whole profile with that one change through
+// PUT /api/profile/me/editable, Cancel (✕, Escape) leaves it as it was. When the profile was changed
+// elsewhere meanwhile (in Discord), the page shows what is saved now and the change stays open to be saved
+// again, so nothing is overwritten unseen.
 
 import { escapeHtml } from "@ms/shared/html";
-import {
-  FIELD_ERROR_MESSAGES,
-  LEGACY_MSC_REGIONS,
-  MSC_PLATFORMS,
-  MSC_REGIONS,
-  type FieldError,
-} from "@ms/shared/friend-codes";
+import { LEGACY_MSC_REGIONS, MSC_PLATFORMS, MSC_REGIONS, type FieldError } from "@ms/shared/friend-codes";
 import { loginPath } from "@ms/shared/site/navigation";
 import { countryDisplayName, flagUrl, normalizeCountryCode } from "../../lib/countries.ts";
-import { TemplatePopup } from "../../lib/popup.ts";
 import { bindFriendCodeInput } from "./friend-code-input.ts";
 import {
-  EMPTY_BLOCKS,
-  fromEditable,
-  isDirty,
-  mergeChanges,
-  toFormField,
-  toRequest,
+  canAddMscCode,
+  checkEdit,
+  isChanged,
+  rebaseEdit,
+  savedText,
+  startEdit,
   type Blocks,
+  type Edit,
   type EditableProfile,
-  type FormState,
-  type Group,
-  type MscRow,
+  type EditTarget,
 } from "./profile-edit-state.ts";
-import template from "./profile-edit-popup.html?raw";
 
 const API_URL = "/api/profile/me/editable";
-const LOGIN_AGAIN_URL = loginPath("/profile?edit=1");
 const DRAFT_KEY = "ms-profile-edit-draft";
 
 const MESSAGES = {
-  loadFailed: "Your profile could not be loaded right now. Please try again later.",
-  loginExpired: "Your login has expired. Close this dialog and log in again.",
-  checkFields: "Please check the marked fields.",
   saving: "Saving…",
   saved: "Changes saved.",
   unchanged: "Nothing was changed.",
-  saveFailed: "Your changes could not be saved right now. They are still here; please try again.",
+  saveFailed: "Your change could not be saved right now. Please try again.",
   tooMany: "Too many requests. Please try again in a minute.",
   notMember: "Only members of the Mario Strikers Discord server can change their profile.",
-  changedElsewhere:
-    "Your profile was changed elsewhere (for example in Discord) while this dialog was open. Your changes are kept; the marked parts show what was saved there. Check them and apply again.",
-  draftRestored: "Your unsaved changes from before the login are back. Check them and apply.",
+  loginExpired: "Your login has expired. Your change is kept for the next login.",
+  finishFirst: "Save or cancel this change first.",
+  changedElsewhere: "Your profile was changed elsewhere (for example in Discord) meanwhile.",
+  checkAgain: "Check your change and save again.",
+  draftRestored: "Your unsaved change from before the login is back. Check it and save.",
+  missingPlatform: "Select the platform.",
 } as const;
 
-interface Editor {
-  profile: EditableProfile;
-  /** The saved values the form started from: what "unsaved changes" are measured against. */
-  base: FormState;
-  saving: boolean;
-  readonly onSaved: () => void;
+const icon = (paths: string): string =>
+  `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">${paths}</svg>`;
+
+const ICONS = {
+  pencil: icon('<path d="M11.4 1.6 14.4 4.6 5.3 13.7 1.6 14.4 2.3 10.7Z" fill="currentColor"/>'),
+  minus: icon('<rect x="2.5" y="7" width="11" height="2" fill="currentColor"/>'),
+  plus: icon('<path d="M7 2.5h2V7h4.5v2H9v4.5H7V9H2.5V7H7Z" fill="currentColor"/>'),
+  check: icon('<path d="M6.2 11.3 2.9 8 1.5 9.4l4.7 4.7 8.3-8.3L13.1 4.4Z" fill="currentColor"/>'),
+  cross: icon(
+    '<path d="M3.9 2.5 8 6.6l4.1-4.1 1.4 1.4L9.4 8l4.1 4.1-1.4 1.4L8 9.4l-4.1 4.1-1.4-1.4L6.6 8 2.5 3.9Z" fill="currentColor"/>',
+  ),
+} as const;
+
+interface Status {
+  readonly text: string;
+  readonly level: "info" | "success" | "error";
+  readonly link?: { readonly href: string; readonly label: string };
 }
 
-let editor: Editor | null = null;
-
-const popup = new TemplatePopup({
-  template,
-  openClass: "popup-open",
-  closeButtonSelector: ".profile-edit-close",
-  beforeClose: () => confirmClose(),
-});
-
-function root(): HTMLElement {
-  return popup.ensure();
+interface OpenEdit {
+  readonly target: EditTarget;
+  /** The saved value when the edit opened, to tell whether it was changed elsewhere meanwhile. */
+  readonly startedFrom: string;
+  /** Values to fill the line with instead of the saved ones (after a conflict or a login). */
+  readonly values: Edit | null;
+  readonly message: string;
 }
 
-function form(): HTMLFormElement | null {
-  return root().querySelector<HTMLFormElement>(".profile-edit-form");
+interface ErrorBody {
+  readonly code?: string;
+  readonly fields?: readonly FieldError[];
+  readonly current?: EditableProfile;
 }
 
-function codeFields(group: string): HTMLInputElement[] {
-  return Array.from(root().querySelectorAll<HTMLInputElement>(`[data-code="${group}"] .profile-edit-digits`));
+export interface ProfileEditorOptions {
+  /** The profile card on the page (#player-profile-page). */
+  readonly root: HTMLElement;
+  readonly profile: EditableProfile;
+  /** Renders the card again from the saved profile, after a save. */
+  readonly reload: () => Promise<void>;
 }
 
-function mscRow(index: number): HTMLElement | null {
-  return root().querySelector<HTMLElement>(`[data-msc-row="${index}"]`);
+export interface ProfileEditor {
+  /** Focuses the first pencil (the account menu's "Modify Profile"). */
+  focusFirst(): void;
 }
 
-function select(container: ParentNode | null, field: string): HTMLSelectElement | null {
-  return container?.querySelector<HTMLSelectElement>(`[data-field="${field}"]`) ?? null;
+function countryName(code: string, profile: EditableProfile): string {
+  const fallback = profile.countries.find((country) => country.code === code)?.name ?? code;
+  return countryDisplayName(normalizeCountryCode(code)) || fallback;
 }
-
-// ---------------------------------------------------------------------------------------------------
-// Rendering
 
 function options(entries: readonly { value: string; label: string }[], selected: string, placeholder: string): string {
   const known = entries.some((entry) => entry.value === selected);
@@ -100,454 +104,508 @@ function options(entries: readonly { value: string; label: string }[], selected:
   ].join("");
 }
 
-function countryName(code: string, fallback: string): string {
-  return countryDisplayName(normalizeCountryCode(code)) || fallback.trim() || code;
+function digitFields(label: string, blocks: Blocks): string {
+  const field = (index: number): string =>
+    `<input class="profile-edit-digits" type="text" inputmode="numeric" autocomplete="off" maxlength="4" spellcheck="false" enterkeyhint="${index === 2 ? "done" : "next"}" value="${escapeHtml(blocks[index] ?? "")}" aria-label="${escapeHtml(label)}, digits ${index * 4 + 1} to ${index * 4 + 4}">`;
+  const dash = '<span class="profile-edit-dash" aria-hidden="true">-</span>';
+  return field(0) + dash + field(1) + dash + field(2);
 }
 
-function renderCountries(profile: EditableProfile, selected: string): void {
-  const node = root().querySelector<HTMLSelectElement>("[data-slot='country']");
-  if (!node) return;
-  const entries = profile.countries
-    .map((country) => ({ value: country.code, label: countryName(country.code, country.name) }))
-    .sort((a, b) => a.label.localeCompare(b.label, "en", { sensitivity: "base" }));
-  node.innerHTML = options(entries, selected, "No country");
-  renderFlag(selected);
+function iconButton(attributes: string, label: string, svg: string, className = "profile-edit-icon"): string {
+  return `<button class="${className}" type="button" ${attributes} aria-label="${escapeHtml(label)}" title="${escapeHtml(label)}">${svg}</button>`;
 }
 
-function renderFlag(code: string): void {
-  const flag = root().querySelector<HTMLImageElement>("[data-slot='flag']");
-  if (!flag) return;
-  const flagCode = normalizeCountryCode(code);
-  flag.hidden = !flagCode;
-  if (flagCode) flag.src = flagUrl(flagCode);
-  else flag.removeAttribute("src");
-}
-
-function mscRowHtml(index: number, row: MscRow): string {
-  const number = index + 1;
-  const regions: { value: string; label: string }[] = MSC_REGIONS.map((region) => ({ ...region }));
-  // An older NTSC-J/K code is shown as it is saved; it can be kept or deleted, not chosen for a new code.
-  const legacy = Object.hasOwn(LEGACY_MSC_REGIONS, row.region) ? LEGACY_MSC_REGIONS[row.region] : undefined;
-  if (legacy) regions.push({ value: row.region, label: `${legacy} (no new codes)` });
-  const platforms = MSC_PLATFORMS.map((platform) => ({ value: platform, label: platform }));
-  const digit = (block: number): string =>
-    `<input class="profile-edit-digits" type="text" inputmode="numeric" autocomplete="off" maxlength="4" spellcheck="false" enterkeyhint="${block === 3 ? "done" : "next"}" value="${escapeHtml(row.blocks[block - 1] ?? "")}" aria-label="MSC friend code ${number}, digits ${block * 4 - 3} to ${block * 4}" aria-describedby="profile-edit-error-msc-${index}">`;
-  return [
-    `<li class="profile-edit-msc-row" data-msc-row="${index}">`,
-    `<span class="profile-edit-msc-number" aria-hidden="true">${number}.</span>`,
-    `<select class="profile-edit-select" data-field="region" aria-label="MSC friend code ${number}, region" aria-describedby="profile-edit-error-msc-${index}">${options(regions, row.region, "Region")}</select>`,
-    `<select class="profile-edit-select" data-field="platform" aria-label="MSC friend code ${number}, platform" aria-describedby="profile-edit-error-msc-${index}">${options(platforms, row.platform, "Platform")}</select>`,
-    `<div class="profile-edit-code" role="group" aria-label="MSC friend code ${number}" data-code="msc-${index}">`,
-    digit(1),
-    '<span class="profile-edit-code-dash" aria-hidden="true">-</span>',
-    digit(2),
-    '<span class="profile-edit-code-dash" aria-hidden="true">-</span>',
-    digit(3),
-    `<button class="profile-edit-clear" type="button" data-clear="msc-${index}" aria-label="Clear MSC friend code ${number}">×</button>`,
-    "</div>",
-    `<p id="profile-edit-error-msc-${index}" class="profile-edit-error" data-error="msc.${index}" hidden></p>`,
-    "</li>",
-  ].join("");
-}
-
-function setBlocks(fields: readonly HTMLInputElement[], blocks: Blocks): void {
-  fields.forEach((field, index) => {
-    field.value = blocks[index] ?? "";
-  });
-}
-
-function renderNames(profile: EditableProfile): void {
-  const { discord } = profile;
-  popup.setText("server-name", discord.server_name || discord.username || "-");
-  popup.setText("username", discord.username ? `@${discord.username}` : "-");
-  const note = popup.slots["names-note"];
-  if (!note) return;
-  let text = "";
-  if (discord.membership === "not_member") text = MESSAGES.notMember;
-  else if (!discord.nick && discord.membership === "member")
-    text = "No server nickname: Discord shows your display name.";
-  else if (discord.source === "login") text = "As of your last login.";
-  note.textContent = text;
-  note.hidden = !text;
-  note.classList.toggle("is-error", discord.membership === "not_member");
-}
-
-function renderForm(profile: EditableProfile, state: FormState): void {
-  renderNames(profile);
-  renderCountries(profile, state.country);
-  setBlocks(codeFields("switch"), state.switchBlocks);
-  const list = popup.lists.msc;
-  if (list) list.innerHTML = state.msc.map((row, index) => mscRowHtml(index, row)).join("");
-  for (let index = 0; index < 3; index += 1) {
-    bindFriendCodeInput(codeFields(`msc-${index}`), { onChange: edited, onRejected: showPasteRejected });
-  }
-  clearMessages();
-  showFieldErrors(missingPlatforms(state), false);
-  refresh();
-}
-
-/** Older MSC codes were saved without a platform: their rows ask for one as soon as the form shows them. */
-function missingPlatforms(state: FormState): FieldError[] {
-  return state.msc.flatMap((row, index): FieldError[] =>
-    row.platform === "" && row.blocks.some((block) => block !== "")
-      ? [{ field: `msc.${index}.platform`, code: "PLATFORM_REQUIRED", message: FIELD_ERROR_MESSAGES.PLATFORM_REQUIRED }]
-      : [],
+function actionButtons(saveLabel: string): string {
+  return (
+    '<span class="profile-edit-actions">' +
+    iconButton('data-edit-action="save"', saveLabel, ICONS.check, "profile-edit-icon is-save") +
+    iconButton('data-edit-action="cancel"', "Cancel", ICONS.cross) +
+    "</span>"
   );
 }
 
-// ---------------------------------------------------------------------------------------------------
-// Reading the form and showing its state
-
-function readBlocks(group: string): Blocks {
-  const values = codeFields(group).map((field) => field.value);
-  return [values[0] ?? "", values[1] ?? "", values[2] ?? ""];
+/** A code line as it reads, e.g. "PAL (Wii): 1234-5678-9012". */
+function lineText(row: Element): string {
+  return Array.from(row.querySelectorAll(".player-popup-code-prefix, .player-popup-code-value"), (node) =>
+    node.textContent.trim(),
+  )
+    .filter(Boolean)
+    .join(" ");
 }
 
-function readRow(index: number): MscRow {
-  const row = mscRow(index);
-  return {
-    region: select(row, "region")?.value ?? "",
-    platform: select(row, "platform")?.value ?? "",
-    blocks: readBlocks(`msc-${index}`),
-  };
-}
+/** Adds editing to the profile card; the card is rendered anew after every save (`reload`). */
+export function createProfileEditor({ root, profile: initial, reload }: ProfileEditorOptions): ProfileEditor {
+  let profile = initial;
+  let open: OpenEdit | null = null;
+  let saving = false;
+  let status: Status | null = null;
 
-function readForm(): FormState {
-  return {
-    country: root().querySelector<HTMLSelectElement>("[data-slot='country']")?.value ?? "",
-    switchBlocks: readBlocks("switch"),
-    msc: [readRow(0), readRow(1), readRow(2)],
-  };
-}
+  const blocked = (): boolean => profile.discord.membership === "not_member";
+  const content = (): HTMLElement | null => root.querySelector<HTMLElement>(".player-popup-content");
+  const list = (key: string): HTMLElement | null => root.querySelector<HTMLElement>(`[data-list="${key}"]`);
+  const editRow = (): HTMLElement | null => root.querySelector<HTMLElement>("[data-edit-row]");
+  const nameOf = (code: string): string => countryName(code, profile);
 
-function dirty(): boolean {
-  return editor ? isDirty(editor.base, readForm()) : false;
-}
+  // -------------------------------------------------------------------------------------------------
+  // Status line
 
-function warnBeforeLeaving(event: BeforeUnloadEvent): void {
-  if (dirty()) event.preventDefault();
-}
-
-/** Apply is offered while there is something to save and nothing is being saved. */
-function refresh(): void {
-  const apply = root().querySelector<HTMLButtonElement>("[data-action='apply']");
-  const blocked = editor?.profile.discord.membership === "not_member";
-  if (apply) apply.disabled = !editor || editor.saving || blocked || !dirty();
-}
-
-/** After every edit by the user: "Changes saved." belongs to the values it saved, so an edit ends it. */
-function edited(): void {
-  if (popup.slots["save-status"]?.classList.contains("is-success")) setStatus("");
-  refresh();
-}
-
-function setStatus(message: string, level?: "success" | "error"): void {
-  const status = popup.slots["save-status"];
-  if (!status) return;
-  status.textContent = message;
-  status.classList.toggle("is-success", level === "success");
-  status.classList.toggle("is-error", level === "error");
-}
-
-function setSummary(message: string, link?: { href: string; label: string }): void {
-  const summary = popup.slots.summary;
-  if (!summary) return;
-  summary.innerHTML = message
-    ? escapeHtml(message) + (link ? ` <a href="${escapeHtml(link.href)}">${escapeHtml(link.label)}</a>` : "")
-    : "";
-  summary.hidden = !message;
-}
-
-function clearMessages(): void {
-  setSummary("");
-  setStatus("");
-  for (const node of Array.from(root().querySelectorAll<HTMLElement>("[data-error]"))) {
-    node.textContent = "";
-    node.hidden = true;
+  function renderStatus(): void {
+    const mount = content();
+    if (!mount) return;
+    let line = mount.querySelector<HTMLElement>(":scope > .profile-edit-status");
+    if (!line) {
+      line = document.createElement("p");
+      line.className = "profile-edit-status";
+      line.setAttribute("role", "status");
+      mount.prepend(line);
+    }
+    line.innerHTML = status
+      ? escapeHtml(status.text) +
+        (status.link ? ` <a href="${escapeHtml(status.link.href)}">${escapeHtml(status.link.label)}</a>` : "")
+      : "";
+    line.hidden = !status;
+    line.classList.toggle("is-success", status?.level === "success");
+    line.classList.toggle("is-error", status?.level === "error");
   }
-  for (const node of Array.from(root().querySelectorAll("[aria-invalid='true']"))) node.removeAttribute("aria-invalid");
-  for (const node of Array.from(root().querySelectorAll<HTMLElement>("[data-conflict]"))) {
-    node.removeAttribute("data-conflict");
+
+  function setStatus(next: Status | null): void {
+    status = next;
+    renderStatus();
   }
-}
 
-function showPasteRejected(message: string): void {
-  setStatus(message, "error");
-}
+  // -------------------------------------------------------------------------------------------------
+  // The lines and their buttons
 
-/** The control a form error points at, for aria-invalid and the first focus. */
-function controlsOf(field: string): HTMLElement[] {
-  if (field === "country") return Array.from(root().querySelectorAll<HTMLElement>("[data-slot='country']"));
-  if (field === "switch_code") return codeFields("switch");
-  const match = /^msc\.(\d+)\.(region|platform|code)$/.exec(field);
-  if (!match) return [];
-  const index = Number(match[1]);
-  if (match[2] === "code") return codeFields(`msc-${index}`);
-  const control = select(mscRow(index), match[2] ?? "");
-  return control ? [control] : [];
-}
-
-function showFieldErrors(errors: readonly FieldError[], focus = true): void {
-  const messages = new Map<string, string[]>();
-  for (const error of errors) {
-    const slot = /^msc\.\d+/.exec(error.field)?.[0] ?? error.field;
-    const list = messages.get(slot) ?? [];
-    if (!list.includes(error.message)) list.push(error.message);
-    messages.set(slot, list);
-    for (const control of controlsOf(error.field)) control.setAttribute("aria-invalid", "true");
+  function editButton(kind: string, label: string, svg: string, code = ""): string {
+    return iconButton(`data-edit="${kind}"${code ? ` data-code="${escapeHtml(code)}"` : ""}`, label, svg);
   }
-  for (const [slot, list] of messages) {
-    const node = root().querySelector<HTMLElement>(`[data-error="${slot}"]`);
-    if (node) {
-      node.textContent = list.join(" ");
-      node.hidden = false;
+
+  function missingRow(): HTMLElement {
+    const row = document.createElement("div");
+    row.className = "player-popup-code-row profile-code-missing";
+    row.innerHTML = '<span class="player-popup-code-value">No code saved</span>';
+    return row;
+  }
+
+  function addActions(container: HTMLElement, className: string, html: string, first = false): void {
+    const actions = document.createElement("span");
+    actions.className = className;
+    actions.innerHTML = html;
+    if (first) container.prepend(actions);
+    else container.append(actions);
+  }
+
+  function showSection(mount: HTMLElement): void {
+    const section = mount.closest<HTMLElement>(".player-popup-section");
+    if (section) section.hidden = false;
+  }
+
+  function renderHeader(): void {
+    const header = root.querySelector<HTMLElement>(".player-popup-header");
+    if (header) {
+      addActions(header, "profile-header-actions", editButton("country", "Change your country", ICONS.pencil));
     }
   }
-  if (!focus) return;
-  const first = errors.map((error) => controlsOf(error.field)[0]).find((control) => control !== undefined);
-  first?.focus();
-}
 
-// ---------------------------------------------------------------------------------------------------
-// Drafts: a login that expired while editing does not lose the form.
-
-interface Draft {
-  readonly id: string;
-  readonly base: FormState;
-  readonly state: FormState;
-}
-
-function saveDraft(draft: Draft): void {
-  try {
-    sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-  } catch {
-    // Storage may be unavailable (private mode); the form stays open either way.
+  function renderSwitch(): void {
+    const mount = list("fc-switch");
+    if (!mount) return;
+    showSection(mount);
+    let row = mount.querySelector<HTMLElement>(".player-popup-code-row");
+    if (!row) {
+      row = missingRow();
+      mount.append(row);
+    }
+    row.dataset.editTarget = "switch";
+    addActions(row, "profile-row-actions", editButton("switch", "Change your Switch friend code", ICONS.pencil));
   }
-}
 
-function takeDraft(id: string): Draft | null {
+  function renderMsc(): void {
+    const mount = list("fc-msc");
+    if (!mount) return;
+    showSection(mount);
+    const rows = Array.from(mount.querySelectorAll<HTMLElement>(".player-popup-code-row"));
+    for (const row of rows) {
+      const code = row.querySelector(".player-popup-code-value")?.textContent.trim() ?? "";
+      const saved = profile.msc_codes.find((entry) => entry.code === code);
+      if (!saved) continue;
+      const label = lineText(row);
+      row.dataset.editTarget = `msc:${code}`;
+      addActions(
+        row,
+        "profile-row-actions",
+        editButton("msc", `Change MSC friend code ${label}`, ICONS.pencil, code) +
+          editButton("msc-delete", `Delete MSC friend code ${label}`, ICONS.minus, code),
+      );
+      // An older code saved without a platform asks for one.
+      if (!saved.platform) {
+        const hint = document.createElement("p");
+        hint.className = "profile-row-hint";
+        hint.textContent = MESSAGES.missingPlatform;
+        row.after(hint);
+      }
+    }
+    if (!rows.length) mount.append(missingRow());
+    const section = mount.closest<HTMLElement>(".player-popup-section");
+    if (section && canAddMscCode(profile)) {
+      addActions(section, "profile-section-actions", editButton("msc-add", "Add an MSC friend code", ICONS.plus), true);
+    }
+  }
+
+  function clearControls(): void {
+    const added = ".profile-row-actions, .profile-section-actions, .profile-header-actions, .profile-row-hint";
+    for (const node of Array.from(root.querySelectorAll(`${added}, .profile-code-missing, [data-edit-row]`))) {
+      node.remove();
+    }
+    for (const node of Array.from(root.querySelectorAll<HTMLElement>("[data-edit-target]"))) {
+      node.hidden = false;
+      delete node.dataset.editTarget;
+    }
+  }
+
+  function renderControls(): void {
+    clearControls();
+    if (blocked() && !status) status = { text: MESSAGES.notMember, level: "info" };
+    renderStatus();
+    if (blocked()) return;
+    renderHeader();
+    renderSwitch();
+    renderMsc();
+    if (open) renderEditRow(open);
+  }
+
+  // -------------------------------------------------------------------------------------------------
+  // The open line
+
+  function targetRow(target: EditTarget): HTMLElement | null {
+    if (target.kind === "country") return null;
+    const key = target.kind === "switch" ? "switch" : `msc:${target.code ?? ""}`;
+    return root.querySelector<HTMLElement>(`[data-edit-target="${CSS.escape(key)}"]`);
+  }
+
+  function editRowHtml(edit: Edit): string {
+    switch (edit.kind) {
+      case "country": {
+        const entries = profile.countries
+          .map((country) => ({ value: country.code, label: nameOf(country.code) }))
+          .sort((a, b) => a.label.localeCompare(b.label, "en", { sensitivity: "base" }));
+        return [
+          '<label class="profile-edit-label" for="profile-edit-country">Country</label>',
+          `<select id="profile-edit-country" class="profile-edit-select" data-field="country">${options(entries, edit.country, "No country")}</select>`,
+          '<img class="profile-edit-flag" data-slot="edit-flag" src="" alt="" width="27" height="18" hidden>',
+          actionButtons("Save the country"),
+        ].join("");
+      }
+      case "switch":
+        return [
+          '<span class="profile-edit-code" role="group" aria-label="Switch friend code">',
+          '<span class="profile-edit-prefix" aria-hidden="true">SW-</span>',
+          digitFields("Switch friend code", edit.blocks),
+          iconButton('data-edit-action="clear"', "Clear the code", ICONS.cross, "profile-edit-icon is-clear"),
+          "</span>",
+          actionButtons("Save the Switch friend code"),
+        ].join("");
+      case "msc": {
+        const regions: { value: string; label: string }[] = MSC_REGIONS.map((region) => ({ ...region }));
+        // An older NTSC-J/K code keeps its region; no new code gets one.
+        const legacy = Object.hasOwn(LEGACY_MSC_REGIONS, edit.region) ? LEGACY_MSC_REGIONS[edit.region] : undefined;
+        if (legacy) regions.push({ value: edit.region, label: `${legacy} (no new codes)` });
+        const platforms = MSC_PLATFORMS.map((platform) => ({ value: platform, label: platform }));
+        return [
+          `<select class="profile-edit-select" data-field="region" aria-label="MSC friend code, region">${options(regions, edit.region, "Region")}</select>`,
+          `<select class="profile-edit-select" data-field="platform" aria-label="MSC friend code, platform">${options(platforms, edit.platform, "Platform")}</select>`,
+          '<span class="profile-edit-code" role="group" aria-label="MSC friend code">',
+          digitFields("MSC friend code", edit.blocks),
+          "</span>",
+          actionButtons(edit.original === null ? "Add the MSC friend code" : "Save the MSC friend code"),
+        ].join("");
+      }
+      case "msc-delete": {
+        const row = targetRow({ kind: "msc", code: edit.code });
+        return [
+          `<span class="profile-edit-question">Delete ${escapeHtml(row ? lineText(row) : edit.code)}?</span>`,
+          actionButtons("Delete the MSC friend code"),
+        ].join("");
+      }
+    }
+  }
+
+  function renderEditRow(state: OpenEdit): void {
+    const edit = state.values ?? startEdit(profile, state.target);
+    const row = document.createElement("div");
+    row.className = `profile-edit-row is-${edit.kind}`;
+    row.dataset.editRow = edit.kind;
+    row.innerHTML = editRowHtml(edit) + '<p class="profile-edit-error" role="alert" hidden></p>';
+    const anchor = targetRow(
+      state.target.kind === "msc-delete" ? { kind: "msc", code: state.target.code } : state.target,
+    );
+    if (state.target.kind === "country") {
+      const mount = content();
+      const club = mount?.querySelector(":scope > .profile-club-line");
+      if (club) club.after(row);
+      else mount?.prepend(row);
+    } else if (anchor) {
+      anchor.hidden = true;
+      anchor.after(row);
+    } else {
+      const mount = list("fc-msc");
+      mount?.querySelector<HTMLElement>(".profile-code-missing")?.setAttribute("hidden", "");
+      mount?.append(row);
+    }
+    const fields = Array.from(row.querySelectorAll<HTMLInputElement>(".profile-edit-digits"));
+    if (fields.length) bindFriendCodeInput(fields, { onChange: () => undefined, onRejected: showError });
+    renderFlag();
+    showError(state.message);
+    (
+      row.querySelector<HTMLElement>("select, input") ?? row.querySelector<HTMLElement>("[data-edit-action='save']")
+    )?.focus();
+  }
+
+  function renderFlag(): void {
+    const select = root.querySelector<HTMLSelectElement>("[data-edit-row] [data-field='country']");
+    const flag = root.querySelector<HTMLImageElement>("[data-slot='edit-flag']");
+    if (!select || !flag) return;
+    const code = normalizeCountryCode(select.value);
+    flag.hidden = !code;
+    if (code) flag.src = flagUrl(code);
+    else flag.removeAttribute("src");
+  }
+
+  function showError(message: string): void {
+    const node = editRow()?.querySelector<HTMLElement>(".profile-edit-error");
+    if (!node) return;
+    node.textContent = message;
+    node.hidden = !message;
+  }
+
+  /** The open line's values. */
+  function readEdit(): Edit | null {
+    const row = editRow();
+    if (!open || !row) return null;
+    const value = (field: string): string =>
+      row.querySelector<HTMLSelectElement>(`[data-field="${field}"]`)?.value ?? "";
+    const digits = Array.from(row.querySelectorAll<HTMLInputElement>(".profile-edit-digits")).map(
+      (field) => field.value,
+    );
+    const blocks: Blocks = [digits[0] ?? "", digits[1] ?? "", digits[2] ?? ""];
+    const target = open.target;
+    switch (target.kind) {
+      case "country":
+        return { kind: "country", country: value("country") };
+      case "switch":
+        return { kind: "switch", blocks };
+      case "msc-delete":
+        return { kind: "msc-delete", code: target.code };
+      case "msc":
+        return { kind: "msc", original: target.code, region: value("region"), platform: value("platform"), blocks };
+    }
+  }
+
+  function dirty(): boolean {
+    const edit = readEdit();
+    return edit ? isChanged(profile, edit) : false;
+  }
+
+  function openEdit(target: EditTarget, values: Edit | null = null, message = ""): void {
+    if (saving) return;
+    if (open) {
+      if (JSON.stringify(open.target) === JSON.stringify(target)) return;
+      if (dirty()) {
+        showError(MESSAGES.finishFirst);
+        editRow()?.querySelector<HTMLElement>("select, input, [data-edit-action='save']")?.focus();
+        return;
+      }
+      closeEdit(false);
+    }
+    const start = values ?? startEdit(profile, target);
+    open = { target, startedFrom: savedText(profile, start, nameOf), values, message };
+    if (status?.level === "success") setStatus(null);
+    renderEditRow(open);
+  }
+
+  /** Focus on the pencil of a line after it closed, or on "+" (or the country) when the line is gone. */
+  function focusLine(target: EditTarget | null): void {
+    let selector = "[data-edit='msc-add'], [data-edit='country']";
+    if (target?.kind === "country" || target?.kind === "switch") selector = `[data-edit='${target.kind}']`;
+    else if (target?.kind === "msc" && target.code)
+      selector = `[data-edit='msc'][data-code="${CSS.escape(target.code)}"]`;
+    root.querySelector<HTMLElement>(selector)?.focus();
+  }
+
+  function closeEdit(focus = true): void {
+    const target = open?.target ?? null;
+    open = null;
+    editRow()?.remove();
+    for (const node of Array.from(root.querySelectorAll<HTMLElement>("[data-edit-target], .profile-code-missing"))) {
+      node.hidden = false;
+    }
+    if (focus) focusLine(target);
+  }
+
+  // -------------------------------------------------------------------------------------------------
+  // Saving
+
+  function saveDraft(target: EditTarget, edit: Edit): void {
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ id: profile.discord.id, target, edit }));
+    } catch {
+      // Storage may be unavailable (private mode); the line stays open either way.
+    }
+  }
+
+  function setRowDisabled(disabled: boolean): void {
+    for (const node of Array.from(root.querySelectorAll<HTMLButtonElement>("[data-edit-row] button"))) {
+      node.disabled = disabled;
+    }
+  }
+
+  /** The target of an edit that became something else (a code removed elsewhere is added anew). */
+  function rebaseTarget(target: EditTarget, edit: Edit): EditTarget {
+    return edit.kind === "msc" && edit.original === null ? { kind: "msc", code: null } : target;
+  }
+
+  async function save(): Promise<void> {
+    if (saving || !open) return;
+    const edit = readEdit();
+    if (!edit) return;
+    const checked = checkEdit(profile, edit);
+    if (!checked.ok) {
+      showError(checked.errors.join(" "));
+      return;
+    }
+    const state = open;
+    saving = true;
+    setStatus({ text: MESSAGES.saving, level: "info" });
+    setRowDisabled(true);
+    try {
+      const response = await fetch(API_URL, {
+        method: "PUT",
+        credentials: "same-origin",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({ version: profile.version, ...checked.request }),
+      });
+      const body = (await response.json().catch(() => ({}))) as EditableProfile & ErrorBody & { changed?: boolean };
+      if (response.ok) {
+        profile = body;
+        open = null;
+        status = { text: body.changed === false ? MESSAGES.unchanged : MESSAGES.saved, level: "success" };
+        await reload();
+        renderControls();
+        // The pencil of the saved line; a changed or new MSC code is found by its new digits.
+        if (edit.kind === "msc") focusLine({ kind: "msc", code: edit.blocks.join("-") });
+        else focusLine(edit.kind === "msc-delete" ? null : state.target);
+        return;
+      }
+      if (response.status === 409 && body.code === "PROFILE_CHANGED" && body.current) {
+        const current = body.current;
+        const rebased = rebaseEdit(edit, current);
+        const now = savedText(current, edit, (code) => countryName(code, current));
+        const notes = [
+          MESSAGES.changedElsewhere,
+          now !== state.startedFrom ? `Saved now: ${now}.` : "",
+          rebased.note,
+          rebased.edit ? MESSAGES.checkAgain : "",
+        ].filter(Boolean);
+        profile = current;
+        open = rebased.edit
+          ? {
+              target: rebaseTarget(state.target, rebased.edit),
+              startedFrom: now,
+              values: rebased.edit,
+              message: notes.join(" "),
+            }
+          : null;
+        status = rebased.edit ? null : { text: notes.join(" "), level: "info" };
+        await reload();
+        renderControls();
+        return;
+      }
+      setStatus(null);
+      if (body.fields?.length) {
+        showError([...new Set(body.fields.map((error) => error.message))].join(" "));
+      } else if (response.status === 401) {
+        saveDraft(state.target, edit);
+        setStatus({
+          text: MESSAGES.loginExpired,
+          level: "error",
+          link: { href: loginPath("/profile"), label: "Log in again" },
+        });
+      } else if (body.code === "NOT_GUILD_MEMBER") {
+        profile = { ...profile, discord: { ...profile.discord, membership: "not_member" } };
+        open = null;
+        status = { text: MESSAGES.notMember, level: "error" };
+        renderControls();
+      } else {
+        showError(response.status === 429 ? MESSAGES.tooMany : MESSAGES.saveFailed);
+      }
+    } catch {
+      setStatus(null);
+      showError(MESSAGES.saveFailed);
+    } finally {
+      saving = false;
+      setRowDisabled(false);
+    }
+  }
+
+  // -------------------------------------------------------------------------------------------------
+  // Events
+
+  root.addEventListener("click", (event) => {
+    const element = event.target instanceof Element ? event.target : null;
+    const trigger = element?.closest<HTMLElement>("[data-edit]");
+    if (trigger) {
+      const code = trigger.dataset.code ?? "";
+      const kind = trigger.dataset.edit;
+      if (kind === "country" || kind === "switch") openEdit({ kind });
+      else if (kind === "msc") openEdit({ kind: "msc", code });
+      else if (kind === "msc-add") openEdit({ kind: "msc", code: null });
+      else if (kind === "msc-delete") openEdit({ kind: "msc-delete", code });
+      return;
+    }
+    const action = element?.closest<HTMLElement>("[data-edit-action]")?.dataset.editAction;
+    if (action === "save") void save();
+    else if (action === "cancel") closeEdit();
+    else if (action === "clear") {
+      const fields = Array.from(root.querySelectorAll<HTMLInputElement>("[data-edit-row] .profile-edit-digits"));
+      for (const field of fields) field.value = "";
+      fields[0]?.focus();
+    }
+  });
+  root.addEventListener("keydown", (event) => {
+    if (!(event.target instanceof Element) || !event.target.closest("[data-edit-row]")) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeEdit();
+    } else if (event.key === "Enter" && !(event.target instanceof HTMLButtonElement)) {
+      event.preventDefault();
+      void save();
+    }
+  });
+  root.addEventListener("change", (event) => {
+    if (event.target instanceof HTMLSelectElement && event.target.dataset.field === "country") renderFlag();
+  });
+  window.addEventListener("beforeunload", (event) => {
+    if (dirty()) event.preventDefault();
+  });
+
+  renderControls();
+
+  // A change kept when the login expired comes back after the next login (same Discord account only).
   try {
     const raw = sessionStorage.getItem(DRAFT_KEY);
     sessionStorage.removeItem(DRAFT_KEY);
-    const draft = raw ? (JSON.parse(raw) as Draft) : null;
-    return draft?.id === id ? draft : null;
-  } catch {
-    return null;
-  }
-}
-
-// ---------------------------------------------------------------------------------------------------
-// Merging a newer saved profile into the form
-
-/** The message line of each field group, which names the value saved elsewhere. */
-const GROUP_NOTE_SLOTS: Readonly<Record<Group, string>> = {
-  country: "country",
-  switch: "switch_code",
-  msc: "msc",
-};
-
-function markGroups(groups: readonly string[], kind: "updated" | "contested"): void {
-  for (const group of groups) {
-    root().querySelector<HTMLElement>(`[data-group="${group}"]`)?.setAttribute("data-conflict", kind);
-  }
-}
-
-/** A group's saved value in words, written like the profile page lists friend codes. */
-function savedValue(profile: EditableProfile, group: Group): string {
-  if (group === "country") {
-    const name = profile.countries.find((country) => country.code === profile.country)?.name ?? "";
-    return profile.country ? countryName(profile.country, name) : "no country";
-  }
-  if (group === "switch") return profile.switch_code ? `SW-${profile.switch_code}` : "no code";
-  const codes = profile.msc_codes.map(
-    (entry) => `${entry.region}${entry.platform ? ` (${entry.platform})` : ""}: ${entry.code}`,
-  );
-  return codes.join(", ") || "no codes";
-}
-
-function mergeInto(current: EditableProfile, mine: FormState, base: FormState, message: string): void {
-  if (!editor) return;
-  const theirs = fromEditable(current);
-  const merged = mergeChanges(base, mine, theirs);
-  editor.profile = current;
-  editor.base = theirs;
-  renderForm(current, merged.state);
-  markGroups(merged.updated, "updated");
-  markGroups(merged.contested, "contested");
-  // A part changed here and elsewhere keeps this form's value; the other one is named, so Apply never
-  // replaces a value the member has not seen.
-  for (const group of merged.contested) {
-    const note = root().querySelector<HTMLElement>(`[data-error="${GROUP_NOTE_SLOTS[group]}"]`);
-    if (!note) continue;
-    note.textContent = `Saved elsewhere: ${savedValue(current, group)}. Apply again to replace it with your change.`;
-    note.hidden = false;
-  }
-  setSummary(message);
-}
-
-// ---------------------------------------------------------------------------------------------------
-// Saving
-
-interface ErrorBody {
-  readonly code?: string;
-  readonly fields?: readonly FieldError[];
-  readonly current?: EditableProfile;
-}
-
-async function apply(): Promise<void> {
-  if (!editor || editor.saving) return;
-  clearMessages();
-  const state = readForm();
-  const checked = toRequest(state, editor.profile);
-  if (!checked.ok) {
-    showFieldErrors(checked.errors);
-    setSummary(MESSAGES.checkFields);
-    return;
-  }
-  const current = editor;
-  current.saving = true;
-  refresh();
-  setStatus(MESSAGES.saving);
-  try {
-    const response = await fetch(API_URL, {
-      method: "PUT",
-      credentials: "same-origin",
-      headers: { Accept: "application/json", "Content-Type": "application/json" },
-      body: JSON.stringify({ version: current.profile.version, ...checked.request }),
-    });
-    const body = (await response.json().catch(() => ({}))) as EditableProfile & ErrorBody & { changed?: boolean };
-    if (editor !== current) return;
-    setStatus("");
-    if (response.ok) {
-      current.profile = body;
-      current.base = fromEditable(body);
-      // The saved values replace the form, except what was typed while the save was under way.
-      renderForm(body, mergeChanges(state, readForm(), current.base).state);
-      setStatus(body.changed === false ? MESSAGES.unchanged : MESSAGES.saved, "success");
-      current.onSaved();
-    } else if (response.status === 409 && body.code === "PROFILE_CHANGED" && body.current) {
-      mergeInto(body.current, state, current.base, MESSAGES.changedElsewhere);
-    } else if (body.fields?.length) {
-      const rows = state.msc.flatMap((row, index) => (row.blocks.some((block) => block !== "") ? [index] : []));
-      showFieldErrors(body.fields.map((error) => ({ ...error, field: toFormField(error.field, rows) })));
-      setSummary(MESSAGES.checkFields);
-    } else if (response.status === 401) {
-      saveDraft({ id: current.profile.discord.id, base: current.base, state });
-      setSummary("Your login has expired. Your changes are kept for the next login.", {
-        href: LOGIN_AGAIN_URL,
-        label: "Log in again",
-      });
-    } else if (body.code === "NOT_GUILD_MEMBER") {
-      setSummary(MESSAGES.notMember);
-    } else if (response.status === 429) {
-      setSummary(MESSAGES.tooMany);
-    } else {
-      setSummary(MESSAGES.saveFailed);
+    const draft = raw ? (JSON.parse(raw) as { id?: string; target?: EditTarget; edit?: Edit }) : null;
+    if (draft?.id === profile.discord.id && draft.target && draft.edit && !blocked()) {
+      const rebased = rebaseEdit(draft.edit, profile);
+      if (rebased.edit) openEdit(rebaseTarget(draft.target, rebased.edit), rebased.edit, MESSAGES.draftRestored);
     }
   } catch {
-    if (editor === current) setSummary(MESSAGES.saveFailed);
-  } finally {
-    current.saving = false;
-    if (editor === current) refresh();
+    // A broken or unavailable draft is dropped.
   }
-}
 
-// ---------------------------------------------------------------------------------------------------
-// Closing
-
-function showConfirm(show: boolean): void {
-  const confirm = popup.slots.confirm;
-  if (confirm) confirm.hidden = !show;
-  if (show) root().querySelector<HTMLButtonElement>("[data-action='keep']")?.focus();
-}
-
-/** Close, ×, Escape and the backdrop end here: unsaved changes are dropped only after asking. */
-function confirmClose(): boolean {
-  if (!editor || !dirty()) {
-    finish();
-    return true;
-  }
-  showConfirm(true);
-  return false;
-}
-
-function finish(): void {
-  editor = null;
-  showConfirm(false);
-  window.removeEventListener("beforeunload", warnBeforeLeaving);
-}
-
-// ---------------------------------------------------------------------------------------------------
-// Opening
-
-let bound = false;
-
-function bindOnce(): void {
-  if (bound) return;
-  bound = true;
-  const node = root();
-  bindFriendCodeInput(codeFields("switch"), { onChange: edited, onRejected: showPasteRejected });
-  form()?.addEventListener("submit", (event) => {
-    event.preventDefault();
-    void apply();
-  });
-  node.addEventListener("change", (event) => {
-    if (event.target instanceof HTMLSelectElement && event.target.matches("[data-slot='country']")) {
-      renderFlag(event.target.value);
-    }
-    edited();
-  });
-  node.addEventListener("click", (event) => {
-    const target = event.target instanceof Element ? event.target : null;
-    const clear = target?.closest<HTMLElement>("[data-clear]");
-    if (clear) {
-      const group = clear.getAttribute("data-clear") ?? "";
-      setBlocks(codeFields(group), EMPTY_BLOCKS);
-      const row = /^msc-(\d)$/.exec(group);
-      if (row) {
-        const container = mscRow(Number(row[1]));
-        for (const field of ["region", "platform"]) {
-          const control = select(container, field);
-          if (control) control.value = "";
-        }
-      }
-      codeFields(group)[0]?.focus();
-      edited();
-    } else if (target?.closest("[data-action='discard']")) {
-      finish();
-      popup.close();
-    } else if (target?.closest("[data-action='keep']")) {
-      showConfirm(false);
-      codeFields("switch")[0]?.focus();
-    }
-  });
-}
-
-/** Opens the editor; `onSaved` runs after every successful save (the profile behind it reloads). */
-export async function openProfileEditor(opener: HTMLElement | null, onSaved: () => void): Promise<void> {
-  bindOnce();
-  const request = popup.begin();
-  showConfirm(false);
-  popup.showStatus("Loading...");
-  popup.open(opener);
-  try {
-    const response = await fetch(API_URL, { credentials: "same-origin", headers: { Accept: "application/json" } });
-    if (!popup.isCurrent(request)) return;
-    if (!response.ok) {
-      popup.showStatus(response.status === 401 ? MESSAGES.loginExpired : MESSAGES.loadFailed, true);
-      return;
-    }
-    const profile = (await response.json()) as EditableProfile;
-    if (!popup.isCurrent(request)) return;
-    const base = fromEditable(profile);
-    editor = { profile, base, saving: false, onSaved };
-    popup.showStatus(null);
-    renderForm(profile, base);
-    window.addEventListener("beforeunload", warnBeforeLeaving);
-    const draft = takeDraft(profile.discord.id);
-    if (draft) mergeInto(profile, draft.state, draft.base, MESSAGES.draftRestored);
-    refresh();
-  } catch {
-    if (popup.isCurrent(request)) popup.showStatus(MESSAGES.loadFailed, true);
-  }
+  return {
+    focusFirst() {
+      root.querySelector<HTMLElement>("[data-edit]")?.focus();
+    },
+  };
 }

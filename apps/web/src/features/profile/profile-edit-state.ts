@@ -1,12 +1,14 @@
-// The profile editor's form as data, without DOM: from and to the API, whether it has unsaved changes,
-// and how a newer saved profile (changed in Discord meanwhile) is merged into it.
+// The profile page's inline editing as data, without DOM: the one change that is open (the country, the
+// Switch code, an MSC code to change, add or delete), the whole profile it asks the API to save, whether it
+// changes anything, and what is left of it when the profile was changed elsewhere (in Discord) meanwhile.
 
 import {
+  FIELD_ERROR_MESSAGES,
+  MAX_MSC_CODES,
   friendCodeBlocks,
   friendCodeFromBlocks,
   validateEditableProfile,
   type EditableProfileInput,
-  type FieldError,
   type MscCodeInput,
 } from "@ms/shared/friend-codes";
 
@@ -31,146 +33,180 @@ export interface EditableProfile {
 
 export type Blocks = readonly [string, string, string];
 
-export interface MscRow {
-  readonly region: string;
-  readonly platform: string;
-  readonly blocks: Blocks;
-}
-
-export interface FormState {
-  readonly country: string;
-  readonly switchBlocks: Blocks;
-  readonly msc: readonly [MscRow, MscRow, MscRow];
-}
-
 export const EMPTY_BLOCKS: Blocks = ["", "", ""];
-export const EMPTY_ROW: MscRow = { region: "", platform: "", blocks: EMPTY_BLOCKS };
 
-export function fromEditable(profile: Pick<EditableProfile, "country" | "switch_code" | "msc_codes">): FormState {
-  const rows = profile.msc_codes
-    .slice(0, 3)
-    .map((entry): MscRow => ({ region: entry.region, platform: entry.platform, blocks: friendCodeBlocks(entry.code) }));
-  while (rows.length < 3) rows.push(EMPTY_ROW);
-  return {
-    country: profile.country,
-    switchBlocks: friendCodeBlocks(profile.switch_code),
-    msc: [rows[0] ?? EMPTY_ROW, rows[1] ?? EMPTY_ROW, rows[2] ?? EMPTY_ROW],
-  };
+export type Edit =
+  | { readonly kind: "country"; readonly country: string }
+  | { readonly kind: "switch"; readonly blocks: Blocks }
+  /** An MSC code; `original` is the saved code it replaces, null for a new one. */
+  | {
+      readonly kind: "msc";
+      readonly original: string | null;
+      readonly region: string;
+      readonly platform: string;
+      readonly blocks: Blocks;
+    }
+  | { readonly kind: "msc-delete"; readonly code: string };
+
+/** What a pencil, "+" or "−" opens. */
+export type EditTarget =
+  | { readonly kind: "country" }
+  | { readonly kind: "switch" }
+  | { readonly kind: "msc"; readonly code: string | null }
+  | { readonly kind: "msc-delete"; readonly code: string };
+
+/** The edit of a target, filled with what is saved. */
+export function startEdit(profile: EditableProfile, target: EditTarget): Edit {
+  switch (target.kind) {
+    case "country":
+      return { kind: "country", country: profile.country };
+    case "switch":
+      return { kind: "switch", blocks: friendCodeBlocks(profile.switch_code) };
+    case "msc-delete":
+      return { kind: "msc-delete", code: target.code };
+    case "msc": {
+      const saved = profile.msc_codes.find((entry) => entry.code === target.code);
+      return saved
+        ? {
+            kind: "msc",
+            original: saved.code,
+            region: saved.region,
+            platform: saved.platform,
+            blocks: friendCodeBlocks(saved.code),
+          }
+        : { kind: "msc", original: null, region: "", platform: "", blocks: EMPTY_BLOCKS };
+    }
+  }
 }
 
-/** A row counts once a digit is in it; region and platform alone are no code. */
-function hasDigits(blocks: Blocks): boolean {
-  return blocks.some((block) => block !== "");
+function codeOf(blocks: Blocks): string {
+  const entry = friendCodeFromBlocks(blocks);
+  return entry.kind === "complete" ? entry.code : "";
 }
 
-export type RequestResult =
+/** The whole profile with the one change, as PUT /api/profile/me/editable takes it (without version). */
+export function requestFor(profile: EditableProfile, edit: Edit): EditableProfileInput {
+  const saved = { country: profile.country, switch_code: profile.switch_code, msc_codes: profile.msc_codes };
+  switch (edit.kind) {
+    case "country":
+      return { ...saved, country: edit.country };
+    case "switch":
+      return { ...saved, switch_code: codeOf(edit.blocks) };
+    case "msc-delete":
+      return { ...saved, msc_codes: profile.msc_codes.filter((entry) => entry.code !== edit.code) };
+    case "msc": {
+      const row = { region: edit.region, platform: edit.platform, code: codeOf(edit.blocks) };
+      const codes =
+        edit.original === null
+          ? [...profile.msc_codes, row]
+          : profile.msc_codes.map((entry) => (entry.code === edit.original ? row : entry));
+      return { ...saved, msc_codes: codes };
+    }
+  }
+}
+
+export type EditCheck =
   | { readonly ok: true; readonly request: EditableProfileInput }
-  | { readonly ok: false; readonly errors: readonly FieldError[] };
+  | { readonly ok: false; readonly errors: readonly string[] };
 
-/**
- * The PUT body of the form, checked with the rules the API enforces. Errors name form fields:
- * "country", "switch_code", "msc.<row>.<region|platform|code>", "msc".
- */
-export function toRequest(state: FormState, profile: Pick<EditableProfile, "countries" | "msc_codes">): RequestResult {
-  const errors: FieldError[] = [];
-  const switchEntry = friendCodeFromBlocks(state.switchBlocks);
-  if (switchEntry.kind === "incomplete") errors.push(incompleteError("switch_code"));
-
-  const rows: number[] = [];
-  const mscCodes: MscCodeInput[] = [];
-  state.msc.forEach((row, index) => {
-    if (!hasDigits(row.blocks)) return;
-    const entry = friendCodeFromBlocks(row.blocks);
-    if (entry.kind === "incomplete") errors.push(incompleteError(`msc.${index}.code`));
-    rows.push(index);
-    mscCodes.push({ region: row.region, platform: row.platform, code: entry.kind === "complete" ? entry.code : "" });
-  });
-
-  const request: EditableProfileInput = {
-    country: state.country,
-    switch_code: switchEntry.kind === "complete" ? switchEntry.code : "",
-    msc_codes: mscCodes,
-  };
-  const allowed = new Set(profile.countries.map((country) => country.code));
-  const legacy = new Set(profile.msc_codes.map((entry) => `${entry.region}:${entry.code}`));
+/** The change checked with the rules the API applies; errors are the messages to show at the open line. */
+export function checkEdit(profile: EditableProfile, edit: Edit): EditCheck {
+  const errors: string[] = [];
+  if (edit.kind === "switch" || edit.kind === "msc") {
+    const entry = friendCodeFromBlocks(edit.blocks);
+    // An MSC code is deleted with "−", so its line needs all 12 digits; the Switch line may be emptied.
+    if (entry.kind === "incomplete" || (edit.kind === "msc" && entry.kind === "empty")) {
+      errors.push(FIELD_ERROR_MESSAGES.INCOMPLETE);
+    }
+  }
+  const request = requestFor(profile, edit);
+  const stored = new Map(profile.msc_codes.map((entry) => [`${entry.region}:${entry.code}`, entry.platform]));
   const checked = validateEditableProfile(request, {
-    isAllowedCountry: (code) => allowed.has(code),
-    isKeptLegacyCode: (region, code) => legacy.has(`${region}:${code}`),
+    isAllowedCountry: (code) => code === profile.country || profile.countries.some((country) => country.code === code),
+    storedPlatform: (region, code) => stored.get(`${region}:${code}`) ?? null,
   });
   if (!checked.ok) {
     for (const error of checked.errors) {
-      const field = toFormField(error.field, rows);
-      // An incomplete code is already reported with the form's own wording.
-      if (!errors.some((known) => known.field === field)) errors.push({ ...error, field });
+      // The missing digits are already reported in the form's own words.
+      if (error.code === "INCOMPLETE" && errors.length) continue;
+      if (!errors.includes(error.message)) errors.push(error.message);
     }
   }
-  return errors.length ? { ok: false, errors } : { ok: true, request: checked.ok ? checked.value : request };
+  return errors.length || !checked.ok ? { ok: false, errors } : { ok: true, request: checked.value };
 }
 
-function incompleteError(field: string): FieldError {
-  return {
-    field,
-    code: "INCOMPLETE",
-    message: "Enter all 12 digits (4 in each field) or leave all three fields empty.",
-  };
+/** Whether the open edit would change what is saved, so closing it would drop typed input. */
+export function isChanged(profile: EditableProfile, edit: Edit): boolean {
+  switch (edit.kind) {
+    case "country":
+      return edit.country !== profile.country;
+    case "switch":
+      return edit.blocks.join("") !== friendCodeBlocks(profile.switch_code).join("");
+    case "msc-delete":
+      return false;
+    case "msc": {
+      const saved = edit.original === null ? null : profile.msc_codes.find((entry) => entry.code === edit.original);
+      if (!saved) return Boolean(edit.region || edit.platform || edit.blocks.join(""));
+      return (
+        edit.region !== saved.region ||
+        edit.platform !== saved.platform ||
+        edit.blocks.join("") !== friendCodeBlocks(saved.code).join("")
+      );
+    }
+  }
 }
 
-/** "msc_codes.1.platform" of the request → "msc.<form row>.platform". */
-export function toFormField(field: string, rows: readonly number[]): string {
-  const match = /^msc_codes\.(\d+)(\..+)?$/.exec(field);
-  if (!match) return field === "msc_codes" ? "msc" : field;
-  const row = rows[Number(match[1])] ?? Number(match[1]);
-  return `msc.${row}${match[2] ?? ""}`;
+/** Whether "+" can add another MSC code. */
+export function canAddMscCode(profile: EditableProfile): boolean {
+  return profile.msc_codes.length < MAX_MSC_CODES;
 }
 
-/** The parts of the form a merge takes from one side or the other. */
-export type Group = "country" | "switch" | "msc";
-export const GROUPS: readonly Group[] = ["country", "switch", "msc"];
-
-/** What a save would store, so selections in a row without digits do not count as a change. */
-function groupValue(state: FormState, group: Group): string {
-  if (group === "country") return state.country;
-  if (group === "switch") return state.switchBlocks.join("");
-  return JSON.stringify(
-    state.msc.filter((row) => hasDigits(row.blocks)).map((row) => [row.region, row.platform, row.blocks.join("")]),
-  );
+/** The saved value an edit is about, in words, e.g. to show what was saved elsewhere meanwhile. */
+export function savedText(profile: EditableProfile, edit: Edit, countryName: (code: string) => string): string {
+  switch (edit.kind) {
+    case "country":
+      return profile.country ? countryName(profile.country) : "no country";
+    case "switch":
+      return profile.switch_code ? `SW-${profile.switch_code}` : "no code";
+    case "msc":
+    case "msc-delete": {
+      const code = edit.kind === "msc" ? edit.original : edit.code;
+      const saved = profile.msc_codes.find((entry) => entry.code === code);
+      return saved ? `${saved.region}${saved.platform ? ` (${saved.platform})` : ""}: ${saved.code}` : "no code";
+    }
+  }
 }
 
-export function changedGroups(base: FormState, current: FormState): Group[] {
-  return GROUPS.filter((group) => groupValue(base, group) !== groupValue(current, group));
-}
-
-export function isDirty(base: FormState, current: FormState): boolean {
-  return changedGroups(base, current).length > 0;
-}
-
-export interface MergeResult {
-  readonly state: FormState;
-  /** Groups only changed elsewhere: they now show the saved value. */
-  readonly updated: readonly Group[];
-  /** Groups changed here and elsewhere: they keep this form's value, which a new Apply saves over the other. */
-  readonly contested: readonly Group[];
+export interface Rebased {
+  /** The edit to keep open, or null when nothing is left of it. */
+  readonly edit: Edit | null;
+  /** Why it changed or closed, when it did. */
+  readonly note: string;
 }
 
 /**
- * Merges the profile saved meanwhile (`theirs`) into the form (`mine`), both changed from `base`:
- * nothing typed here is lost, and nothing saved elsewhere is replaced without the user seeing it.
+ * The open edit on the profile saved elsewhere meanwhile: a change of a code that is gone becomes a new
+ * code (if there is room), a deletion of a code that is gone is done already.
  */
-export function mergeChanges(base: FormState, mine: FormState, theirs: FormState): MergeResult {
-  const mineChanged = new Set(changedGroups(base, mine));
-  const theirsChanged = new Set(changedGroups(base, theirs));
-  const pick = (group: Group): FormState => (mineChanged.has(group) ? mine : theirs);
-  const state: FormState = {
-    country: pick("country").country,
-    switchBlocks: pick("switch").switchBlocks,
-    msc: pick("msc").msc,
-  };
-  return {
-    state,
-    updated: GROUPS.filter((group) => theirsChanged.has(group) && !mineChanged.has(group)),
-    contested: GROUPS.filter(
-      (group) =>
-        theirsChanged.has(group) && mineChanged.has(group) && groupValue(mine, group) !== groupValue(theirs, group),
-    ),
-  };
+export function rebaseEdit(edit: Edit, current: EditableProfile): Rebased {
+  if (edit.kind === "msc-delete" && !current.msc_codes.some((entry) => entry.code === edit.code)) {
+    return { edit: null, note: "This code was already deleted elsewhere." };
+  }
+  if (
+    edit.kind === "msc" &&
+    edit.original !== null &&
+    !current.msc_codes.some((entry) => entry.code === edit.original)
+  ) {
+    if (!canAddMscCode(current)) {
+      return { edit: null, note: `This code was removed elsewhere, and ${MAX_MSC_CODES} MSC codes are saved now.` };
+    }
+    return {
+      edit: { ...edit, original: null },
+      note: "This code was removed elsewhere; saving adds yours as a new code.",
+    };
+  }
+  if (edit.kind === "msc" && edit.original === null && !canAddMscCode(current)) {
+    return { edit: null, note: `${MAX_MSC_CODES} MSC codes are saved now, so no code can be added.` };
+  }
+  return { edit, note: "" };
 }

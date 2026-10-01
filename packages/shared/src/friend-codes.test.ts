@@ -10,9 +10,12 @@ import {
   type ValidationOptions,
 } from "./friend-codes.ts";
 
+// The profile has a legacy NTSC-J code and an older PAL code saved without a platform.
+const STORED: Readonly<Record<string, string>> = { "JPN:1111-2222-3333": "Wii", "PAL:5555-6666-7777": "" };
+
 const OPTIONS: ValidationOptions = {
   isAllowedCountry: (code) => ["de", "us", "scotland"].includes(code),
-  isKeptLegacyCode: (region, code) => region === "JPN" && code === "1111-2222-3333",
+  storedPlatform: (region, code) => STORED[`${region}:${code}`] ?? null,
 };
 
 const valid = { country: "de", switch_code: "0001-0020-0300", msc_codes: [] };
@@ -101,8 +104,21 @@ test("every MSC code needs its region and platform, the bot's choices only", () 
 test("legacy NTSC-J/K codes may stay but none can be added", () => {
   const msc = (row: Record<string, unknown>): string[] => errorsOf({ ...valid, msc_codes: [row] });
   assert.deepEqual(msc({ region: "JPN", platform: "Wii", code: "1111-2222-3333" }), []);
+  assert.deepEqual(msc({ region: "JPN", platform: "Dolphin", code: "1111-2222-3333" }), []);
   assert.deepEqual(msc({ region: "JPN", platform: "Wii", code: "9999-2222-3333" }), ["msc_codes.0.region:INVALID"]);
   assert.deepEqual(msc({ region: "KOR", platform: "Wii", code: "1111-2222-3333" }), ["msc_codes.0.region:INVALID"]);
+});
+
+test("an older code saved without a platform may stay so, but a changed or new code needs one", () => {
+  const msc = (row: Record<string, unknown>): string[] => errorsOf({ ...valid, msc_codes: [row] });
+  assert.deepEqual(msc({ region: "PAL", platform: "", code: "5555-6666-7777" }), []);
+  assert.deepEqual(msc({ region: "PAL", platform: "Dolphin", code: "5555-6666-7777" }), []);
+  assert.deepEqual(msc({ region: "NTSC", platform: "", code: "5555-6666-7777" }), [
+    "msc_codes.0.platform:PLATFORM_REQUIRED",
+  ]);
+  assert.deepEqual(msc({ region: "JPN", platform: "", code: "1111-2222-3333" }), [
+    "msc_codes.0.platform:PLATFORM_REQUIRED",
+  ]);
 });
 
 test("at most three MSC codes, none twice; Switch and MSC may share a code", () => {
