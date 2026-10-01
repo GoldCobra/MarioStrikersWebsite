@@ -4,7 +4,13 @@
 // A profile changed elsewhere meanwhile (in Discord) is merged into the form instead of being overwritten.
 
 import { escapeHtml } from "@ms/shared/html";
-import { LEGACY_MSC_REGIONS, MSC_PLATFORMS, MSC_REGIONS, type FieldError } from "@ms/shared/friend-codes";
+import {
+  FIELD_ERROR_MESSAGES,
+  LEGACY_MSC_REGIONS,
+  MSC_PLATFORMS,
+  MSC_REGIONS,
+  type FieldError,
+} from "@ms/shared/friend-codes";
 import { countryDisplayName, flagUrl, normalizeCountryCode } from "../../lib/countries.ts";
 import { TemplatePopup } from "../../lib/popup.ts";
 import { bindFriendCodeInput } from "./friend-code-input.ts";
@@ -175,7 +181,17 @@ function renderForm(profile: EditableProfile, state: FormState): void {
     bindFriendCodeInput(codeFields(`msc-${index}`), { onChange: edited, onRejected: showPasteRejected });
   }
   clearMessages();
+  showFieldErrors(missingPlatforms(state), false);
   refresh();
+}
+
+/** Older MSC codes were saved without a platform: their rows ask for one as soon as the form shows them. */
+function missingPlatforms(state: FormState): FieldError[] {
+  return state.msc.flatMap((row, index): FieldError[] =>
+    row.platform === "" && row.blocks.some((block) => block !== "")
+      ? [{ field: `msc.${index}.platform`, code: "PLATFORM_REQUIRED", message: FIELD_ERROR_MESSAGES.PLATFORM_REQUIRED }]
+      : [],
+  );
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -270,7 +286,7 @@ function controlsOf(field: string): HTMLElement[] {
   return control ? [control] : [];
 }
 
-function showFieldErrors(errors: readonly FieldError[]): void {
+function showFieldErrors(errors: readonly FieldError[], focus = true): void {
   const messages = new Map<string, string[]>();
   for (const error of errors) {
     const slot = /^msc\.\d+/.exec(error.field)?.[0] ?? error.field;
@@ -286,6 +302,7 @@ function showFieldErrors(errors: readonly FieldError[]): void {
       node.hidden = false;
     }
   }
+  if (!focus) return;
   const first = errors.map((error) => controlsOf(error.field)[0]).find((control) => control !== undefined);
   first?.focus();
 }
