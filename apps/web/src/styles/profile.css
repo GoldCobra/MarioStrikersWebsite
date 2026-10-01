@@ -129,6 +129,17 @@
   color: #d7d8de;
 }
 
+/* "Member of <club> [<tag>]" as one line of text, the club in the buttons' gold; without a club the
+   line stays, empty but one line tall. */
+.profile-club-line {
+  display: block;
+  min-height: calc(var(--reporter-line-height) * 1em);
+}
+
+.profile-club-line > .profile-club-name {
+  color: var(--color-gold);
+}
+
 .profile-meta-line > a {
   min-width: 0;
   color: #7ab6ff;
@@ -168,6 +179,7 @@
 .profile-panel-title {
   margin: 0 0 0.48rem;
   color: #d7d8de;
+  text-transform: uppercase;
 }
 
 .profile-muted {
@@ -180,6 +192,7 @@
   gap: 0.26rem;
 }
 
+/* The codes are written in the site's Reporter text font, like the club line. */
 .profile-code-row {
   min-height: 26px;
   display: flex;
@@ -188,6 +201,11 @@
   padding: 0.15rem 0.55rem;
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: var(--reporter-font-size-sm);
+  letter-spacing: var(--reporter-letter-spacing);
+  line-height: 1.25;
 }
 
 .profile-code-prefix {
@@ -708,6 +726,10 @@
 
 .profile-meta-actions {
   margin: 0.4rem 0 0;
+}
+
+.profile-meta-actions .profile-action-button {
+  text-transform: uppercase;
 }
 
 .profile-action-button:disabled {
