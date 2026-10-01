@@ -1,26 +1,13 @@
-// Discord login, the current account and the linked player profile.
+// Discord login and the current account. The login also creates the player profile of a member who has
+// none yet; the profile itself is served by modules/profile.
 
-import type { FastifyInstance, FastifyRequest } from "fastify";
+import type { FastifyInstance } from "fastify";
 import { HttpError } from "../../http/errors.ts";
-import { rateLimit, sendNoStore, type RouteContext } from "../../http/route-context.ts";
-import type { PlayerProfile } from "../players/mappers.ts";
-import { NotGuildMemberError } from "./discord-oauth.ts";
-import { SessionManager, type DiscordUser } from "./session.ts";
+import { isCrossSiteRequest, rateLimit, sendNoStore, type RouteContext } from "../../http/route-context.ts";
+import { identityFromLogin } from "../profile/mappers.ts";
+import { NotGuildMemberError, type DiscordLogin } from "./discord-oauth.ts";
+import { SessionManager } from "./session.ts";
 import { DEFAULT_RETURN_TO, appendQuery, normalizeReturnTo, serializeCookie } from "./tokens.ts";
-
-/**
- * A logout from another site's page is refused; same-site requests and non-browser clients pass.
- * Host names are compared without ports, because nginx forwards the host without its port.
- */
-function isCrossSiteRequest(request: FastifyRequest): boolean {
-  const origin = request.headers.origin;
-  if (!origin) return false;
-  try {
-    return new URL(origin).hostname !== new URL(`http://${request.headers.host ?? ""}`).hostname;
-  } catch {
-    return true;
-  }
-}
 
 export function registerAuthRoutes(app: FastifyInstance, { config, data }: RouteContext): void {
   const limit = rateLimit(config, 30);
@@ -48,9 +35,9 @@ export function registerAuthRoutes(app: FastifyInstance, { config, data }: Route
       if (!code) {
         return reply.header("Set-Cookie", clearState).redirect(appendQuery(verified.returnTo, { auth: "failed" }), 302);
       }
-      let user: DiscordUser;
+      let login: DiscordLogin;
       try {
-        user = await oauth.completeLogin(code);
+        login = await oauth.completeLogin(code);
       } catch (err) {
         const notMember = err instanceof NotGuildMemberError;
         if (!notMember) request.log.error({ err }, "[auth] Discord login failed");
@@ -58,14 +45,24 @@ export function registerAuthRoutes(app: FastifyInstance, { config, data }: Route
           .header("Set-Cookie", clearState)
           .redirect(appendQuery(verified.returnTo, { auth: notMember ? "not_member" : "failed" }), 302);
       }
+      // A member without a player profile gets one now. A failure (database unavailable) does not stop
+      // the login: the profile page asks for the profile again.
+      try {
+        await data.profiles.ensurePlayer(identityFromLogin(login));
+      } catch (err) {
+        request.log.error({ err }, "[auth] Player profile could not be created at login");
+      }
       return reply
-        .header("Set-Cookie", [clearState, manager.createSessionCookie(user)])
+        .header("Set-Cookie", [clearState, manager.createSessionCookie(login.user, login.nick)])
         .redirect(appendQuery(verified.returnTo, { auth: "success" }), 302);
     },
   );
 
   app.get("/api/auth/me", async (request, reply) =>
-    sendNoStore(reply, SessionManager.toAuthMeResponse(sessions?.readSession(request.headers.cookie) ?? null)),
+    sendNoStore(reply, {
+      ...SessionManager.toAuthMeResponse(sessions?.readSession(request.headers.cookie) ?? null),
+      login_available: data.login !== null,
+    }),
   );
 
   app.post("/api/auth/logout", limit, async (request, reply) => {
@@ -79,29 +76,5 @@ export function registerAuthRoutes(app: FastifyInstance, { config, data }: Route
         secure: config.session.cookieSecure,
       });
     return sendNoStore(reply.header("Set-Cookie", clear), { ok: true });
-  });
-
-  app.get("/api/profile/me", rateLimit(config, 60), async (request, reply) => {
-    const session = sessions?.readSession(request.headers.cookie) ?? null;
-    if (!session) return sendNoStore(reply, { error: "Authentication required.", code: "AUTH_REQUIRED" }, 401);
-    const me = SessionManager.toAuthMeResponse(session);
-    const account = me.authenticated ? me.user : null;
-    let profile: PlayerProfile | null;
-    try {
-      profile = await data.getPlayerProfileByDiscordId(session.discord_user_id);
-    } catch (error) {
-      if (error instanceof HttpError && error.code === "PLAYER_PROFILE_CONFLICT") {
-        return sendNoStore(reply, { error: error.message, code: error.code, account }, 409);
-      }
-      throw error;
-    }
-    if (!profile) {
-      return sendNoStore(
-        reply,
-        { error: "No linked player profile.", code: "PLAYER_PROFILE_NOT_LINKED", account },
-        404,
-      );
-    }
-    return sendNoStore(reply, { account, profile });
   });
 }

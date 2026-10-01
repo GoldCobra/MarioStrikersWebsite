@@ -151,7 +151,7 @@ test("all public API families return populated fixture contracts", async () => {
 });
 
 test("sample login and logout use local callbacks and isolated signed cookies", async () => {
-  assert.deepEqual(await json("/api/auth/me"), { authenticated: false });
+  assert.deepEqual(await json("/api/auth/me"), { authenticated: false, login_available: true });
   assert.equal((await fetch(`${base}/api/profile/me`)).status, 401);
   const start = await fetch(`${base}/api/auth/discord/start?returnTo=%2Fprofile`, { redirect: "manual" });
   assert.equal(start.status, 302);

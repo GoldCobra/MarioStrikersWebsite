@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { loadConfig } from "../../config.ts";
-import { DISCORD_TEST_ENV, DISCORD_TEST_USER, createFakeDiscordFetch } from "../../test-support/fake-discord.ts";
+import {
+  DISCORD_TEST_ENV,
+  DISCORD_TEST_NICK,
+  DISCORD_TEST_USER,
+  createFakeDiscordFetch,
+} from "../../test-support/fake-discord.ts";
 import { NotGuildMemberError, createDiscordOAuthClient } from "./discord-oauth.ts";
 
 const discord = loadConfig(DISCORD_TEST_ENV).discord;
@@ -15,14 +20,30 @@ test("authorize URL asks for identify and guild membership with the signed state
   assert.equal(url.searchParams.get("state"), "state-token");
 });
 
-test("completeLogin exchanges the code and returns server members", async () => {
+test("completeLogin exchanges the code and returns server members with their nickname", async () => {
   const fake = createFakeDiscordFetch();
-  assert.deepEqual(await createDiscordOAuthClient(discord, fake.fetch).completeLogin("abc"), DISCORD_TEST_USER);
+  assert.deepEqual(await createDiscordOAuthClient(discord, fake.fetch).completeLogin("abc"), {
+    user: DISCORD_TEST_USER,
+    nick: DISCORD_TEST_NICK,
+  });
   assert.deepEqual(fake.requests.sort(), [
     "GET /api/users/@me",
     "GET /api/users/@me/guilds/987654321/member",
     "POST /api/oauth2/token",
   ]);
+});
+
+test("completeLogin reports no nickname for members without one", async () => {
+  const fake = createFakeDiscordFetch();
+  const withoutNick = ((input: string | URL | Request, init?: RequestInit) =>
+    fake.fetch(input, init).then(async (response) => {
+      if (!String(input instanceof Request ? input.url : input).endsWith("/member")) return response;
+      const member = (await response.json()) as Record<string, unknown>;
+      return new Response(JSON.stringify({ ...member, nick: null }), { status: 200 });
+    })) as typeof fetch;
+  const login = await createDiscordOAuthClient(discord, withoutNick).completeLogin("abc");
+  assert.equal(login.nick, "");
+  assert.equal(login.user.id, DISCORD_TEST_USER.id);
 });
 
 test("completeLogin rejects non-members and failed exchanges", async () => {

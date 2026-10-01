@@ -27,7 +27,19 @@
             <img class="nav-top-icon" src="/assets/nav-buttons/default/nav-partners.webp" width="733" height="198" alt="Partners" data-fallback-src="./assets/nav-buttons/default/nav-partners.png"/>
           </a>
         </nav>
-        <div id="global-account" class="global-account" data-auth-state="logged-out"/>
+        <div id="global-account" class="global-account" data-auth-state="logged-out">
+          <a class="global-account-button global-account-login" href="/api/auth/discord/start?returnTo=%2Fprofile" aria-label="Login with Discord">
+            <span class="global-account-icon" aria-hidden="true">
+              <svg class="global-account-login-glyph" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+                <circle cx="8" cy="5" r="3" fill="currentColor"/>
+                <path d="M2.5 14.5c0-3.2 2.4-5.4 5.5-5.4s5.5 2.2 5.5 5.4z" fill="currentColor"/>
+              </svg>
+            </span>
+            <span class="global-account-name" aria-hidden="true">
+              #text "Login"
+            </span>
+          </a>
+        </div>
       </header>
     </div>
     #text "\n    "

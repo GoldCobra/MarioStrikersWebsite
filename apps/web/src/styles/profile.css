@@ -56,7 +56,9 @@
   border: 2px solid var(--color-amber);
   background: var(--color-maroon);
   color: var(--color-gold);
+  font: inherit;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .profile-action-button:hover,

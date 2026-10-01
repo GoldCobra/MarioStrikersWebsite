@@ -2,35 +2,47 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { FastifyInstance } from "fastify";
 import type { Config } from "../../config.ts";
-import { HttpError } from "../../http/errors.ts";
 import { cookiePair, createTestApp, setCookies, tamper } from "../../test-support/app.ts";
-import { DISCORD_TEST_ENV, DISCORD_TEST_USER, createFakeDiscordFetch } from "../../test-support/fake-discord.ts";
-import type { PlayerProfile } from "../players/mappers.ts";
+import {
+  DISCORD_TEST_ENV,
+  DISCORD_TEST_NICK,
+  DISCORD_TEST_USER,
+  createFakeDiscordFetch,
+} from "../../test-support/fake-discord.ts";
+import type { DiscordIdentity } from "../profile/mappers.ts";
+import type { ProfileService } from "../profile/service.ts";
 import { createDiscordOAuthClient } from "./discord-oauth.ts";
 import { OAUTH_STATE_COOKIE, SessionManager } from "./session.ts";
 
 interface LoginApp {
   app: FastifyInstance;
   sessions: SessionManager;
+  ensured: DiscordIdentity[];
 }
 
 async function createLoginApp({
   member = true,
-  profile,
-}: { member?: boolean; profile?: (discordId: string) => Promise<PlayerProfile | null> } = {}): Promise<LoginApp> {
+  ensure = () => Promise.resolve({ playerId: 42, created: true }),
+}: { member?: boolean; ensure?: ProfileService["ensurePlayer"] } = {}): Promise<LoginApp> {
   let sessions: SessionManager | undefined;
+  const ensured: DiscordIdentity[] = [];
   const { app } = await createTestApp({
     env: DISCORD_TEST_ENV,
     data: (config: Config) => {
       sessions = new SessionManager({ ...config.session, now: Date.now });
       return {
         login: { sessions, oauth: createDiscordOAuthClient(config.discord, createFakeDiscordFetch({ member }).fetch) },
-        ...(profile ? { getPlayerProfileByDiscordId: profile } : {}),
+        profiles: {
+          ensurePlayer: (identity) => {
+            ensured.push(identity);
+            return ensure(identity);
+          },
+        },
       };
     },
   });
   assert.ok(sessions);
-  return { app, sessions };
+  return { app, sessions, ensured };
 }
 
 /** Starts a login and returns the state from Discord's authorize URL with this browser's nonce cookie. */
@@ -55,7 +67,7 @@ function callback(app: FastifyInstance, state: string, cookie?: string) {
 }
 
 test("Discord callback creates a signed session for server members", async () => {
-  const { app } = await createLoginApp();
+  const { app, sessions } = await createLoginApp();
   const { state, stateCookie } = await startLogin(app, "/players#top");
   const response = await callback(app, state, stateCookie);
   assert.equal(response.statusCode, 302);
@@ -63,18 +75,38 @@ test("Discord callback creates a signed session for server members", async () =>
   const [clearState, session] = setCookies(response.headers["set-cookie"]);
   assert.match(clearState ?? "", new RegExp(`^${OAUTH_STATE_COOKIE}=; Max-Age=0`));
   assert.match(session ?? "", /^msc_session=/);
+  assert.equal(sessions.readSession(cookiePair(session ?? ""))?.guild_nick, DISCORD_TEST_NICK);
 
   const me = (await app.inject({ url: "/api/auth/me", headers: { cookie: cookiePair(session ?? "") } })).json<{
     authenticated: boolean;
     user: { id: string; global_name: string };
+    login_available: boolean;
   }>();
   assert.equal(me.authenticated, true);
   assert.equal(me.user.id, DISCORD_TEST_USER.id);
   assert.equal(me.user.global_name, "GoldCobra");
+  assert.equal(me.login_available, true);
 });
 
-test("Discord callback rejects non-members without a session", async () => {
-  const { app } = await createLoginApp({ member: false });
+test("Discord callback creates the member's player profile, once per login", async () => {
+  const { app, ensured } = await createLoginApp();
+  const { state, stateCookie } = await startLogin(app);
+  await callback(app, state, stateCookie);
+  assert.deepEqual(ensured, [
+    { id: DISCORD_TEST_USER.id, username: "goldcobra", globalName: "GoldCobra", nick: DISCORD_TEST_NICK },
+  ]);
+});
+
+test("a failed profile creation does not stop the login", async () => {
+  const { app } = await createLoginApp({ ensure: () => Promise.reject(new Error("database unavailable")) });
+  const { state, stateCookie } = await startLogin(app);
+  const response = await callback(app, state, stateCookie);
+  assert.equal(response.headers.location, "/profile?auth=success");
+  assert.ok(setCookies(response.headers["set-cookie"]).some((value) => value.startsWith("msc_session=")));
+});
+
+test("Discord callback rejects non-members without a session or a profile", async () => {
+  const { app, ensured } = await createLoginApp({ member: false });
   const { state, stateCookie } = await startLogin(app);
   const response = await callback(app, state, stateCookie);
   assert.equal(response.headers.location, "/profile?auth=not_member");
@@ -82,10 +114,11 @@ test("Discord callback rejects non-members without a session", async () => {
     setCookies(response.headers["set-cookie"]).map((cookie) => cookie.split("=")[0]),
     [OAUTH_STATE_COOKIE],
   );
+  assert.deepEqual(ensured, []);
 });
 
 test("invalid, forged and cross-browser OAuth states are rejected", async () => {
-  const { app } = await createLoginApp();
+  const { app, ensured } = await createLoginApp();
   const { state, stateCookie } = await startLogin(app);
   const other = await startLogin(app);
   for (const [attempt, cookie] of [
@@ -100,6 +133,7 @@ test("invalid, forged and cross-browser OAuth states are rejected", async () => 
     assert.equal(response.headers.location, "/profile?auth=failed");
     assert.ok(!setCookies(response.headers["set-cookie"]).some((value) => value.startsWith("msc_session=")));
   }
+  assert.deepEqual(ensured, []);
 });
 
 test("login reports unavailable when Discord is not configured", async () => {
@@ -108,7 +142,7 @@ test("login reports unavailable when Discord is not configured", async () => {
   assert.equal(start.headers.location, "/players?auth=unavailable");
   const callbackResponse = await app.inject("/api/auth/discord/callback?code=abc&state=x");
   assert.equal(callbackResponse.headers.location, "/profile?auth=unavailable");
-  assert.deepEqual((await app.inject("/api/auth/me")).json(), { authenticated: false });
+  assert.deepEqual((await app.inject("/api/auth/me")).json(), { authenticated: false, login_available: false });
 });
 
 test("tampered and malformed session cookies are treated as logged out", async () => {
@@ -118,7 +152,7 @@ test("tampered and malformed session cookies are treated as logged out", async (
     const response = await app.inject({ url: "/api/auth/me", headers: { cookie: value } });
     assert.equal(response.statusCode, 200);
     assert.equal(response.headers["cache-control"], "no-store");
-    assert.deepEqual(response.json(), { authenticated: false });
+    assert.deepEqual(response.json(), { authenticated: false, login_available: true });
   }
   // Undecodable cookies of other applications do not invalidate a valid session.
   for (const value of [`unrelated=%; ${cookie}`, `${cookie}; unrelated=%E0%A4%A`]) {
@@ -151,60 +185,4 @@ test("logout clears the session and refuses cross-site requests", async () => {
     assert.deepEqual(response.json(), { ok: true });
     assert.match(String(response.headers["set-cookie"]), /^msc_session=; Max-Age=0; Expires=Thu, 01 Jan 1970/);
   }
-});
-
-test("/api/profile/me requires a session", async () => {
-  const { app } = await createLoginApp();
-  const response = await app.inject("/api/profile/me");
-  assert.equal(response.statusCode, 401);
-  assert.equal(response.headers["cache-control"], "no-store");
-  assert.deepEqual(response.json(), { error: "Authentication required.", code: "AUTH_REQUIRED" });
-});
-
-test("/api/profile/me returns a no-profile state for linked Discord accounts without a player", async () => {
-  const { app, sessions } = await createLoginApp({ profile: () => Promise.resolve(null) });
-  const cookie = cookiePair(sessions.createSessionCookie({ id: "123", username: "tester" }));
-  const response = await app.inject({ url: "/api/profile/me", headers: { cookie } });
-  assert.equal(response.statusCode, 404);
-  const body = response.json<{ code: string; account: { id: string } }>();
-  assert.equal(body.code, "PLAYER_PROFILE_NOT_LINKED");
-  assert.equal(body.account.id, "123");
-});
-
-test("/api/profile/me returns profile data for the authenticated Discord account", async () => {
-  const profile = {
-    player: { id: 42, name: "GoldCobra", country: "us", club_id: 8, club_name: "Chaos Edge", club_tag: "CE" },
-    friend_codes: {},
-    accolades: [],
-    ratings: {},
-  } as unknown as PlayerProfile;
-  const { app, sessions } = await createLoginApp({
-    profile: (discordId) => {
-      assert.equal(discordId, "123");
-      return Promise.resolve(profile);
-    },
-  });
-  const cookie = cookiePair(sessions.createSessionCookie({ id: "123", username: "tester" }));
-  const response = await app.inject({ url: "/api/profile/me", headers: { cookie } });
-  assert.equal(response.statusCode, 200);
-  assert.equal(response.headers["cache-control"], "no-store");
-  const body = response.json<{ account: { id: string }; profile: { player: { name: string; club_id: number } } }>();
-  assert.equal(body.account.id, "123");
-  assert.equal(body.profile.player.name, "GoldCobra");
-  assert.equal(body.profile.player.club_id, 8);
-});
-
-test("/api/profile/me fails closed on duplicate Discord profile links", async () => {
-  const { app, sessions } = await createLoginApp({
-    profile: () =>
-      Promise.reject(
-        new HttpError(409, "PLAYER_PROFILE_CONFLICT", "Multiple player profiles match this Discord account."),
-      ),
-  });
-  const cookie = cookiePair(sessions.createSessionCookie({ id: "123", username: "tester" }));
-  const response = await app.inject({ url: "/api/profile/me", headers: { cookie } });
-  assert.equal(response.statusCode, 409);
-  const body = response.json<{ code: string; account: { id: string } }>();
-  assert.equal(body.code, "PLAYER_PROFILE_CONFLICT");
-  assert.equal(body.account.id, "123");
 });

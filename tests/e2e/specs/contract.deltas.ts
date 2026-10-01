@@ -13,6 +13,11 @@ const OAUTH_STATE_COOKIE = "msc_oauth_state=";
 // P7: the season and Wiimmfi responses use snake_case keys like every other response (they had camelCase).
 const SNAKE_CASED_PATHS = new Set(["/api/competitive-season/current", "/api/wiimmfi/msc-charged"]);
 
+// Discord login: /api/auth/me also says whether the login is available (login_available), and a member
+// without a player profile gets one at login instead of the "not linked" answer of /api/profile/me.
+const AUTH_ME_PATH = "/api/auth/me";
+const UNLINKED_SAMPLE_ACCOUNT = "900000000000000002";
+
 function snakeCaseKeys(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(snakeCaseKeys);
   if (!value || typeof value !== "object") return value;
@@ -44,6 +49,11 @@ export function normalizeContract(record: ContractRecord): ContractRecord {
     const { code, ...rest } = body as Record<string, unknown>;
     if (typeof code === "string" && NEW_ERROR_CODES.has(code)) body = rest;
   }
+  if (record.path === AUTH_ME_PATH && body && typeof body === "object") {
+    const rest = { ...(body as Record<string, unknown>) };
+    delete rest.login_available;
+    body = rest;
+  }
 
   const setCookie = record.setCookie
     ?.split("\n")
@@ -63,6 +73,10 @@ export function normalizeContract(record: ContractRecord): ContractRecord {
       (record.status === 302 && record.location === "/profile?auth=failed"));
   if (rejectedState) {
     normalized = { ...normalized, status: 0, headers: {}, location: undefined, body: "rejected OAuth state" };
+  }
+  const account = (record.body as { account?: { id?: unknown } } | null)?.account;
+  if (record.path === "/api/profile/me" && account?.id === UNLINKED_SAMPLE_ACCOUNT) {
+    normalized = { ...normalized, status: 0, headers: {}, body: "unlinked sample account (gets a profile at login)" };
   }
   return normalized;
 }

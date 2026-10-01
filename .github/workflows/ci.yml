@@ -97,7 +97,7 @@ jobs:
                   assert response.status == 200, route
           with urllib.request.urlopen(base + '/api/auth/me', timeout=5) as response:
               assert response.headers['X-Data-Source'] == 'fixtures'
-              assert json.load(response) == {'authenticated': False}
+              assert json.load(response) == {'authenticated': False, 'login_available': True}
           with urllib.request.urlopen(base + '/assets/logo/logo.webp', timeout=5) as response:
               assert 'no-store' in response.headers['Cache-Control']
           print('Docker development serves synthetic data, clean routes, templates and uncached assets.')

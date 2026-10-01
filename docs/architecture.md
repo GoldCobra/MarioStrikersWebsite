@@ -125,9 +125,18 @@ responses also use `no-store`: season data remains cached internally, but
 `server_now_utc` is generated at response time for countdown synchronization.
 
 Discord OAuth requests `identify` and `guilds.members.read`, checks membership
-in the configured guild, and sets a signed HTTP-only session cookie.
-`/api/profile/me` maps the Discord user to `Player.DiscordID`. A bot token
-enables Discord name lookups and event discovery.
+in the configured guild, and sets a signed HTTP-only session cookie (with the
+member's server nickname at login). The access token is used only during the
+callback and never stored. `/api/auth/me` says whether login is available
+(`login_available`); the header shows its Login button only then.
+`/api/profile/me` maps the Discord user to `Player.DiscordID` (unique). A member
+without a player profile gets one at login (`modules/profile/`): one batch locks
+the Discord id's key range, inserts `dbo.Player` named after the member's server
+display name (nickname, else global name, else username, without a leading
+`[TAG]` of the bot's nickname sync) and logs it in `dbo.CommandLog`, so parallel
+logins and the bots' own inserts never create a second row. When that fails, the
+login still succeeds and the profile page asks again (`POST /api/profile/me`).
+A bot token enables Discord name lookups and event discovery.
 
 Responses use snake_case keys throughout; code inside the API uses camelCase
 and converts at the route (the season route shows how, since its cached
@@ -164,8 +173,9 @@ Unexpected errors are logged with the request id and answered as a generic
 `500 INTERNAL`; database and configuration details never reach clients.
 Uncached routes (profiles, login) are rate-limited per client address in
 production. The Discord login binds its OAuth state to the browser with a
-short-lived `msc_oauth_state` cookie, logout refuses cross-site requests, and
-club logos are only downloaded from public HTTPS addresses.
+short-lived `msc_oauth_state` cookie, logout and profile changes refuse
+cross-site requests, and club logos are only downloaded from public HTTPS
+addresses.
 
 ## API reference
 
@@ -185,9 +195,10 @@ All endpoints below use the same origin as the website.
 | GET | `/api/wiimmfi/msc-charged` | Online MSC players |
 | GET | `/api/auth/discord/start?returnTo=/profile` | Begin login |
 | GET | `/api/auth/discord/callback` | Complete login |
-| GET | `/api/auth/me` | Current login state |
+| GET | `/api/auth/me` | Current login state and whether login is available |
 | POST | `/api/auth/logout` | Clear session |
 | GET | `/api/profile/me` | Authenticated user's linked profile |
+| POST | `/api/profile/me` | Create the authenticated user's profile when the login could not |
 | GET | `/api/health` | Service health |
 
 Leaderboard games are `msbl`, `msc` and `sms`; modes are `elo1v1`,

@@ -24,6 +24,8 @@ import { CommunityEventsCache, fetchCommunityEvents, type EventsPayload } from "
 import { getLeaderboardRows, type LeaderboardQuery, type LeaderboardRow } from "./modules/leaderboards/service.ts";
 import type { PlayerProfile } from "./modules/players/mappers.ts";
 import { getPlayerProfile, getPlayerProfileByDiscordId, getPlayersList } from "./modules/players/service.ts";
+import { createSqlProfileStore } from "./modules/profile/repository.ts";
+import { createProfileService, type ProfileService } from "./modules/profile/service.ts";
 import { getCompetitiveSeasonStatus } from "./modules/season/service.ts";
 import { WiimmfiService, fetchWiimmfiPlayers, type WiimmfiPlayer } from "./modules/wiimmfi/service.ts";
 
@@ -39,6 +41,8 @@ export interface DataSource {
   getPlayerProfile(playerId: number): Promise<PlayerProfile | null>;
   /** null when no player is linked to this Discord account. */
   getPlayerProfileByDiscordId(discordId: string): Promise<PlayerProfile | null>;
+  /** The signed-in player's own profile: created at the first login. */
+  readonly profiles: ProfileService;
   /** null when no club has this (validated) id. */
   getClubProfile(clubId: number): Promise<ClubProfile | null>;
   getClubLogoFile(clubIdRaw: unknown): Promise<LogoFile | null>;
@@ -130,6 +134,7 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     getLeaderboardRows: (query) => getLeaderboardRows(database, query, limits),
     getPlayerProfile: (playerId) => getPlayerProfile(database, log, playerId),
     getPlayerProfileByDiscordId: (discordId) => getPlayerProfileByDiscordId(database, log, discordId),
+    profiles: createProfileService(createSqlProfileStore(database)),
     getClubProfile: (clubId) => getMsblClubProfile(database, { logoCache: logos, users }, clubId),
     getClubLogoFile: (clubIdRaw) => logos.getLogoFile(clubIdRaw),
     getCommunityEvents: () => events.get(),

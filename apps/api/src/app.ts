@@ -14,6 +14,7 @@ import { registerEventRoutes } from "./modules/events/routes.ts";
 import { registerHealthRoutes } from "./modules/health/routes.ts";
 import { registerLeaderboardRoutes } from "./modules/leaderboards/routes.ts";
 import { registerPlayerRoutes } from "./modules/players/routes.ts";
+import { registerProfileRoutes } from "./modules/profile/routes.ts";
 import { registerSeasonRoutes } from "./modules/season/routes.ts";
 import { registerWiimmfiRoutes } from "./modules/wiimmfi/routes.ts";
 
@@ -68,6 +69,7 @@ export async function buildApp({ config, data, loggerInstance }: AppOptions): Pr
   const context: RouteContext = { config, data };
   registerHealthRoutes(app, context);
   registerAuthRoutes(app, context);
+  registerProfileRoutes(app, context);
   registerLeaderboardRoutes(app, context);
   registerPlayerRoutes(app, context);
   registerSeasonRoutes(app, context);
