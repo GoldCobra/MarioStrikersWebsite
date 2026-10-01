@@ -24,6 +24,17 @@ async function violations(page: Page): Promise<string[]> {
   return page.evaluate(() => (window as unknown as { __cspViolations: string[] }).__cspViolations);
 }
 
+/** A paste into the focused field, as the browser delivers it. */
+async function paste(page: Page, text: string): Promise<void> {
+  await page.evaluate((value) => {
+    const data = new DataTransfer();
+    data.setData("text", value);
+    document.activeElement?.dispatchEvent(
+      new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }),
+    );
+  }, text);
+}
+
 async function open(page: Page, path: string): Promise<void> {
   await watchViolations(page);
   await preparePage(page);
@@ -68,6 +79,52 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await login(page, "linked");
     await page.goto("/profile");
     await settle(page, { eagerImages: true });
+  },
+  // The editor's rules in the browser: digits only, whole codes pasted with their leading zeros, one save
+  // per Apply. The save is answered here, so the shared fixture stack keeps its data.
+  "profile editor": async (page) => {
+    await watchViolations(page);
+    await preparePage(page);
+    await login(page, "linked");
+    await page.goto("/profile");
+    await settle(page, { eagerImages: true });
+    await page.locator("[data-profile-action='edit']").click();
+    await page.locator(".profile-edit-form:not([hidden])").waitFor();
+    const fields = page.locator("[data-code='switch'] .profile-edit-digits");
+    const status = page.locator("[data-slot='save-status']");
+
+    await fields.first().fill("");
+    await fields.first().pressSequentially("1a2b");
+    await expect(fields.first()).toHaveValue("12");
+
+    await fields.nth(1).focus();
+    await paste(page, "SW-0001-0020-0300");
+    for (const [index, value] of ["0001", "0020", "0300"].entries()) await expect(fields.nth(index)).toHaveValue(value);
+    await paste(page, "12ab");
+    await expect(status).toHaveText("Paste a 12-digit friend code (digits only).");
+    await expect(fields.first()).toHaveValue("0001");
+
+    let saves = 0;
+    await page.route("**/api/profile/me/editable", async (route) => {
+      if (route.request().method() !== "PUT") {
+        await route.continue();
+        return;
+      }
+      saves += 1;
+      const sent = route.request().postDataJSON() as { switch_code?: string };
+      expect(sent.switch_code).toBe("0001-0020-0300");
+      const current = (await (await route.fetch({ method: "GET" })).json()) as Record<string, unknown>;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ...current, switch_code: sent.switch_code, changed: true }),
+      });
+    });
+    await page.locator("[data-action='apply']").dblclick();
+    await expect(status).toHaveText("Changes saved.");
+    expect(saves).toBe(1);
+    await expect(page.locator("#profile-edit-popup")).toBeVisible();
+    await settle(page);
   },
   "gear builder panes, character menu and card picture": async (page) => {
     await open(page, "/msbl-gear-builder");

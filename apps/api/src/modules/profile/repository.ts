@@ -1,13 +1,27 @@
 // SQL of the signed-in player's own profile. A new profile is created in one batch that first locks the
 // Discord id's key range (UPDLOCK, HOLDLOCK), so parallel logins wait for each other and reuse the row
 // the first one created; the unique index IX_Player_DiscordID stays the last guard against a second row.
-// Like the bot's procedures, every creation is written to dbo.CommandLog.
+// A save reads the profile under update locks, decides and writes in one transaction. Like the bot's
+// procedures, every creation and every save is written to dbo.CommandLog.
 
-import type { Database } from "../../db/database.ts";
+import { normalizeText } from "@ms/shared/text";
+import type { Database, Queryable } from "../../db/database.ts";
 import { mssql } from "../../db/database.ts";
-import type { EnsuredPlayer, ProfileStore } from "./service.ts";
+import { isUniqueViolation } from "../../lib/sql-errors.ts";
+import type {
+  ChangePlan,
+  CodeKey,
+  CountryOption,
+  EnsuredPlayer,
+  ProfileStore,
+  StoredFriendCode,
+  StoredProfile,
+} from "./service.ts";
 
 type Row = Record<string, unknown>;
+
+/** dbo.Enumeration rarely changes; the countries are read once an hour. */
+const COUNTRIES_TTL_MS = 60 * 60 * 1000;
 
 export function buildEnsurePlayerQuery(): string {
   return [
@@ -29,11 +43,92 @@ export function buildEnsurePlayerQuery(): string {
   ].join(" ");
 }
 
-/** SQL Server's duplicate key errors: unique index (2601) and unique constraint (2627). */
-export function isUniqueViolation(error: unknown): boolean {
-  const record = (error ?? {}) as { number?: unknown; originalError?: { info?: { number?: unknown } } };
-  const number = record.number ?? record.originalError?.info?.number;
-  return number === 2601 || number === 2627;
+export const FIND_PLAYER_QUERY =
+  "SELECT TOP 1 ID AS player_id FROM dbo.Player WHERE DiscordID = @discordId ORDER BY ID;";
+
+export const COUNTRIES_QUERY = "SELECT Code, Description FROM dbo.Enumeration WHERE Type = N'country';";
+
+/** The profile; with `lock`, under update locks held until the transaction ends. */
+export function buildProfileQuery(lock: boolean): string {
+  const hint = lock ? " WITH (UPDLOCK, HOLDLOCK)" : "";
+  return [
+    lock ? "SET XACT_ABORT ON;" : "",
+    `SELECT p.Country AS country FROM dbo.Player p${hint} WHERE p.ID = @playerId;`,
+    "SELECT fc.GameType, fc.Region, fc.LineSeq, fc.Label, fc.Code",
+    `FROM dbo.FriendCodes fc${hint}`,
+    "WHERE fc.Player = @playerId",
+    "ORDER BY fc.GameType, fc.Region, fc.LineSeq;",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+/** Which of these codes other players have in the same game (parameters @takenGame<n>, @takenCode<n>). */
+export function buildTakenCodesQuery(count: number): string {
+  if (!count) return "";
+  const pairs = Array.from(
+    { length: count },
+    (_, index) => `(fc.GameType = @takenGame${index} AND fc.Code = @takenCode${index})`,
+  );
+  return `SELECT fc.GameType, fc.Code FROM dbo.FriendCodes fc WHERE fc.Player <> @playerId AND (${pairs.join(" OR ")});`;
+}
+
+/** The writes of a plan as one batch; adds its parameters to `request`. */
+export function buildApplyQuery(plan: ChangePlan, request: mssql.Request): string {
+  const statements: string[] = ["SET XACT_ABORT ON;"];
+  const key = (prefix: string, index: number, row: StoredFriendCode): string => {
+    request.input(`${prefix}Game${index}`, mssql.Int, row.gameType);
+    request.input(`${prefix}Region${index}`, mssql.NVarChar(4), row.region);
+    request.input(`${prefix}Seq${index}`, mssql.Int, row.lineSeq);
+    return `Player = @playerId AND GameType = @${prefix}Game${index} AND Region = @${prefix}Region${index} AND LineSeq = @${prefix}Seq${index}`;
+  };
+  if (plan.country !== null) {
+    request.input("country", mssql.NVarChar(25), plan.country);
+    statements.push("UPDATE dbo.Player SET Country = @country WHERE ID = @playerId;");
+  }
+  plan.deletes.forEach((row, index) => {
+    statements.push(`DELETE FROM dbo.FriendCodes WHERE ${key("del", index, row)};`);
+  });
+  plan.updates.forEach((update, index) => {
+    request.input(`updLabel${index}`, mssql.NVarChar(50), update.label);
+    request.input(`updNewSeq${index}`, mssql.Int, update.lineSeq);
+    statements.push(
+      `UPDATE dbo.FriendCodes SET Label = @updLabel${index}, LineSeq = @updNewSeq${index} WHERE ${key("upd", index, update.row)};`,
+    );
+  });
+  plan.inserts.forEach((row, index) => {
+    request.input(`insGame${index}`, mssql.Int, row.gameType);
+    request.input(`insSeq${index}`, mssql.Int, row.lineSeq);
+    request.input(`insRegion${index}`, mssql.NVarChar(4), row.region);
+    request.input(`insLabel${index}`, mssql.NVarChar(50), row.label);
+    request.input(`insCode${index}`, mssql.NVarChar(17), row.code);
+    statements.push(
+      "INSERT INTO dbo.FriendCodes (Player, GameType, LineSeq, Region, Label, Code)" +
+        ` VALUES (@playerId, @insGame${index}, @insSeq${index}, @insRegion${index}, @insLabel${index}, @insCode${index});`,
+    );
+  });
+  statements.push("INSERT INTO dbo.CommandLog (Command, Parameters) VALUES (N'WebsiteProfileSave', @audit);");
+  return statements.join(" ");
+}
+
+function recordsets(result: { recordsets?: unknown }): Row[][] {
+  return Array.isArray(result.recordsets) ? (result.recordsets as Row[][]) : [];
+}
+
+function toStoredProfile(playerId: number, sets: Row[][]): StoredProfile {
+  const player = sets[0]?.[0];
+  if (!player) throw new Error(`Player ${playerId} not found.`);
+  return {
+    playerId,
+    country: typeof player.country === "string" ? player.country.trim() : "",
+    codes: (sets[1] ?? []).map((row) => ({
+      gameType: Number(row.GameType),
+      region: normalizeText(row.Region),
+      lineSeq: Number(row.LineSeq),
+      label: normalizeText(row.Label),
+      code: normalizeText(row.Code),
+    })),
+  };
 }
 
 async function ensurePlayerOnce(
@@ -58,7 +153,26 @@ async function ensurePlayerOnce(
   return { playerId, created: rows[0]?.created === true || Number(rows[0]?.created) === 1 };
 }
 
-export function createSqlProfileStore(database: Pick<Database, "withPool">): ProfileStore {
+async function queryProfile(queryable: Queryable, playerId: number, lock: boolean, taken: readonly CodeKey[] = []) {
+  const request = queryable.request();
+  request.multiple = true;
+  request.input("playerId", mssql.Int, playerId);
+  taken.forEach((key, index) => {
+    request.input(`takenGame${index}`, mssql.Int, key.gameType);
+    request.input(`takenCode${index}`, mssql.NVarChar(17), key.code);
+  });
+  const sets = recordsets(await request.query(buildProfileQuery(lock) + " " + buildTakenCodesQuery(taken.length)));
+  return {
+    profile: toStoredProfile(playerId, sets),
+    taken: taken.length
+      ? (sets[2] ?? []).map((row) => ({ gameType: Number(row.GameType), code: normalizeText(row.Code) }))
+      : [],
+  };
+}
+
+export function createSqlProfileStore(database: Pick<Database, "withPool" | "withTransaction">): ProfileStore {
+  let countries: { readonly at: number; readonly rows: Promise<readonly CountryOption[]> } | null = null;
+
   return {
     async ensurePlayer(discordId, name) {
       try {
@@ -68,6 +182,55 @@ export function createSqlProfileStore(database: Pick<Database, "withPool">): Pro
         if (!isUniqueViolation(error)) throw error;
         return ensurePlayerOnce(database, discordId, name);
       }
+    },
+
+    async findPlayerId(discordId) {
+      const rows = await database.withPool(async (pool) => {
+        const request = pool.request();
+        request.input("discordId", mssql.NVarChar(25), discordId);
+        const result = await request.query(FIND_PLAYER_QUERY);
+        return Array.isArray(result.recordset) ? (result.recordset as Row[]) : [];
+      });
+      const playerId = Number(rows[0]?.player_id);
+      return Number.isInteger(playerId) && playerId > 0 ? playerId : null;
+    },
+
+    async readProfile(playerId) {
+      return database.withPool(async (pool) => (await queryProfile(pool, playerId, false)).profile);
+    },
+
+    countries() {
+      if (countries && Date.now() - countries.at < COUNTRIES_TTL_MS) return countries.rows;
+      const rows = database
+        .withPool(async (pool) => {
+          const result = await pool.request().query(COUNTRIES_QUERY);
+          return (Array.isArray(result.recordset) ? (result.recordset as Row[]) : [])
+            .map((row) => ({
+              code: normalizeText(row.Code).toLowerCase(),
+              name: normalizeText(row.Description),
+            }))
+            .filter((row) => row.code !== "");
+        })
+        .catch((error: unknown) => {
+          countries = null;
+          throw error;
+        });
+      countries = { at: Date.now(), rows };
+      return rows;
+    },
+
+    async saveProfile(playerId, codes, decide) {
+      return database.withTransaction(async (transaction) => {
+        const { profile, taken } = await queryProfile(transaction, playerId, true, codes);
+        const decision = decide(profile, taken);
+        if (decision.plan) {
+          const request = transaction.request();
+          request.input("playerId", mssql.Int, playerId);
+          request.input("audit", mssql.NVarChar(4000), decision.audit);
+          await request.query(buildApplyQuery(decision.plan, request));
+        }
+        return decision.result;
+      });
     },
   };
 }

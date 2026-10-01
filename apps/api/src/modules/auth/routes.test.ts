@@ -37,6 +37,8 @@ async function createLoginApp({
             ensured.push(identity);
             return ensure(identity);
           },
+          getEditableProfile: () => Promise.resolve(null),
+          saveEditableProfile: () => Promise.reject(new Error("unused")),
         },
       };
     },

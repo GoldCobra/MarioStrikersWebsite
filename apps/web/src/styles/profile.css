@@ -703,3 +703,301 @@
   mask-size: contain;
 }
 
+
+/* --- Profile editor (features/profile/profile-edit-popup.html) ------ */
+
+.profile-meta-actions {
+  margin: 0.4rem 0 0;
+}
+
+.profile-action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#profile-edit-popup .profile-edit-card {
+  width: min(640px, calc(100vw - 1.8rem));
+}
+
+.profile-edit-close {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.profile-edit-body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.profile-edit-loading {
+  margin: 0;
+  padding: 1rem;
+  color: #fff;
+}
+
+.profile-edit-loading.is-error {
+  color: #ff9f9f;
+}
+
+.profile-edit-form {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem 1rem;
+  color: #fff;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: var(--reporter-font-size-xs);
+  line-height: 1.4;
+  letter-spacing: var(--reporter-letter-spacing);
+}
+
+.profile-edit-section {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.6rem 0.7rem;
+  border-left: 3px solid transparent;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* After a merge: saved meanwhile elsewhere (amber), or changed here and elsewhere (red). */
+.profile-edit-section[data-conflict="updated"] {
+  border-left-color: var(--color-amber);
+}
+
+.profile-edit-section[data-conflict="contested"] {
+  border-left-color: #ff6b6b;
+}
+
+.profile-edit-section-title {
+  margin: 0;
+  color: var(--color-gold);
+  font-family: "ITC Grizzly", sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.profile-edit-names {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.profile-edit-name {
+  min-width: 0;
+}
+
+.profile-edit-name dt {
+  color: #d7d8de;
+}
+
+.profile-edit-name dd {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-edit-note,
+.profile-edit-error,
+.profile-edit-status {
+  margin: 0;
+}
+
+.profile-edit-note {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.profile-edit-note.is-error,
+.profile-edit-error,
+.profile-edit-status.is-error {
+  color: #ff9f9f;
+}
+
+.profile-edit-country {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Fields keep 16px text, so phones do not zoom into them. */
+.profile-edit-select,
+.profile-edit-digits {
+  min-height: 36px;
+  border: 1px solid var(--color-amber);
+  border-radius: 0;
+  background: rgba(20, 0, 0, 0.86);
+  color: #fff;
+  font: inherit;
+  font-size: 16px;
+  letter-spacing: normal;
+}
+
+.profile-edit-select {
+  min-width: 0;
+  padding: 0 0.42rem;
+}
+
+#profile-edit-country {
+  width: min(320px, 100%);
+}
+
+/* One height, the width follows the flag's own proportions. */
+.profile-edit-flag {
+  width: auto;
+  height: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.65);
+}
+
+.profile-edit-code {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.profile-edit-code-prefix,
+.profile-edit-code-dash {
+  flex: 0 0 auto;
+  color: #d7d8de;
+}
+
+.profile-edit-digits {
+  flex: 1 1 0;
+  width: 5em;
+  min-width: 3.4em;
+  max-width: 5em;
+  padding: 0 0.3rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+
+.profile-edit-select:focus-visible,
+.profile-edit-digits:focus-visible,
+.profile-edit-clear:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+.profile-edit-select[aria-invalid="true"],
+.profile-edit-digits[aria-invalid="true"] {
+  border-color: #ff6b6b;
+}
+
+.profile-edit-clear {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #d7d8de;
+  font: inherit;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.profile-edit-clear:hover {
+  color: var(--color-gold);
+}
+
+.profile-edit-msc-list {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+  list-style: none;
+}
+
+.profile-edit-msc-row {
+  display: grid;
+  grid-template-areas:
+    "number region platform"
+    ". code code"
+    ". error error";
+  /* The region's label ("NTSC-U (R4QE01)") is the longest. */
+  grid-template-columns: 1.6em minmax(0, 1.65fr) minmax(0, 1fr);
+  gap: 0.35rem 0.4rem;
+  align-items: center;
+}
+
+.profile-edit-msc-number {
+  grid-area: number;
+  color: #d7d8de;
+}
+
+.profile-edit-msc-row [data-field="region"] {
+  grid-area: region;
+}
+
+.profile-edit-msc-row [data-field="platform"] {
+  grid-area: platform;
+}
+
+.profile-edit-msc-row .profile-edit-code {
+  grid-area: code;
+}
+
+.profile-edit-msc-row .profile-edit-error {
+  grid-area: error;
+}
+
+.profile-edit-summary {
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  background: rgba(120, 0, 0, 0.6);
+}
+
+.profile-edit-summary a {
+  color: var(--color-gold);
+}
+
+.profile-edit-confirm {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--color-amber);
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.profile-edit-confirm-text {
+  margin: 0;
+}
+
+/* Status, the discard question and the buttons stay in view while the form scrolls. */
+.profile-edit-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: grid;
+  gap: 0.5rem;
+  margin: 0 -1rem -1rem;
+  padding: 0.6rem 1rem 1rem;
+  border-top: 1px solid rgba(199, 118, 3, 0.45);
+  background: rgba(16, 8, 8, 0.96);
+}
+
+.profile-edit-confirm-actions,
+.profile-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.profile-edit-actions {
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.profile-edit-status {
+  flex: 1 1 12rem;
+  color: #d7d8de;
+}
+
+.profile-edit-status.is-success {
+  color: var(--color-amber);
+}

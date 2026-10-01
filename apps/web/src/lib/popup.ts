@@ -1,6 +1,7 @@
 // A dialog mounted from its HTML template on first use (the feature's *-popup.html, bundled with its code):
 // named slots (data-slot) and lists (data-list) to fill, a status line for loading and errors, close
-// buttons, Escape, and focus kept inside while it is open. The player and the club popup are built on it.
+// buttons, Escape, and focus kept inside while it is open. The player and the club popup and the profile
+// editor are built on it.
 
 export interface PopupOptions {
   /** The popup's markup: one root element, hidden until opened. */
@@ -9,6 +10,8 @@ export interface PopupOptions {
   readonly openClass: string;
   /** The close button that gets focus when the popup opens. */
   readonly closeButtonSelector: string;
+  /** Asked before a close button, the backdrop or Escape closes the popup; false keeps it open. */
+  readonly beforeClose?: () => boolean;
 }
 
 function mapByAttribute(root: HTMLElement, attribute: string): Record<string, HTMLElement | undefined> {
@@ -62,7 +65,7 @@ export class TemplatePopup {
       event.preventDefault();
       event.stopPropagation();
       event.stopImmediatePropagation();
-      this.close();
+      this.requestClose();
     };
     for (const node of Array.from(root.querySelectorAll("[data-action='popup-close']"))) {
       node.addEventListener("click", requestClose);
@@ -94,6 +97,12 @@ export class TemplatePopup {
     this.isOpen = true;
     document.body.classList.add(this.options.openClass);
     this.root.querySelector<HTMLElement>(this.options.closeButtonSelector)?.focus({ preventScroll: true });
+  }
+
+  /** Closes unless the popup's beforeClose keeps it open. */
+  requestClose(): void {
+    if (this.options.beforeClose && !this.options.beforeClose()) return;
+    this.close();
   }
 
   close(): void {
@@ -135,7 +144,7 @@ export class TemplatePopup {
       if (event.key === "Escape" && (this.isOpen || this.activeRequest)) {
         event.preventDefault();
         event.stopPropagation();
-        this.close();
+        this.requestClose();
         return;
       }
       if (event.key !== "Tab" || !this.isOpen || !this.root) return;

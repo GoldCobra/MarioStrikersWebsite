@@ -13,8 +13,18 @@ import type { ClubListItem, ClubProfile, RosterRow } from "../modules/clubs/mapp
 import type { EventsPayload } from "../modules/events/service.ts";
 import { assertGameAndMode, parseLimit, parseOffset, type GameCode } from "../modules/leaderboards/params.ts";
 import type { LeaderboardRow } from "../modules/leaderboards/service.ts";
+import { normalizeCountryCode } from "@ms/shared/countries";
+import { toText } from "@ms/shared/text";
+import { UNKNOWN_MEMBER, type GuildMemberLookup } from "../integrations/discord/members.ts";
 import type { PlayerListItem, PlayerProfile, RatingBlock, SeasonRewardLevelDto } from "../modules/players/mappers.ts";
-import { createProfileService, type ProfileStore } from "../modules/profile/service.ts";
+import {
+  applyPlan,
+  createProfileService,
+  type CountryOption,
+  type ProfileStore,
+  type StoredFriendCode,
+  type StoredProfile,
+} from "../modules/profile/service.ts";
 
 const DAY_MS = 86_400_000;
 const ASSET_VERSION = "20260608-rank-crop-v1";
@@ -148,6 +158,37 @@ const COUNTRIES = [
   "at",
   "no",
 ];
+// The profile editor's countries, shaped like dbo.Enumeration's (home nations and the rows that are no
+// country included, so the editor's filtering shows).
+const COUNTRY_OPTIONS: readonly CountryOption[] = [
+  ["at", "Austria"],
+  ["au", "Australia"],
+  ["be", "Belgium"],
+  ["br", "Brazil"],
+  ["ca", "Canada"],
+  ["ch", "Switzerland"],
+  ["de", "Germany"],
+  ["england", "England"],
+  ["es", "Spain"],
+  ["eu", "Europe is NOT a Country"],
+  ["fr", "France"],
+  ["gb", "United Kingdom"],
+  ["it", "Italy"],
+  ["jp", "Japan"],
+  ["kr", "South Korea"],
+  ["mx", "Mexico"],
+  ["nl", "Netherlands"],
+  ["no", "Norway"],
+  ["northern_ireland", "Northern Ireland"],
+  ["pt", "Portugal"],
+  ["rocci", "Arg Matey!"],
+  ["scotland", "Scotland"],
+  ["se", "Sweden"],
+  ["us", "United States"],
+  ["ve", "Venezuela"],
+  ["wales", "Wales"],
+  ["xk", "Kosovo"],
+].map(([code = "", name = ""]) => ({ code, name }));
 const CLUB_DEFS: readonly (readonly [string, string, string, string, readonly string[]])[] = [
   ["Sample Strikers", "SMP", "Open to Anyone", "EU", ["EU"]],
   ["Demo United", "DEMO", "Invite Only", "NA", ["NA"]],
@@ -473,7 +514,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
       player: {
         id: player.player_id,
         name: player.name,
-        country: player.country,
+        country: editedCountry(player.player_id, player.country),
         club_id: player.club_id,
         club_name: player.club_name,
         club_tag: player.club_tag,
@@ -481,14 +522,17 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
         activity: player.activity,
         is_active: player.is_active,
       },
-      friend_codes: {
-        switch: index % 5 === 4 ? [] : [fakeFriendCode(createRandom(player.player_id), "SW")],
-        msc: index % 3 === 2 ? [] : [`PAL (Wii): ${fakeFriendCode(createRandom(player.player_id + 100))}`],
-        msc_pal: index % 3 === 2 ? [] : [`PAL (Wii): ${fakeFriendCode(createRandom(player.player_id + 100))}`],
-        msc_ntsc: index % 4 === 1 ? [`NTSC (Dolphin): ${fakeFriendCode(createRandom(player.player_id + 200))}`] : [],
-        msc_kor: [],
-        msc_jpn: [],
-      },
+      friend_codes: editedProfiles.has(player.player_id)
+        ? editedFriendCodes(player.player_id)
+        : {
+            switch: index % 5 === 4 ? [] : [fakeFriendCode(createRandom(player.player_id), "SW")],
+            msc: index % 3 === 2 ? [] : [`PAL (Wii): ${fakeFriendCode(createRandom(player.player_id + 100))}`],
+            msc_pal: index % 3 === 2 ? [] : [`PAL (Wii): ${fakeFriendCode(createRandom(player.player_id + 100))}`],
+            msc_ntsc:
+              index % 4 === 1 ? [`NTSC (Dolphin): ${fakeFriendCode(createRandom(player.player_id + 200))}`] : [],
+            msc_kor: [],
+            msc_jpn: [],
+          },
       season_awards: seasonAwards,
       accolades,
       ratings: {
@@ -565,8 +609,55 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
     },
   };
 
-  // Profiles created by simulated logins, by Discord id; they live as long as the process.
+  // Profiles created by simulated logins, by Discord id, and profiles changed in the editor, by player id;
+  // both live as long as the process.
   const createdPlayers = new Map<string, { readonly player_id: number; readonly name: string }>();
+  const editedProfiles = new Map<number, StoredProfile>();
+
+  /** A player's country and friend codes as dbo.Player and dbo.FriendCodes would hold them. */
+  function storedProfileOf(playerId: number): StoredProfile | null {
+    const edited = editedProfiles.get(playerId);
+    if (edited) return edited;
+    if ([...createdPlayers.values()].some((created) => created.player_id === playerId)) {
+      return { playerId, country: "", codes: [] };
+    }
+    const player = findPlayer(playerId);
+    if (!player) return null;
+    const index = playerId - 1;
+    const codes: StoredFriendCode[] = [];
+    const code = (seed: number): string => fakeFriendCode(createRandom(seed));
+    if (index % 5 !== 4) codes.push({ gameType: 3, region: "SW", lineSeq: 1, label: "", code: code(playerId) });
+    if (index % 3 !== 2)
+      codes.push({ gameType: 1, region: "PAL", lineSeq: 1, label: "Wii", code: code(playerId + 100) });
+    if (index % 4 === 1)
+      codes.push({ gameType: 1, region: "NTSC", lineSeq: 1, label: "Dolphin", code: code(playerId + 200) });
+    return { playerId, country: player.country, codes };
+  }
+
+  function editedCountry(playerId: number, country: string): string {
+    const edited = editedProfiles.get(playerId);
+    return edited ? normalizeCountryCode(edited.country) : country;
+  }
+
+  // Edited friend codes as the profile shows them (players/mappers.ts loads database code, which fixture
+  // mode never does, so the lines are built here like the fixture's own).
+  function editedFriendCodes(playerId: number): PlayerProfile["friend_codes"] {
+    const codes = [...(editedProfiles.get(playerId)?.codes ?? [])].sort((a, b) => a.lineSeq - b.lineSeq);
+    const regionLabels: Readonly<Record<string, string>> = { PAL: "PAL", NTSC: "NTSC-U", JPN: "NTSC-J", KOR: "NTSC-K" };
+    const msc = (region: string): string[] =>
+      codes
+        .filter((row) => row.gameType === 1 && row.region === region)
+        .map((row) => `${regionLabels[region] ?? region}${row.label ? ` (${row.label})` : ""}: ${row.code}`);
+    return {
+      switch: codes.filter((row) => row.gameType === 3).map((row) => `SW-${row.code}`),
+      msc: [...msc("PAL"), ...msc("NTSC"), ...msc("JPN"), ...msc("KOR")],
+      msc_pal: msc("PAL"),
+      msc_ntsc: msc("NTSC"),
+      msc_kor: msc("KOR"),
+      msc_jpn: msc("JPN"),
+    };
+  }
+
   const profileStore: ProfileStore = {
     ensurePlayer: (discordId, name) => {
       if (discordId === linkedUser.id) return Promise.resolve({ playerId: 1, created: false });
@@ -576,6 +667,41 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
       createdPlayers.set(discordId, player);
       return Promise.resolve({ playerId: player.player_id, created: true });
     },
+    findPlayerId: (discordId) =>
+      Promise.resolve(discordId === linkedUser.id ? 1 : (createdPlayers.get(discordId)?.player_id ?? null)),
+    readProfile: (playerId) => {
+      const profile = storedProfileOf(playerId);
+      return profile ? Promise.resolve(profile) : Promise.reject(new Error(`Player ${playerId} not found.`));
+    },
+    countries: () => Promise.resolve(COUNTRY_OPTIONS),
+    saveProfile: (playerId, codes, decide) => {
+      const current = storedProfileOf(playerId);
+      if (!current) return Promise.reject(new Error(`Player ${playerId} not found.`));
+      const others = [
+        ...players.map((player) => player.player_id),
+        ...[...createdPlayers.values()].map((p) => p.player_id),
+      ]
+        .filter((id) => id !== playerId)
+        .flatMap((id) => storedProfileOf(id)?.codes ?? []);
+      const taken = codes.filter((key) => others.some((row) => row.gameType === key.gameType && row.code === key.code));
+      const decision = decide(current, taken);
+      if (decision.plan) editedProfiles.set(playerId, applyPlan(current, decision.plan));
+      return Promise.resolve(decision.result);
+    },
+  };
+
+  // The simulated members' names on the server.
+  const members: GuildMemberLookup = {
+    getMember: (discordId) => {
+      const login = Object.values(loginsByCode).find((entry) => entry.user.id === discordId);
+      if (!login) return Promise.resolve(UNKNOWN_MEMBER);
+      return Promise.resolve({
+        membership: "member",
+        nick: login.nick,
+        username: toText(login.user.username),
+        globalName: toText(login.user.global_name),
+      });
+    },
   };
 
   // A profile created at login: nothing in it yet but the name.
@@ -584,7 +710,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
       player: {
         id: player.player_id,
         name: player.name,
-        country: "",
+        country: editedCountry(player.player_id, ""),
         club_id: null,
         club_name: "",
         club_tag: "",
@@ -592,7 +718,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
         activity: generatedAt,
         is_active: true,
       },
-      friend_codes: { switch: [], msc: [], msc_pal: [], msc_ntsc: [], msc_kor: [], msc_jpn: [] },
+      friend_codes: editedFriendCodes(player.player_id),
       season_awards: [],
       accolades: [],
       ratings: { sms: {}, msc: {}, msbl: {}, sms2v2: {}, msc2v2: {}, msbl2v2: {} },
@@ -679,7 +805,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
       const created = createdPlayers.get(discordId);
       return Promise.resolve(created ? buildNewPlayerProfile(created) : null);
     },
-    profiles: createProfileService(profileStore),
+    profiles: createProfileService({ store: profileStore, members }),
     getClubProfile: (clubId) => {
       const club = findClub(clubId);
       return Promise.resolve(club ? buildClubProfile(club) : null);

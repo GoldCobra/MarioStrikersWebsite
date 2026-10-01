@@ -1,4 +1,5 @@
 // A stand-in for the MSSQL pool: records every query with its parameters and answers from a handler.
+// Transactions are recorded as "begin", "commit" and "rollback" in their own list.
 
 import type { Database, Pool } from "../db/database.ts";
 
@@ -14,12 +15,14 @@ export type QueryHandler = (
   inputs: Readonly<Record<string, unknown>>,
 ) => { recordset?: unknown[]; recordsets?: unknown[][] } | Promise<{ recordset?: unknown[]; recordsets?: unknown[][] }>;
 
-export interface FakeDatabase extends Pick<Database, "withPool" | "measurePool"> {
+export interface FakeDatabase extends Pick<Database, "withPool" | "measurePool" | "withTransaction"> {
   readonly queries: RecordedQuery[];
+  readonly transactions: string[];
 }
 
 export function createFakeDatabase(handler: QueryHandler): FakeDatabase {
   const queries: RecordedQuery[] = [];
+  const transactions: string[] = [];
   const pool = {
     request() {
       const inputs: Record<string, unknown> = {};
@@ -45,7 +48,19 @@ export function createFakeDatabase(handler: QueryHandler): FakeDatabase {
   } as unknown as Pool;
   return {
     queries,
+    transactions,
     withPool: (run) => run(pool),
     measurePool: (run) => run(pool, 0),
+    withTransaction: async (run) => {
+      transactions.push("begin");
+      try {
+        const result = await run(pool);
+        transactions.push("commit");
+        return result;
+      } catch (error) {
+        transactions.push("rollback");
+        throw error;
+      }
+    },
   };
 }

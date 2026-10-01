@@ -12,3 +12,4 @@ change a record's status instead of deleting it when it is replaced.
 | [0004](0004-comparison-checks.md) | Comparison checks against a reference commit |
 | [0005](0005-bundled-modules.md) | Browser code as bundled TypeScript modules |
 | [0006](0006-no-inline-code-and-csp.md) | No inline code; an enforced Content Security Policy |
+| [0007](0007-profile-writes-in-shared-database.md) | The profile editor writes to the bot's tables |
