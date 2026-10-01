@@ -82,15 +82,16 @@ function renderCard(card: ProfileCard, profile: PlayerProfile): void {
 }
 
 /**
- * The member's server nickname and global Discord name under the club line, each only when Discord has
- * one (without a nickname, the server shows the global name).
+ * The member's names under the club line: the name the server shows (nickname, else global name, else
+ * username; the API's server_name) and the Discord username (as the Striker Clubs list it). A name the
+ * API does not have leaves its line out.
  */
 function renderDiscordNames(card: ProfileCard, discord: EditableProfile["discord"]): void {
   const club = card.root.querySelector(".player-popup-content > .profile-club-line");
   if (!club) return;
   const lines = [
-    { label: "Server name", value: toText(discord.nick).trim() },
-    { label: "Discord name", value: toText(discord.global_name).trim() },
+    { label: "Server name", value: toText(discord.server_name).trim() },
+    { label: "Discord name", value: toText(discord.username).trim() },
   ].filter((line) => line.value);
   if (!lines.length) return;
   const list = document.createElement("dl");

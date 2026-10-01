@@ -106,9 +106,7 @@ test("errors are placed at their fields", () => {
   const checked = checkDraft(draft, SAVED, PROFILE.countries);
   assert.equal(checked.ok, false);
   assert.deepEqual(checked.errors.get("country"), ["Select a country from the list."]);
-  assert.deepEqual(checked.errors.get("switch"), [
-    "Enter all 12 digits (4 in each field) or leave all three fields empty.",
-  ]);
+  assert.deepEqual(checked.errors.get("switch"), ["Enter all 12 digits (4 in each field)."]);
   assert.deepEqual(checked.errors.get("msc:new:1"), ["Select the MSC region.", "Select the platform."]);
   // The older code saved without a platform may stay as it is.
   assert.equal(checked.errors.has("msc:saved:4444-5555-6666"), false);
@@ -129,9 +127,7 @@ test("a saved code changed or emptied needs its platform and all digits", () => 
   const checked = checkDraft(changed, SAVED, PROFILE.countries);
   assert.equal(checked.ok, false);
   assert.deepEqual(checked.errors.get("msc:saved:4444-5555-6666"), ["Select the platform."]);
-  assert.deepEqual(checked.errors.get("msc:saved:1111-2222-3333"), [
-    "Enter all 12 digits (4 in each field) or leave all three fields empty.",
-  ]);
+  assert.deepEqual(checked.errors.get("msc:saved:1111-2222-3333"), ["Enter all 12 digits (4 in each field)."]);
 });
 
 test("the same code twice and a fourth MSC code are refused", () => {

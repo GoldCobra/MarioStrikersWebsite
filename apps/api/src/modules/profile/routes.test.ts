@@ -248,7 +248,7 @@ test("invalid and taken codes are refused with the fields they concern", async (
     {
       field: "switch_code",
       code: "INCOMPLETE",
-      message: "Enter all 12 digits (4 in each field) or leave all three fields empty.",
+      message: "Enter all 12 digits (4 in each field).",
     },
   ]);
 

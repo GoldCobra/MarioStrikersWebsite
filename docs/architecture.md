@@ -156,7 +156,7 @@ marked unsaved, and SAVE sends the whole profile in one request, DISCARD (after 
 confirmation) drops them; leaving with unsaved changes warns. The country is a
 combobox with the local flags (`country-select.ts`, `dbo.Enumeration`'s list);
 messages are toasts at the bottom right (`profile-toasts.ts`, `aria-live`). The
-page also shows the member's server nickname and global Discord name. A save
+page also shows the member's server name (what the server shows) and Discord username. A save
 goes to the tables robotic_nightmare's `/profile` commands use, in their exact
 form ([ADR 0007](adr/0007-profile-writes-in-shared-database.md)): one
 transaction, refused with `409 PROFILE_CHANGED` when the profile changed since

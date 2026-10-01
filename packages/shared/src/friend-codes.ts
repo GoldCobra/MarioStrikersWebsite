@@ -107,7 +107,7 @@ export interface FieldError {
 
 export const FIELD_ERROR_MESSAGES: Readonly<Record<FieldErrorCode, string>> = {
   INVALID: "This value is not valid.",
-  INCOMPLETE: "Enter all 12 digits (4 in each field) or leave all three fields empty.",
+  INCOMPLETE: "Enter all 12 digits (4 in each field).",
   REGION_REQUIRED: "Select the MSC region.",
   PLATFORM_REQUIRED: "Select the platform.",
   DUPLICATE: "This friend code is entered twice.",

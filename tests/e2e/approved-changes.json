@@ -1,5 +1,10 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "df2f56003467b95c14b7b05c90d51f443f39646d",
-  "changes": []
+  "reference": "b1479c484a3ba010819f3fd7ea46fec118687f0f",
+  "changes": [
+    {
+      "screenshots": ["states/profile-*"],
+      "reason": "Owner feedback on #63: 'Discord name' is the Discord username (as in the Striker Clubs), 'Server name' the name the server shows (nickname, else global name, else username), and the incomplete-code message no longer says 'or leave all three fields empty'. Checked: only the 24 profile state screenshots differ; on the linked profile only the Discord name's value (one line), with the error also the message; the unlinked profile gains its Server name line and the 390px error state its shorter message, so the lines below move."
+    }
+  ]
 }
