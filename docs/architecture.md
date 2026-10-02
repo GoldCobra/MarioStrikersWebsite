@@ -189,7 +189,9 @@ held when the competitive ranks began. Unclear data awards nothing and is
 reported. The API runs the rules once a day (`TITLE_SYNC_INTERVAL_MS`; the last
 run is logged in `dbo.CommandLog`); `npm run ops:player-titles` creates the
 tables and adds missing titles of `catalog.ts`, `npm run ops:title-sync` awards
-on demand (a dry run without `-- --apply`). A new title of a known kind is one
+on demand (a dry run without `-- --apply`); `npm run ops:title-order` brought the
+category order and the ungrouped TOURNAMENT WINNER of 2026-10-02 into existing rows
+(backups `dbo.*_Backup_20261002`). A new title of a known kind is one
 row in `dbo.PlayerTitle` (or a line in `catalog.ts` plus `ops:player-titles`).
 
 Responses use snake_case keys throughout; code inside the API uses camelCase
