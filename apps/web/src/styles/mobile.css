@@ -327,7 +327,6 @@
   }
 
   .online-editor-profile-trigger,
-.online-editor-profile-option,
 .online-editor-popup-field > input,
 .online-editor-popup-field > textarea {
     min-height: 44px;
@@ -389,58 +388,60 @@
     overflow-wrap: anywhere;
   }
 
-  .popup-overlay {
+  /* The popup on phones. None of it reaches the Discord card (.player-popup.is-card), which looks the same in
+     any window (base.css); :where() keeps each rule's weight. */
+  .popup-overlay:where(:not(.is-card, .is-card *)) {
     padding: 0.45rem;
     padding-top: max(0.45rem, env(safe-area-inset-top));
     padding-bottom: max(0.45rem, env(safe-area-inset-bottom));
   }
 
-  .popup-card {
+  .popup-card:where(:not(.is-card, .is-card *)) {
     width: min(100%, calc(100vw - 0.9rem));
     max-height: calc(100dvh - 0.9rem);
   }
 
-  .popup-close {
+  .popup-close:where(:not(.is-card, .is-card *)) {
     top: 0.1rem;
     right: 0.1rem;
     min-width: 44px;
     min-height: 44px;
   }
 
-  .popup-header {
+  .popup-header:where(:not(.is-card, .is-card *)) {
     padding: 0.7rem 3.1rem 0.45rem 0.75rem;
   }
 
-  .popup-title {
+  .popup-title:where(:not(.is-card, .is-card *)) {
     max-width: 100%;
     font-size: clamp(1rem, 5.2vw, 1.25rem);
   }
 
-  .player-popup-body {
+  .player-popup-body:where(:not(.is-card, .is-card *)) {
     padding: 0 0.65rem 0.75rem;
   }
 
-  .player-popup-content {
+  .player-popup-content:where(:not(.is-card, .is-card *)) {
     max-height: calc(100dvh - 8.5rem);
     padding-right: 0.15rem;
     scrollbar-width: thin;
   }
 
-  .player-popup-ratings-grid {
+  .player-popup-ratings-grid:where(:not(.is-card, .is-card *)) {
     grid-template-columns: 1fr;
     gap: 0.4rem;
   }
 
-  .player-popup-rating-card {
+  .player-popup-rating-card:where(:not(.is-card, .is-card *)) {
     min-height: auto;
   }
 
-  .player-popup-code-row {
+  .player-popup-code-row:where(:not(.is-card, .is-card *)) {
     flex-wrap: wrap;
     gap: 0.25rem 0.45rem;
   }
 
-  .player-popup-code-value,
+  .player-popup-code-value:where(:not(.is-card, .is-card *)),
 .player-popup-results-link {
     white-space: normal;
     overflow-wrap: anywhere;

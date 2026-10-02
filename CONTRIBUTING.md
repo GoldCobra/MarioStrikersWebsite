@@ -97,6 +97,16 @@ Renaming or removing a page keeps its old URL working: add it to
   it would award with `npm run ops:title-sync --workspace=@ms/api` before
   writing it with `-- --apply` ([ADR 0008](docs/adr/0008-player-titles.md)).
 
+**Fields, dropdowns and player titles**
+
+- The look of a field (type, box height, heading gap) and of dropdown options are
+  the `--field-*` and `--dropdown-*` tokens in `apps/web/src/styles/base.css`; a
+  player title's type and looks are `.player-title` in `player-popup.css`. Change
+  them there, never per view ([ADR 0010](docs/adr/0010-shared-fields-dropdown-and-title-type.md)).
+- A new choice whose options need images or a look uses `createDropdown()`
+  (`apps/web/src/lib/dropdown.ts`); a plain text choice a native `<select>`. A
+  title is always built with `playerTitleHtml()` or `showPlayerTitle()`.
+
 **An intended visual change**
 
 - List the affected screenshots with the reason in

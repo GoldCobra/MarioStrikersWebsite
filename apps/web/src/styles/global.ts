@@ -12,6 +12,7 @@ import clubPopup from "./club-popup.css?raw";
 import clubs from "./clubs.css?raw";
 import competitiveRules from "./competitive-rules.css?raw";
 import contentBox from "./content-box.css?raw";
+import dropdown from "./dropdown.css?raw";
 import events from "./events.css?raw";
 import footer from "./footer.css?raw";
 import landing from "./landing.css?raw";
@@ -51,6 +52,7 @@ export const GLOBAL_CSS = [
   clubs,
   players,
   profile,
+  dropdown,
   tierLists,
   popups,
   playerPopup,

@@ -100,12 +100,50 @@ body {
   --rules-header-bottom-gap: -0.18rem;
   --reporter-font-stack: "Reporter", "ITC Grizzly", sans-serif;
   --reporter-font-weight: 700;
+  /* Fields: a heading over grey boxes of one line each (a friend code, the country, the player title), in
+     the player popup, on the Discord card and on the profile page, where pencils and the fields that edit
+     a value (dropdowns, digits) sit in the same box. One type, one box height, one gap under the heading,
+     so the views and both modes of a profile line agree (player-popup.css, profile.css, dropdown.css). */
+  --field-font-size: 15px;
+  --field-line-height: 1.22;
+  --field-heading-gap: 0.15rem;
+  --field-box-height: 26px;
+  --field-control-height: 24px;
+  --field-box-pad-y: calc((var(--field-box-height) - var(--field-control-height)) / 2);
+  --field-box-pad-x: 0.55rem;
+  /* Room on both sides of a box's text that cuts long values off, so a title's glow is not cut. */
+  --field-glow-room: 8px;
+  /* Dropdowns (lib/dropdown.ts, dropdown.css) and the menus like them (account menu, MSC profile menu):
+     options as tall as their text plus a little, at least a touch target's 24px. */
+  --dropdown-list-pad-y: 2px;
+  --dropdown-option-pad-y: 3px;
+  --dropdown-option-pad-x: 0.5rem;
+  --dropdown-option-min-height: 24px;
+  /* Player titles (player-popup.css .player-title): the same in the popup, on the Discord card, in the
+     profile's field and in its dropdown; the section titles' face and size, a little tighter. */
+  --player-title-font-size: var(--field-font-size);
+}
+
+/* Touch screens: dropdown options a finger hits reliably, still more of them in view than before. */
+@media (pointer: coarse) {
+  :root {
+    --dropdown-option-min-height: 28px;
+  }
+}
+
+/* The Reporter type. mobile.css makes it smaller on :root for narrow windows. The Discord card (/player-card,
+   .player-popup.is-card) declares the full values on itself instead: it is an image of one fixed size, made
+   in whatever window the bot opens, and must look the same in every one (so must the title's spacing,
+   derived here, as a var() takes the values of the element it is declared on). */
+:root,
+.player-popup.is-card {
   --reporter-font-size: 19px;
   --reporter-font-size-sm: 17px;
   --reporter-font-size-xs: 15px;
   --reporter-line-height: 1.5;
   --reporter-letter-spacing: 1pt;
   --reporter-text-drop-shadow: drop-shadow(-2px 2px 0 #000);
+  --player-title-letter-spacing: calc(var(--reporter-letter-spacing) * 0.45);
 }
 
 html {

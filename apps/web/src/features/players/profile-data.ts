@@ -132,8 +132,8 @@ export function isWorldChampion(accolades: readonly Accolade[] | null | undefine
 }
 
 /**
- * The classes of a title's look (the API's title_style, titles/availability.ts titleLook): its colour and
- * glow, set once in styles/player-popup.css for the popup, the Discord card and the profile's title list.
+ * The classes of a player title: its type and look (the API's title_style, titles/availability.ts titleLook:
+ * colour and glow), set once in styles/player-popup.css (.player-title) for every view that shows a title.
  */
 export function titleLookClass(style: unknown): string {
   const look =
@@ -141,5 +141,5 @@ export function titleLookClass(style: unknown): string {
       .trim()
       .toLowerCase()
       .replace(/[^a-z0-9-]/g, "") || "plain";
-  return `player-title-look is-look-${look}`;
+  return `player-title is-look-${look}`;
 }

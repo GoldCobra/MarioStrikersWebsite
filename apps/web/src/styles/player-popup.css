@@ -49,57 +49,60 @@ body.player-popup-open {
   transform: translateY(-3px);
 }
 
-/* The player title (player-profile-view.ts): the content's first line, before the friend codes, in the
-   face and size of the section titles ("Switch Friend Code") with a little less letter spacing; only the
-   title, in FULL CAPS and its look (below). Without a title it is hidden and takes no room. */
+/* The player title in the popup and on the Discord card (player-profile-view.ts): the content's first line,
+   before the friend codes; its type and look are .player-title's (below). Without a title it is hidden and
+   takes no room. */
 .player-popup-player-title {
   margin: 0.7rem 0 0;
-  font-family: var(--reporter-font-stack);
-  font-weight: var(--reporter-font-weight);
-  font-size: 15px;
-  line-height: 1.22;
-  letter-spacing: calc(var(--reporter-letter-spacing) * 0.6);
-  text-transform: uppercase;
   overflow-wrap: anywhere;
 }
 
-/* A title's look (titles/availability.ts titleLook, titleLookClass in profile-data.ts): its colour and
-   glow, the same in the popup, on the Discord card (/player-card, the popup's card mode) and in the
-   profile's title list. The glows follow the owner's reference images (2026-10-02): the text keeps its
-   colour, a 5-6px blur of a deeper shade at 80% fades out about 7px from the letters. Free, tournament
-   and legacy titles (and a category without a look) are plain grey, without a glow. */
-.player-title-look {
+/* A player title, wherever it is shown: the popup's and the Discord card's line (/player-card, the popup's
+   card mode), the profile's "Player Title" field and its dropdown's field and options (playerTitleHtml in
+   player-profile-view.ts). One definition of its type (--player-title-*: the section titles' face and size,
+   a little tighter), its FULL CAPS and its look, so every view shows a title alike.
+   The look (titles/availability.ts titleLook, titleLookClass in profile-data.ts) is its colour and glow.
+   The glows follow the owner's reference images (2026-10-02): the text keeps its colour, a 5-6px blur of a
+   deeper shade at 80% fades out about 7px from the letters. Free, tournament and legacy titles (and a
+   category without a look) are plain grey, without a glow. */
+.player-title {
   --player-title-glow: none;
   color: #b6b6b6;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: var(--player-title-font-size);
+  line-height: var(--field-line-height);
+  letter-spacing: var(--player-title-letter-spacing);
+  text-transform: uppercase;
 }
 
 /* The popup and the profile page strip every shadow inside them (rating-cards.css), so the glow is
    re-asserted with the same !important escape as the other glows there. */
-.player-title-look,
-:is(#player-profile-popup, #player-profile-page) .player-title-look {
+.player-title,
+:is(#player-profile-popup, #player-profile-page) .player-title {
   text-shadow: var(--player-title-glow) !important;
 }
 
-.player-title-look.is-look-season {
+.player-title.is-look-season {
   --player-title-glow: 0 0 6px rgba(255, 0, 0, 0.8);
   color: #ff0000;
 }
 
-.player-title-look.is-look-special {
+.player-title.is-look-special {
   --player-title-glow: 0 0 5px rgba(69, 168, 255, 0.8);
   color: #aef7ff;
 }
 
-.player-title-look.is-look-msl-world {
+.player-title.is-look-msl-world {
   --player-title-glow: 0 0 6px rgba(255, 148, 0, 0.8);
   color: #ffeb5c;
 }
 
-.player-title-look.is-look-msl {
+.player-title.is-look-msl {
   color: #e09e00;
 }
 
-.player-title-look.is-look-tournament-x5 {
+.player-title.is-look-tournament-x5 {
   color: #77c300;
 }
 
@@ -157,18 +160,19 @@ body.player-popup-open {
   color: #d7d8de;
 }
 
+/* A field: its heading, then its boxes (the profile page's open lines, .profile-edit-row, are the same box). */
 .player-popup-code-list {
-  margin-top: 0.42rem;
+  margin-top: var(--field-heading-gap);
   display: grid;
   gap: 0.26rem;
 }
 
 .player-popup-code-row {
-  min-height: 26px;
+  min-height: var(--field-box-height);
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.15rem 0.55rem;
+  padding: var(--field-box-pad-y) var(--field-box-pad-x);
   border-radius: 0;
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
@@ -184,9 +188,20 @@ body.player-popup-open {
   color: #f4f4f4;
 }
 
-.player-popup-code-value {
+/* One line of a field's text (a code and its prefix, the country, a title; the dropdown's field and options):
+   trimmed to its capitals (text-box), so the box's flex centring centres the letters themselves, whatever
+   the face's ascent and descent and with or without a flag, ball or pencil beside them (a browser without
+   text-box centres the line box, a pixel higher with this face). A long value ends in an ellipsis; it is
+   never cut at its top or bottom, and a glow keeps its room at both ends (--field-glow-room). */
+:is(.player-popup-code-prefix, .player-popup-code-value, .dropdown-text) {
+  text-box: trim-both cap alphabetic;
+}
+
+:is(.player-popup-code-value, .dropdown-text) {
   min-width: 0;
-  overflow: hidden;
+  margin-inline: calc(-1 * var(--field-glow-room));
+  padding-inline: var(--field-glow-room);
+  overflow-x: clip;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -301,8 +316,6 @@ body.player-popup-open {
 
 :is(#player-profile-popup, #player-profile-page) :is(
   .player-popup-status,
-  .player-popup-section-title,
-  .player-popup-code-row,
   .player-popup-results-link,
   .player-popup-accolade-item,
   .player-popup-season-award-item,
@@ -312,6 +325,12 @@ body.player-popup-open {
 ) {
   font-size: 15px;
   line-height: 1.22;
+  text-shadow: none;
+}
+
+:is(#player-profile-popup, #player-profile-page) :is(.player-popup-section-title, .player-popup-code-row) {
+  font-size: var(--field-font-size);
+  line-height: var(--field-line-height);
   text-shadow: none;
 }
 
@@ -356,6 +375,12 @@ body.player-popup-open {
   padding-inline: 0.7rem;
 }
 
+/* The name at the size the popup gives it in a wide window (popups.css), not one that follows the bot's
+   window: the card looks the same in any (base.css, mobile.css). */
+.player-popup.is-card .popup-title {
+  font-size: 1.24rem;
+}
+
 .player-popup.is-card .player-popup-body {
   padding: 0 0.65rem 0.6rem;
 }
@@ -381,10 +406,6 @@ body.player-popup-open {
 .player-popup.is-card .player-popup-section {
   flex: 1 1 auto;
   margin-top: 0.55rem;
-}
-
-.player-popup.is-card .player-popup-code-list {
-  margin-top: 0.3rem;
 }
 
 /* The ratings grids' row gap, now on the section. */

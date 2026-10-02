@@ -14,7 +14,7 @@ in the browser. In `apps/web/`:
 | `src/content/` | Page content as typed data, rendered at build time: competitive rules, tier lists, Gear Builder characters |
 | `src/entries/` | One module per page type, loaded through the layout's `scripts` slot; it starts that page's features |
 | `src/features/<name>/` | Browser code in TypeScript, one folder per feature, bundled by Vite with content-hashed file names |
-| `src/lib/` | Shared browser helpers: API fetch, countries, the template popup, image fallbacks, sitemap dates |
+| `src/lib/` | Shared browser helpers: API fetch, countries, the template popup, the dropdown, image fallbacks, sitemap dates |
 | `src/styles/` | The global stylesheet as partials named after the components they style; `global.ts` fixes their order |
 | `src/layouts/assets.ts` | The Gear Builder's stylesheets with their cache tags |
 | `public/` | Served as it is: `assets/` (including the Gear Builder snapshot) and the Gear Builder template in `pages/templates/` |
@@ -56,7 +56,25 @@ card (`showPlayerCard`, class `is-card`) that the Discord bot screenshots for
 `/profile show`; `<html data-player-card>` turns `ready` once it has loaded. The
 card is 550 px wide and as tall as its content, at most 350 px: Discord's largest
 message preview (`player-card.ts` rounds the height to a whole pixel and scales a
-taller card down). The bot takes it at its own size, so Discord shows it 1:1.
+taller card down). The bot takes it at its own size, so Discord shows it 1:1. It
+looks the same in any window the bot opens (550 px wide or more): it declares the
+Reporter type tokens on itself next to `:root`, the popup's phone rules in
+`mobile.css` exclude it, and its name has a fixed size
+([ADR 0010](adr/0010-shared-fields-dropdown-and-title-type.md)).
+
+**Fields and dropdowns.** A field is a heading over grey one-line boxes (friend
+codes, country, title) in the popup, on the card and on the profile page. Its
+type, box height (26 px; pencils and editing fields 24 px), padding and heading
+gap are the `--field-*` tokens in `styles/base.css`; the profile's open line is
+the same box as a closed one. A value is trimmed to its capitals (`text-box`), so
+it sits in the middle of its box whatever the face's metrics, ends in an ellipsis
+when too long and is never cut at its top or bottom. A choice whose options need
+images or a look uses the site's dropdown (`src/lib/dropdown.ts`,
+`styles/dropdown.css`): the open list lies in the top layer, so no container cuts
+it off and nothing covers it, opens above its field when there is more room
+there, is at most 280 px or the room it has tall and scrolls; field and options
+take the line's type, options the `--dropdown-*` spacing (also the account menu
+and the MSC profile menu). Plain text choices stay native `<select>`s.
 
 **No inline code.** Markup carries no inline scripts or event handlers, so the
 Content Security Policy can forbid them: an image states its fallback as
@@ -154,8 +172,8 @@ title, the country, the Switch code, an MSC code) without saving it, "+" adds an
 removes an open one; a click outside an open field closes it again, keeping what was entered (an empty
 code line added with "+" goes). Changes collect in a draft (`profile-edit-state.ts`), are
 marked unsaved, and SAVE sends the whole profile in one request, DISCARD (after a
-confirmation) drops them; leaving with unsaved changes warns. The country is a
-combobox with the local flags (`country-select.ts`, `dbo.Enumeration`'s list);
+confirmation) drops them; leaving with unsaved changes warns. The country is the
+site's dropdown with the local flags (`country-select.ts`, `dbo.Enumeration`'s list);
 messages are toasts at the bottom right (`profile-toasts.ts`, `aria-live`). The
 page also shows the member's Discord username, right of the club line. A save
 goes to the tables robotic_nightmare's `/profile` commands use, in their exact
@@ -175,8 +193,11 @@ A member picks one of their titles on the profile page; the player popup and the
 Discord card show it as the content's first line, before the friend codes (without
 a title the line takes no room), the profile page in its "Player Title" field. Each
 title is shown in FULL CAPS and in its group's look, colour and glow, in the popup,
-on the card and in the profile's title list alike: `titleLook` (`availability.ts`)
-assigns it, `styles/player-popup.css` holds the colours once. A title of one game
+on the card, in the profile's field and in its dropdown alike: `titleLook`
+(`availability.ts`) assigns it, `.player-title` in `styles/player-popup.css` holds
+its face, size, spacing (`--player-title-letter-spacing`), colours and glows once,
+and `playerTitleHtml()`/`showPlayerTitle()` (`player-profile-view.ts`) build every
+title with its ball. A title of one game
 (`dbo.PlayerTitle.GameCode`: MSL, tournament and season titles; `games.ts`) shows
 that game's ball before it everywhere (`titleBallHtml` in
 `features/players/player-profile-view.ts`, the accolades' 16px ball). Five

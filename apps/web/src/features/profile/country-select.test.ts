@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { countryOptions, NO_COUNTRY_LABEL, typeaheadIndex } from "./country-select.ts";
+import { typeaheadIndex } from "../../lib/dropdown.ts";
+import { countryOptions, NO_COUNTRY_LABEL } from "./country-select.ts";
 
 const OPTIONS = countryOptions([
   { code: "se", name: "Sweden" },
@@ -24,6 +25,17 @@ test("the list starts with no country, then every country once, alphabetically",
   );
   // The value sent is the list's own code.
   assert.equal(OPTIONS.find((option) => option.flag === "gb-nir")?.value, "northern_ireland");
+});
+
+test("each country shows its flag and name as a field's text, the same in the field and the list", () => {
+  assert.equal(
+    OPTIONS.find((option) => option.value === "de")?.html,
+    '<img class="profile-country-flag" src="../assets/flags/de.png" width="27" height="18" alt="" loading="lazy"><span class="dropdown-text">Germany</span>',
+  );
+  assert.equal(
+    OPTIONS[0]?.html,
+    `<span class="profile-country-flag is-empty" aria-hidden="true"></span><span class="dropdown-text">${NO_COUNTRY_LABEL}</span>`,
+  );
 });
 
 test("typing jumps to the first country with that start", () => {

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { hideDevNotice, login, preparePage, settle } from "../lib/browser.ts";
+import { advance, hideDevNotice, login, preparePage, settle } from "../lib/browser.ts";
 import { MSBL_SAVE, MSC_SAVE_PAL, buildOnlineFile } from "../lib/save-files.ts";
 import { DOM_WIDTH, PAGE_SLUGS, pagePath } from "../lib/site.ts";
 
@@ -129,8 +129,8 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await page.locator("[data-edit-open='title']").click();
     await page.locator("#profile-title-select").click();
     await page.locator("[role='option'][data-value='msl-2025-world-champion-msbl']").click();
-    await expect(page.locator("#profile-title-select .profile-country-name")).toHaveText("MSL 2025 WORLD CHAMPION");
-    await expect(page.locator("#profile-title-select .profile-country-name")).toHaveClass(/is-look-msl-world/);
+    await expect(page.locator("#profile-title-select .dropdown-text")).toHaveText("MSL 2025 WORLD CHAMPION");
+    await expect(page.locator("#profile-title-select .dropdown-text")).toHaveClass(/is-look-msl-world/);
     await expect(page.locator("#profile-title-select .player-title-ball")).toHaveAttribute("alt", "MSBL");
     await expect(page.locator("[data-field-row='title']")).toHaveClass(/is-unsaved/);
 
@@ -269,7 +269,7 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
         nodes.map((node) => [
           (node as HTMLElement).dataset.value ?? "",
           (node as HTMLElement).innerText,
-          /is-look-([a-z0-9-]+)/.exec(node.querySelector(".profile-country-name")?.className ?? "")?.[1] ?? "",
+          /is-look-([a-z0-9-]+)/.exec(node.querySelector(".dropdown-text")?.className ?? "")?.[1] ?? "",
           node.querySelector(".player-title-ball")?.getAttribute("alt") ?? "",
         ]),
       );
@@ -395,6 +395,239 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await expect(title).toHaveClass(/is-look-tournament-x5/);
     expect(await title.evaluate((node) => node.getBoundingClientRect().height)).toBeCloseTo(plainHeight, 1);
     await settle(page);
+  },
+  // Every dropdown (lib/dropdown.ts) opens over the page: no container cuts it off and nothing covers it. It
+  // opens above a field low in the window, is never taller than the room it has, scrolls, and every option
+  // can be reached and taken. Its field and options are in the type of the line's value, the options compact.
+  "dropdowns open over the page, fit the window and reach every option": async (page) => {
+    await page.setViewportSize({ width: 1280, height: 600 });
+    await watchViolations(page);
+    await preparePage(page);
+    await login(page, "linked");
+    await page.goto("/profile");
+    await settle(page, { eagerImages: true });
+    await hideDevNotice(page);
+    const field = page.locator("#profile-country-select");
+    const list = page.locator("#profile-country-select-listbox");
+    const options = list.locator("[role='option']");
+    const countryValue = page.locator("[data-field-row='country'] .player-popup-code-value");
+    const valueType = await countryValue.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return [style.fontFamily, style.fontSize, style.fontWeight, style.letterSpacing].join(" | ");
+    });
+    /** Where the open list is, and whether it is the topmost thing at its corners and in its middle. */
+    const placement = () =>
+      page.evaluate(() => {
+        const listNode = document.getElementById("profile-country-select-listbox") ?? document.body;
+        const listBox = listNode.getBoundingClientRect();
+        const fieldBox = document.getElementById("profile-country-select")?.getBoundingClientRect() ?? listBox;
+        const points = [
+          [listBox.left + 4, listBox.top + 4],
+          [listBox.right - 4, listBox.bottom - 4],
+          [listBox.left + listBox.width / 2, listBox.top + listBox.height / 2],
+        ];
+        return {
+          topLayer: listNode.matches(":popover-open"),
+          up: listBox.bottom <= fieldBox.top,
+          inWindow: listBox.top >= 0 && listBox.bottom <= window.innerHeight,
+          visible: points.every(([x, y]) => listNode.contains(document.elementFromPoint(x ?? 0, y ?? 0))),
+          scrolls: listNode.scrollHeight > listNode.clientHeight,
+          gap: listBox.top - fieldBox.bottom,
+        };
+      });
+
+    // A field low in the window: the list opens above it, inside the window, on top of everything.
+    await page.locator("[data-edit-open='country']").click();
+    await field.evaluate((node) => {
+      window.scrollBy(0, node.getBoundingClientRect().bottom - window.innerHeight + 40);
+    });
+    await field.click();
+    await expect(list).toBeVisible();
+    expect(await placement()).toMatchObject({ topLayer: true, up: true, inWindow: true, visible: true, scrolls: true });
+
+    // Type: the field's value and every option in the value's type; options as compact as the tokens say.
+    const typeOf = (selector: string) =>
+      page
+        .locator(selector)
+        .first()
+        .evaluate((node) => {
+          const style = getComputedStyle(node);
+          return [style.fontFamily, style.fontSize, style.fontWeight, style.letterSpacing].join(" | ");
+        });
+    expect(await typeOf("#profile-country-select .dropdown-text")).toBe(valueType);
+    expect(await typeOf("#profile-country-select-listbox .dropdown-text")).toBe(valueType);
+    const heights = await options.evaluateAll((nodes) => nodes.map((node) => node.getBoundingClientRect().height));
+    expect(Math.max(...heights)).toBeLessThanOrEqual(24.5);
+
+    // The page scrolls: the list goes with its field.
+    await page.evaluate(() => {
+      window.scrollBy(0, -120);
+    });
+    await advance(page, 500);
+    expect(await placement()).toMatchObject({ visible: true, inWindow: true });
+
+    // The last option, scrolled to, is taken by a click; the field stays open until a click outside it.
+    await list.evaluate((node) => {
+      node.scrollTop = node.scrollHeight;
+    });
+    const last = options.last();
+    const lastName = (await last.innerText()).trim();
+    await last.click();
+    await expect(list).toBeHidden();
+    await expect(field).toContainText(lastName);
+    await expect(page.locator("[data-edit-row][data-field-row='country']")).toHaveCount(1);
+    await page.mouse.click(4, 300);
+    await expect(page.locator("[data-edit-row]")).toHaveCount(0);
+    await expect(countryValue).toHaveText(lastName);
+
+    // A profile created at login is short: the list reaches out of the card, whole and on top.
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.context().clearCookies();
+    await login(page, "unlinked");
+    await page.goto("/profile");
+    await settle(page, { eagerImages: true });
+    await hideDevNotice(page);
+    await page.locator("[data-edit-open='country']").click();
+    await field.click();
+    const card = await page.locator("#player-profile-page .popup-card").boundingBox();
+    const listBox = await list.boundingBox();
+    expect(listBox && card && listBox.y + listBox.height > card.y + card.height).toBe(true);
+    expect(await placement()).toMatchObject({ topLayer: true, up: false, inWindow: true, visible: true });
+    await page.keyboard.press("Escape");
+    await expect(list).toBeHidden();
+    await settle(page);
+  },
+  // A player title looks the same wherever it is shown: the popup's line, the Discord card's line, the
+  // profile's field, and the title dropdown's field and options (one definition, .player-title).
+  "player titles look the same in every view": async (page) => {
+    const look = (selector: string) =>
+      page
+        .locator(selector)
+        .first()
+        .evaluate((node) => {
+          const style = getComputedStyle(node);
+          return {
+            font: [style.fontFamily, style.fontSize, style.fontWeight, style.lineHeight].join(" | "),
+            spacing: style.letterSpacing,
+            caps: style.textTransform,
+            color: style.color,
+            glow: style.textShadow,
+            text: (node as HTMLElement).innerText.trim(),
+            ball: node.querySelector(".player-title-ball")?.getAttribute("alt") ?? "",
+          };
+        });
+    // Set after preparePage: a later route is matched before its catch-all one.
+    await watchViolations(page);
+    await preparePage(page);
+    await page.route("**/api/players/2/profile", async (route) => {
+      const response = await route.fetch();
+      const body = (await response.json()) as { player?: Record<string, unknown> };
+      const player = {
+        ...body.player,
+        title: "MSL 2025 WORLD CHAMPION",
+        title_style: "msl-world",
+        title_game_code: "MSBL",
+      };
+      await route.fulfill({ response, json: { ...body, player } });
+    });
+    await page.goto("/players");
+    await settle(page, { eagerImages: true });
+    await page.locator('.players-name-trigger[data-player-id="2"]').click();
+    await settle(page, { eagerImages: true });
+    const popup = await look("#player-profile-popup .player-popup-player-title");
+    expect(popup).toMatchObject({ spacing: "0.6px", caps: "uppercase", text: "MSL 2025 WORLD CHAMPION", ball: "MSBL" });
+    expect(popup.glow).not.toBe("none");
+
+    await page.goto("/player-card?player=2");
+    await page.locator("html[data-player-card='ready']").waitFor();
+    expect(await look(".player-popup-player-title")).toEqual(popup);
+
+    await login(page, "linked");
+    await page.goto("/profile");
+    await settle(page, { eagerImages: true });
+    await hideDevNotice(page);
+    await page.locator("[data-edit-open='title']").click();
+    await page.locator("#profile-title-select").click();
+    const option = "[role='option'][data-value='msl-2025-world-champion-msbl'] .player-title";
+    expect(await look(option)).toEqual(popup);
+    await page.locator(option).click();
+    expect(await look("#profile-title-select .player-title")).toEqual(popup);
+    await page.mouse.click(4, 400);
+    await expect(page.locator("[data-edit-row]")).toHaveCount(0);
+    expect(await look("[data-field-row='title'] .player-title")).toEqual(popup);
+    await settle(page);
+  },
+  // A field's value sits in the middle of its grey box (its capitals, trimmed by text-box), in every view and
+  // in both modes of a profile line, and every heading is as far from its first box. An open line is as
+  // tall as a closed one.
+  "field values are centred in their boxes, headings evenly spaced": async (page) => {
+    const offsets = (selector: string) =>
+      page.locator(selector).evaluateAll((nodes) =>
+        nodes
+          .filter((node) => (node as HTMLElement).offsetParent)
+          .map((node) => {
+            const box = node.getBoundingClientRect();
+            const row = (node.closest(".player-popup-code-row, .profile-edit-row") ?? node).getBoundingClientRect();
+            return Math.round(Math.abs(box.top + box.height / 2 - (row.top + row.height / 2)) * 100) / 100;
+          }),
+      );
+    const headingGaps = () =>
+      page.locator(".player-popup-code-list").evaluateAll((lists) =>
+        lists
+          .filter((list) => (list as HTMLElement).offsetParent && list.firstElementChild)
+          .map((list) => {
+            const heading = list.parentElement?.querySelector(".player-popup-section-title");
+            const first = list.firstElementChild?.getBoundingClientRect();
+            return heading && first
+              ? Math.round((first.top - heading.getBoundingClientRect().bottom) * 100) / 100
+              : NaN;
+          }),
+      );
+    await open(page, "/player-card?player=2");
+    await page.locator("html[data-player-card='ready']").waitFor();
+    for (const offset of await offsets(".player-popup-code-value, .player-popup-code-prefix"))
+      expect(offset).toBeLessThanOrEqual(0.5);
+    const cardGaps = await headingGaps();
+    expect(new Set(cardGaps).size).toBe(1);
+
+    await login(page, "linked");
+    await page.goto("/profile");
+    await settle(page, { eagerImages: true });
+    await hideDevNotice(page);
+    for (const offset of await offsets(".player-popup-code-value, .player-popup-code-prefix"))
+      expect(offset).toBeLessThanOrEqual(0.5);
+    expect(await headingGaps()).toEqual((await headingGaps()).map(() => cardGaps[0]));
+    const closedHeight = await page
+      .locator("[data-field-row='title']")
+      .evaluate((node) => node.getBoundingClientRect().height);
+    for (const field of ["title", "country"]) {
+      await page.locator(`[data-edit-open='${field}']`).click();
+      const row = page.locator(`[data-edit-row][data-field-row='${field}']`);
+      expect(await row.evaluate((node) => node.getBoundingClientRect().height)).toBeCloseTo(closedHeight, 1);
+      for (const offset of await offsets(`[data-edit-row][data-field-row='${field}'] .dropdown-field .dropdown-text`))
+        expect(offset).toBeLessThanOrEqual(0.5);
+    }
+    await page.locator("[data-edit-open='switch']").click();
+    expect(
+      await page
+        .locator("[data-edit-row][data-field-row='switch']")
+        .evaluate((node) => node.getBoundingClientRect().height),
+    ).toBeCloseTo(closedHeight, 1);
+    await settle(page);
+  },
+  // The Discord card is an image of one size, made in whatever window the bot opens: it looks the same in all.
+  "the Discord card looks the same in any window": async (page) => {
+    await open(page, "/player-card?player=2");
+    const shots: Buffer[] = [];
+    for (const width of [550, 800, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 700 });
+      await page.goto("/player-card?player=2");
+      await page.locator("html[data-player-card='ready']").waitFor();
+      await settle(page, { eagerImages: true });
+      shots.push(await page.locator(".player-popup-card").screenshot());
+    }
+    const [first, ...others] = shots;
+    for (const shot of others) expect(first && shot.equals(first)).toBe(true);
   },
   "gear builder panes, character menu and card picture": async (page) => {
     await open(page, "/msbl-gear-builder");
