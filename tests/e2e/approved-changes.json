@@ -5,6 +5,10 @@
     {
       "screenshots": ["states/profile-*"],
       "reason": "Owner 2026-10-03: on MY PROFILE (/profile) the rating cards are replaced by the member's statistics per game (MSBL, MSC, SMS; ten read-only fields each, the game's ball before each name, values right-aligned in field boxes, '-' where missing), before Season Rewards and Tourney Accolades. Everything above them is unchanged; the page is taller, so its background scales with it. The player popup, the players page and the Discord card are unchanged (their states are equal)."
+    },
+    {
+      "screenshots": ["states/player-card-title*"],
+      "reason": "NOT a change of this PR: player 5's card is untouched (its DOM and all other card and popup states are equal). The state differs intermittently by ~273 px inside the three SILVER season-reward icons only (raster noise of the scaled icon with its drop-shadow filter); a self comparison of one tree fails 7 of 36 repeats the same way, and CI failed three reruns of #73 on it. Excepted for this reference only until the flakiness is fixed separately."
     }
   ]
 }
