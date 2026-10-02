@@ -31,6 +31,7 @@ export interface TitleOption {
   readonly name: string;
   readonly category: string;
   readonly categoryName: string;
+  /** Its look (titleLook): the colour and glow the profile's title list shows it in. */
   readonly style: string;
 }
 
@@ -139,12 +140,45 @@ export function selectedTitle(
   return availableTitles(catalog, unlockedIds).find((title) => title.id === selectedId) ?? null;
 }
 
+/**
+ * How a title looks (owner, 2026-10-02): its colour and glow, by its group. The popup, the Discord card and
+ * the profile's title list all show this one look; their colours live once in styles/player-popup.css.
+ *   free, tournament, legacy  #b6b6b6
+ *   season                    #ff0000 with glow
+ *   special                   #aef7ff with glow
+ *   msl-world                 #ffeb5c with glow (every MSL title naming WORLD CHAMPION, N-TIME included)
+ *   msl                       #e09e00 (the SPRING, SUMMER and FALL CHAMPION titles)
+ *   tournament-x5             #77c300 (the green TOURNAMENT WINNER, style key "green")
+ *   plain                     a category without a look of its own, like the Free Titles
+ */
+export type TitleLook =
+  "free" | "season" | "special" | "msl-world" | "msl" | "tournament" | "tournament-x5" | "legacy" | "plain";
+
+export function titleLook(title: Pick<CatalogTitle, "category" | "name" | "styleKey">): TitleLook {
+  switch (title.category) {
+    case TITLE_CATEGORY.free:
+      return "free";
+    case TITLE_CATEGORY.season:
+      return "season";
+    case TITLE_CATEGORY.special:
+      return "special";
+    case TITLE_CATEGORY.msl:
+      return titleText(title.name).includes("WORLD CHAMPION") ? "msl-world" : "msl";
+    case TITLE_CATEGORY.tournament:
+      return title.styleKey === "green" ? "tournament-x5" : "tournament";
+    case TITLE_CATEGORY.legacy:
+      return "legacy";
+    default:
+      return "plain";
+  }
+}
+
 export function toTitleOption(title: CatalogTitle): TitleOption {
   return {
     code: title.code,
     name: titleText(title.name),
     category: title.category,
     categoryName: title.categoryName,
-    style: title.styleKey,
+    style: titleLook(title),
   };
 }

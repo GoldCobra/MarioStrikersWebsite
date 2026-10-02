@@ -247,7 +247,7 @@ test("the stored profile has the selected title only while the player can select
     name: "MSL 2023 WORLD CHAMPION",
     category: "msl",
     categoryName: "MSL Titles",
-    style: "",
+    style: "msl-world",
   });
 
   assert.equal((await read("og-player", [])).title, "og-player");

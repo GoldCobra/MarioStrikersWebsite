@@ -16,6 +16,7 @@ import {
   mscFriendCodeLines,
   parseCodeLine,
   switchFriendCodeLines,
+  titleLookClass,
   type Accolade,
   type PlayerProfile,
   type SeasonAward,
@@ -120,19 +121,14 @@ export function showFlag(flag: HTMLImageElement, country: unknown): void {
 }
 
 /**
- * The player title under the name, in FULL CAPS, hidden without one. Its look (`style`, e.g. "green") is a
- * class for the coming formatting.
+ * The player title, the first line of the content (before the friend codes): only the title, in FULL CAPS
+ * and its look. Without one the line is hidden and takes no room.
  */
 export function showPlayerTitle(line: HTMLElement, title: unknown, style: unknown = ""): void {
   const text = toText(title).trim().toUpperCase();
   line.textContent = text;
   line.hidden = !text;
-  line.className = "player-popup-player-title";
-  const look = toText(style)
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, "");
-  if (text && look) line.classList.add(`is-style-${look}`);
+  line.className = text ? `player-popup-player-title ${titleLookClass(style)}` : "player-popup-player-title";
 }
 
 function renderPlayerTitle(view: TemplateView, player: PlayerProfile["player"]): void {

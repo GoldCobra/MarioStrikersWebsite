@@ -11,7 +11,20 @@ interface VisualState {
   login?: "linked" | "unlinked";
   failApi?: boolean;
   fullPage?: boolean;
+  /** Set up before the page loads, e.g. a changed API answer. */
+  route?: (page: Page) => Promise<void>;
   act?: (page: Page) => Promise<void>;
+}
+
+/** The profile of a player with another title, as the API sends a title of that look (title_style). */
+function withTitle(playerId: number, title: string, look: string): (page: Page) => Promise<void> {
+  return async (page) => {
+    await page.route(`**/api/players/${String(playerId)}/profile`, async (route) => {
+      const response = await route.fetch();
+      const body = (await response.json()) as { player?: Record<string, unknown> };
+      await route.fulfill({ response, json: { ...body, player: { ...body.player, title, title_style: look } } });
+    });
+  };
 }
 
 async function clickAndSettle(page: Page, selector: string): Promise<void> {
@@ -77,16 +90,30 @@ const STATES: VisualState[] = [
     act: showPlayerCard,
   },
   {
-    // A player title under the name: player 5 is no world champion, so it is white on the orange bar.
+    // A player title, the content's first line before the friend codes: player 5's legacy rank, grey.
     name: "player-card-title",
     path: "/player-card?player=5",
     act: showPlayerCard,
   },
   {
-    // A world champion's title is black on the gold bar; player 2 has the longest free title.
+    // A title with a glow under a world champion's gold bar: MSL WORLD CHAMPION, yellow with an orange glow.
+    name: "player-card-title-glow",
+    path: "/player-card?player=2",
+    route: withTitle(2, "MSL 2025 WORLD CHAMPION", "msl-world"),
+    act: showPlayerCard,
+  },
+  {
+    // Player 2, a world champion, has the longest free title (grey).
     name: "players-popup-title",
     path: "/players",
     act: (page) => clickAndSettle(page, '.players-name-trigger[data-player-id="2"]'),
+  },
+  {
+    // A special pre-2014 title: light cyan with a blue glow.
+    name: "players-popup-title-glow",
+    path: "/players",
+    route: withTitle(5, "WFC FINAL SEASON LEADER", "special"),
+    act: (page) => clickAndSettle(page, '.players-name-trigger[data-player-id="5"]'),
   },
   {
     // The fixture player 4 has no match in the current season, so every rating card is greyed out.
@@ -161,14 +188,32 @@ const STATES: VisualState[] = [
     },
   },
   {
-    // The title field open with a title picked from the member's titles: the line under the name shows it.
+    // The title field open with a title picked from the member's titles, shown in its look (a reference
+    // commit from before the list picks it in a plain select).
     name: "profile-title-edit",
     path: "/profile",
     login: "linked",
     act: async (page) => {
       if (!(await openProfileField(page, "[data-edit-open='title']"))) return;
-      await page.locator("[data-field='title']").selectOption("msl-2025-world-champion");
+      if (await page.locator("#profile-title-select").count()) {
+        await page.locator("#profile-title-select").click();
+        await page.locator("[role='option'][data-value='msl-2025-world-champion']").click();
+      } else {
+        await page.locator("[data-field='title']").selectOption("msl-2025-world-champion");
+      }
       await settle(page);
+    },
+  },
+  {
+    // The title list open: the sample member has a title of every look, each in its colour and glow.
+    name: "profile-title-list",
+    path: "/profile",
+    login: "linked",
+    act: async (page) => {
+      if (!(await openProfileField(page, "[data-edit-open='title']"))) return;
+      const list = page.locator("#profile-title-select");
+      if (await list.count()) await list.click();
+      await settle(page, { eagerImages: true });
     },
   },
   {
@@ -259,6 +304,7 @@ for (const state of STATES) {
     test(`${state.name} @${width}`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await preparePage(page, { failApi: state.failApi });
+      if (state.route) await state.route(page);
       if (state.login) await login(page, state.login);
       await page.goto(state.path);
       await settle(page, { eagerImages: true });

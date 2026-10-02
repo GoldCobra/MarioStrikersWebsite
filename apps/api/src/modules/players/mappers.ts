@@ -11,7 +11,7 @@ import {
 import { normalizeText, toText } from "@ms/shared/text";
 import { isActivityActive, toActivityIso, toIsoDateOnly } from "../../lib/dates.ts";
 import { toPositiveIntId, toPositiveIntOrNull, toSafeCount } from "../../lib/numbers.ts";
-import { selectedTitle, titleText, type CatalogTitle } from "../titles/availability.ts";
+import { selectedTitle, titleLook, titleText, type CatalogTitle } from "../titles/availability.ts";
 import { PROFILE_RECORDSET } from "./repository.ts";
 
 type Row = Record<string, unknown>;
@@ -524,7 +524,7 @@ export function buildPlayerTitle(
 ): Pick<PlayerProfile["player"], "title" | "title_style"> {
   const unlocked = unlockedRows.map((row) => Number(row.title_id));
   const title = selectedTitle(catalog, unlocked, toPositiveIntId(selectedRows[0]?.title_id));
-  return { title: title ? titleText(title.name) : "", title_style: title?.styleKey ?? "" };
+  return { title: title ? titleText(title.name) : "", title_style: title ? titleLook(title) : "" };
 }
 
 /** The profile DTO from the eleven result sets of the profile batch; null when the player is missing. */

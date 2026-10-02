@@ -1,6 +1,6 @@
 // Editing on the profile page itself. A pencil opens one field (the title, the country, the Switch code, an
 // MSC code) for editing without saving it; "+" adds an MSC code (at most three) and "−" removes one while it
-// is open. The title is picked from the member's titles; the line under the name shows it at once. A click
+// is open. The title is picked from the member's titles, each shown in its look (colour and glow). A click
 // outside an open field closes it again; what was entered stays in the draft.
 // Every change is kept in a draft, marked as unsaved, until SAVE sends the whole profile in one request
 // (PUT /api/profile/me/editable) or DISCARD drops it. When the profile was changed elsewhere meanwhile (in
@@ -9,8 +9,16 @@
 import { escapeHtml } from "@ms/shared/html";
 import { LEGACY_MSC_REGIONS, MSC_PLATFORMS, MSC_REGIONS, type FieldError } from "@ms/shared/friend-codes";
 import { loginPath } from "@ms/shared/site/navigation";
-import { showFlag, showPlayerTitle } from "../players/player-profile-view.ts";
-import { countryLabel, countryOptions, createCountrySelect, flagImage, NO_COUNTRY_LABEL } from "./country-select.ts";
+import { titleLookClass } from "../players/profile-data.ts";
+import { showFlag } from "../players/player-profile-view.ts";
+import {
+  countryLabel,
+  countryOptions,
+  createCountrySelect,
+  flagImage,
+  NO_COUNTRY_LABEL,
+  type CountryOption,
+} from "./country-select.ts";
 import { bindFriendCodeInput } from "./friend-code-input.ts";
 import {
   COUNTRY_FIELD,
@@ -100,16 +108,18 @@ function savedOf(profile: EditableProfile): SavedProfile {
 
 /**
  * The title list: "No player title", then only the member's titles, in the order the API sends them (by
- * category and each category's own rule, titles/availability.ts); no category names.
+ * category and each category's own rule, titles/availability.ts), each in its look; no category names.
  */
-function titleOptions(titles: EditableProfile["titles"], selected: string): string {
+function titleOptions(titles: EditableProfile["titles"]): CountryOption[] {
   return [
-    `<option value=""${selected ? "" : " selected"}>${escapeHtml(MESSAGES.noTitle)}</option>`,
-    ...titles.map(
-      (title) =>
-        `<option value="${escapeHtml(title.code)}"${title.code === selected ? " selected" : ""}>${escapeHtml(title.name)}</option>`,
-    ),
-  ].join("");
+    { value: "", label: MESSAGES.noTitle, flag: "", className: "profile-title-none" },
+    ...titles.map((title) => ({
+      value: title.code,
+      label: title.name,
+      flag: "",
+      className: titleLookClass(title.style),
+    })),
+  ];
 }
 
 function options(entries: readonly { value: string; label: string }[], selected: string, placeholder: string): string {
@@ -201,7 +211,7 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
     if (section) section.hidden = false;
   }
 
-  /** "Title" as its own section, before the country: only on this page, not in the popup. */
+  /** "Player Title" as its own section, before the country: only on this page, not in the popup. */
   function titleSection(): HTMLElement | null {
     let mount = list("title");
     if (mount) return mount;
@@ -210,7 +220,7 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
     const section = document.createElement("section");
     section.className = "player-popup-section profile-title-section";
     section.innerHTML =
-      '<h3 id="profile-title-label" class="player-popup-section-title">Title</h3><div class="player-popup-code-list" data-list="title"></div>';
+      '<h3 id="profile-title-label" class="player-popup-section-title">Player Title</h3><div class="player-popup-code-list" data-list="title"></div>';
     next.before(section);
     mount = section.querySelector<HTMLElement>("[data-list='title']");
     return mount;
@@ -220,17 +230,31 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
     const mount = titleSection();
     if (!mount) return;
     if (openFields.has(TITLE_FIELD) && !blocked()) {
-      mount.innerHTML = editRow(
-        TITLE_FIELD,
-        "title",
-        `<select class="profile-edit-select profile-title-select" data-field="title" aria-labelledby="profile-title-label" aria-describedby="${fieldId(TITLE_FIELD)}-error">${titleOptions(profile.titles, draft.title)}</select>`,
-      );
+      mount.innerHTML = editRow(TITLE_FIELD, "title", "");
+      const select = createCountrySelect({
+        id: "profile-title-select",
+        labelledBy: "profile-title-label",
+        describedBy: `${fieldId(TITLE_FIELD)}-error`,
+        options: titleOptions(profile.titles),
+        value: draft.title,
+        flags: false,
+        className: "profile-title-select",
+        onChange: (value) => {
+          draft = { ...draft, title: value };
+          clearError(TITLE_FIELD);
+          refresh();
+        },
+      });
+      select.setInvalid(errors.has(TITLE_FIELD));
+      mount.querySelector<HTMLElement>("[data-edit-row]")?.prepend(select.element);
       return;
     }
     const title = titleOf(draft.title);
     mount.innerHTML = viewRow(
       TITLE_FIELD,
-      `<span class="player-popup-code-value">${escapeHtml(title ? title.name : MESSAGES.noTitle)}</span>`,
+      title
+        ? `<span class="player-popup-code-value ${titleLookClass(title.style)}">${escapeHtml(title.name)}</span>`
+        : `<span class="player-popup-code-value">${escapeHtml(MESSAGES.noTitle)}</span>`,
       pencil(TITLE_FIELD, "Change your title"),
       title ? " profile-title-row" : " profile-title-row profile-code-missing",
     );
@@ -496,13 +520,6 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
     if (flag) showFlag(flag, draft.country);
   }
 
-  /** The line under the name follows the draft's title, like the flag follows its country. */
-  function renderHeaderTitle(): void {
-    const line = root.querySelector<HTMLElement>(".player-popup-player-title");
-    const title = titleOf(draft.title);
-    if (line) showPlayerTitle(line, title?.name ?? "", title?.style ?? "");
-  }
-
   function renderNotice(): void {
     const mount = content();
     let notice = mount?.querySelector<HTMLElement>(":scope > .profile-edit-notice") ?? null;
@@ -543,7 +560,6 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
     renderMsc();
     bindDigitFields();
     renderHeaderFlag();
-    renderHeaderTitle();
     refresh();
   }
 
@@ -592,10 +608,7 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
       (input) => input.value,
     );
     const blocks: Blocks = [digits[0] ?? "", digits[1] ?? "", digits[2] ?? ""];
-    if (field === TITLE_FIELD) {
-      draft = { ...draft, title: row.querySelector<HTMLSelectElement>("[data-field='title']")?.value ?? "" };
-      renderHeaderTitle();
-    } else if (field === SWITCH_FIELD) {
+    if (field === SWITCH_FIELD) {
       draft = { ...draft, switchBlocks: blocks };
     } else if (field.startsWith("msc:")) {
       const value = (name: string): string =>

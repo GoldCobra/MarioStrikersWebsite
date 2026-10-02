@@ -25,8 +25,15 @@ import {
   type StoredFriendCode,
   type StoredProfile,
 } from "../modules/profile/service.ts";
-import { availableTitles, selectedTitle, titleText, toTitleOption } from "../modules/titles/availability.ts";
-import { seededCatalog } from "../modules/titles/catalog.ts";
+import {
+  availableTitles,
+  selectedTitle,
+  titleLook,
+  titleText,
+  toTitleOption,
+  type CatalogTitle,
+} from "../modules/titles/availability.ts";
+import { TITLE_CATEGORIES, TITLE_CATEGORY, seededCatalog } from "../modules/titles/catalog.ts";
 
 const DAY_MS = 86_400_000;
 const ASSET_VERSION = "20260608-rank-crop-v1";
@@ -214,15 +221,20 @@ const TOURNAMENTS: readonly (readonly [string, string, boolean])[] = [
   ["Demo Doubles Open", "🥈", false],
 ];
 const GAMES: readonly GameCode[] = ["msbl", "msc", "sms"];
-// Player titles: the real catalog with invented unlocks. Player 1 (the signed-in sample, a world champion
-// like its accolades say) has some but none selected; player 2 (a world champion too) shows the longest
-// free title, player 5 (no champion) an unlocked one.
+// Player titles: the real catalog plus one season title (as the sync creates it when a season ends with a
+// Strikers Titan), with invented unlocks. Player 1 (the signed-in sample, a world champion like its
+// accolades say) has a title of every look but none selected; player 2 (a world champion too) shows the
+// longest free title, player 5 (no champion) an unlocked one.
+const FIXTURE_SEASON_TITLE = { code: "season-titan-1", name: "BURST 2026 STRIKERS TITAN", seasonNumber: 1 };
 const FIXTURE_TITLE_UNLOCKS: Readonly<Record<number, readonly string[]>> = {
   1: [
     "msl-2025-world-champion",
     "msl-2-time-world-champion",
+    "msl-2026-spring-champion",
+    FIXTURE_SEASON_TITLE.code,
     "tournament-winner",
     "tournament-winner-green",
+    "wfc-final-season-leader",
     "legacy-megastriker",
   ],
   2: ["tournament-winner", "legacy-legend"],
@@ -577,7 +589,26 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
   }
 
   // The selected title of a player as dbo.PlayerActiveTitle would hold it, edited or invented.
-  const titleCatalog = seededCatalog();
+  const seededTitles = seededCatalog();
+  const titleCatalog: CatalogTitle[] = [
+    ...seededTitles,
+    ...seededTitles
+      .filter((title) => title.code === "legacy-rookie")
+      .map((template) => ({
+        ...template,
+        id: seededTitles.length + 1,
+        code: FIXTURE_SEASON_TITLE.code,
+        name: FIXTURE_SEASON_TITLE.name,
+        category: TITLE_CATEGORY.season,
+        categoryName: "Competitive Season Titles",
+        categorySort: TITLE_CATEGORIES.find((category) => category.code === TITLE_CATEGORY.season)?.sortOrder ?? 0,
+        sortOrder: FIXTURE_SEASON_TITLE.seasonNumber,
+        ruleKind: "season-titan",
+        ruleParams: JSON.stringify({ season_id: FIXTURE_SEASON_TITLE.seasonNumber }),
+        exclusiveGroup: "",
+        exclusiveLevel: 0,
+      })),
+  ];
   const titleIds = new Map(titleCatalog.map((title) => [title.code, title.id]));
   const unlockedTitleIds = (playerId: number): number[] =>
     (FIXTURE_TITLE_UNLOCKS[playerId] ?? []).map((code) => titleIds.get(code) ?? 0);
@@ -590,7 +621,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
   }
   function titleFieldsOf(playerId: number): { title: string; title_style: string } {
     const title = selectedTitleOf(playerId);
-    return { title: title ? titleText(title.name) : "", title_style: title?.styleKey ?? "" };
+    return { title: title ? titleText(title.name) : "", title_style: title ? titleLook(title) : "" };
   }
 
   function buildClubProfile(club: ClubListItem): ClubProfile {

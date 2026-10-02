@@ -39,8 +39,14 @@ const msc = (region: string, lineSeq: number, label: string, code: string): Stor
 });
 
 const TITLES: StoredProfile["titles"] = [
-  { code: "legacy-legend", name: "LEGACY LEGEND", category: "legacy-rank", categoryName: "Legacy Ranks", style: "" },
-  { code: "og-player", name: "OG PLAYER", category: "free", categoryName: "Free Titles", style: "" },
+  {
+    code: "legacy-legend",
+    name: "LEGACY LEGEND",
+    category: "legacy-rank",
+    categoryName: "Legacy Ranks",
+    style: "legacy",
+  },
+  { code: "og-player", name: "OG PLAYER", category: "free", categoryName: "Free Titles", style: "free" },
 ];
 
 const PROFILE: StoredProfile = {

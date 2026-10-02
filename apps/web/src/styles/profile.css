@@ -301,11 +301,6 @@
   color: #000;
 }
 
-.player-popup-header.is-world-champion .player-popup-player-title {
-  color: #000;
-  filter: none;
-}
-
 /* The MSL logo (assets/msl/msl-logo.webp, a black silhouette, 172x128) sits at the header's right
    end, left of the close button (on the profile page: of the pencil), vertically centred on the whole
    header, with a 1px drop shadow; the name's row keeps clear of it. The gold is a gradient masked by
@@ -584,12 +579,6 @@
   line-height: 1.22;
 }
 
-/* The title field: the member's titles in the owner's order (features/profile/profile-edit.ts). */
-.profile-title-select {
-  flex: 1 1 16rem;
-  min-width: 0;
-  max-width: 24rem;
-}
 
 /* The country field: a combobox with the flags (features/profile/country-select.ts). */
 .profile-country-select {
@@ -666,6 +655,16 @@
 
 .profile-country-option[aria-selected="true"] {
   color: var(--color-gold);
+}
+
+/* The title field: the country field's list without flags, the member's titles in the owner's order and
+   each in its look (player-popup.css), in the list as in the field (features/profile/profile-edit.ts). */
+.profile-country-select.profile-title-select {
+  max-width: 24rem;
+}
+
+.profile-title-select .profile-title-none {
+  color: var(--profile-muted-color);
 }
 
 /* SAVE and DISCARD at the end of the card. The slot keeps the bar's height, so nothing moves when the
