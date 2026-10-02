@@ -63,8 +63,9 @@ body.player-popup-open {
    a little tighter), its FULL CAPS and its look, so every view shows a title alike.
    The look (titles/availability.ts titleLook, titleLookClass in profile-data.ts) is its colour and glow.
    The glows follow the owner's reference images (2026-10-02): the text keeps its colour, a 5-6px blur of a
-   deeper shade at 80% fades out about 7px from the letters. Free, tournament and legacy titles (and a
-   category without a look) are plain grey, without a glow. */
+   deeper shade fades out about 7px from the letters, at 95% (owner, 2026-10-02: "a little stronger" than the
+   first 80%; the radius and so the glow's room stay). Free, tournament and legacy titles (and a category
+   without a look) are plain grey, without a glow. */
 .player-title {
   --player-title-glow: none;
   color: #b6b6b6;
@@ -84,17 +85,17 @@ body.player-popup-open {
 }
 
 .player-title.is-look-season {
-  --player-title-glow: 0 0 6px rgba(255, 0, 0, 0.8);
+  --player-title-glow: 0 0 6px rgba(255, 0, 0, 0.95);
   color: #ff0000;
 }
 
 .player-title.is-look-special {
-  --player-title-glow: 0 0 5px rgba(69, 168, 255, 0.8);
+  --player-title-glow: 0 0 5px rgba(69, 168, 255, 0.95);
   color: #aef7ff;
 }
 
 .player-title.is-look-msl-world {
-  --player-title-glow: 0 0 6px rgba(255, 148, 0, 0.8);
+  --player-title-glow: 0 0 6px rgba(255, 148, 0, 0.95);
   color: #ffeb5c;
 }
 
