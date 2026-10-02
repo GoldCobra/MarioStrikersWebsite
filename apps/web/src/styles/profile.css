@@ -667,6 +667,12 @@
   color: var(--profile-muted-color);
 }
 
+/* In the list and the field the row's gap already spaces the ball from the name. */
+.profile-title-select .player-title-ball {
+  flex: 0 0 auto;
+  margin-right: 0;
+}
+
 /* SAVE and DISCARD at the end of the card. The slot keeps the bar's height, so nothing moves when the
    bar floats at the bottom of the screen (profile-edit.ts) while unsaved changes are out of sight. */
 .profile-edit-bar-slot {

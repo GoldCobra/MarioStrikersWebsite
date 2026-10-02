@@ -221,23 +221,33 @@ const TOURNAMENTS: readonly (readonly [string, string, boolean])[] = [
   ["Demo Doubles Open", "🥈", false],
 ];
 const GAMES: readonly GameCode[] = ["msbl", "msc", "sms"];
-// Player titles: the real catalog plus one season title (as the sync creates it when a season ends with a
-// Strikers Titan), with invented unlocks. Player 1 (the signed-in sample, a world champion like its
-// accolades say) has a title of every look but none selected; player 2 (a world champion too) shows the
-// longest free title, player 5 (no champion) an unlocked one.
-const FIXTURE_SEASON_TITLE = { code: "season-titan-1", name: "BURST 2026 STRIKERS TITAN", seasonNumber: 1 };
+// Player titles: the real catalog plus one season title and two MSL event variants (as the sync creates them
+// when a season ends with a Strikers Titan or an MSL event has a winner), with invented unlocks. Player 1 (the
+// signed-in sample, a world champion like its accolades say) has a title of every look, of every game, but
+// none selected; player 2 (a world champion too) shows the longest free title, player 5 (no champion) an
+// unlocked one.
+const FIXTURE_SEASON_TITLE = {
+  code: "season-titan-1-msbl",
+  name: "BURST 2026 STRIKERS TITAN",
+  seasonNumber: 1,
+  gameCode: "MSBL",
+} as const;
+const FIXTURE_MSL_VARIANTS = [
+  { template: "msl-2025-world-champion", gameCode: "MSBL", suffix: "msbl" },
+  { template: "msl-2026-spring-champion", gameCode: "SMS", suffix: "sms" },
+] as const;
 const FIXTURE_TITLE_UNLOCKS: Readonly<Record<number, readonly string[]>> = {
   1: [
-    "msl-2025-world-champion",
-    "msl-2-time-world-champion",
-    "msl-2026-spring-champion",
+    "msl-2025-world-champion-msbl",
+    "msl-2-time-world-champion-msbl",
+    "msl-2026-spring-champion-sms",
     FIXTURE_SEASON_TITLE.code,
-    "tournament-winner",
-    "tournament-winner-green",
+    "tournament-winner-msc",
+    "tournament-winner-green-msc",
     "wfc-final-season-leader",
     "legacy-megastriker",
   ],
-  2: ["tournament-winner", "legacy-legend"],
+  2: ["tournament-winner-sms", "legacy-legend"],
   3: ["legacy-rookie"],
   5: ["legacy-superstar"],
 };
@@ -607,21 +617,37 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
         ruleParams: JSON.stringify({ season_id: FIXTURE_SEASON_TITLE.seasonNumber }),
         exclusiveGroup: "",
         exclusiveLevel: 0,
+        gameCode: FIXTURE_SEASON_TITLE.gameCode,
       })),
+    ...FIXTURE_MSL_VARIANTS.flatMap((variant, index) =>
+      seededTitles
+        .filter((title) => title.code === variant.template)
+        .map((template) => ({
+          ...template,
+          id: seededTitles.length + 2 + index,
+          code: `${template.code}-${variant.suffix}`,
+          ruleKind: "tournament-name",
+          gameCode: variant.gameCode,
+        })),
+    ),
   ];
   const titleIds = new Map(titleCatalog.map((title) => [title.code, title.id]));
   const unlockedTitleIds = (playerId: number): number[] =>
     (FIXTURE_TITLE_UNLOCKS[playerId] ?? []).map((code) => titleIds.get(code) ?? 0);
   const titleOptionsOf = (playerId: number) =>
-    availableTitles(titleCatalog, unlockedTitleIds(playerId)).map(toTitleOption);
+    availableTitles(titleCatalog, unlockedTitleIds(playerId), { playerId }).map(toTitleOption);
   function selectedTitleOf(playerId: number) {
     const edited = editedProfiles.get(playerId);
     const code = edited ? edited.title : (FIXTURE_SELECTED_TITLES[playerId] ?? "");
-    return selectedTitle(titleCatalog, unlockedTitleIds(playerId), titleIds.get(code) ?? null);
+    return selectedTitle(titleCatalog, unlockedTitleIds(playerId), titleIds.get(code) ?? null, { playerId });
   }
-  function titleFieldsOf(playerId: number): { title: string; title_style: string } {
+  function titleFieldsOf(playerId: number): { title: string; title_style: string; title_game_code: string } {
     const title = selectedTitleOf(playerId);
-    return { title: title ? titleText(title.name) : "", title_style: title ? titleLook(title) : "" };
+    return {
+      title: title ? titleText(title.name) : "",
+      title_style: title ? titleLook(title) : "",
+      title_game_code: title?.gameCode ?? "",
+    };
   }
 
   function buildClubProfile(club: ClubListItem): ClubProfile {

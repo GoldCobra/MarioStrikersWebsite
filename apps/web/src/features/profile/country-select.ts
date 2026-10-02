@@ -1,8 +1,8 @@
 // The country field of the profile page: a select-only combobox (WAI-ARIA APG) whose options show the
 // country's flag from /assets/flags, as a native <select> cannot show images and Windows draws no flag
 // emoji. Typing jumps to the first country starting with what was typed; Enter, Tab or a click takes it.
-// The title field uses it too, without flags: each title in its look (colour and glow), which the options
-// of a native <select> cannot show either.
+// The title field uses it too, without flags: each title in its look (colour and glow) after its game's
+// ball, which the options of a native <select> cannot show either.
 
 import { escapeHtml } from "@ms/shared/html";
 import { countryDisplayName, flagUrl, normalizeCountryCode } from "../../lib/countries.ts";
@@ -15,6 +15,8 @@ export interface CountryOption {
   readonly flag: string;
   /** Classes for the option's name, in the list and in the field (a title's look). */
   readonly className?: string;
+  /** An icon before the name, in the list and in the field (a title's game ball); built by the caller. */
+  readonly iconHtml?: string;
 }
 
 export const NO_COUNTRY_LABEL = "No country";
@@ -115,6 +117,7 @@ export function createCountrySelect(config: CountrySelectOptions): CountrySelect
   const flagOf = (option: CountryOption | undefined): string =>
     flags ? flagImage(option?.flag ?? "", "profile-country-flag") : "";
   const nameOf = (option: CountryOption | undefined, fallback: string): string =>
+    (option?.iconHtml ?? "") +
     `<span class="profile-country-name${option?.className ? ` ${escapeHtml(option.className)}` : ""}">${escapeHtml(option?.label ?? fallback)}</span>`;
   const element = document.createElement("div");
   element.className = config.className ? `profile-country-select ${config.className}` : "profile-country-select";

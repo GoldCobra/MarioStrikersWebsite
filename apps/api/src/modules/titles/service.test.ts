@@ -8,7 +8,7 @@ import { createTitleSyncSchedule, isSyncDue, runTitleSync } from "./service.ts";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const NOW = Date.parse("2026-10-02T12:00:00Z");
 
-// The catalog as the database holds it, one World Championship won by player 9.
+// The catalog as the database holds it, one World Championship (MSC) won by player 9.
 function catalogRow(title: ReturnType<typeof seededCatalog>[number]): Record<string, unknown> {
   return {
     Id: title.id,
@@ -21,7 +21,8 @@ function catalogRow(title: ReturnType<typeof seededCatalog>[number]): Record<str
     StyleKey: title.styleKey || null,
     ExclusiveGroup: title.exclusiveGroup || null,
     ExclusiveLevel: title.exclusiveLevel || null,
-    IsActive: true,
+    GameCode: title.gameCode || null,
+    IsActive: title.isActive,
     CategoryName: title.categoryName,
     CategorySort: title.categorySort,
     IsGlobal: title.isGlobal,
@@ -68,7 +69,8 @@ test("a run is due when none was logged or the last one is a day old", () => {
 test("without apply the run only reports; with apply it writes and logs", async () => {
   const dry = createFakeDatabase(handler(null));
   const report = await runTitleSync(dry, { apply: false, legacy: false, grantedBy: "ops:title-sync" });
-  assert.deepEqual(report.byTitle, { "msl-2023-world-champion": 1 });
+  assert.deepEqual(report.byTitle, { "msl-2023-world-champion-msc": 1 });
+  assert.deepEqual(report.newTitles, ["MSL 2023 WORLD CHAMPION"]);
   assert.equal(report.granted, 0);
   assert.deepEqual(dry.transactions, []);
 
@@ -80,9 +82,10 @@ test("without apply the run only reports; with apply it writes and logs", async 
   assert.deepEqual(JSON.parse(String(log?.inputs.log)), {
     granted_by: "ops:title-sync",
     granted: 1,
-    titles: { "msl-2023-world-champion": 1 },
-    new_titles: [],
-    open_points: 0,
+    titles: { "msl-2023-world-champion-msc": 1 },
+    new_titles: ["MSL 2023 WORLD CHAMPION"],
+    // The fixed WFC titles (their players are not in this data) and MSL 2025 SPRING CHAMPION.
+    open_points: 5,
   });
 });
 
@@ -112,7 +115,7 @@ test("the daily check runs the sync only when it is due and never throws", async
     now: () => NOW,
   }).check();
   assert.deepEqual(due.transactions, ["begin", "commit"]);
-  assert.equal(invalidated, 0, "no new titles, the cached catalog stays");
+  assert.equal(invalidated, 1, "the new MSL 2023 WORLD CHAMPION (MSC) shows at once");
 
   const warnings: unknown[] = [];
   const log: Logger = { ...silentLogger, warn: (...args: unknown[]) => warnings.push(args) };

@@ -35,8 +35,10 @@ export interface ProfilePlayer {
   readonly results_url?: unknown;
   /** The selected player title, in FULL CAPS; "" for none. */
   readonly title?: unknown;
-  /** Its look ("green"), for the later formatting; "" for the plain one. */
+  /** Its look (colour and glow, titleLookClass); "" without a title. */
   readonly title_style?: unknown;
+  /** Its game ("MSBL", "MSC", "SMS"), shown as that game's ball before it; "" for none. */
+  readonly title_game_code?: unknown;
 }
 
 export interface PlayerProfile {
@@ -104,6 +106,14 @@ export function gameBallIconUrl(gameCode: unknown): string {
 }
 
 const WINNER_GAMES = new Set(["msbl", "msc", "sms"]);
+
+/** The ball of a title's game, as the accolades and season rewards show it; null for a title without a game. */
+export function titleGameBall(gameCode: unknown): { src: string; fallback: string; alt: string } | null {
+  const code = toText(gameCode).trim().toLowerCase();
+  if (!WINNER_GAMES.has(code)) return null;
+  const src = gameBallIconUrl(code);
+  return { src, fallback: src.replace(/\.webp$/i, ".png"), alt: code.toUpperCase() };
+}
 
 /**
  * A world champion title keeps its gold glow; every other tournament win is tinted in that game's colour

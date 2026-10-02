@@ -5,6 +5,7 @@ import { createFakeDatabase } from "../../test-support/fake-database.ts";
 import { TITLE_CATALOG, TITLE_CATEGORIES } from "./catalog.ts";
 import {
   CATALOG_QUERY,
+  GAME_COLUMN_SQL,
   LAST_SYNC_QUERY,
   SCHEMA_SQL,
   buildGrantQuery,
@@ -30,7 +31,13 @@ function recordingRequest(): { request: mssql.Request; inputs: Record<string, un
 }
 
 test("the schema creates each title table only when it is missing", () => {
-  for (const table of ["PlayerTitleCategory", "PlayerTitle", "PlayerTitleUnlock", "PlayerActiveTitle"]) {
+  for (const table of [
+    "PlayerTitleCategory",
+    "PlayerTitle",
+    "PlayerTitleUnlock",
+    "PlayerActiveTitle",
+    "PlayerTitleTestUnlock",
+  ]) {
     assert.match(
       SCHEMA_SQL,
       new RegExp(`IF OBJECT_ID\\(N'dbo\\.${table}', N'U'\\) IS NULL CREATE TABLE dbo\\.${table} \\(`),
@@ -41,6 +48,21 @@ test("the schema creates each title table only when it is missing", () => {
   assert.match(SCHEMA_SQL, /CHECK \(Name = UPPER\(Name\) COLLATE Latin1_General_100_BIN2/);
   assert.match(SCHEMA_SQL, /CONSTRAINT UQ_PlayerTitleUnlock_Player_Title UNIQUE \(PlayerId, TitleId\)/);
   assert.match(SCHEMA_SQL, /SourceType IN \('SEASON', 'ACCOLADE', 'TOURNAMENT', 'LEGACY_RANK', 'MANUAL'\)/);
+  // A title's game is one of the three, or none; test unlocks are their own table, once per player and title.
+  assert.match(
+    SCHEMA_SQL,
+    /GameCode VARCHAR\(8\) NULL CONSTRAINT CK_PlayerTitle_GameCode CHECK \(GameCode IN \('MSBL', 'MSC', 'SMS'\)\)/,
+  );
+  assert.match(SCHEMA_SQL, /CONSTRAINT UQ_PlayerTitleTestUnlock_Player_Title UNIQUE \(PlayerId, TitleId\)/);
+  assert.match(SCHEMA_SQL, /FK_PlayerTitleTestUnlock_Title REFERENCES dbo\.PlayerTitle \(Id\)/);
+});
+
+test("an older PlayerTitle gets the GameCode column only when it is missing, and nothing else", () => {
+  assert.match(
+    GAME_COLUMN_SQL,
+    /^IF COL_LENGTH\(N'dbo\.PlayerTitle', N'GameCode'\) IS NULL ALTER TABLE dbo\.PlayerTitle ADD GameCode /,
+  );
+  assert.doesNotMatch(GAME_COLUMN_SQL, /\b(?:DROP|TRUNCATE|DELETE|UPDATE)\b/i);
 });
 
 test("the seed adds only missing categories and titles, every value a typed parameter", () => {
@@ -60,12 +82,17 @@ test("the seed adds only missing categories and titles, every value a typed para
   assert.equal(titles.inputs[`tParams${index}`], '{"min":5}');
   assert.equal(titles.inputs[`tStyle${index}`], "green");
   assert.equal(titles.inputs[`tGroup${index}`], null);
+  assert.equal(titles.inputs[`tActive${index}`], false);
+  assert.equal(titles.inputs[`tGame${index}`], null);
+  const variant = TITLE_CATALOG.findIndex((title) => title.code === "tournament-winner-green-sms");
+  assert.equal(titles.inputs[`tGame${variant}`], "SMS");
+  assert.equal(titles.inputs[`tActive${variant}`], true);
   const legacy = TITLE_CATALOG.findIndex((title) => title.code === "legacy-legend");
   assert.equal(titles.inputs[`tGroup${legacy}`], "legacy-rank");
   assert.equal(titles.inputs[`tLevel${legacy}`], 4);
   const free = TITLE_CATALOG.findIndex((title) => title.code === "og-player");
   assert.equal(titles.inputs[`tParams${free}`], null);
-  // 9 parameters per title stay far below SQL Server's 2100 per request.
+  // 11 parameters per title stay far below SQL Server's 2100 per request.
   assert.ok(Object.keys(titles.inputs).length < 2100);
 });
 
@@ -86,6 +113,7 @@ test("the catalog is read once per five minutes, again after invalidate and afte
           StyleKey: null,
           ExclusiveGroup: null,
           ExclusiveLevel: null,
+          GameCode: null,
           IsActive: true,
           CategoryName: "Free Titles",
           CategorySort: 6,
@@ -110,6 +138,7 @@ test("the catalog is read once per five minutes, again after invalidate and afte
     styleKey: "",
     exclusiveGroup: "",
     exclusiveLevel: 0,
+    gameCode: "",
     isActive: true,
   });
   await catalog.get();
@@ -131,7 +160,7 @@ test("the sources are read in one batch; the legacy ranks only when asked for", 
           recordsets: [
             [],
             [{ PlayerId: 4, TitleId: 9 }],
-            [{ ID: 4 }],
+            [{ ID: 4, DiscordID: " 195905866527014912 " }],
             [
               {
                 ID: 211,
@@ -143,7 +172,7 @@ test("the sources are read in one batch; the legacy ranks only when asked for", 
               },
             ],
             [{ Id: 2, SeasonNumber: 1, DisplayName: "Burst Season 2026", LifecycleStatus: "completed" }],
-            [{ SeasonId: 2, PlayerId: 4 }],
+            [{ SeasonId: 2, PlayerId: 4, GameId: 3 }],
           ],
         },
   );
@@ -163,7 +192,8 @@ test("the sources are read in one batch; the legacy ranks only when asked for", 
   ]);
   assert.deepEqual(daily.seasons, [{ id: 2, seasonNumber: 1, displayName: "Burst Season 2026", status: "completed" }]);
   assert.deepEqual([...daily.playerIds], [4]);
-  assert.deepEqual(daily.titans, [{ seasonId: 2, playerId: 4 }]);
+  assert.deepEqual([...daily.discordIds], [[4, "195905866527014912"]]);
+  assert.deepEqual(daily.titans, [{ seasonId: 2, playerId: 4, gameType: 3 }]);
 
   const full = await readTitleSources(database, { legacy: true });
   assert.deepEqual(full.legacyRanks, [
@@ -191,6 +221,7 @@ const PLAN: TitleAwardPlan = {
       sortOrder: 1,
       ruleKind: "season-titan",
       ruleParams: '{"season_id":2}',
+      gameCode: "MSBL",
     },
   ],
   grants: Array.from({ length: 450 }, (_, index) => ({
@@ -213,6 +244,7 @@ test("grants are written in chunks in one transaction with the run in dbo.Comman
   const [newTitle, ...rest] = database.queries;
   assert.match(newTitle?.sql ?? "", /^IF NOT EXISTS \(SELECT 1 FROM dbo\.PlayerTitle WHERE Code = @code\) INSERT/);
   assert.equal(newTitle?.inputs.name, "BURST 2026 STRIKERS TITAN");
+  assert.equal(newTitle.inputs.gameCode, "MSBL");
   const grants = rest.filter((query) => query.sql.includes("PlayerTitleUnlock"));
   assert.deepEqual(
     grants.map((query) => Object.keys(query.inputs).filter((name) => name.startsWith("player")).length),

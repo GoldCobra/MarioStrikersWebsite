@@ -169,34 +169,45 @@ are refused for members who left the server, checked with the bot token
 (`integrations/discord/members.ts`).
 A bot token enables Discord name lookups and event discovery.
 
-**Player titles** ([ADR 0008](adr/0008-player-titles.md), `modules/titles/`).
+**Player titles** ([ADR 0008](adr/0008-player-titles.md), [ADR 0009](adr/0009-per-game-titles-and-test-unlocks.md),
+`modules/titles/`).
 A member picks one of their titles on the profile page; the player popup and the
 Discord card show it as the content's first line, before the friend codes (without
 a title the line takes no room), the profile page in its "Player Title" field. Each
 title is shown in FULL CAPS and in its group's look, colour and glow, in the popup,
 on the card and in the profile's title list alike: `titleLook` (`availability.ts`)
-assigns it, `styles/player-popup.css` holds the colours once. Four
-`dbo` tables hold them: categories, titles (with the rule that awards each one),
-unlocks (one per player and title, with their source) and the selected title.
+assigns it, `styles/player-popup.css` holds the colours once. A title of one game
+(`dbo.PlayerTitle.GameCode`: MSL, tournament and season titles; `games.ts`) shows
+that game's ball before it everywhere (`titleBallHtml` in
+`features/players/player-profile-view.ts`, the accolades' 16px ball). Five
+`dbo` tables hold them: categories, titles (with the rule that awards each one and
+its game), unlocks (one per player and title, with their source), temporary test
+unlocks (apart from the earned ones) and the selected title.
 Free Titles are available to everyone; of an exclusive group (legacy ranks,
-N-TIME WORLD CHAMPION) only the highest unlocked level is offered, while the green
-and the plain TOURNAMENT WINNER can both be selected (`availability.ts`). The same
-file sets the list's order, which the profile page shows as it comes, without
-category names: categories by `SortOrder`, Free Titles always last (a new category
-falls in before them); MSL titles N-TIME first, then by year and the latest event,
-season titles by year and season, the green TOURNAMENT WINNER first, legacy ranks
-from the highest, Free Titles A–Z; equal ranks by code. `rules.ts` awards from existing data: a season's
-Strikers Titans (reward level 5/5, once the season is completed; the season's
-title is created then), winners of named tournaments (MSL titles), counts of
-MSL World Championships and of clear non-MSL wins, and the highest legacy rank
-held when the competitive ranks began. Unclear data awards nothing and is
-reported. The API runs the rules once a day (`TITLE_SYNC_INTERVAL_MS`; the last
-run is logged in `dbo.CommandLog`); `npm run ops:player-titles` creates the
-tables and adds missing titles of `catalog.ts`, `npm run ops:title-sync` awards
-on demand (a dry run without `-- --apply`); `npm run ops:title-order` brought the
-category order and the ungrouped TOURNAMENT WINNER of 2026-10-02 into existing rows
-(backups `dbo.*_Backup_20261002`). A new title of a known kind is one
-row in `dbo.PlayerTitle` (or a line in `catalog.ts` plus `ops:player-titles`).
+N-TIME WORLD CHAMPION of a game) only the highest unlocked level is offered, while
+the green and the plain TOURNAMENT WINNER can both be selected; an MSL event
+template is never offered, a fixed title only to its owners, and test unlocks add
+every level on top (`availability.ts`). The same file sets the list's order, which
+the profile page shows as it comes, without category names: categories by
+`SortOrder`, Free Titles always last (a new category falls in before them); MSL in
+groups X-TIME WORLD CHAMPION (5 down to 2), WORLD, FALL, SUMMER, SPRING CHAMPION,
+each by year (newest first); season titles by year and season, the green
+TOURNAMENT WINNER first, legacy ranks from the highest, Free Titles A–Z; the same
+title in several games MSBL, MSC, SMS; equal ranks by code. `rules.ts` awards from
+existing data, each title in its game: a season's Strikers Titans (reward level
+5/5, once the season is completed; the season's title of that game is created
+then), MSL event winners (the template creates the game variant), counts of MSL
+World Championships and of clear non-MSL wins in one game, the fixed WFC titles to
+their owners (player and Discord id), and the highest legacy rank held when the
+competitive ranks began (no game). Unclear data awards nothing and is reported. The
+API runs the rules once a day (`TITLE_SYNC_INTERVAL_MS`; the last run is logged in
+`dbo.CommandLog`); `npm run ops:player-titles` creates the tables and adds missing
+titles of `catalog.ts`, `npm run ops:title-sync` awards on demand (a dry run
+without `-- --apply`); `npm run ops:title-order` and `npm run ops:title-games`
+brought the changes of 2026-10-02 into existing rows (backups
+`dbo.*_Backup_20261002` and `_20261002b`); `npm run ops:title-test-unlocks` grants
+or revokes a player's test unlocks. A new title of a known kind is one row in
+`dbo.PlayerTitle` (or a line in `catalog.ts` plus `ops:player-titles`).
 
 Responses use snake_case keys throughout; code inside the API uses camelCase
 and converts at the route (the season route shows how, since its cached

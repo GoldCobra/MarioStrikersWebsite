@@ -16,13 +16,17 @@ interface VisualState {
   act?: (page: Page) => Promise<void>;
 }
 
-/** The profile of a player with another title, as the API sends a title of that look (title_style). */
-function withTitle(playerId: number, title: string, look: string): (page: Page) => Promise<void> {
+/**
+ * The profile of a player with another title, as the API sends a title of that look (title_style) and game
+ * (title_game_code; a reference commit from before the game balls ignores it).
+ */
+function withTitle(playerId: number, title: string, look: string, game = ""): (page: Page) => Promise<void> {
   return async (page) => {
     await page.route(`**/api/players/${String(playerId)}/profile`, async (route) => {
       const response = await route.fetch();
       const body = (await response.json()) as { player?: Record<string, unknown> };
-      await route.fulfill({ response, json: { ...body, player: { ...body.player, title, title_style: look } } });
+      const player = { ...body.player, title, title_style: look, title_game_code: game };
+      await route.fulfill({ response, json: { ...body, player } });
     });
   };
 }
@@ -96,10 +100,11 @@ const STATES: VisualState[] = [
     act: showPlayerCard,
   },
   {
-    // A title with a glow under a world champion's gold bar: MSL WORLD CHAMPION, yellow with an orange glow.
+    // A title with a glow under a world champion's gold bar: MSL WORLD CHAMPION, yellow with an orange glow,
+    // after the MSBL ball.
     name: "player-card-title-glow",
     path: "/player-card?player=2",
-    route: withTitle(2, "MSL 2025 WORLD CHAMPION", "msl-world"),
+    route: withTitle(2, "MSL 2025 WORLD CHAMPION", "msl-world", "MSBL"),
     act: showPlayerCard,
   },
   {
@@ -109,10 +114,17 @@ const STATES: VisualState[] = [
     act: (page) => clickAndSettle(page, '.players-name-trigger[data-player-id="2"]'),
   },
   {
-    // A special pre-2014 title: light cyan with a blue glow.
+    // A special pre-2014 title: light cyan with a blue glow, no game.
     name: "players-popup-title-glow",
     path: "/players",
     route: withTitle(5, "WFC FINAL SEASON LEADER", "special"),
+    act: (page) => clickAndSettle(page, '.players-name-trigger[data-player-id="5"]'),
+  },
+  {
+    // A title of a game in the popup: the green TOURNAMENT WINNER of MSC after the MSC ball.
+    name: "players-popup-title-ball",
+    path: "/players",
+    route: withTitle(5, "TOURNAMENT WINNER", "tournament-x5", "MSC"),
     act: (page) => clickAndSettle(page, '.players-name-trigger[data-player-id="5"]'),
   },
   {
@@ -197,7 +209,8 @@ const STATES: VisualState[] = [
       if (!(await openProfileField(page, "[data-edit-open='title']"))) return;
       if (await page.locator("#profile-title-select").count()) {
         await page.locator("#profile-title-select").click();
-        await page.locator("[role='option'][data-value='msl-2025-world-champion']").click();
+        // Since 2026-10-02 the member holds its MSBL variant ("msl-2025-world-champion-msbl").
+        await page.locator("[role='option'][data-value^='msl-2025-world-champion']").click();
       } else {
         await page.locator("[data-field='title']").selectOption("msl-2025-world-champion");
       }

@@ -98,7 +98,10 @@ test("the editor reads the profile, under update locks when it saves", () => {
     locked,
     /SELECT a\.TitleId FROM dbo\.PlayerActiveTitle a WITH \(UPDLOCK, HOLDLOCK\) WHERE a\.PlayerId = @playerId;/,
   );
-  assert.match(locked, /SELECT u\.TitleId FROM dbo\.PlayerTitleUnlock u WHERE u\.PlayerId = @playerId;$/);
+  assert.match(
+    locked,
+    /SELECT u\.TitleId FROM dbo\.PlayerTitleUnlock u WHERE u\.PlayerId = @playerId; SELECT x\.TitleId FROM dbo\.PlayerTitleTestUnlock x WHERE x\.PlayerId = @playerId;$/,
+  );
   assert.equal(buildTakenCodesQuery(0), "");
   assert.equal(
     buildTakenCodesQuery(2),
@@ -222,35 +225,54 @@ test("a title change replaces the selected title; none removes it; the code is a
 });
 
 test("the stored profile has the selected title only while the player can select it", async () => {
-  const sets = (selected: string, unlocked: readonly string[]) => [
+  const sets = (selected: string, unlocked: readonly string[], tests: readonly string[] = []) => [
     [{ country: "" }],
     [],
     selected ? [{ TitleId: titleId(selected) }] : [],
     unlocked.map((code) => ({ TitleId: titleId(code) })),
+    tests.map((code) => ({ TitleId: titleId(code) })),
   ];
-  const read = async (selected: string, unlocked: readonly string[]) =>
+  const read = async (selected: string, unlocked: readonly string[], tests: readonly string[] = []) =>
     createSqlProfileStore(
-      createFakeDatabase(() => ({ recordsets: sets(selected, unlocked) })),
+      createFakeDatabase(() => ({ recordsets: sets(selected, unlocked, tests) })),
       {
         get: () => Promise.resolve(TITLES),
       },
     ).readProfile(223);
 
-  const champion = await read("msl-2023-world-champion", ["msl-2023-world-champion", "legacy-rookie", "legacy-legend"]);
-  assert.equal(champion.title, "msl-2023-world-champion");
+  const champion = await read("msl-3-time-world-champion-msc", [
+    "msl-3-time-world-champion-msc",
+    "legacy-rookie",
+    "legacy-legend",
+  ]);
+  assert.equal(champion.title, "msl-3-time-world-champion-msc");
   const codes = champion.titles.map((title) => title.code);
-  assert.deepEqual(codes.slice(0, 2), ["msl-2023-world-champion", "legacy-legend"]);
+  assert.deepEqual(codes.slice(0, 2), ["msl-3-time-world-champion-msc", "legacy-legend"]);
   assert.ok(codes.includes("og-player"));
   assert.ok(!codes.includes("legacy-rookie"), "only the highest legacy rank is offered");
   assert.deepEqual(champion.titles[0], {
-    code: "msl-2023-world-champion",
-    name: "MSL 2023 WORLD CHAMPION",
+    code: "msl-3-time-world-champion-msc",
+    name: "3-TIME WORLD CHAMPION",
     category: "msl",
     categoryName: "MSL Titles",
     style: "msl-world",
+    gameCode: "MSC",
   });
+  // Test unlocks (player 223) add titles on top, also another player's fixed one; regular ones stay as they are.
+  const tester = await read(
+    "wfc-5012-daily-points-world-record",
+    ["legacy-rookie"],
+    ["wfc-5012-daily-points-world-record"],
+  );
+  assert.equal(tester.title, "wfc-5012-daily-points-world-record");
+  assert.ok(tester.titles.some((title) => title.code === "legacy-rookie"));
 
   assert.equal((await read("og-player", [])).title, "og-player");
-  assert.equal((await read("msl-2023-world-champion", [])).title, "", "a title no longer unlocked is not selected");
+  assert.equal(
+    (await read("msl-2023-world-champion", ["msl-2023-world-champion"])).title,
+    "",
+    "a template is never selected",
+  );
+  assert.equal((await read("tournament-winner-sms", [])).title, "", "a title no longer unlocked is not selected");
   assert.equal((await read("legacy-rookie", ["legacy-rookie", "legacy-legend"])).title, "");
 });

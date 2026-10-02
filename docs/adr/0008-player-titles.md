@@ -1,6 +1,7 @@
 # 0008: Player titles live in the shared database
 
-Status: accepted (2026-10-02)
+Status: accepted (2026-10-02); extended by [0009](0009-per-game-titles-and-test-unlocks.md) (titles of one
+game, fixed owners, test unlocks)
 
 ## Context
 

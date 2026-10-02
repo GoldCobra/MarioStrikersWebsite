@@ -2,8 +2,14 @@
 // title with its stable code and the rule that awards it. `npm run ops:player-titles` writes the ones the
 // database does not have yet; from then on dbo.PlayerTitle is the source, so a title can be added there
 // without a release (docs/adr/0008-player-titles.md). A code never changes once it is in the database.
+//
+// Since 2026-10-02 (docs/adr/0009-per-game-titles-and-test-unlocks.md) MSL, tournament and season titles
+// belong to one game (GameCode, games.ts): N-TIME WORLD CHAMPION and TOURNAMENT WINNER have a fixed variant
+// per game, an MSL event is a template whose game variants the sync creates from the tournaments. The
+// titles they replaced stay in the list, retired, because their codes are in the database.
 
 import type { CatalogTitle } from "./availability.ts";
+import { TITLE_GAMES, type TitleGame, type TitleGameCode } from "./games.ts";
 
 /** The codes of the categories, as the title order (availability.ts) and the season titles use them. */
 export const TITLE_CATEGORY = {
@@ -19,11 +25,20 @@ export const TITLE_CATEGORY = {
 export type TitleRuleKind =
   | "everyone"
   | "manual"
+  | "fixed-players"
   | "season-titan"
+  | "msl-event"
   | "tournament-name"
   | "world-championship-count"
   | "side-tournament-count"
   | "legacy-rank";
+
+/** An MSL event title: a template that no player selects; the sync creates and awards its game variants. */
+export const TEMPLATE_RULE_KIND = "msl-event";
+
+/** The owners of the fixed WFC titles (owner, 2026-10-02): the player and the Discord account it must have. */
+export const GOLDCOBRA = { player_id: 223, discord_id: "195905866527014912" } as const;
+export const GIANT = { player_id: 17, discord_id: "110442894686453760" } as const;
 
 export interface TitleCategoryDefinition {
   readonly code: string;
@@ -44,6 +59,10 @@ export interface TitleRule {
   /** Titles of one group: a player is offered only the highest level unlocked. */
   readonly exclusiveGroup?: string;
   readonly exclusiveLevel?: number;
+  /** The game the title belongs to; its rule then counts only that game. */
+  readonly gameCode?: TitleGameCode;
+  /** false: retired, offered to nobody and awarding nothing (its unlocks stay as history). */
+  readonly isActive?: boolean;
 }
 
 export interface TitleDefinition extends TitleRule {
@@ -90,26 +109,37 @@ export const TITLE_CATEGORIES: readonly TitleCategoryDefinition[] = [
 const EVERYONE: TitleRule = { ruleKind: "everyone" };
 const MANUAL: TitleRule = { ruleKind: "manual" };
 
-const worldChampionships = (min: number): TitleRule => ({
+/** Replaced by its game variants on 2026-10-02; kept because its code is in the database. */
+const retired = (rule: TitleRule): TitleRule => ({ ...rule, isActive: false });
+
+/** At least `min` MSL World Championships won in `game` (in any game for the retired title without one). */
+const worldChampionships = (min: number, game?: TitleGame): TitleRule => ({
   ruleKind: "world-championship-count",
   ruleParams: { min },
-  exclusiveGroup: "msl-world-championships",
+  exclusiveGroup: game ? `msl-world-championships-${game.suffix}` : "msl-world-championships",
   exclusiveLevel: min,
+  ...(game ? { gameCode: game.code } : {}),
 });
 
 /**
- * Winners of the tournaments with exactly these names, in any game. A split's title goes to the winners of
- * its main event (Amateur, Challenger, Division A, Consolation and Live Events do not count); a split
- * without one names none and waits for staff.
+ * An MSL event: the winners of the tournaments with exactly these names, one title per game. A split's
+ * title goes to the winners of its main event (Amateur, Challenger, Division A, Consolation and Live Events
+ * do not count); a split without one names none and waits for staff.
  */
-const wonTournament = (...names: string[]): TitleRule =>
-  names.length ? { ruleKind: "tournament-name", ruleParams: { names } } : MANUAL;
+const mslEvent = (...names: string[]): TitleRule => ({ ruleKind: TEMPLATE_RULE_KIND, ruleParams: { names } });
 
-/** No exclusive group: a player with five wins can select the green and the plain one. */
-const tournamentWins = (min: number, styleKey?: string): TitleRule => ({
+/** No exclusive group: a player with five wins in the game can select the green and the plain one. */
+const tournamentWins = (min: number, styleKey?: string, game?: TitleGame): TitleRule => ({
   ruleKind: "side-tournament-count",
   ruleParams: { min },
   ...(styleKey ? { styleKey } : {}),
+  ...(game ? { gameCode: game.code } : {}),
+});
+
+/** Only these players, each as long as dbo.Player still has this Discord account. */
+const fixedTo = (...players: readonly { readonly player_id: number; readonly discord_id: string }[]): TitleRule => ({
+  ruleKind: "fixed-players",
+  ruleParams: { players: players.map((player) => ({ ...player })) },
 });
 
 const legacyRank = (tier: number): TitleRule => ({
@@ -121,53 +151,65 @@ const legacyRank = (tier: number): TitleRule => ({
 
 type Entry = readonly [code: string, name: string, rule: TitleRule];
 
-function inCategory(category: string, entries: readonly Entry[]): TitleDefinition[] {
-  return entries.map(([code, name, rule], index) => ({ code, name, category, sortOrder: index + 1, ...rule }));
+function inCategory(category: string, entries: readonly Entry[], firstSortOrder = 1): TitleDefinition[] {
+  return entries.map(([code, name, rule], index) => ({
+    code,
+    name,
+    category,
+    sortOrder: firstSortOrder + index,
+    ...rule,
+  }));
 }
 
-/** Every title of the list; season titles are created when a season ends with a Strikers Titan (rules.ts). */
+/**
+ * Every title of the list; season titles are created when a season ends with a Strikers Titan, MSL event
+ * titles per game when its tournaments have a winner (rules.ts). The game variants come last so the
+ * titles before them keep their place (and their ids in seededCatalog).
+ */
 export const TITLE_CATALOG: readonly TitleDefinition[] = [
   ...inCategory(TITLE_CATEGORY.msl, [
-    ["msl-5-time-world-champion", "5-TIME WORLD CHAMPION", worldChampionships(5)],
-    ["msl-4-time-world-champion", "4-TIME WORLD CHAMPION", worldChampionships(4)],
-    ["msl-3-time-world-champion", "3-TIME WORLD CHAMPION", worldChampionships(3)],
-    ["msl-2-time-world-champion", "2-TIME WORLD CHAMPION", worldChampionships(2)],
-    ["msl-season-1-world-champion", "MSL SEASON 1 WORLD CHAMPION", wonTournament("MSL Season 1 World Championship")],
-    ["msl-2022-world-champion", "MSL 2022 WORLD CHAMPION", wonTournament("MSL 2022 World Championship")],
-    ["msl-2023-world-champion", "MSL 2023 WORLD CHAMPION", wonTournament("MSL 2023 World Championship")],
-    ["msl-2024-world-champion", "MSL 2024 WORLD CHAMPION", wonTournament("MSL 2024 World Championship")],
-    ["msl-2025-world-champion", "MSL 2025 WORLD CHAMPION", wonTournament("MSL 2025 World Championship")],
-    ["msl-2026-world-champion", "MSL 2026 WORLD CHAMPION", wonTournament("MSL 2026 World Championship")],
-    ["msl-season-1-spring-champion", "MSL SEASON 1 SPRING CHAMPION", wonTournament("MSL Season 1 Spring Split")],
-    ["msl-season-1-summer-champion", "MSL SEASON 1 SUMMER CHAMPION", wonTournament("MSL Season 1 Summer Split")],
-    ["msl-season-1-fall-champion", "MSL SEASON 1 FALL CHAMPION", wonTournament("MSL Season 1 Fall Split")],
-    ["msl-2022-spring-champion", "MSL 2022 SPRING CHAMPION", wonTournament("MSL 2022 Spring Split")],
-    ["msl-2022-summer-champion", "MSL 2022 SUMMER CHAMPION", wonTournament("MSL 2022 Summer Split")],
-    ["msl-2022-fall-champion", "MSL 2022 FALL CHAMPION", wonTournament("MSL 2022 Fall Split")],
-    ["msl-2023-spring-champion", "MSL 2023 SPRING CHAMPION", wonTournament("MSL 2023 Spring Split")],
-    ["msl-2023-summer-champion", "MSL 2023 SUMMER CHAMPION", wonTournament("MSL 2023 Summer Split - Premier Event")],
-    ["msl-2023-fall-champion", "MSL 2023 FALL CHAMPION", wonTournament("MSL 2023 Fall Split - Premier Event")],
-    ["msl-2024-spring-champion", "MSL 2024 SPRING CHAMPION", wonTournament("MSL 2024 Spring Split - Premier Event")],
-    ["msl-2024-summer-champion", "MSL 2024 SUMMER CHAMPION", wonTournament("MSL 2024 Summer Split - Premier Event")],
-    ["msl-2024-fall-champion", "MSL 2024 FALL CHAMPION", wonTournament("MSL 2024 Fall Split - Premier Event")],
-    ["msl-2025-spring-champion", "MSL 2025 SPRING CHAMPION", wonTournament()],
-    ["msl-2025-summer-champion", "MSL 2025 SUMMER CHAMPION", wonTournament("MSL 2025 Summer Split - Premier Event")],
-    ["msl-2025-fall-champion", "MSL 2025 FALL CHAMPION", wonTournament("MSL 2025 Fall Split - Premier Event")],
-    ["msl-2026-spring-champion", "MSL 2026 SPRING CHAMPION", wonTournament("MSL 2026 Spring Series")],
+    ["msl-5-time-world-champion", "5-TIME WORLD CHAMPION", retired(worldChampionships(5))],
+    ["msl-4-time-world-champion", "4-TIME WORLD CHAMPION", retired(worldChampionships(4))],
+    ["msl-3-time-world-champion", "3-TIME WORLD CHAMPION", retired(worldChampionships(3))],
+    ["msl-2-time-world-champion", "2-TIME WORLD CHAMPION", retired(worldChampionships(2))],
+    ["msl-season-1-world-champion", "MSL SEASON 1 WORLD CHAMPION", mslEvent("MSL Season 1 World Championship")],
+    ["msl-2022-world-champion", "MSL 2022 WORLD CHAMPION", mslEvent("MSL 2022 World Championship")],
+    ["msl-2023-world-champion", "MSL 2023 WORLD CHAMPION", mslEvent("MSL 2023 World Championship")],
+    ["msl-2024-world-champion", "MSL 2024 WORLD CHAMPION", mslEvent("MSL 2024 World Championship")],
+    ["msl-2025-world-champion", "MSL 2025 WORLD CHAMPION", mslEvent("MSL 2025 World Championship")],
+    ["msl-2026-world-champion", "MSL 2026 WORLD CHAMPION", mslEvent("MSL 2026 World Championship")],
+    ["msl-season-1-spring-champion", "MSL SEASON 1 SPRING CHAMPION", mslEvent("MSL Season 1 Spring Split")],
+    ["msl-season-1-summer-champion", "MSL SEASON 1 SUMMER CHAMPION", mslEvent("MSL Season 1 Summer Split")],
+    ["msl-season-1-fall-champion", "MSL SEASON 1 FALL CHAMPION", mslEvent("MSL Season 1 Fall Split")],
+    ["msl-2022-spring-champion", "MSL 2022 SPRING CHAMPION", mslEvent("MSL 2022 Spring Split")],
+    ["msl-2022-summer-champion", "MSL 2022 SUMMER CHAMPION", mslEvent("MSL 2022 Summer Split")],
+    ["msl-2022-fall-champion", "MSL 2022 FALL CHAMPION", mslEvent("MSL 2022 Fall Split")],
+    ["msl-2023-spring-champion", "MSL 2023 SPRING CHAMPION", mslEvent("MSL 2023 Spring Split")],
+    ["msl-2023-summer-champion", "MSL 2023 SUMMER CHAMPION", mslEvent("MSL 2023 Summer Split - Premier Event")],
+    ["msl-2023-fall-champion", "MSL 2023 FALL CHAMPION", mslEvent("MSL 2023 Fall Split - Premier Event")],
+    ["msl-2024-spring-champion", "MSL 2024 SPRING CHAMPION", mslEvent("MSL 2024 Spring Split - Premier Event")],
+    ["msl-2024-summer-champion", "MSL 2024 SUMMER CHAMPION", mslEvent("MSL 2024 Summer Split - Premier Event")],
+    ["msl-2024-fall-champion", "MSL 2024 FALL CHAMPION", mslEvent("MSL 2024 Fall Split - Premier Event")],
+    // No split event in 2025's spring: it waits for staff to name the tournament(s).
+    ["msl-2025-spring-champion", "MSL 2025 SPRING CHAMPION", mslEvent()],
+    ["msl-2025-summer-champion", "MSL 2025 SUMMER CHAMPION", mslEvent("MSL 2025 Summer Split - Premier Event")],
+    ["msl-2025-fall-champion", "MSL 2025 FALL CHAMPION", mslEvent("MSL 2025 Fall Split - Premier Event")],
+    ["msl-2026-spring-champion", "MSL 2026 SPRING CHAMPION", mslEvent("MSL 2026 Spring Series")],
     // Named like the 2026 Spring Series; they apply once such a tournament is entered.
-    ["msl-2026-summer-champion", "MSL 2026 SUMMER CHAMPION", wonTournament("MSL 2026 Summer Series")],
-    ["msl-2026-fall-champion", "MSL 2026 FALL CHAMPION", wonTournament("MSL 2026 Fall Series")],
+    ["msl-2026-summer-champion", "MSL 2026 SUMMER CHAMPION", mslEvent("MSL 2026 Summer Series")],
+    ["msl-2026-fall-champion", "MSL 2026 FALL CHAMPION", mslEvent("MSL 2026 Fall Series")],
   ]),
   ...inCategory(TITLE_CATEGORY.tournament, [
-    ["tournament-winner", "TOURNAMENT WINNER", tournamentWins(1)],
-    ["tournament-winner-green", "TOURNAMENT WINNER", tournamentWins(5, "green")],
+    ["tournament-winner", "TOURNAMENT WINNER", retired(tournamentWins(1))],
+    ["tournament-winner-green", "TOURNAMENT WINNER", retired(tournamentWins(5, "green"))],
   ]),
-  // World records and final leaders of Nintendo Wi-Fi Connection (until 2014): staff only.
+  // World records and final leaders of Nintendo Wi-Fi Connection (until 2014); four of them belong to
+  // their record holders for good (owner, 2026-10-02).
   ...inCategory(TITLE_CATEGORY.special, [
-    ["wfc-200-0-season-world-record", "WFC 200-0 SEASON WORLD RECORD", MANUAL],
-    ["wfc-66-0-daily-world-record", "WFC 66-0 DAILY WORLD RECORD", MANUAL],
-    ["wfc-5012-daily-points-world-record", "WFC 5012 DAILY POINTS WORLD RECORD", MANUAL],
-    ["wfc-final-daily-leader", "WFC FINAL DAILY LEADER", MANUAL],
+    ["wfc-200-0-season-world-record", "WFC 200-0 SEASON WORLD RECORD", fixedTo(GOLDCOBRA)],
+    ["wfc-66-0-daily-world-record", "WFC 66-0 DAILY WORLD RECORD", fixedTo(GOLDCOBRA)],
+    ["wfc-5012-daily-points-world-record", "WFC 5012 DAILY POINTS WORLD RECORD", fixedTo(GIANT)],
+    ["wfc-final-daily-leader", "WFC FINAL DAILY LEADER", fixedTo(GOLDCOBRA)],
     ["wfc-final-season-leader", "WFC FINAL SEASON LEADER", MANUAL],
   ]),
   ...inCategory(TITLE_CATEGORY.legacy, [
@@ -202,6 +244,26 @@ export const TITLE_CATALOG: readonly TitleDefinition[] = [
     ["football-is-life", "FOOTBALL IS LIFE", EVERYONE],
     ["wins-without-a-goalie", "WINS WITHOUT A GOALIE", EVERYONE],
   ]),
+  // The game variants of 2026-10-02: wins count only in their game, never added up across games.
+  ...inCategory(
+    TITLE_CATEGORY.msl,
+    [5, 4, 3, 2].flatMap((min) =>
+      TITLE_GAMES.map((game): Entry => [
+        `msl-${String(min)}-time-world-champion-${game.suffix}`,
+        `${String(min)}-TIME WORLD CHAMPION`,
+        worldChampionships(min, game),
+      ]),
+    ),
+    29,
+  ),
+  ...inCategory(
+    TITLE_CATEGORY.tournament,
+    TITLE_GAMES.flatMap((game): Entry[] => [
+      [`tournament-winner-green-${game.suffix}`, "TOURNAMENT WINNER", tournamentWins(5, "green", game)],
+      [`tournament-winner-${game.suffix}`, "TOURNAMENT WINNER", tournamentWins(1, undefined, game)],
+    ]),
+    3,
+  ),
 ];
 
 /** The catalog as the database holds it after ops:player-titles (ids in list order), for fixtures and tests. */
@@ -223,7 +285,8 @@ export function seededCatalog(): CatalogTitle[] {
       styleKey: title.styleKey ?? "",
       exclusiveGroup: title.exclusiveGroup ?? "",
       exclusiveLevel: title.exclusiveLevel ?? 0,
-      isActive: true,
+      gameCode: title.gameCode ?? "",
+      isActive: title.isActive ?? true,
     };
   });
 }

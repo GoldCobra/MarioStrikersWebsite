@@ -10,7 +10,7 @@ import { escapeHtml } from "@ms/shared/html";
 import { LEGACY_MSC_REGIONS, MSC_PLATFORMS, MSC_REGIONS, type FieldError } from "@ms/shared/friend-codes";
 import { loginPath } from "@ms/shared/site/navigation";
 import { titleLookClass } from "../players/profile-data.ts";
-import { showFlag } from "../players/player-profile-view.ts";
+import { showFlag, titleBallHtml } from "../players/player-profile-view.ts";
 import {
   countryLabel,
   countryOptions,
@@ -108,7 +108,8 @@ function savedOf(profile: EditableProfile): SavedProfile {
 
 /**
  * The title list: "No player title", then only the member's titles, in the order the API sends them (by
- * category and each category's own rule, titles/availability.ts), each in its look; no category names.
+ * category and each category's own rule, titles/availability.ts), each in its look with its game's ball;
+ * no category names.
  */
 function titleOptions(titles: EditableProfile["titles"]): CountryOption[] {
   return [
@@ -118,6 +119,7 @@ function titleOptions(titles: EditableProfile["titles"]): CountryOption[] {
       label: title.name,
       flag: "",
       className: titleLookClass(title.style),
+      iconHtml: titleBallHtml(title.game_code),
     })),
   ];
 }
@@ -253,7 +255,7 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
     mount.innerHTML = viewRow(
       TITLE_FIELD,
       title
-        ? `<span class="player-popup-code-value ${titleLookClass(title.style)}">${escapeHtml(title.name)}</span>`
+        ? `<span class="player-popup-code-value ${titleLookClass(title.style)}">${titleBallHtml(title.game_code)}${escapeHtml(title.name)}</span>`
         : `<span class="player-popup-code-value">${escapeHtml(MESSAGES.noTitle)}</span>`,
       pencil(TITLE_FIELD, "Change your title"),
       title ? " profile-title-row" : " profile-title-row profile-code-missing",

@@ -18,7 +18,8 @@ const SNAKE_CASED_PATHS = new Set(["/api/competitive-season/current", "/api/wiim
 const AUTH_ME_PATH = "/api/auth/me";
 const UNLINKED_SAMPLE_ACCOUNT = "900000000000000002";
 
-// Player titles: a profile names its player's selected title (player.title, player.title_style).
+// Player titles: a profile names its player's selected title (player.title, player.title_style) and its
+// game (player.title_game_code, since 2026-10-02).
 const PLAYER_PROFILE_PATH = /^\/api\/players\/\d+\/profile$/;
 
 function withoutPlayerTitle(profile: unknown): unknown {
@@ -27,6 +28,7 @@ function withoutPlayerTitle(profile: unknown): unknown {
   const rest = { ...(player as Record<string, unknown>) };
   delete rest.title;
   delete rest.title_style;
+  delete rest.title_game_code;
   return { ...(profile as Record<string, unknown>), player: rest };
 }
 

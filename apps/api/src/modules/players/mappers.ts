@@ -104,8 +104,10 @@ export interface PlayerProfile {
     is_active: boolean;
     /** The selected player title in FULL CAPS; "" for none. */
     title: string;
-    /** Its look for the later formatting ("green"); "" for the plain one. */
+    /** Its look (titles/availability.ts titleLook: colour and glow); "" without a title. */
     title_style: string;
+    /** Its game ("MSBL", "MSC", "SMS"), shown as the game's ball before it; "" for none. */
+    title_game_code: string;
   };
   friend_codes: FriendCodes;
   season_awards: SeasonAward[];
@@ -516,18 +518,26 @@ function getRecordset(recordsets: unknown, index: number): Row[] {
   return Array.isArray(set) ? (set as Row[]) : [];
 }
 
-/** The selected title, while the player can still select it (the batch's last two result sets). */
+/** The selected title, while the player can still select it (the batch's last three result sets). */
 export function buildPlayerTitle(
   selectedRows: readonly Row[],
   unlockedRows: readonly Row[],
   catalog: readonly CatalogTitle[],
-): Pick<PlayerProfile["player"], "title" | "title_style"> {
-  const unlocked = unlockedRows.map((row) => Number(row.title_id));
-  const title = selectedTitle(catalog, unlocked, toPositiveIntId(selectedRows[0]?.title_id));
-  return { title: title ? titleText(title.name) : "", title_style: title ? titleLook(title) : "" };
+  holder: { readonly playerId: number | null; readonly testRows?: readonly Row[] } = { playerId: null },
+): Pick<PlayerProfile["player"], "title" | "title_style" | "title_game_code"> {
+  const ids = (rows: readonly Row[]): number[] => rows.map((row) => Number(row.title_id));
+  const title = selectedTitle(catalog, ids(unlockedRows), toPositiveIntId(selectedRows[0]?.title_id), {
+    playerId: holder.playerId,
+    testUnlockedIds: ids(holder.testRows ?? []),
+  });
+  return {
+    title: title ? titleText(title.name) : "",
+    title_style: title ? titleLook(title) : "",
+    title_game_code: title?.gameCode ?? "",
+  };
 }
 
-/** The profile DTO from the eleven result sets of the profile batch; null when the player is missing. */
+/** The profile DTO from the twelve result sets of the profile batch; null when the player is missing. */
 export function buildPlayerProfileFromRecordsets(
   recordsets: unknown,
   titleCatalog: readonly CatalogTitle[] = [],
@@ -554,6 +564,10 @@ export function buildPlayerProfileFromRecordsets(
         getRecordset(recordsets, PROFILE_RECORDSET.selectedTitle),
         getRecordset(recordsets, PROFILE_RECORDSET.unlockedTitles),
         titleCatalog,
+        {
+          playerId: Number(playerRow.player_id) || null,
+          testRows: getRecordset(recordsets, PROFILE_RECORDSET.testUnlockedTitles),
+        },
       ),
     },
     friend_codes: buildFriendCodes(getRecordset(recordsets, PROFILE_RECORDSET.friendCodes)),
