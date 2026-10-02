@@ -18,12 +18,10 @@
 import { normalizeText, toText } from "@ms/shared/text";
 import { formatSeasonAwardSeasonName } from "../players/mappers.ts";
 import { titleText, type CatalogTitle } from "./availability.ts";
+import { TITLE_CATEGORY } from "./catalog.ts";
 
 /** CompetitiveSeasonRewardEarned.TierOrder of Strikers Titan (packages/shared/src/ranks.ts). */
 export const TITAN_REWARD_TIER_ORDER = 7;
-
-/** The category of the titles created for seasons. */
-export const SEASON_TITLE_CATEGORY = "competitive-season";
 
 /** Every MSL event, also the side events with MSL in their name; none counts as a tournament win. */
 const MSL = /\bMSL\b/i;
@@ -368,7 +366,7 @@ export function planTitleAwards(sources: TitleSources): TitleAwardPlan {
       newTitles.push({
         code,
         name: seasonTitanTitleName(season.displayName),
-        category: SEASON_TITLE_CATEGORY,
+        category: TITLE_CATEGORY.season,
         sortOrder: season.seasonNumber,
         ruleKind: "season-titan",
         ruleParams: JSON.stringify({ season_id: seasonId }),

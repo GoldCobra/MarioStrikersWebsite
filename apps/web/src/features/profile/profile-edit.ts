@@ -1,6 +1,7 @@
 // Editing on the profile page itself. A pencil opens one field (the title, the country, the Switch code, an
 // MSC code) for editing without saving it; "+" adds an MSC code (at most three) and "−" removes one while it
-// is open. The title is picked from the member's titles; the line under the name shows it at once.
+// is open. The title is picked from the member's titles; the line under the name shows it at once. A click
+// outside an open field closes it again; what was entered stays in the draft.
 // Every change is kept in a draft, marked as unsaved, until SAVE sends the whole profile in one request
 // (PUT /api/profile/me/editable) or DISCARD drops it. When the profile was changed elsewhere meanwhile (in
 // Discord), the draft is laid on top of what is saved now, so nothing is overwritten unseen.
@@ -21,6 +22,7 @@ import {
   checkDraft,
   createDraft,
   errorsByField,
+  isBlankNewRow,
   mscField,
   newMscRow,
   parseStoredDraft,
@@ -55,7 +57,7 @@ const MESSAGES = {
   unsaved: "Unsaved changes",
   saving: "Saving…",
   confirmDiscard: "Discard all unsaved changes?",
-  noTitle: "No title",
+  noTitle: "No player title",
 } as const;
 
 const icon = (paths: string): string =>
@@ -96,16 +98,17 @@ function savedOf(profile: EditableProfile): SavedProfile {
   };
 }
 
-/** The title list: "No title", then the member's titles grouped by their category, in the list's order. */
+/**
+ * The title list: "No player title", then only the member's titles, in the order the API sends them (by
+ * category and each category's own rule, titles/availability.ts); no category names.
+ */
 function titleOptions(titles: EditableProfile["titles"], selected: string): string {
-  const groups = new Map<string, string[]>();
-  for (const title of titles) {
-    const option = `<option value="${escapeHtml(title.code)}"${title.code === selected ? " selected" : ""}>${escapeHtml(title.name)}</option>`;
-    groups.set(title.category_name, [...(groups.get(title.category_name) ?? []), option]);
-  }
   return [
     `<option value=""${selected ? "" : " selected"}>${escapeHtml(MESSAGES.noTitle)}</option>`,
-    ...[...groups].map(([label, entries]) => `<optgroup label="${escapeHtml(label)}">${entries.join("")}</optgroup>`),
+    ...titles.map(
+      (title) =>
+        `<option value="${escapeHtml(title.code)}"${title.code === selected ? " selected" : ""}>${escapeHtml(title.name)}</option>`,
+    ),
   ].join("");
 }
 
@@ -160,6 +163,8 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
   let errors: FieldErrors = new Map();
   let saving = false;
   let confirming = false;
+  /** How often the lines were drawn; a click outside a field draws them only if nothing else did. */
+  let renders = 0;
   let slotBelowView = false;
 
   const blocked = (): boolean => profile.discord.membership === "not_member";
@@ -509,7 +514,7 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
     if (!notice) {
       notice = document.createElement("p");
       notice.className = "profile-edit-notice";
-      mount.querySelector(":scope > .profile-discord-lines, :scope > .profile-club-line")?.after(notice);
+      mount.querySelector(":scope > .profile-top-line")?.after(notice);
       if (!notice.isConnected) mount.prepend(notice);
     }
     notice.textContent = MESSAGES.notMember;
@@ -530,6 +535,7 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
   }
 
   function render(): void {
+    renders += 1;
     renderNotice();
     renderCountry();
     renderTitle();
@@ -805,6 +811,39 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
 
   // -------------------------------------------------------------------------------------------------
   // Events
+
+  // A click outside an open field closes it: anywhere but its line, whose selects, digit fields, country
+  // list, "×" and "−" belong to it. The draft keeps what was entered, marked unsaved; nothing is saved or
+  // reverted, and a code line added with "+" and left empty goes. Seen in the capture phase, before the
+  // card's own handler; the lines are drawn anew only once the click has passed (in the bubble phase, or
+  // right after it if something stopped it on the way), so it still reaches a pencil, "+", SAVE or
+  // DISCARD, and only when the click drew nothing itself.
+  let closedAt: number | null = null;
+  function closeFieldsOutside(event: MouseEvent): void {
+    if (!root.isConnected) {
+      document.removeEventListener("click", closeFieldsOutside, true);
+      document.removeEventListener("click", drawClosedFields);
+      return;
+    }
+    if (!openFields.size || saving) return;
+    const target = event.target instanceof Node ? event.target : null;
+    const closing = [...openFields].filter(
+      (field) => !root.querySelector(`[data-edit-row][data-field-row="${CSS.escape(field)}"]`)?.contains(target),
+    );
+    if (!closing.length) return;
+    for (const field of closing) openFields.delete(field);
+    draft = { ...draft, msc: draft.msc.filter((row) => !(closing.includes(mscField(row)) && isBlankNewRow(row))) };
+    closedAt = renders;
+    window.setTimeout(drawClosedFields, 0);
+  }
+  function drawClosedFields(): void {
+    if (closedAt === null) return;
+    const drawn = closedAt;
+    closedAt = null;
+    if (root.isConnected && renders === drawn) render();
+  }
+  document.addEventListener("click", closeFieldsOutside, true);
+  document.addEventListener("click", drawClosedFields);
 
   root.addEventListener("click", (event) => {
     const element = event.target instanceof Element ? event.target : null;

@@ -10,10 +10,16 @@ export interface RecordedQuery {
   readonly multiple: boolean;
 }
 
+export interface QueryResult {
+  recordset?: unknown[];
+  recordsets?: unknown[][];
+  rowsAffected?: number[];
+}
+
 export type QueryHandler = (
   sql: string,
   inputs: Readonly<Record<string, unknown>>,
-) => { recordset?: unknown[]; recordsets?: unknown[][] } | Promise<{ recordset?: unknown[]; recordsets?: unknown[][] }>;
+) => QueryResult | Promise<QueryResult>;
 
 export interface FakeDatabase extends Pick<Database, "withPool" | "measurePool" | "withTransaction"> {
   readonly queries: RecordedQuery[];
