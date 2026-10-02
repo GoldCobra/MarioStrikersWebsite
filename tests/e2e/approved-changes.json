@@ -1,22 +1,15 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "1e5572f4abedd3638490118dde67152a725c8895",
+  "reference": "2d4956154efed2dd69e8407cf26043f1bec985b7",
   "changes": [
     {
-      "screenshots": ["states/players-popup*", "states/leaderboard-popup*", "states/whr-popup*"],
-      "reason": "Fields (ADR 0010): a heading is 0.15rem above its first box instead of 0.42rem, each value and code prefix is trimmed to its capitals (text-box) and so centred in its 26px box, about a pixel lower than before; a title's letter spacing is 0.45 instead of 0.6 of the Reporter spacing. Everything else in the popup is unchanged."
-    },
-    {
-      "screenshots": ["states/player-card*"],
-      "reason": "The Discord card has the popup's field changes (heading gap 0.15rem instead of 0.3rem, centred values, tighter title spacing) and looks the same in any window: at 390px it no longer takes the phone rules (Reporter tokens, wrapping code lines, rating card heights), and its name is 1.24rem at every width (at 1024px it was 1.08rem)."
-    },
-    {
-      "screenshots": ["states/account-menu*"],
-      "reason": "The account menu's items are spaced like every dropdown's options (--dropdown-*: 3px padding, at least 24px tall, 2px list padding) instead of 34px rows; type and colours are unchanged."
-    },
-    {
-      "screenshots": ["states/profile-*"],
-      "reason": "Profile page (ADR 0010): headings 0.15rem above their boxes, every line 26px tall open or closed (pencils and fields 24px), values centred; the dropdowns take the line's 15px type and 24px options, show the chosen option with a gold edge and lie over the page; a title in its field and list has the title type of the popup (tighter spacing, glow no longer cut); the native selects and digits take the line's 15px type."
+      "screenshots": [
+        "states/player-card-title-glow*",
+        "states/players-popup-title-glow*",
+        "states/profile-title-edit*",
+        "states/profile-title-list*"
+      ],
+      "reason": "Owner (2026-10-02): the glowing titles a little stronger. The season, special and MSL WORLD CHAMPION glows go from 80% to 95% opacity with the same blur radius (6px/5px/6px), so the glow reaches no further and its room stays; colours and the titles without a glow are unchanged."
     }
   ]
 }
