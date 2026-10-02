@@ -28,6 +28,8 @@ import { getPlayerProfile, getPlayerProfileByDiscordId, getPlayersList } from ".
 import { createSqlProfileStore } from "./modules/profile/repository.ts";
 import { createProfileService, type ProfileService } from "./modules/profile/service.ts";
 import { getCompetitiveSeasonStatus } from "./modules/season/service.ts";
+import { createTitleCatalog } from "./modules/titles/repository.ts";
+import { createTitleSyncSchedule } from "./modules/titles/service.ts";
 import { WiimmfiService, fetchWiimmfiPlayers, type WiimmfiPlayer } from "./modules/wiimmfi/service.ts";
 
 export interface DataSource {
@@ -89,6 +91,14 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
   });
   // FlareSolverr itself waits up to 60 s for Cloudflare; the request gets a little longer.
   const wiimmfi = new WiimmfiService({ log, load: () => fetchWiimmfiPlayers(config.flareSolverrUrl, 70_000) });
+  // Player titles: the catalog for profiles and the editor, and the daily sync that awards new ones.
+  const titleCatalog = createTitleCatalog(database);
+  const titleSync = createTitleSyncSchedule({
+    database,
+    log,
+    catalog: titleCatalog,
+    intervalMs: config.titleSyncIntervalMs,
+  });
 
   const loaders: Record<string, () => Promise<unknown>> = {
     [PLAYERS_LIST_KEY]: async () => {
@@ -133,10 +143,11 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     healthCheck: () => database.healthCheck(),
     publicData,
     getLeaderboardRows: (query) => getLeaderboardRows(database, query, limits),
-    getPlayerProfile: (playerId) => getPlayerProfile(database, log, playerId),
-    getPlayerProfileByDiscordId: (discordId) => getPlayerProfileByDiscordId(database, log, discordId),
+    getPlayerProfile: (playerId) => getPlayerProfile(database, log, playerId, () => titleCatalog.get()),
+    getPlayerProfileByDiscordId: (discordId) =>
+      getPlayerProfileByDiscordId(database, log, discordId, () => titleCatalog.get()),
     profiles: createProfileService({
-      store: createSqlProfileStore(database),
+      store: createSqlProfileStore(database, titleCatalog),
       // The editor shows the member's current server names; they are asked again after a minute.
       members: new DiscordMemberDirectory({
         ...discordRest,
@@ -160,8 +171,10 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
       database.startKeepalive();
       publicData.start();
       events.start();
+      titleSync.start();
     },
     async stop() {
+      titleSync.stop();
       await publicData.stop();
       await events.stop();
       await database.close();

@@ -1,5 +1,5 @@
 // The Discord identity of a login or a session, the name a new player profile gets from it, and the
-// editor's profile as the API sends it.
+// editor's profile as the API sends it (with the player's titles to choose from).
 
 import { normalizeText, toText } from "@ms/shared/text";
 import type { DiscordLogin } from "../auth/discord-oauth.ts";
@@ -68,5 +68,13 @@ export function toEditableResponse(profile: EditableProfile): Record<string, unk
     switch_code: profile.switchCode,
     msc_codes: profile.mscCodes.map((entry) => ({ region: entry.region, platform: entry.platform, code: entry.code })),
     countries: profile.countries.map((country) => ({ code: country.code, name: country.name })),
+    title: profile.title,
+    titles: profile.titles.map((title) => ({
+      code: title.code,
+      name: title.name,
+      category: title.category,
+      category_name: title.categoryName,
+      style: title.style,
+    })),
   };
 }

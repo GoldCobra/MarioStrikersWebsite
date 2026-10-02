@@ -33,6 +33,10 @@ export interface ProfilePlayer {
   readonly club_name?: unknown;
   readonly club_tag?: unknown;
   readonly results_url?: unknown;
+  /** The selected player title, in FULL CAPS; "" for none. */
+  readonly title?: unknown;
+  /** Its look ("green"), for the later formatting; "" for the plain one. */
+  readonly title_style?: unknown;
 }
 
 export interface PlayerProfile {

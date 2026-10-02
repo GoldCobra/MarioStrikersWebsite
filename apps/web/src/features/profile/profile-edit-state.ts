@@ -1,5 +1,5 @@
-// The profile page's editing as data, without DOM: the draft (country, Switch code and MSC codes as the
-// member has changed them so far), which of its fields differ from what is saved, the whole profile one
+// The profile page's editing as data, without DOM: the draft (title, country, Switch code and MSC codes as
+// the member has changed them so far), which of its fields differ from what is saved, the whole profile one
 // SAVE sends, the errors of each field, and what is left of the draft when the profile was changed
 // elsewhere (in Discord) meanwhile.
 
@@ -31,10 +31,24 @@ export interface EditableProfile {
   readonly switch_code: string;
   readonly msc_codes: readonly MscCodeInput[];
   readonly countries: readonly { readonly code: string; readonly name: string }[];
+  /** The selected title's code, "" for none. */
+  readonly title: string;
+  /** The titles the member can select, in the order of the list. */
+  readonly titles: readonly TitleOption[];
+}
+
+/** A player title the member can select (GET /api/profile/me/editable). */
+export interface TitleOption {
+  readonly code: string;
+  /** FULL CAPS. */
+  readonly name: string;
+  readonly category: string;
+  readonly category_name: string;
+  readonly style: string;
 }
 
 /** What is saved of a profile; the base a draft is compared with. */
-export type SavedProfile = Pick<EditableProfile, "country" | "switch_code" | "msc_codes">;
+export type SavedProfile = Pick<EditableProfile, "country" | "switch_code" | "msc_codes" | "title">;
 
 export type Blocks = readonly [string, string, string];
 
@@ -50,12 +64,15 @@ export interface DraftMsc {
 }
 
 export interface Draft {
+  /** A title code, "" for none. */
+  readonly title: string;
   readonly country: string;
   readonly switchBlocks: Blocks;
   readonly msc: readonly DraftMsc[];
 }
 
-/** Field keys: "country", "switch", "msc" (the list) and "msc:<row key>". */
+/** Field keys: "title", "country", "switch", "msc" (the list) and "msc:<row key>". */
+export const TITLE_FIELD = "title";
 export const COUNTRY_FIELD = "country";
 export const SWITCH_FIELD = "switch";
 export const MSC_LIST_FIELD = "msc";
@@ -67,6 +84,7 @@ export function mscField(row: Pick<DraftMsc, "key">): string {
 /** The draft of a saved profile: nothing changed yet. */
 export function createDraft(saved: SavedProfile): Draft {
   return {
+    title: saved.title,
     country: saved.country,
     switchBlocks: friendCodeBlocks(saved.switch_code),
     msc: saved.msc_codes.map((entry) => ({
@@ -117,6 +135,7 @@ function rowChanged(saved: SavedProfile, row: DraftMsc): boolean {
 /** The fields whose draft differs from what is saved ("msc" when a saved code was removed). */
 export function changedFields(draft: Draft, saved: SavedProfile): Set<string> {
   const fields = new Set<string>();
+  if (draft.title !== saved.title) fields.add(TITLE_FIELD);
   if (draft.country !== saved.country) fields.add(COUNTRY_FIELD);
   if (blocksText(draft.switchBlocks) !== blocksText(friendCodeBlocks(saved.switch_code))) fields.add(SWITCH_FIELD);
   for (const row of draft.msc) if (rowChanged(saved, row)) fields.add(mscField(row));
@@ -145,6 +164,7 @@ export function draftRequest(draft: Draft): DraftRequest {
   const rows = draft.msc.filter((row) => !isBlankNewRow(row));
   return {
     request: {
+      title: draft.title,
       country: draft.country,
       switch_code: codeOf(draft.switchBlocks),
       msc_codes: rows.map((row) => ({ region: row.region, platform: row.platform, code: codeOf(row.blocks) })),
@@ -153,8 +173,9 @@ export function draftRequest(draft: Draft): DraftRequest {
   };
 }
 
-/** The field an API error is about: "country", "switch", "msc:<row key>" or the list ("msc"). */
+/** The field an API error is about: "title", "country", "switch", "msc:<row key>" or the list ("msc"). */
 export function fieldOfError(path: string, rowKeys: readonly string[]): string {
+  if (path === "title") return TITLE_FIELD;
   if (path === "country") return COUNTRY_FIELD;
   if (path === "switch_code") return SWITCH_FIELD;
   const match = /^msc_codes\.(\d+)(?:\.|$)/.exec(path);
@@ -182,7 +203,12 @@ export type DraftCheck =
   | { readonly ok: false; readonly errors: FieldErrors; readonly rowKeys: readonly string[] };
 
 /** The draft checked with the rules the API applies, before anything is sent. */
-export function checkDraft(draft: Draft, saved: SavedProfile, countries: EditableProfile["countries"]): DraftCheck {
+export function checkDraft(
+  draft: Draft,
+  saved: SavedProfile,
+  countries: EditableProfile["countries"],
+  titles: EditableProfile["titles"],
+): DraftCheck {
   const { request, rowKeys } = draftRequest(draft);
   const errors = new Map<string, string[]>();
   const add = (field: string, message: string): void => {
@@ -202,6 +228,7 @@ export function checkDraft(draft: Draft, saved: SavedProfile, countries: Editabl
   const checked = validateEditableProfile(request, {
     isAllowedCountry: (code) => code === saved.country || countries.some((country) => country.code === code),
     storedPlatform: (region, code) => stored.get(`${region}:${code}`) ?? null,
+    isAvailableTitle: (code) => titles.some((title) => title.code === code),
   });
   if (!checked.ok) {
     for (const error of checked.errors) {
@@ -233,11 +260,21 @@ export function rebaseDraft(
   base: SavedProfile,
   current: SavedProfile,
   describeCountry: (code: string) => string,
+  describeTitle: (code: string) => string = (code) => code,
 ): Rebased {
   const notes: string[] = [];
   const conflicts = new Set<string>();
   const baseDraft = createDraft(base);
   const currentDraft = createDraft(current);
+
+  let title = current.title;
+  if (draft.title !== base.title) {
+    title = draft.title;
+    if (current.title !== base.title && current.title !== draft.title) {
+      conflicts.add(TITLE_FIELD);
+      notes.push(`Title saved now: ${current.title ? describeTitle(current.title) : "no title"}.`);
+    }
+  }
 
   let country = current.country;
   if (draft.country !== base.country) {
@@ -291,12 +328,12 @@ export function rebaseDraft(
       notes.push(`MSC code ${entry.original} was added elsewhere.`);
     }
   }
-  return { draft: { country, switchBlocks, msc: rows }, notes, conflicts };
+  return { draft: { title, country, switchBlocks, msc: rows }, notes, conflicts };
 }
 
 /** The draft as sessionStorage keeps it over an expired login. */
 export interface StoredDraft {
-  readonly v: 2;
+  readonly v: 3;
   readonly id: string;
   readonly base: SavedProfile;
   readonly draft: Draft;
@@ -317,18 +354,23 @@ function isMscInput(value: unknown): value is MscCodeInput {
   );
 }
 
-/** A stored draft of this member, or null for anything else (an older format included). */
+/**
+ * A stored draft of this member, or null for anything else. A draft from before titles (v2) has none: it
+ * leaves the title as it is saved.
+ */
 export function parseStoredDraft(raw: string | null, discordId: string): StoredDraft | null {
   if (!raw) return null;
   try {
-    const value = JSON.parse(raw) as Partial<StoredDraft> | null;
-    if (value?.v !== 2 || value.id !== discordId) return null;
+    const value = JSON.parse(raw) as (Partial<Omit<StoredDraft, "v">> & { readonly v?: unknown }) | null;
+    if ((value?.v !== 2 && value?.v !== 3) || value.id !== discordId) return null;
     const { base, draft } = value;
     if (!base || typeof base.country !== "string" || typeof base.switch_code !== "string") return null;
     if (!Array.isArray(base.msc_codes) || !base.msc_codes.every(isMscInput)) return null;
     if (!draft || typeof draft.country !== "string" || !isBlocks(draft.switchBlocks) || !Array.isArray(draft.msc)) {
       return null;
     }
+    const withTitle = value.v === 3;
+    if (withTitle && (typeof base.title !== "string" || typeof draft.title !== "string")) return null;
     const rows = draft.msc as unknown[];
     const valid = rows.every((row) => {
       const entry = row as Partial<DraftMsc> | null;
@@ -342,7 +384,10 @@ export function parseStoredDraft(raw: string | null, discordId: string): StoredD
         isBlocks(entry.blocks)
       );
     });
-    return valid ? { v: 2, id: discordId, base, draft } : null;
+    if (!valid) return null;
+    return withTitle
+      ? { v: 3, id: discordId, base, draft }
+      : { v: 3, id: discordId, base: { ...base, title: "" }, draft: { ...draft, title: "" } };
   } catch {
     return null;
   }

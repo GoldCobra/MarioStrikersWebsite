@@ -39,6 +39,11 @@ const PROFILE: EditableProfile = {
     { code: "de", name: "Germany" },
     { code: "us", name: "United States" },
   ],
+  title: "",
+  titles: [
+    { code: "legacy-legend", name: "LEGACY LEGEND", category: "legacy-rank", category_name: "Legacy Ranks", style: "" },
+    { code: "og-player", name: "OG PLAYER", category: "free", category_name: "Free Titles", style: "" },
+  ],
 };
 
 const SAVED: SavedProfile = PROFILE;
@@ -65,6 +70,7 @@ test("a new draft is the saved profile and changes nothing", () => {
   );
   assert.equal(isDirty(draft, SAVED), false);
   assert.deepEqual(draftRequest(draft).request, {
+    title: "",
     country: "de",
     switch_code: "0012-0000-0340",
     msc_codes: SAVED.msc_codes,
@@ -80,6 +86,7 @@ test("several changes are kept together and sent in one request", () => {
   assert.deepEqual([...fields].sort(), ["country", "msc", "msc:new:1", "switch"]);
   const { request, rowKeys } = draftRequest(draft);
   assert.deepEqual(request, {
+    title: "",
     country: "us",
     switch_code: "9999-8888-7777",
     msc_codes: [
@@ -88,7 +95,7 @@ test("several changes are kept together and sent in one request", () => {
     ],
   });
   assert.deepEqual(rowKeys, ["saved:1111-2222-3333", "new:1"]);
-  const checked = checkDraft(draft, SAVED, PROFILE.countries);
+  const checked = checkDraft(draft, SAVED, PROFILE.countries, PROFILE.titles);
   assert.equal(checked.ok, true);
 });
 
@@ -96,14 +103,14 @@ test("a row added with + and left empty changes nothing and is not sent", () => 
   const draft = { ...createDraft(SAVED), msc: [...createDraft(SAVED).msc, newMscRow(createDraft(SAVED))] };
   assert.equal(isDirty(draft, SAVED), false);
   assert.equal(draftRequest(draft).request.msc_codes.length, 2);
-  assert.equal(checkDraft(draft, SAVED, PROFILE.countries).ok, true);
+  assert.equal(checkDraft(draft, SAVED, PROFILE.countries, PROFILE.titles).ok, true);
 });
 
 test("errors are placed at their fields", () => {
   let draft = createDraft(SAVED);
   draft = { ...draft, country: "xx", switchBlocks: ["12", "", ""] };
   draft = withNewCode(draft, "", "", "1234-5678-9012");
-  const checked = checkDraft(draft, SAVED, PROFILE.countries);
+  const checked = checkDraft(draft, SAVED, PROFILE.countries, PROFILE.titles);
   assert.equal(checked.ok, false);
   assert.deepEqual(checked.errors.get("country"), ["Select a country from the list."]);
   assert.deepEqual(checked.errors.get("switch"), ["Enter all 12 digits (4 in each field)."]);
@@ -124,7 +131,7 @@ test("a saved code changed or emptied needs its platform and all digits", () => 
           : row,
     ),
   };
-  const checked = checkDraft(changed, SAVED, PROFILE.countries);
+  const checked = checkDraft(changed, SAVED, PROFILE.countries, PROFILE.titles);
   assert.equal(checked.ok, false);
   assert.deepEqual(checked.errors.get("msc:saved:4444-5555-6666"), ["Select the platform."]);
   assert.deepEqual(checked.errors.get("msc:saved:1111-2222-3333"), ["Enter all 12 digits (4 in each field)."]);
@@ -132,13 +139,13 @@ test("a saved code changed or emptied needs its platform and all digits", () => 
 
 test("the same code twice and a fourth MSC code are refused", () => {
   let draft = withNewCode(createDraft(SAVED), "PAL", "Wii", "1111-2222-3333");
-  let checked = checkDraft(draft, SAVED, PROFILE.countries);
+  let checked = checkDraft(draft, SAVED, PROFILE.countries, PROFILE.titles);
   assert.equal(checked.ok, false);
   assert.deepEqual(checked.errors.get("msc:new:1"), ["This friend code is entered twice."]);
   draft = withNewCode(createDraft(SAVED), "PAL", "Wii", "0000-0000-0001");
   assert.equal(canAddMscCode(draft), false);
   draft = withNewCode(draft, "PAL", "Wii", "0000-0000-0002");
-  checked = checkDraft(draft, SAVED, PROFILE.countries);
+  checked = checkDraft(draft, SAVED, PROFILE.countries, PROFILE.titles);
   assert.equal(checked.ok, false);
   assert.deepEqual(checked.errors.get("msc"), ["At most 3 MSC friend codes can be saved."]);
 });
@@ -162,9 +169,9 @@ test("API errors map to the draft's rows", () => {
 
 test("a legacy NTSC-J code may stay, but no new code gets that region", () => {
   const saved: SavedProfile = { ...SAVED, msc_codes: [{ region: "JPN", platform: "", code: "2222-3333-4444" }] };
-  assert.equal(checkDraft({ ...createDraft(saved), country: "us" }, saved, PROFILE.countries).ok, true);
+  assert.equal(checkDraft({ ...createDraft(saved), country: "us" }, saved, PROFILE.countries, PROFILE.titles).ok, true);
   const draft = withNewCode(createDraft(saved), "JPN", "Wii", "5555-6666-7777");
-  const checked = checkDraft(draft, saved, PROFILE.countries);
+  const checked = checkDraft(draft, saved, PROFILE.countries, PROFILE.titles);
   assert.equal(checked.ok, false);
   assert.deepEqual(checked.errors.get("msc:new:1"), ["This value is not valid."]);
 });
@@ -173,6 +180,7 @@ test("after a change elsewhere, untouched fields follow it and changed ones stay
   let draft = createDraft(SAVED);
   draft = { ...draft, switchBlocks: ["9999", "8888", "7777"] };
   const current: SavedProfile = {
+    title: "",
     country: "us",
     switch_code: "0012-0000-0340",
     msc_codes: [
@@ -205,6 +213,7 @@ test("a change of a field changed elsewhere too is a conflict, a removed code co
     msc: draft.msc.map((row) => (row.original === "4444-5555-6666" ? { ...row, platform: "Wii U" } : row)),
   };
   const current: SavedProfile = {
+    title: "",
     country: "fr",
     switch_code: "0012-0000-0340",
     msc_codes: [{ region: "PAL", platform: "Wii", code: "1111-2222-3333" }],
@@ -230,13 +239,61 @@ test("a removed code stays removed when it is still saved", () => {
 });
 
 test("a stored draft is used only in its own format and for the same member", () => {
-  const stored = JSON.stringify({ v: 2, id: PROFILE.discord.id, base: SAVED, draft: createDraft(SAVED) });
+  const stored = JSON.stringify({ v: 3, id: PROFILE.discord.id, base: SAVED, draft: createDraft(SAVED) });
   assert.ok(parseStoredDraft(stored, PROFILE.discord.id));
   assert.equal(parseStoredDraft(stored, "123"), null);
+  const untitled = JSON.stringify({
+    v: 3,
+    id: PROFILE.discord.id,
+    base: { ...SAVED, title: 1 },
+    draft: createDraft(SAVED),
+  });
+  assert.equal(parseStoredDraft(untitled, PROFILE.discord.id), null);
   assert.equal(
     parseStoredDraft(JSON.stringify({ id: PROFILE.discord.id, target: {}, edit: {} }), PROFILE.discord.id),
     null,
   );
   assert.equal(parseStoredDraft("{broken", PROFILE.discord.id), null);
   assert.equal(parseStoredDraft(null, PROFILE.discord.id), null);
+});
+
+test("a draft from before titles leaves the saved title as it is", () => {
+  const withoutTitle = (value: object): Record<string, unknown> =>
+    Object.fromEntries(Object.entries(value).filter(([key]) => key !== "title"));
+  const oldBase = withoutTitle(SAVED);
+  const oldDraft = withoutTitle({ ...createDraft(SAVED), country: "us" });
+  const parsed = parseStoredDraft(
+    JSON.stringify({ v: 2, id: PROFILE.discord.id, base: oldBase, draft: oldDraft }),
+    PROFILE.discord.id,
+  );
+  assert.ok(parsed);
+  const rebased = rebaseDraft(parsed.draft, parsed.base, { ...SAVED, title: "og-player" }, name);
+  assert.equal(rebased.draft.title, "og-player");
+  assert.equal(rebased.draft.country, "us");
+});
+
+test("a title is chosen in the draft, sent with the profile and checked against the member's titles", () => {
+  const draft = { ...createDraft(SAVED), title: "og-player" };
+  assert.deepEqual([...changedFields(draft, SAVED)], ["title"]);
+  assert.equal(draftRequest(draft).request.title, "og-player");
+  assert.equal(checkDraft(draft, SAVED, PROFILE.countries, PROFILE.titles).ok, true);
+  const unknown = checkDraft({ ...draft, title: "msl-2023-world-champion" }, SAVED, PROFILE.countries, PROFILE.titles);
+  assert.equal(unknown.ok, false);
+  assert.deepEqual(unknown.errors.get("title"), ["Select a title from the list."]);
+  assert.equal(fieldOfError("title", []), "title");
+  assert.equal(isDirty({ ...draft, title: "" }, SAVED), false);
+});
+
+test("a title changed here and elsewhere is a conflict; an untouched one follows the saved one", () => {
+  const titled = (title: string): SavedProfile => ({ ...SAVED, title });
+  const followed = rebaseDraft(createDraft(SAVED), SAVED, titled("og-player"), name, name);
+  assert.equal(followed.draft.title, "og-player");
+  assert.equal(followed.conflicts.size, 0);
+  const draft = { ...createDraft(SAVED), title: "legacy-legend" };
+  const conflict = rebaseDraft(draft, SAVED, titled("og-player"), name, (code) => `[${code}]`);
+  assert.equal(conflict.draft.title, "legacy-legend");
+  assert.deepEqual([...conflict.conflicts], ["title"]);
+  assert.ok(conflict.notes.includes("Title saved now: [og-player]."));
+  const same = rebaseDraft(draft, SAVED, titled("legacy-legend"), name);
+  assert.equal(same.conflicts.size, 0);
 });

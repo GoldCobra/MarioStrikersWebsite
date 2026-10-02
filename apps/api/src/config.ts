@@ -73,6 +73,8 @@ export interface Config {
     readonly fetchTimeoutMs: number;
     readonly failureRetryMs: number;
   };
+  /** Time between two runs of the player title sync; 0 switches it off. */
+  readonly titleSyncIntervalMs: number;
   readonly discord: DiscordConfig;
   readonly session: SessionConfig;
   readonly mssql: MssqlConfig;
@@ -148,6 +150,7 @@ export function loadConfig(env: Env, options: LoadConfigOptions = {}): Config {
       fetchTimeoutMs: readInt(env, "CLUB_LOGO_FETCH_TIMEOUT_MS", 15_000),
       failureRetryMs: readInt(env, "CLUB_LOGO_FAILURE_RETRY_MS", 6 * 60 * 60 * 1000),
     },
+    titleSyncIntervalMs: readInt(env, "TITLE_SYNC_INTERVAL_MS", 24 * 60 * 60 * 1000),
     discord: {
       clientId: readString(env, "DISCORD_CLIENT_ID"),
       clientSecret: readString(env, "DISCORD_CLIENT_SECRET"),

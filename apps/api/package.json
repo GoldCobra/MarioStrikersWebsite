@@ -14,6 +14,8 @@
     "ops:check-db": "node src/ops/check-database.ts",
     "ops:club-logos": "node src/ops/cache-club-logos.ts",
     "ops:profile-index": "node src/ops/apply-profile-index.ts",
+    "ops:player-titles": "node src/ops/apply-player-titles.ts",
+    "ops:title-sync": "node src/ops/sync-player-titles.ts",
     "ops:probe-tls": "node src/ops/probe-tls.ts",
     "test": "node --import ./src/test-support/isolate.ts --test \"src/**/*.test.ts\"",
     "test:smoke": "node --import ./src/test-support/isolate.ts --test src/dev-smoke.test.ts"

@@ -119,6 +119,27 @@ export function showFlag(flag: HTMLImageElement, country: unknown): void {
   }
 }
 
+/**
+ * The player title under the name, in FULL CAPS, hidden without one. Its look (`style`, e.g. "green") is a
+ * class for the coming formatting.
+ */
+export function showPlayerTitle(line: HTMLElement, title: unknown, style: unknown = ""): void {
+  const text = toText(title).trim().toUpperCase();
+  line.textContent = text;
+  line.hidden = !text;
+  line.className = "player-popup-player-title";
+  const look = toText(style)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, "");
+  if (text && look) line.classList.add(`is-style-${look}`);
+}
+
+function renderPlayerTitle(view: TemplateView, player: PlayerProfile["player"]): void {
+  const line = view.slots["player-title"];
+  if (line) showPlayerTitle(line, player?.title, player?.title_style);
+}
+
 /** An MSL World Champion's header turns gold and shows the MSL logo at its right end. */
 function renderWorldChampion(view: TemplateView, champion: boolean): void {
   view.slots["player-header"]?.classList.toggle("is-world-champion", champion);
@@ -165,6 +186,7 @@ export function renderPlayerProfile(view: TemplateView, profile: PlayerProfile):
   const friendCodes = profile.friend_codes ?? {};
   view.setText("player-name", toText(player.name || "-"));
   renderFlag(view, player.country);
+  renderPlayerTitle(view, player);
   renderWorldChampion(view, isWorldChampion(profile.accolades));
   renderCodeLines(view, "fc-switch", switchFriendCodeLines(friendCodes));
   renderCodeLines(view, "fc-msc", mscFriendCodeLines(friendCodes));
@@ -190,5 +212,6 @@ export function renderPlayerProfile(view: TemplateView, profile: PlayerProfile):
 export function clearPlayerProfileHeader(view: TemplateView): void {
   view.setText("player-name", "");
   renderFlag(view, null);
+  renderPlayerTitle(view, null);
   renderWorldChampion(view, false);
 }

@@ -87,6 +87,16 @@ Renaming or removing a page keeps its old URL working: add it to
   record it in `tests/e2e/specs/contract.deltas.ts` and update the browser
   code in the same pull request.
 
+**A player title**
+
+- A title of a known kind is data: add it to `apps/api/src/modules/titles/catalog.ts`
+  (a stable code, the name in FULL CAPS, its rule) and run
+  `npm run ops:player-titles --workspace=@ms/api`, or insert the row into
+  `dbo.PlayerTitle` directly. A new Free Title is at once available to every player.
+- A new kind of rule goes into `modules/titles/rules.ts` with its tests. See what
+  it would award with `npm run ops:title-sync --workspace=@ms/api` before
+  writing it with `-- --apply` ([ADR 0008](docs/adr/0008-player-titles.md)).
+
 **An intended visual change**
 
 - List the affected screenshots with the reason in

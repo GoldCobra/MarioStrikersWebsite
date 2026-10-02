@@ -8,7 +8,7 @@ Mario Strikers Charged (MSC) and Super Mario Strikers (SMS).
 ## What is here
 
 - Setup guides, competitive rules, tier lists and community events.
-- Live rankings, players, Striker Clubs and Discord-backed profiles.
+- Live rankings, players, Striker Clubs and Discord-backed profiles with player titles.
 - MSBL Gear Builder and save editor; MSC save and online friendlist editors.
   They read and export files locally in the browser and never upload saves.
 

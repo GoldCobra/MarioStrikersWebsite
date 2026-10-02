@@ -2,12 +2,16 @@
 // Discord id's key range (UPDLOCK, HOLDLOCK), so parallel logins wait for each other and reuse the row
 // the first one created; the unique index IX_Player_DiscordID stays the last guard against a second row.
 // A save reads the profile under update locks, decides and writes in one transaction. Like the bot's
-// procedures, every creation and every save is written to dbo.CommandLog.
+// procedures, every creation and every save is written to dbo.CommandLog. The selected title and the
+// player's unlocked titles are read with the profile; the title catalog comes from its cache.
 
 import { normalizeText } from "@ms/shared/text";
 import type { Database, Queryable } from "../../db/database.ts";
 import { mssql } from "../../db/database.ts";
+import { toPositiveIntId } from "../../lib/numbers.ts";
 import { isUniqueViolation } from "../../lib/sql-errors.ts";
+import { availableTitles, selectedTitle, toTitleOption, type CatalogTitle } from "../titles/availability.ts";
+import type { TitleCatalog } from "../titles/repository.ts";
 import type {
   ChangePlan,
   CodeKey,
@@ -48,6 +52,9 @@ export const FIND_PLAYER_QUERY =
 
 export const COUNTRIES_QUERY = "SELECT Code, Description FROM dbo.Enumeration WHERE Type = N'country';";
 
+/** Result set positions of buildProfileQuery() (the taken codes of a save follow them). */
+export const PROFILE_SETS = { player: 0, codes: 1, title: 2, unlocks: 3, taken: 4 } as const;
+
 /** The profile; with `lock`, under update locks held until the transaction ends. */
 export function buildProfileQuery(lock: boolean): string {
   const hint = lock ? " WITH (UPDLOCK, HOLDLOCK)" : "";
@@ -58,6 +65,8 @@ export function buildProfileQuery(lock: boolean): string {
     `FROM dbo.FriendCodes fc${hint}`,
     "WHERE fc.Player = @playerId",
     "ORDER BY fc.GameType, fc.Region, fc.LineSeq;",
+    `SELECT a.TitleId FROM dbo.PlayerActiveTitle a${hint} WHERE a.PlayerId = @playerId;`,
+    "SELECT u.TitleId FROM dbo.PlayerTitleUnlock u WHERE u.PlayerId = @playerId;",
   ]
     .filter(Boolean)
     .join(" ");
@@ -107,6 +116,15 @@ export function buildApplyQuery(plan: ChangePlan, request: mssql.Request): strin
         ` VALUES (@playerId, @insGame${index}, @insSeq${index}, @insRegion${index}, @insLabel${index}, @insCode${index});`,
     );
   });
+  if (plan.title !== null) {
+    statements.push("DELETE FROM dbo.PlayerActiveTitle WHERE PlayerId = @playerId;");
+    if (plan.title) {
+      request.input("titleCode", mssql.VarChar(64), plan.title);
+      statements.push(
+        "INSERT INTO dbo.PlayerActiveTitle (PlayerId, TitleId) SELECT @playerId, t.Id FROM dbo.PlayerTitle t WHERE t.Code = @titleCode;",
+      );
+    }
+  }
   statements.push("INSERT INTO dbo.CommandLog (Command, Parameters) VALUES (N'WebsiteProfileSave', @audit);");
   return statements.join(" ");
 }
@@ -115,19 +133,23 @@ function recordsets(result: { recordsets?: unknown }): Row[][] {
   return Array.isArray(result.recordsets) ? (result.recordsets as Row[][]) : [];
 }
 
-function toStoredProfile(playerId: number, sets: Row[][]): StoredProfile {
-  const player = sets[0]?.[0];
+function toStoredProfile(playerId: number, sets: Row[][], catalog: readonly CatalogTitle[]): StoredProfile {
+  const player = sets[PROFILE_SETS.player]?.[0];
   if (!player) throw new Error(`Player ${playerId} not found.`);
+  const unlocked = (sets[PROFILE_SETS.unlocks] ?? []).map((row) => Number(row.TitleId));
+  const selected = selectedTitle(catalog, unlocked, toPositiveIntId(sets[PROFILE_SETS.title]?.[0]?.TitleId));
   return {
     playerId,
     country: typeof player.country === "string" ? player.country.trim() : "",
-    codes: (sets[1] ?? []).map((row) => ({
+    codes: (sets[PROFILE_SETS.codes] ?? []).map((row) => ({
       gameType: Number(row.GameType),
       region: normalizeText(row.Region),
       lineSeq: Number(row.LineSeq),
       label: normalizeText(row.Label),
       code: normalizeText(row.Code),
     })),
+    title: selected?.code ?? "",
+    titles: availableTitles(catalog, unlocked).map(toTitleOption),
   };
 }
 
@@ -153,7 +175,13 @@ async function ensurePlayerOnce(
   return { playerId, created: rows[0]?.created === true || Number(rows[0]?.created) === 1 };
 }
 
-async function queryProfile(queryable: Queryable, playerId: number, lock: boolean, taken: readonly CodeKey[] = []) {
+async function queryProfile(
+  queryable: Queryable,
+  playerId: number,
+  lock: boolean,
+  catalog: readonly CatalogTitle[],
+  taken: readonly CodeKey[] = [],
+) {
   const request = queryable.request();
   request.multiple = true;
   request.input("playerId", mssql.Int, playerId);
@@ -163,14 +191,20 @@ async function queryProfile(queryable: Queryable, playerId: number, lock: boolea
   });
   const sets = recordsets(await request.query(buildProfileQuery(lock) + " " + buildTakenCodesQuery(taken.length)));
   return {
-    profile: toStoredProfile(playerId, sets),
+    profile: toStoredProfile(playerId, sets, catalog),
     taken: taken.length
-      ? (sets[2] ?? []).map((row) => ({ gameType: Number(row.GameType), code: normalizeText(row.Code) }))
+      ? (sets[PROFILE_SETS.taken] ?? []).map((row) => ({
+          gameType: Number(row.GameType),
+          code: normalizeText(row.Code),
+        }))
       : [],
   };
 }
 
-export function createSqlProfileStore(database: Pick<Database, "withPool" | "withTransaction">): ProfileStore {
+export function createSqlProfileStore(
+  database: Pick<Database, "withPool" | "withTransaction">,
+  titles: Pick<TitleCatalog, "get">,
+): ProfileStore {
   let countries: { readonly at: number; readonly rows: Promise<readonly CountryOption[]> } | null = null;
 
   return {
@@ -196,7 +230,8 @@ export function createSqlProfileStore(database: Pick<Database, "withPool" | "wit
     },
 
     async readProfile(playerId) {
-      return database.withPool(async (pool) => (await queryProfile(pool, playerId, false)).profile);
+      const catalog = await titles.get();
+      return database.withPool(async (pool) => (await queryProfile(pool, playerId, false, catalog)).profile);
     },
 
     countries() {
@@ -220,8 +255,9 @@ export function createSqlProfileStore(database: Pick<Database, "withPool" | "wit
     },
 
     async saveProfile(playerId, codes, decide) {
+      const catalog = await titles.get();
       return database.withTransaction(async (transaction) => {
-        const { profile, taken } = await queryProfile(transaction, playerId, true, codes);
+        const { profile, taken } = await queryProfile(transaction, playerId, true, catalog, codes);
         const decision = decide(profile, taken);
         if (decision.plan) {
           const request = transaction.request();

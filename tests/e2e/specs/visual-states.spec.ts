@@ -77,6 +77,18 @@ const STATES: VisualState[] = [
     act: showPlayerCard,
   },
   {
+    // A player title under the name: player 5 is no world champion, so it is white on the orange bar.
+    name: "player-card-title",
+    path: "/player-card?player=5",
+    act: showPlayerCard,
+  },
+  {
+    // A world champion's title is black on the gold bar; player 2 has the longest free title.
+    name: "players-popup-title",
+    path: "/players",
+    act: (page) => clickAndSettle(page, '.players-name-trigger[data-player-id="2"]'),
+  },
+  {
     // The fixture player 4 has no match in the current season, so every rating card is greyed out.
     name: "players-popup-inactive",
     path: "/players",
@@ -146,6 +158,17 @@ const STATES: VisualState[] = [
       await page.locator("[role='combobox']").press("ArrowDown");
       await page.keyboard.type("s");
       await settle(page, { eagerImages: true });
+    },
+  },
+  {
+    // The title field open with a title picked from the member's titles: the line under the name shows it.
+    name: "profile-title-edit",
+    path: "/profile",
+    login: "linked",
+    act: async (page) => {
+      if (!(await openProfileField(page, "[data-edit-open='title']"))) return;
+      await page.locator("[data-field='title']").selectOption("msl-2025-world-champion");
+      await settle(page);
     },
   },
   {

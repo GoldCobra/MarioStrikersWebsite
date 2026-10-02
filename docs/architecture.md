@@ -149,8 +149,8 @@ display name (nickname, else global name, else username, without a leading
 logins and the bots' own inserts never create a second row. When that fails, the
 login still succeeds and the profile page asks again (`POST /api/profile/me`).
 On the profile page (`/profile`, `features/profile/`) the member changes the
-country and the friend codes in place: a pencil opens one field (the country,
-the Switch code, an MSC code) without saving it, "+" adds an MSC code and "−"
+title, the country and the friend codes in place: a pencil opens one field (the
+title, the country, the Switch code, an MSC code) without saving it, "+" adds an MSC code and "−"
 removes an open one. Changes collect in a draft (`profile-edit-state.ts`), are
 marked unsaved, and SAVE sends the whole profile in one request, DISCARD (after a
 confirmation) drops them; leaving with unsaved changes warns. The country is a
@@ -167,6 +167,24 @@ code saved without a platform may stay so, a new or changed one needs it. Saves
 are refused for members who left the server, checked with the bot token
 (`integrations/discord/members.ts`).
 A bot token enables Discord name lookups and event discovery.
+
+**Player titles** ([ADR 0008](adr/0008-player-titles.md), `modules/titles/`).
+A member picks one of their titles on the profile page; the player popup, the
+profile page and the Discord card show it under the name, in FULL CAPS. Four
+`dbo` tables hold them: categories, titles (with the rule that awards each one),
+unlocks (one per player and title, with their source) and the selected title.
+Free Titles are available to everyone; of an exclusive group (legacy ranks,
+N-TIME WORLD CHAMPION, TOURNAMENT WINNER) only the highest unlocked level is
+offered (`availability.ts`). `rules.ts` awards from existing data: a season's
+Strikers Titans (reward level 5/5, once the season is completed; the season's
+title is created then), winners of named tournaments (MSL titles), counts of
+MSL World Championships and of clear non-MSL wins, and the highest legacy rank
+held when the competitive ranks began. Unclear data awards nothing and is
+reported. The API runs the rules once a day (`TITLE_SYNC_INTERVAL_MS`; the last
+run is logged in `dbo.CommandLog`); `npm run ops:player-titles` creates the
+tables and adds missing titles of `catalog.ts`, `npm run ops:title-sync` awards
+on demand (a dry run without `-- --apply`). A new title of a known kind is one
+row in `dbo.PlayerTitle` (or a line in `catalog.ts` plus `ops:player-titles`).
 
 Responses use snake_case keys throughout; code inside the API uses camelCase
 and converts at the route (the season route shows how, since its cached
@@ -229,8 +247,8 @@ All endpoints below use the same origin as the website.
 | POST | `/api/auth/logout` | Clear session |
 | GET | `/api/profile/me` | Authenticated user's linked profile |
 | POST | `/api/profile/me` | Create the authenticated user's profile when the login could not |
-| GET | `/api/profile/me/editable` | The editor's profile: Discord names, country, friend codes, countries |
-| PUT | `/api/profile/me/editable` | Save the editor's country and friend codes (JSON, with `version`) |
+| GET | `/api/profile/me/editable` | The editor's profile: Discord names, title, country, friend codes, the member's titles, countries |
+| PUT | `/api/profile/me/editable` | Save the editor's title, country and friend codes (JSON, with `version`) |
 | GET | `/api/health` | Service health |
 
 Leaderboard games are `msbl`, `msc` and `sms`; modes are `elo1v1`,

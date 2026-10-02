@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import test from "node:test";
 import { UNKNOWN_MEMBER, type GuildMember } from "../../integrations/discord/members.ts";
 import type { DiscordIdentity } from "./mappers.ts";
@@ -37,14 +38,21 @@ const msc = (region: string, lineSeq: number, label: string, code: string): Stor
   code,
 });
 
+const TITLES: StoredProfile["titles"] = [
+  { code: "legacy-legend", name: "LEGACY LEGEND", category: "legacy-rank", categoryName: "Legacy Ranks", style: "" },
+  { code: "og-player", name: "OG PLAYER", category: "free", categoryName: "Free Titles", style: "" },
+];
+
 const PROFILE: StoredProfile = {
   playerId: 223,
   country: "de",
   codes: [sw("0012-0000-0340"), msc("NTSC", 1, "", "4444-5555-6666"), msc("PAL", 1, "Wii", "1111-2222-3333")],
+  title: "",
+  titles: TITLES,
 };
 
 interface Harness {
-  store: ProfileStore & { saved: StoredProfile; writes: number };
+  store: ProfileStore & { saved: StoredProfile; writes: number; audits: string[] };
   service: ReturnType<typeof createProfileService>;
   changes: number;
 }
@@ -59,6 +67,7 @@ function harness({
   const store = {
     saved: profile,
     writes: 0,
+    audits: [] as string[],
     ensurePlayer: () => Promise.resolve({ playerId: 223, created: false }),
     findPlayerId: () => Promise.resolve(223),
     readProfile() {
@@ -71,7 +80,7 @@ function harness({
       decide: (
         current: StoredProfile,
         taken: readonly CodeKey[],
-      ) => { plan: Parameters<typeof applyPlan>[1] | null; result: T },
+      ) => { plan: Parameters<typeof applyPlan>[1] | null; audit: string; result: T },
     ) {
       const decision = decide(
         store.saved,
@@ -81,6 +90,7 @@ function harness({
         if (failApply) return Promise.reject(failApply);
         store.saved = applyPlan(store.saved, decision.plan);
         store.writes += 1;
+        store.audits.push(decision.audit);
       }
       return Promise.resolve(decision.result);
     },
@@ -99,6 +109,10 @@ function harness({
       return state.changes;
     },
   };
+}
+
+function auditOf(h: Harness, index: number): { title?: unknown } {
+  return JSON.parse(h.store.audits[index] ?? "{}") as { title?: unknown };
 }
 
 async function editable(h: Harness) {
@@ -287,6 +301,8 @@ test("the plan keeps rows of unchanged codes and renumbers the rest from 1", () 
       msc("PAL", 2, "", "2222-2222-2222"),
       msc("PAL", 3, "Wii", "3333-3333-3333"),
     ],
+    title: "",
+    titles: [],
   };
   const plan = planChanges(current, "", [
     msc("PAL", 0, "Wii", "3333-3333-3333"),
@@ -311,5 +327,63 @@ test("the plan keeps rows of unchanged codes and renumbers the rest from 1", () 
 test("applying a plan leaves exactly the requested rows", () => {
   const plan = planChanges(PROFILE, "", [sw("9999-0000-0001")]);
   assert.ok(plan);
-  assert.deepEqual(applyPlan(PROFILE, plan), { playerId: 223, country: "", codes: [sw("9999-0000-0001")] });
+  assert.deepEqual(applyPlan(PROFILE, plan), { ...PROFILE, country: "", codes: [sw("9999-0000-0001")] });
+});
+
+test("the editor offers the player's titles; one of them is selected and saved, none removes it", async () => {
+  const h = harness();
+  const profile = await editable(h);
+  assert.equal(profile.title, "");
+  assert.deepEqual(
+    profile.titles.map((title) => title.code),
+    ["legacy-legend", "og-player"],
+  );
+  const selected = await h.service.saveEditableProfile(IDENTITY, request(profile, { title: "LEGACY-LEGEND" }));
+  assert.ok(selected.kind === "saved" && selected.changed);
+  assert.equal(h.store.saved.title, "legacy-legend");
+  assert.equal(selected.profile.title, "legacy-legend");
+  assert.deepEqual(auditOf(h, 0).title, { from: "", to: "legacy-legend" });
+  // The selected title is part of the version, so a save from an older page is refused.
+  assert.notEqual(selected.profile.version, profile.version);
+
+  const removed = await h.service.saveEditableProfile(IDENTITY, request(selected.profile, { title: "" }));
+  assert.ok(removed.kind === "saved" && removed.changed);
+  assert.equal(h.store.saved.title, "");
+});
+
+test("the version has the title only when one is selected, so versions from before titles stay valid", () => {
+  const rows = PROFILE.codes
+    .map((row) => JSON.stringify([row.gameType, row.region, row.lineSeq, row.label, row.code]))
+    .sort();
+  const before = createHash("sha256")
+    .update(JSON.stringify(["de", rows]))
+    .digest("base64url");
+  assert.equal(profileVersion(PROFILE), before);
+  assert.notEqual(profileVersion({ ...PROFILE, title: "og-player" }), before);
+});
+
+test("a request without a title leaves it; a title the player cannot select is refused", async () => {
+  const h = harness({ profile: { ...PROFILE, title: "og-player" } });
+  const profile = await editable(h);
+  const other = await h.service.saveEditableProfile(IDENTITY, request(profile, { country: "us" }));
+  assert.ok(other.kind === "saved" && other.changed);
+  assert.equal(h.store.saved.title, "og-player");
+  assert.equal(auditOf(h, 0).title, undefined);
+
+  const refused = await h.service.saveEditableProfile(
+    IDENTITY,
+    request(await editable(h), { title: "msl-2023-world-champion" }),
+  );
+  assert.deepEqual(refused.kind === "invalid" && refused.errors.map((error) => `${error.field}:${error.code}`), [
+    "title:UNKNOWN_TITLE",
+  ]);
+  assert.equal(h.store.writes, 1);
+});
+
+test("the plan changes the title only when asked for another one", () => {
+  const withTitle = { ...PROFILE, title: "og-player" };
+  assert.equal(planChanges(withTitle, "de", withTitle.codes), null);
+  assert.equal(planChanges(withTitle, "de", withTitle.codes, "og-player"), null);
+  assert.equal(planChanges(withTitle, "de", withTitle.codes, "")?.title, "");
+  assert.equal(planChanges(PROFILE, "de", PROFILE.codes, "og-player")?.title, "og-player");
 });

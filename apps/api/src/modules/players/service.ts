@@ -5,6 +5,7 @@ import type { Database } from "../../db/database.ts";
 import { HttpError } from "../../http/errors.ts";
 import { normalizeDiscordId } from "../../lib/discord-id.ts";
 import type { Logger } from "../../lib/logger.ts";
+import type { CatalogTitle } from "../titles/availability.ts";
 import {
   buildPlayerProfileFromRecordsets,
   toPlayerListDTO,
@@ -17,16 +18,27 @@ const PROFILE_SLOW_LOG_THRESHOLD_MS = 1500;
 
 type PlayerDatabase = Pick<Database, "withPool" | "measurePool">;
 
+/** The title catalog (titles/repository.ts, cached); without one, profiles show no title. */
+export type TitleCatalogSource = () => Promise<readonly CatalogTitle[]>;
+
+const NO_TITLES: TitleCatalogSource = () => Promise.resolve([]);
+
 export async function getPlayersList(database: PlayerDatabase): Promise<PlayerListItem[]> {
   const rows = await database.withPool((pool) => fetchPlayersList(pool));
   return rows.map((row) => toPlayerListDTO(row)).filter((row): row is PlayerListItem => row !== null);
 }
 
-async function loadProfile(database: PlayerDatabase, log: Logger, playerId: number): Promise<PlayerProfile | null> {
+async function loadProfile(
+  database: PlayerDatabase,
+  log: Logger,
+  playerId: number,
+  titles: TitleCatalogSource,
+): Promise<PlayerProfile | null> {
+  const catalog = await titles();
   return database.measurePool(async (pool, poolMs) => {
     const startedAt = Date.now();
     const batch = await fetchPlayerProfileRecordsets(pool, playerId);
-    const profile = buildPlayerProfileFromRecordsets(batch.recordsets);
+    const profile = buildPlayerProfileFromRecordsets(batch.recordsets, catalog);
     const totalMs = Date.now() - startedAt + poolMs;
     if (totalMs >= PROFILE_SLOW_LOG_THRESHOLD_MS) {
       log.warn(
@@ -43,8 +55,9 @@ export function getPlayerProfile(
   database: PlayerDatabase,
   log: Logger,
   playerId: number,
+  titles: TitleCatalogSource = NO_TITLES,
 ): Promise<PlayerProfile | null> {
-  return loadProfile(database, log, playerId);
+  return loadProfile(database, log, playerId, titles);
 }
 
 /**
@@ -55,6 +68,7 @@ export async function getPlayerProfileByDiscordId(
   database: PlayerDatabase,
   log: Logger,
   discordIdRaw: unknown,
+  titles: TitleCatalogSource = NO_TITLES,
 ): Promise<PlayerProfile | null> {
   const discordId = normalizeDiscordId(discordIdRaw);
   if (!discordId) throw new HttpError(400, "BAD_REQUEST", "Invalid Discord user id.");
@@ -66,7 +80,7 @@ export async function getPlayerProfileByDiscordId(
   }
   const playerId = Number(matches[0]?.player_id);
   if (!Number.isInteger(playerId) || playerId <= 0) return null;
-  const profile = await loadProfile(database, log, playerId);
+  const profile = await loadProfile(database, log, playerId, titles);
   if (!profile) throw new HttpError(404, "NOT_FOUND", "Player not found.");
   return profile;
 }

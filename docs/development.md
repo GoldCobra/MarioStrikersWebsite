@@ -51,7 +51,9 @@ Run `npm run dev:live` from the repository root to serve the site and live API t
 at **http://localhost:8787** (the API reads `apps/api/.env`). Missing service configuration may cause the
 corresponding API calls to fail; other pages and browser save tools remain
 available. A live database smoke check is `npm run ops:check-db --workspace=@ms/api`;
-run it only when the intended database connection is configured.
+run it only when the intended database connection is configured. Live development
+never awards player titles by itself; `npm run ops:title-sync --workspace=@ms/api`
+reports what the data would award (and writes it with `-- --apply`).
 
 ## Checks and troubleshooting
 

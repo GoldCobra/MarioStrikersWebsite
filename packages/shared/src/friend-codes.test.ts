@@ -16,6 +16,7 @@ const STORED: Readonly<Record<string, string>> = { "JPN:1111-2222-3333": "Wii", 
 const OPTIONS: ValidationOptions = {
   isAllowedCountry: (code) => ["de", "us", "scotland"].includes(code),
   storedPlatform: (region, code) => STORED[`${region}:${code}`] ?? null,
+  isAvailableTitle: (code) => ["og-player", "legacy-legend"].includes(code),
 };
 
 const valid = { country: "de", switch_code: "0001-0020-0300", msc_codes: [] };
@@ -141,6 +142,17 @@ test("the country is one of the list, or the profile's current one", () => {
   assert.deepEqual(errorsOf({ ...valid, country: "fr" }), ["country:UNKNOWN_COUNTRY"]);
   assert.deepEqual(errorsOf({ ...valid, country: "Scotland" }), []);
   assert.deepEqual(errorsOf({ ...valid, country: 5 }), ["country:INVALID"]);
+});
+
+test("the title is one of the player's titles; without it in the request it stays as it is", () => {
+  const result = validateEditableProfile({ ...valid, title: " OG-Player " }, OPTIONS);
+  assert.deepEqual(result.ok && result.value.title, "og-player");
+  assert.deepEqual(errorsOf({ ...valid, title: "" }), []);
+  assert.deepEqual(errorsOf({ ...valid, title: null }), []);
+  assert.deepEqual(errorsOf({ ...valid, title: "msl-2023-world-champion" }), ["title:UNKNOWN_TITLE"]);
+  assert.deepEqual(errorsOf({ ...valid, title: 7 }), ["title:INVALID"]);
+  const unchanged = validateEditableProfile(valid, OPTIONS);
+  assert.ok(unchanged.ok && !("title" in unchanged.value));
 });
 
 test("requests that are no object are refused", () => {
