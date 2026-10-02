@@ -1,5 +1,14 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
   "reference": "aa0be372aea2ad96ccd865a85283b1e6dd7badd6",
-  "changes": []
+  "changes": [
+    {
+      "screenshots": ["states/player-card-title-glow*", "states/players-popup-title-ball*"],
+      "reason": "A title of one game shows that game's 16px ball (the accolades' ball) right before it, on the Discord card (MSL 2025 WORLD CHAMPION, MSBL) and in the popup (green TOURNAMENT WINNER, MSC; players-popup-title-ball is new). Colour, glow, size and the line's height are unchanged; the reference ignores title_game_code."
+    },
+    {
+      "screenshots": ["states/profile-title-edit*", "states/profile-title-list*"],
+      "reason": "The sample member's titles are game variants now (2026-10-02): the title list and field show each one's game ball before the name, and MSL titles follow the owner's groups (X-TIME, WORLD, FALL, SUMMER, SPRING CHAMPION), so MSL 2025 WORLD CHAMPION comes before MSL 2026 SPRING CHAMPION."
+    }
+  ]
 }
