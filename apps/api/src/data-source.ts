@@ -27,6 +27,8 @@ import type { PlayerProfile } from "./modules/players/mappers.ts";
 import { getPlayerProfile, getPlayerProfileByDiscordId, getPlayersList } from "./modules/players/service.ts";
 import { createSqlProfileStore } from "./modules/profile/repository.ts";
 import { createProfileService, type ProfileService } from "./modules/profile/service.ts";
+import { getProfileStatsByDiscordId } from "./modules/profile/stats-repository.ts";
+import type { ProfileStats } from "./modules/profile/stats.ts";
 import { getCompetitiveSeasonStatus } from "./modules/season/service.ts";
 import { createTitleCatalog } from "./modules/titles/repository.ts";
 import { createTitleSyncSchedule } from "./modules/titles/service.ts";
@@ -46,6 +48,8 @@ export interface DataSource {
   getPlayerProfileByDiscordId(discordId: string): Promise<PlayerProfile | null>;
   /** The signed-in player's own profile: created at the first login, changed in the profile editor. */
   readonly profiles: ProfileService;
+  /** MY PROFILE's statistics of the player linked to this Discord account; null when none is linked. */
+  getProfileStatsByDiscordId(discordId: string): Promise<ProfileStats | null>;
   /** null when no club has this (validated) id. */
   getClubProfile(clubId: number): Promise<ClubProfile | null>;
   getClubLogoFile(clubIdRaw: unknown): Promise<LogoFile | null>;
@@ -146,6 +150,7 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     getPlayerProfile: (playerId) => getPlayerProfile(database, log, playerId, () => titleCatalog.get()),
     getPlayerProfileByDiscordId: (discordId) =>
       getPlayerProfileByDiscordId(database, log, discordId, () => titleCatalog.get()),
+    getProfileStatsByDiscordId: (discordId) => getProfileStatsByDiscordId(database, discordId),
     profiles: createProfileService({
       store: createSqlProfileStore(database, titleCatalog),
       // The editor shows the member's current server names; they are asked again after a minute.

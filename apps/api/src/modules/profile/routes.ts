@@ -1,5 +1,5 @@
-// The signed-in player's own profile: reading it, creating it when the login could not, and the
-// editor's reading and saving of the country, the friend codes and the title. Every route takes the player
+// The signed-in player's own profile: reading it, creating it when the login could not, the editor's
+// reading and saving of the country, the friend codes and the title, and MY PROFILE's statistics. Every route takes the player
 // from the signed session only; no request can name another player.
 
 import type { FastifyInstance, FastifyRequest } from "fastify";
@@ -8,6 +8,7 @@ import { isCrossSiteRequest, rateLimit, sendNoStore, type RouteContext } from ".
 import { SessionManager } from "../auth/session.ts";
 import type { PlayerProfile } from "../players/mappers.ts";
 import { identityFromSession, toEditableResponse } from "./mappers.ts";
+import { toProfileStatsResponse, type ProfileStats } from "./stats.ts";
 
 const AUTH_REQUIRED = { error: "Authentication required.", code: "AUTH_REQUIRED" } as const;
 const NOT_LINKED = { error: "No linked player profile.", code: "PLAYER_PROFILE_NOT_LINKED" } as const;
@@ -44,6 +45,23 @@ export function registerProfileRoutes(app: FastifyInstance, { config, data }: Ro
     if (!session) return sendNoStore(reply, AUTH_REQUIRED, 401);
     const player = await data.profiles.ensurePlayer(identityFromSession(session));
     return sendNoStore(reply, { player_id: player.playerId, created: player.created });
+  });
+
+  // MY PROFILE's statistics: only ever the signed-in player's own, from the session (no player id is taken).
+  app.get("/api/profile/me/stats", rateLimit(config, 60), async (request, reply) => {
+    const session = sessions?.readSession(request.headers.cookie) ?? null;
+    if (!session) return sendNoStore(reply, AUTH_REQUIRED, 401);
+    let stats: ProfileStats | null;
+    try {
+      stats = await data.getProfileStatsByDiscordId(session.discord_user_id);
+    } catch (error) {
+      if (error instanceof HttpError && error.code === "PLAYER_PROFILE_CONFLICT") {
+        return sendNoStore(reply, { error: error.message, code: error.code }, 409);
+      }
+      throw error;
+    }
+    if (!stats) return sendNoStore(reply, NOT_LINKED, 404);
+    return sendNoStore(reply, toProfileStatsResponse(stats));
   });
 
   app.get("/api/profile/me/editable", rateLimit(config, 60), async (request, reply) => {

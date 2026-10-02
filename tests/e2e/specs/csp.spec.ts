@@ -480,10 +480,14 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await expect(page.locator("[data-edit-row]")).toHaveCount(0);
     await expect(countryValue).toHaveText(lastName);
 
-    // A profile created at login is short: the list reaches out of the card, whole and on top.
+    // A short card (a profile created at login, here without its statistics, whose three areas always show):
+    // the list reaches out of the card, whole and on top.
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.context().clearCookies();
     await login(page, "unlinked");
+    await page.route("**/api/profile/me/stats", (route) =>
+      route.fulfill({ status: 503, json: { error: "Unavailable.", code: "UNAVAILABLE" } }),
+    );
     await page.goto("/profile");
     await settle(page, { eagerImages: true });
     await hideDevNotice(page);
@@ -635,6 +639,131 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await settle(page);
   },
   // The Discord card is an image of one size, made in whatever window the bot opens: it looks the same in all.
+  // MY PROFILE's statistics (owner, 2026-10-03): only on the member's own /profile, in the place of the rating
+  // cards and before Season Rewards and Tourney Accolades; read from the session only (no id is taken). The
+  // player popup and the Discord card keep their rating cards and never ask for the statistics.
+  "my profile statistics replace the rating cards only there": async (page) => {
+    await watchViolations(page);
+    await preparePage(page);
+    const anonymous = await page.request.get("/api/profile/me/stats");
+    expect(anonymous.status()).toBe(401);
+    await login(page, "linked");
+    const own: unknown = await (await page.request.get("/api/profile/me/stats")).json();
+    for (const forged of ["?player_id=2", "?playerId=3&discord_id=900000000000000002"]) {
+      expect(await (await page.request.get(`/api/profile/me/stats${forged}`)).json()).toEqual(own);
+    }
+    await page.goto("/profile");
+    await settle(page, { eagerImages: true });
+    await hideDevNotice(page);
+    const profile = page.locator("#player-profile-page");
+    await expect(profile.locator(".player-popup-rating-card, [data-slot^='ratings-grid']")).toHaveCount(0);
+    const areas = profile.locator(".profile-stats-game");
+    await expect(areas).toHaveCount(3);
+    expect(await areas.evaluateAll((nodes) => nodes.map((node) => (node as HTMLElement).dataset.statsGame))).toEqual([
+      "msbl",
+      "msc",
+      "sms",
+    ]);
+    const fields = [
+      "Season Rank",
+      "Season ELO",
+      "Season W/L",
+      "Highest Season Rank",
+      "Current WHR",
+      "Highest WHR",
+      "Total W/L",
+      "Total Matches",
+      "Total Win %",
+      "Highest Legacy Rank",
+    ];
+    const read = (game: string) =>
+      profile.locator(`[data-stats-game='${game}'] .profile-stat-row`).evaluateAll(
+        (rows, ball) =>
+          rows.map((row) => {
+            const box = row.querySelector(".profile-stat-value")?.getBoundingClientRect();
+            const value = row.querySelector(".player-popup-code-value")?.getBoundingClientRect();
+            const image = row.querySelector<HTMLImageElement>(".profile-stat-ball");
+            return {
+              label: row.querySelector(".profile-stat-name")?.textContent ?? "",
+              value: row.querySelector(".player-popup-code-value")?.textContent ?? "",
+              ball: Boolean(image?.complete && image.naturalWidth > 0 && image.currentSrc.includes(`${ball}ball`)),
+              // Right-aligned in the box (its padding), centred on its height.
+              right: box && value ? Math.round(box.right - value.right) : NaN,
+              middle: box && value ? Math.abs(box.top + box.height / 2 - (value.top + value.height / 2)) : NaN,
+              height: box?.height ?? NaN,
+            };
+          }),
+        game,
+      );
+    const rows = { msbl: await read("msbl"), msc: await read("msc"), sms: await read("sms") };
+    for (const [game, list] of Object.entries(rows)) {
+      expect(
+        list.map((row) => row.label),
+        game,
+      ).toEqual(fields);
+      for (const row of list) {
+        expect(row.ball, `${game} ${row.label}`).toBe(true);
+        expect(row.middle, `${game} ${row.label}`).toBeLessThanOrEqual(0.5);
+        expect(row.height).toBe(list[0]?.height);
+        expect(row.right).toBe(rows.msbl[0]?.right);
+      }
+    }
+    expect(rows.msbl.map((row) => row.value)).toEqual([
+      "Gold III",
+      "1187",
+      "14-6",
+      "Platinum II",
+      "1612",
+      "1688",
+      "212-131",
+      "343",
+      "61.81%",
+      "Megastriker",
+    ]);
+    expect(rows.msc.slice(0, 4).map((row) => row.value)).toEqual(["-", "-", "-", "Gold I"]);
+    expect(rows.sms.map((row) => row.value)).toEqual([
+      "Unranked",
+      "500",
+      "0-0",
+      "Unranked",
+      "-",
+      "-",
+      "0-0",
+      "0",
+      "-",
+      "-",
+    ]);
+    // The statistics come before Season Rewards and Tourney Accolades, which keep working.
+    const order = await profile.evaluate((root) => {
+      const stats = root.querySelector(".profile-stats");
+      const rewards = root.querySelector(".player-popup-season-awards-details");
+      const accolades = root.querySelector(".player-popup-accolades-details");
+      const follows = (a: Element | null, b: Element | null) =>
+        Boolean(a && b && a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+      return follows(stats, rewards) && follows(rewards, accolades);
+    });
+    expect(order).toBe(true);
+    await profile.locator(".player-popup-accolades-details > summary").click();
+    await expect(profile.locator(".player-popup-accolade-item").first()).toBeVisible();
+
+    // Elsewhere nothing changes: the popup and the card keep their rating cards and never ask.
+    let asked = 0;
+    page.on("request", (request) => {
+      if (request.url().includes("/api/profile/me/stats")) asked += 1;
+    });
+    await page.goto("/players");
+    await settle(page, { eagerImages: true });
+    await page.locator('.players-name-trigger[data-player-id="1"]').click();
+    await settle(page, { eagerImages: true });
+    expect(await page.locator("#player-profile-popup .player-popup-rating-card").count()).toBeGreaterThan(0);
+    await expect(page.locator("#player-profile-popup .profile-stats")).toHaveCount(0);
+    await page.goto("/player-card?player=1");
+    await page.locator("html[data-player-card='ready']").waitFor();
+    expect(await page.locator(".player-popup-rating-card").count()).toBeGreaterThan(0);
+    await expect(page.locator(".profile-stats")).toHaveCount(0);
+    expect(asked).toBe(0);
+    await settle(page);
+  },
   "the Discord card looks the same in any window": async (page) => {
     await open(page, "/player-card?player=2");
     const shots: Buffer[] = [];
