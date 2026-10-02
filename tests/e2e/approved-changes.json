@@ -1,10 +1,14 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "dd2af421721c00fba80b6eb5edcb3c94ff465d8b",
+  "reference": "6555017c289e7430b562244624c4d27b2e395369",
   "changes": [
     {
+      "screenshots": ["states/player-card-title*", "states/players-popup-title*"],
+      "reason": "Player titles leave the header: the title is the content's first line, before the friend codes, in the section titles' face and size with less letter spacing, coloured by its group (legacy and free titles #b6b6b6; the -glow states show MSL WORLD CHAMPION #ffeb5c with an orange glow and a special title #aef7ff with a blue glow). The reference shows them under the name."
+    },
+    {
       "screenshots": ["states/profile-*"],
-      "reason": "Profile follow-ups: no 'Server name' line, the Discord username right of the club line (13px, grey, a line of its own under a long club name on phones); 'No player title' instead of 'No title'; friend code inputs wide enough for four digits, so an open MSC line puts its '−' on a second line from 768px up; a click outside an open field closes it, so in profile-discard the Switch field is closed by the click on DISCARD, its change kept and marked unsaved. Checked: of 349 screenshots only the 27 of the 9 profile states differ; popups, Discord cards and the title states are pixel-identical."
+      "reason": "Profile labels 'Player Title' and 'MSC Friend Codes (max 3)'; the title field is a listbox showing each title in its look (profile-title-list is new: the open list with one title of every look, which the reference's plain select cannot show)."
     }
   ]
 }

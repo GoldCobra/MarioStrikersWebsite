@@ -41,7 +41,8 @@ interface ProfileCard {
 /**
  * The player popup's card as a section of the page: the same markup, so the same styles apply
  * (#player-profile-page next to #player-profile-popup), without what makes the popup a popup: no
- * overlay, no close button, no dialog role, no loading line.
+ * overlay, no close button, no dialog role, no loading line. The title line is left out too: here the
+ * "Player Title" field shows the title in its look (profile-edit.ts). The MSC list says its limit.
  */
 function createProfileCard(): ProfileCard {
   const host = document.createElement("div");
@@ -52,6 +53,9 @@ function createProfileCard(): ProfileCard {
   card.removeAttribute("aria-modal");
   card.querySelector(".player-popup-close")?.remove();
   card.querySelector("[data-slot='popup-status']")?.remove();
+  card.querySelector("[data-slot='player-title']")?.remove();
+  const mscTitle = card.querySelector("[data-list='fc-msc']")?.closest(".player-popup-section")?.querySelector("h3");
+  if (mscTitle) mscTitle.textContent = "MSC Friend Codes (max 3)";
   card.querySelector("[data-slot='popup-content']")?.removeAttribute("hidden");
   const root = document.createElement("div");
   root.id = "player-profile-page";

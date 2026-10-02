@@ -49,20 +49,58 @@ body.player-popup-open {
   transform: translateY(-3px);
 }
 
-/* The player title under the name (player-profile-view.ts): FULL CAPS in the popup's text face, smaller
-   than the name. The title groups get their colours later (class is-style-<look>). */
+/* The player title (player-profile-view.ts): the content's first line, before the friend codes, in the
+   face and size of the section titles ("Switch Friend Code") with a little less letter spacing; only the
+   title, in FULL CAPS and its look (below). Without a title it is hidden and takes no room. */
 .player-popup-player-title {
-  max-width: calc(100% - 1.8rem);
-  margin: 0.1rem 0 0;
-  color: #f4f4f4;
+  margin: 0.7rem 0 0;
   font-family: var(--reporter-font-stack);
   font-weight: var(--reporter-font-weight);
-  font-size: 13px;
-  line-height: 1.2;
-  letter-spacing: var(--reporter-letter-spacing);
+  font-size: 15px;
+  line-height: 1.22;
+  letter-spacing: calc(var(--reporter-letter-spacing) * 0.6);
   text-transform: uppercase;
   overflow-wrap: anywhere;
-  filter: drop-shadow(-1px 1px 0 #000);
+}
+
+/* A title's look (titles/availability.ts titleLook, titleLookClass in profile-data.ts): its colour and
+   glow, the same in the popup, on the Discord card (/player-card, the popup's card mode) and in the
+   profile's title list. The glows follow the owner's reference images (2026-10-02): the text keeps its
+   colour, a 5-6px blur of a deeper shade at 80% fades out about 7px from the letters. Free, tournament
+   and legacy titles (and a category without a look) are plain grey, without a glow. */
+.player-title-look {
+  --player-title-glow: none;
+  color: #b6b6b6;
+}
+
+/* The popup and the profile page strip every shadow inside them (rating-cards.css), so the glow is
+   re-asserted with the same !important escape as the other glows there. */
+.player-title-look,
+:is(#player-profile-popup, #player-profile-page) .player-title-look {
+  text-shadow: var(--player-title-glow) !important;
+}
+
+.player-title-look.is-look-season {
+  --player-title-glow: 0 0 6px rgba(255, 0, 0, 0.8);
+  color: #ff0000;
+}
+
+.player-title-look.is-look-special {
+  --player-title-glow: 0 0 5px rgba(69, 168, 255, 0.8);
+  color: #aef7ff;
+}
+
+.player-title-look.is-look-msl-world {
+  --player-title-glow: 0 0 6px rgba(255, 148, 0, 0.8);
+  color: #ffeb5c;
+}
+
+.player-title-look.is-look-msl {
+  color: #e09e00;
+}
+
+.player-title-look.is-look-tournament-x5 {
+  color: #77c300;
 }
 
 .player-popup-body {
@@ -318,6 +356,12 @@ body.player-popup-open {
   flex-wrap: wrap;
   column-gap: 0.5rem;
   overflow: visible;
+}
+
+/* The title takes a line of its own, before the friend codes. */
+.player-popup.is-card .player-popup-player-title {
+  flex-basis: 100%;
+  margin-top: 0.55rem;
 }
 
 /* A friend code list is as wide as its longest code; one that does not fit beside the other wraps. */

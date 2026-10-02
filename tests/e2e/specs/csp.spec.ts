@@ -124,10 +124,12 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await expect(combobox).toContainText("United States");
     await expect(page.locator(".player-popup-flag")).toHaveAttribute("src", /flags\/us\.png$/);
 
-    // The title: one of the member's titles; the line under the name shows it at once.
+    // The title: one of the member's titles, picked from a list that shows each in its look.
     await page.locator("[data-edit-open='title']").click();
-    await page.locator("[data-field='title']").selectOption("msl-2025-world-champion");
-    await expect(page.locator(".player-popup-player-title")).toHaveText("MSL 2025 WORLD CHAMPION");
+    await page.locator("#profile-title-select").click();
+    await page.locator("[role='option'][data-value='msl-2025-world-champion']").click();
+    await expect(page.locator("#profile-title-select .profile-country-name")).toHaveText("MSL 2025 WORLD CHAMPION");
+    await expect(page.locator("#profile-title-select .profile-country-name")).toHaveClass(/is-look-msl-world/);
     await expect(page.locator("[data-field-row='title']")).toHaveClass(/is-unsaved/);
 
     await page.locator("[data-edit-action='add']").click();
@@ -237,7 +239,8 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
   },
   // A click outside an open field closes it and keeps what was entered, unsaved; clicks into its lists do
   // not close it, a pencil elsewhere opens that field at once, and an empty code line added with "+" goes.
-  // Nothing is sent. The title list holds only the member's titles, in the API's order, without groups.
+  // Nothing is sent. The title list holds only the member's titles, in the API's order, without groups, each
+  // in its look; this page shows the title only in its field.
   "profile editor closes fields on a click outside": async (page) => {
     await watchViolations(page);
     await preparePage(page);
@@ -252,33 +255,40 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     const outside = page.locator("#profile-country-label");
     const open = page.locator("[data-edit-row]");
     const titleRow = page.locator("[data-field-row='title']");
-    const headerTitle = page.locator(".player-popup-player-title");
+    const titleList = page.locator("#profile-title-select");
+    const titleOption = (code: string) => page.locator(`[role='option'][data-value='${code}']`);
+    await expect(page.locator(".player-popup-player-title")).toHaveCount(0);
 
     await page.locator("[data-edit-open='title']").click();
-    const select = page.locator("[data-field='title']");
-    await expect(select.locator("optgroup")).toHaveCount(0);
-    const options = await select
-      .locator("option")
+    await titleList.click();
+    const options = await page
+      .locator("#profile-title-select-listbox [role='option']")
       .evaluateAll((nodes) =>
-        nodes.map((node) => [(node as HTMLOptionElement).value, (node as HTMLOptionElement).text]),
+        nodes.map((node) => [
+          (node as HTMLElement).dataset.value ?? "",
+          (node as HTMLElement).innerText,
+          /is-look-([a-z0-9-]+)/.exec(node.querySelector(".profile-country-name")?.className ?? "")?.[1] ?? "",
+        ]),
       );
-    expect(options.slice(0, 7)).toEqual([
-      ["", "No player title"],
-      ["msl-2-time-world-champion", "2-TIME WORLD CHAMPION"],
-      ["msl-2025-world-champion", "MSL 2025 WORLD CHAMPION"],
-      ["tournament-winner-green", "TOURNAMENT WINNER"],
-      ["tournament-winner", "TOURNAMENT WINNER"],
-      ["legacy-megastriker", "LEGACY MEGASTRIKER"],
-      ["three-ghosts", "3 GHOSTS"],
+    expect(options.slice(0, 10)).toEqual([
+      ["", "No player title", ""],
+      ["wfc-final-season-leader", "WFC FINAL SEASON LEADER", "special"],
+      ["msl-2-time-world-champion", "2-TIME WORLD CHAMPION", "msl-world"],
+      ["msl-2026-spring-champion", "MSL 2026 SPRING CHAMPION", "msl"],
+      ["msl-2025-world-champion", "MSL 2025 WORLD CHAMPION", "msl-world"],
+      ["season-titan-1", "BURST 2026 STRIKERS TITAN", "season"],
+      ["tournament-winner-green", "TOURNAMENT WINNER", "tournament-x5"],
+      ["tournament-winner", "TOURNAMENT WINNER", "tournament"],
+      ["legacy-megastriker", "LEGACY MEGASTRIKER", "legacy"],
+      ["three-ghosts", "3 GHOSTS", "free"],
     ]);
-    await select.click();
-    await select.selectOption("tournament-winner");
+    await titleOption("tournament-winner").click();
     await expect(open).toHaveCount(1);
     await outside.click();
     await expect(open).toHaveCount(0);
     await expect(titleRow).toHaveClass(/is-unsaved/);
     await expect(titleRow.locator(".player-popup-code-value")).toHaveText("TOURNAMENT WINNER");
-    await expect(headerTitle).toHaveText("TOURNAMENT WINNER");
+    await expect(titleRow.locator(".player-popup-code-value")).toHaveClass(/is-look-tournament(?!-)/);
 
     // The country list belongs to its field: picking from it keeps the field open.
     await page.locator("[data-edit-open='country']").click();
@@ -309,15 +319,49 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await outside.click();
     await expect(codes).toHaveCount(before);
 
-    // "No player title": the field says so, the line under the name is gone.
+    // "No player title": the field says so, muted.
     await page.locator("[data-edit-open='title']").click();
-    await select.selectOption("");
+    await titleList.click();
+    await titleOption("").click();
     await outside.click();
     await expect(titleRow.locator(".player-popup-code-value")).toHaveText("No player title");
-    await expect(headerTitle).toBeHidden();
+    await expect(titleRow).toHaveClass(/profile-code-missing/);
 
     await expect(page.locator("[data-edit-action='save']")).toBeEnabled();
     expect(puts).toBe(0);
+    await settle(page);
+  },
+  // The player title is the content's first line, before the friend codes, in its look; the header has
+  // none. Without a title the Switch code takes its place: no empty line, no extra gap.
+  "player title in the popup and on the card": async (page) => {
+    await open(page, "/players");
+    const popup = page.locator("#player-profile-popup");
+    const title = popup.locator(".player-popup-content > .player-popup-player-title");
+    const topOf = (selector: string): Promise<number> =>
+      popup.evaluate((root, css) => {
+        const content = root.querySelector(".player-popup-content");
+        const node = root.querySelector(css);
+        return node && content ? node.getBoundingClientRect().top - content.getBoundingClientRect().top : NaN;
+      }, selector);
+    await page.locator('.players-name-trigger[data-player-id="2"]').click();
+    await settle(page, { eagerImages: true });
+    await expect(title).toHaveText("SELF-PROCLAIMED KING OF STRIKERS");
+    await expect(title).toHaveClass(/is-look-free/);
+    await expect(popup.locator(".player-popup-header .player-popup-player-title")).toHaveCount(0);
+    const titledTop = await topOf(".player-popup-player-title");
+    await page.keyboard.press("Escape");
+    await page.locator('.players-name-trigger[data-player-id="4"]').click();
+    await settle(page, { eagerImages: true });
+    await expect(title).toBeHidden();
+    expect(await topOf(".player-popup-section")).toBeCloseTo(titledTop, 1);
+
+    await page.goto("/player-card?player=3");
+    await page.locator("html[data-player-card='ready']").waitFor();
+    await expect(title).toBeHidden();
+    await page.goto("/player-card?player=5");
+    await page.locator("html[data-player-card='ready']").waitFor();
+    await expect(title).toHaveText("LEGACY SUPERSTAR");
+    await expect(title).toHaveClass(/is-look-legacy/);
     await settle(page);
   },
   "gear builder panes, character menu and card picture": async (page) => {

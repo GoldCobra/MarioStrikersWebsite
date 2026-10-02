@@ -170,8 +170,12 @@ are refused for members who left the server, checked with the bot token
 A bot token enables Discord name lookups and event discovery.
 
 **Player titles** ([ADR 0008](adr/0008-player-titles.md), `modules/titles/`).
-A member picks one of their titles on the profile page; the player popup, the
-profile page and the Discord card show it under the name, in FULL CAPS. Four
+A member picks one of their titles on the profile page; the player popup and the
+Discord card show it as the content's first line, before the friend codes (without
+a title the line takes no room), the profile page in its "Player Title" field. Each
+title is shown in FULL CAPS and in its group's look, colour and glow, in the popup,
+on the card and in the profile's title list alike: `titleLook` (`availability.ts`)
+assigns it, `styles/player-popup.css` holds the colours once. Four
 `dbo` tables hold them: categories, titles (with the rule that awards each one),
 unlocks (one per player and title, with their source) and the selected title.
 Free Titles are available to everyone; of an exclusive group (legacy ranks,

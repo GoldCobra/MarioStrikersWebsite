@@ -1,6 +1,8 @@
 // The country field of the profile page: a select-only combobox (WAI-ARIA APG) whose options show the
 // country's flag from /assets/flags, as a native <select> cannot show images and Windows draws no flag
 // emoji. Typing jumps to the first country starting with what was typed; Enter, Tab or a click takes it.
+// The title field uses it too, without flags: each title in its look (colour and glow), which the options
+// of a native <select> cannot show either.
 
 import { escapeHtml } from "@ms/shared/html";
 import { countryDisplayName, flagUrl, normalizeCountryCode } from "../../lib/countries.ts";
@@ -11,6 +13,8 @@ export interface CountryOption {
   readonly label: string;
   /** The flag file's code ("de", "gb-eng"), "" when there is none. */
   readonly flag: string;
+  /** Classes for the option's name, in the list and in the field (a title's look). */
+  readonly className?: string;
 }
 
 export const NO_COUNTRY_LABEL = "No country";
@@ -80,6 +84,10 @@ export interface CountrySelectOptions {
   readonly options: readonly CountryOption[];
   readonly value: string;
   readonly onChange: (value: string) => void;
+  /** Show the options' flags (default); off for a list without them. */
+  readonly flags?: boolean;
+  /** Another class for the field, e.g. its width. */
+  readonly className?: string;
 }
 
 export interface CountrySelect {
@@ -103,8 +111,13 @@ export function createCountrySelect(config: CountrySelectOptions): CountrySelect
   let typed = "";
   let typedTimer: number | undefined;
 
+  const flags = config.flags ?? true;
+  const flagOf = (option: CountryOption | undefined): string =>
+    flags ? flagImage(option?.flag ?? "", "profile-country-flag") : "";
+  const nameOf = (option: CountryOption | undefined, fallback: string): string =>
+    `<span class="profile-country-name${option?.className ? ` ${escapeHtml(option.className)}` : ""}">${escapeHtml(option?.label ?? fallback)}</span>`;
   const element = document.createElement("div");
-  element.className = "profile-country-select";
+  element.className = config.className ? `profile-country-select ${config.className}` : "profile-country-select";
   element.innerHTML = [
     `<div id="${escapeHtml(id)}" class="profile-country-trigger" role="combobox" tabindex="0"`,
     ` aria-haspopup="listbox" aria-expanded="false" aria-controls="${escapeHtml(listId)}"`,
@@ -116,8 +129,8 @@ export function createCountrySelect(config: CountrySelectOptions): CountrySelect
     options
       .map(
         (option, index) =>
-          `<li id="${escapeHtml(optionId(index))}" class="profile-country-option" role="option" aria-selected="false" data-index="${String(index)}">` +
-          `${flagImage(option.flag, "profile-country-flag")}<span class="profile-country-name">${escapeHtml(option.label)}</span></li>`,
+          `<li id="${escapeHtml(optionId(index))}" class="profile-country-option" role="option" aria-selected="false" data-index="${String(index)}" data-value="${escapeHtml(option.value)}">` +
+          `${flagOf(option)}${nameOf(option, option.label)}</li>`,
       )
       .join(""),
     "</ul>",
@@ -134,8 +147,8 @@ export function createCountrySelect(config: CountrySelectOptions): CountrySelect
   function renderValue(): void {
     const option = options.find((entry) => entry.value === value) ?? options[0];
     trigger.innerHTML =
-      flagImage(option?.flag ?? "", "profile-country-flag") +
-      `<span class="profile-country-name">${escapeHtml(option?.label ?? NO_COUNTRY_LABEL)}</span>` +
+      flagOf(option) +
+      nameOf(option, NO_COUNTRY_LABEL) +
       '<span class="profile-country-caret" aria-hidden="true"></span>';
     items.forEach((item, index) => {
       item.setAttribute("aria-selected", options[index]?.value === value ? "true" : "false");

@@ -5,6 +5,7 @@ import {
   compareTitles,
   normalizeTitleCode,
   selectedTitle,
+  titleLook,
   titleText,
   titleYear,
   toTitleOption,
@@ -192,6 +193,25 @@ test("titles are shown in FULL CAPS and codes taken in lower case", () => {
     name: "TOURNAMENT WINNER",
     category: "tournament",
     categoryName: "Tournament Titles",
-    style: "green",
+    style: "tournament-x5",
   });
+});
+
+test("every title has the look of its group: colour and glow are set once per look", () => {
+  const looks = Object.fromEntries(CATALOG.map((title) => [title.code, titleLook(title)]));
+  assert.equal(looks["og-player"], "free");
+  assert.equal(looks["wfc-final-season-leader"], "special");
+  assert.equal(looks["msl-2025-world-champion"], "msl-world");
+  assert.equal(looks["msl-season-1-world-champion"], "msl-world");
+  assert.equal(looks["msl-5-time-world-champion"], "msl-world");
+  assert.equal(looks["msl-2-time-world-champion"], "msl-world");
+  assert.equal(looks["msl-2025-fall-champion"], "msl");
+  assert.equal(looks["msl-2026-spring-champion"], "msl");
+  assert.equal(looks["msl-season-1-summer-champion"], "msl");
+  assert.equal(looks["tournament-winner"], "tournament");
+  assert.equal(looks["tournament-winner-green"], "tournament-x5");
+  assert.equal(looks["legacy-megastriker"], "legacy");
+  assert.equal(titleLook(seasonTitle(7, 3, "CHILL 2026 STRIKERS TITAN")), "season");
+  assert.equal(titleLook({ category: "events", name: "EVENT HERO", styleKey: "" }), "plain");
+  assert.equal(toTitleOption(catalogTitle("tournament-winner-green")).style, "tournament-x5");
 });

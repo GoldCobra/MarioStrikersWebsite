@@ -1013,8 +1013,11 @@ test("the selected title shows in FULL CAPS while the player can still select it
     return { title: player?.title, title_style: player?.title_style };
   };
   const both = ["tournament-winner", "tournament-winner-green"];
-  assert.deepEqual(shown("tournament-winner-green", both), { title: "TOURNAMENT WINNER", title_style: "green" });
-  assert.deepEqual(shown("og-player", []), { title: "OG PLAYER", title_style: "" });
+  assert.deepEqual(shown("tournament-winner-green", both), {
+    title: "TOURNAMENT WINNER",
+    title_style: "tournament-x5",
+  });
+  assert.deepEqual(shown("og-player", []), { title: "OG PLAYER", title_style: "free" });
   assert.deepEqual(shown("", both), { title: "", title_style: "" });
   assert.equal(shown("msl-2023-world-champion", []).title, "", "a title no longer unlocked is not shown");
   assert.equal(shown("tournament-winner", both).title, "TOURNAMENT WINNER", "the plain one stays selectable");
