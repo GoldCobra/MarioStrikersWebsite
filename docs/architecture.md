@@ -47,9 +47,17 @@ their code and is bundled with it. The profile page (`/profile`) shows the
 player popup's card as a section of the page (`#player-profile-page`): the same
 template, renderer (`features/players/player-profile-view.ts`) and styles, but
 no overlay, close button or dialog role; there all text is in MLSBY (the
-"Reporter" face) except the name (ITC Grizzly) and the rating cards, and the
+"Reporter" face) except the name (ITC Grizzly), and the
 background starts at the card's top at the card's width, so it never moves when
-the card grows. Shared popup classes in `src/styles/popups.css` are
+the card grows. Instead of the rating cards it shows the member's statistics per
+game (`features/profile/profile-stats.ts`, `GET /api/profile/me/stats`): MSBL,
+MSC and SMS, each with the same ten read-only fields (season rank, ELO and W-L of
+the active season, highest season rank, current and highest WHR, total W-L,
+matches and win rate, highest legacy rank), the game's ball before each name and
+the value right-aligned in a field box; "-" where a value is missing, a real 0 or
+0-0 as such. The API reads them in one batch for the session's player only
+(`modules/profile/stats-repository.ts`; `stats.ts` names each value's source and
+rule). The popup, the players page and the Discord card keep their rating cards. Shared popup classes in `src/styles/popups.css` are
 `popup-overlay`, `popup-card`, `popup-header`, `popup-title` and `popup-close`.
 The hidden page `/player-card?player=<id>` shows the player popup as a compact
 card (`showPlayerCard`, class `is-card`) that the Discord bot screenshots for
@@ -292,6 +300,7 @@ All endpoints below use the same origin as the website.
 | GET | `/api/profile/me` | Authenticated user's linked profile |
 | POST | `/api/profile/me` | Create the authenticated user's profile when the login could not |
 | GET | `/api/profile/me/editable` | The editor's profile: Discord names, title, country, friend codes, the member's titles, countries |
+| GET | `/api/profile/me/stats` | MY PROFILE's statistics per game (MSBL, MSC, SMS) of the signed-in player; `null` for a value not available |
 | PUT | `/api/profile/me/editable` | Save the editor's title, country and friend codes (JSON, with `version`) |
 | GET | `/api/health` | Service health |
 

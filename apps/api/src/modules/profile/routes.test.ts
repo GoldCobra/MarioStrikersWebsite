@@ -8,12 +8,15 @@ import { SessionManager } from "../auth/session.ts";
 import type { PlayerProfile } from "../players/mappers.ts";
 import type { DiscordIdentity } from "./mappers.ts";
 import type { ProfileService } from "./service.ts";
+import { buildProfileStats, type ProfileStats } from "./stats.ts";
 
 async function createProfileApp({
   profile,
+  stats,
   ensure = () => Promise.resolve({ playerId: 42, created: false }),
 }: {
   profile?: (discordId: string) => Promise<PlayerProfile | null>;
+  stats?: (discordId: string) => Promise<ProfileStats | null>;
   ensure?: ProfileService["ensurePlayer"];
 } = {}) {
   let sessions: SessionManager | undefined;
@@ -36,6 +39,7 @@ async function createProfileApp({
           saveEditableProfile: () => Promise.reject(new Error("unused")),
         },
         ...(profile ? { getPlayerProfileByDiscordId: profile } : {}),
+        ...(stats ? { getProfileStatsByDiscordId: stats } : {}),
       };
     },
   });
@@ -316,4 +320,92 @@ test("a former member's save is refused, and a member without a profile has noth
   const missing = await app.inject({ url: EDITABLE_URL, headers: { cookie } });
   assert.equal(missing.statusCode, 404);
   assert.equal(missing.json<{ code: string }>().code, "PLAYER_PROFILE_NOT_LINKED");
+});
+
+test("/api/profile/me/stats: only the signed-in player's own statistics, never anyone else's", async () => {
+  const asked: string[] = [];
+  const { app, cookie } = await createProfileApp({
+    stats: (discordId) => {
+      asked.push(discordId);
+      return Promise.resolve(
+        buildProfileStats([
+          [{ Id: 3, DisplayName: "Dusk Season 2026" }],
+          [],
+          [],
+          [{ GameType: 3, MatchWins: 4, MatchLosses: 1 }],
+        ]),
+      );
+    },
+  });
+  const anonymous = await app.inject("/api/profile/me/stats?player_id=9");
+  assert.equal(anonymous.statusCode, 401);
+  assert.equal(anonymous.headers["cache-control"], "no-store");
+  assert.equal(anonymous.json<{ code: string }>().code, "AUTH_REQUIRED");
+  assert.deepEqual(asked, [], "nothing is read without a session");
+
+  // Whatever the request names, the player comes from the session (Discord account 123).
+  for (const url of [
+    "/api/profile/me/stats",
+    "/api/profile/me/stats?player_id=9&discord_id=456",
+    "/api/profile/me/stats?playerId=9",
+  ]) {
+    const response = await app.inject({ url, headers: { cookie, "x-player-id": "9" } });
+    assert.equal(response.statusCode, 200, url);
+    assert.equal(response.headers["cache-control"], "no-store");
+    const body = response.json<{
+      season: string;
+      games: { game: string; total_wins: number | null; total_win_percent: number | null }[];
+    }>();
+    assert.equal(body.season, "Dusk Season 2026");
+    assert.deepEqual(
+      body.games.map((game) => game.game),
+      ["MSBL", "MSC", "SMS"],
+    );
+    assert.equal(body.games[0]?.total_wins, 4);
+    assert.equal(body.games[0].total_win_percent, 80);
+    assert.equal(body.games[1]?.total_wins, null);
+  }
+  assert.deepEqual(asked, ["123", "123", "123"]);
+});
+
+test("/api/profile/me/stats reports an account without a player and duplicate links", async () => {
+  const none = await createProfileApp({ stats: () => Promise.resolve(null) });
+  const missing = await none.app.inject({ url: "/api/profile/me/stats", headers: { cookie: none.cookie } });
+  assert.equal(missing.statusCode, 404);
+  assert.equal(missing.json<{ code: string }>().code, "PLAYER_PROFILE_NOT_LINKED");
+
+  const doubled = await createProfileApp({
+    stats: () =>
+      Promise.reject(
+        new HttpError(409, "PLAYER_PROFILE_CONFLICT", "Multiple player profiles match this Discord account."),
+      ),
+  });
+  const conflict = await doubled.app.inject({ url: "/api/profile/me/stats", headers: { cookie: doubled.cookie } });
+  assert.equal(conflict.statusCode, 409);
+  assert.equal(conflict.json<{ code: string }>().code, "PLAYER_PROFILE_CONFLICT");
+});
+
+test("the simulated member's statistics: every value, a game without this season, real zeros", async () => {
+  const { app } = await createTestApp();
+  const start = await app.inject("/api/auth/discord/start?returnTo=%2Fprofile");
+  const stateCookie = cookiePair(setCookies(start.headers["set-cookie"])[0] ?? "");
+  const callback = await app.inject({ url: String(start.headers.location), headers: { cookie: stateCookie } });
+  const session = setCookies(callback.headers["set-cookie"]).find((value) => value.startsWith("msc_dev_session="));
+  const response = await app.inject({ url: "/api/profile/me/stats", headers: { cookie: cookiePair(session ?? "") } });
+  assert.equal(response.statusCode, 200);
+  const games = response.json<{ games: Record<string, unknown>[] }>().games;
+  assert.deepEqual(
+    games.map((game) => [
+      game.game,
+      game.season_rank,
+      game.total_matches,
+      game.total_win_percent,
+      game.highest_legacy_rank,
+    ]),
+    [
+      ["MSBL", "Gold III", 343, 61.81, "Megastriker"],
+      ["MSC", null, 178, 49.44, "Superstar"],
+      ["SMS", "Unranked", 0, null, null],
+    ],
+  );
 });

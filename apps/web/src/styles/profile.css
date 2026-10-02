@@ -193,6 +193,58 @@
   content: "▼";
 }
 
+/* MY PROFILE's statistics (features/profile/profile-stats.ts), only on this page, in the place of the popup's
+   rating cards: per game a heading and its ten fields. A field is its name with the game's ball on the left
+   and its value in a grey field box on the right (.player-popup-code-row and its value: the box, type and
+   centring of every field, --field-*), right-aligned; the list keeps the fields' compact gap
+   (.player-popup-code-list). The same field looks the same in all three games. */
+#player-profile-page .profile-stats-list {
+  margin-bottom: 0;
+}
+
+#player-profile-page .profile-stat-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(7.5rem, 42%);
+  align-items: center;
+  gap: 0.45rem;
+}
+
+#player-profile-page .profile-stat-label {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #d7d8de;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: var(--field-font-size);
+  line-height: var(--field-line-height);
+  letter-spacing: var(--reporter-letter-spacing);
+}
+
+#player-profile-page .profile-stat-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#player-profile-page .profile-stat-ball {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+#player-profile-page .profile-stat-value {
+  margin: 0;
+  justify-content: flex-end;
+}
+
+#player-profile-page .profile-stat-value .player-popup-code-value {
+  text-align: right;
+}
+
 .player-popup-season-awards {
   margin: 0.42rem 0 0;
   padding: 0;

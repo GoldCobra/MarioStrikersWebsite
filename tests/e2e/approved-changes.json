@@ -1,10 +1,10 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "a99d5780bd7df12ebaf97f233dbe6b7c1be4935f",
+  "reference": "da8757b762743df25000bc5dd198b6325e232dcc",
   "changes": [
     {
-      "screenshots": ["states/players-popup-accolades*"],
-      "reason": "New state (Season Rewards and Tourney Accolades open; the reference shows its old look). Owner 2026-10-02: the entries (season, reward, tournament, date) take the player title's type (Reporter 15px, title letter spacing, FULL CAPS; the date was 0.92em and not tightened), and a won MSL World Championship takes the MSL WORLD CHAMPION title's gold 1:1 (#ffeb5c, 0 0 6px rgba(255,148,0,.95)) instead of #ffed60 with a three-layer halo; its medal shares that glow. Other colours unchanged."
+      "screenshots": ["states/profile-*"],
+      "reason": "Owner 2026-10-03: on MY PROFILE (/profile) the rating cards are replaced by the member's statistics per game (MSBL, MSC, SMS; ten read-only fields each, the game's ball before each name, values right-aligned in field boxes, '-' where missing), before Season Rewards and Tourney Accolades. Everything above them is unchanged; the page is taller, so its background scales with it. The player popup, the players page and the Discord card are unchanged (their states are equal)."
     }
   ]
 }

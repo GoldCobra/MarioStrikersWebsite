@@ -61,15 +61,13 @@ export function getPlayerProfile(
 }
 
 /**
- * The profile linked to a Discord account; null when none is linked.
- * Two linked profiles are a data error the user cannot fix, reported as 409 PLAYER_PROFILE_CONFLICT.
+ * The id of the player linked to a Discord account; null when none is linked. Two linked profiles are a
+ * data error the user cannot fix, reported as 409 PLAYER_PROFILE_CONFLICT.
  */
-export async function getPlayerProfileByDiscordId(
-  database: PlayerDatabase,
-  log: Logger,
+export async function findLinkedPlayerId(
+  database: Pick<PlayerDatabase, "withPool">,
   discordIdRaw: unknown,
-  titles: TitleCatalogSource = NO_TITLES,
-): Promise<PlayerProfile | null> {
+): Promise<number | null> {
   const discordId = normalizeDiscordId(discordIdRaw);
   if (!discordId) throw new HttpError(400, "BAD_REQUEST", "Invalid Discord user id.");
   const rows = await database.withPool((pool) => fetchPlayersByDiscordId(pool, discordId));
@@ -79,7 +77,21 @@ export async function getPlayerProfileByDiscordId(
     throw new HttpError(409, "PLAYER_PROFILE_CONFLICT", "Multiple player profiles match this Discord account.");
   }
   const playerId = Number(matches[0]?.player_id);
-  if (!Number.isInteger(playerId) || playerId <= 0) return null;
+  return Number.isInteger(playerId) && playerId > 0 ? playerId : null;
+}
+
+/**
+ * The profile linked to a Discord account; null when none is linked.
+ * Two linked profiles are a data error the user cannot fix, reported as 409 PLAYER_PROFILE_CONFLICT.
+ */
+export async function getPlayerProfileByDiscordId(
+  database: PlayerDatabase,
+  log: Logger,
+  discordIdRaw: unknown,
+  titles: TitleCatalogSource = NO_TITLES,
+): Promise<PlayerProfile | null> {
+  const playerId = await findLinkedPlayerId(database, discordIdRaw);
+  if (playerId === null) return null;
   const profile = await loadProfile(database, log, playerId, titles);
   if (!profile) throw new HttpError(404, "NOT_FOUND", "Player not found.");
   return profile;

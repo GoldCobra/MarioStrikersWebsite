@@ -1,7 +1,8 @@
 // The signed-in player's own profile (/profile), from /api/profile/me, or the reason it cannot be shown.
 // It is formatted like the player popup (the same template, renderer and styles; the page itself is no
-// popup), shows the member's Discord username and is edited in place (profile-edit.ts). The login creates a
-// missing profile; when that failed, the page asks for it once more.
+// popup), shows the member's Discord username and is edited in place (profile-edit.ts). Instead of the
+// popup's rating cards it shows the member's statistics per game (profile-stats.ts, /api/profile/me/stats).
+// The login creates a missing profile; when that failed, the page asks for it once more.
 
 import { toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
@@ -12,6 +13,7 @@ import type { PlayerProfile } from "../players/profile-data.ts";
 import template from "../players/player-profile-popup.html?raw";
 import { createProfileEditor } from "./profile-edit.ts";
 import type { EditableProfile } from "./profile-edit-state.ts";
+import { renderProfileStats, type ProfileStatsResponse } from "./profile-stats.ts";
 
 const DISCORD_LINK =
   '<a class="profile-action-button" href="https://discord.gg/de2YaWg" target="_blank" rel="noopener noreferrer">Open Discord</a>';
@@ -36,6 +38,8 @@ function statePanel(title: string, message: string, actionHtml = ""): string {
 interface ProfileCard {
   readonly root: HTMLElement;
   readonly view: TemplateView;
+  /** Where the statistics go: the place of the popup's rating cards, before Season Rewards. */
+  readonly stats: HTMLElement;
 }
 
 /**
@@ -57,10 +61,14 @@ function createProfileCard(): ProfileCard {
   const mscTitle = card.querySelector("[data-list='fc-msc']")?.closest(".player-popup-section")?.querySelector("h3");
   if (mscTitle) mscTitle.textContent = "MSC Friend Codes (max 3)";
   card.querySelector("[data-slot='popup-content']")?.removeAttribute("hidden");
+  // The rating cards are the popup's; this page shows the statistics in their place (only here).
+  const stats = document.createElement("div");
+  stats.className = "profile-stats";
+  card.querySelector("[data-slot='ratings-grid-singles']")?.closest(".player-popup-section")?.replaceWith(stats);
   const root = document.createElement("div");
   root.id = "player-profile-page";
   root.append(card);
-  return { root, view: templateView(root) };
+  return { root, view: templateView(root), stats };
 }
 
 /**
@@ -198,6 +206,20 @@ async function createProfile(): Promise<boolean> {
   }
 }
 
+/** The member's statistics; null when they could not be loaded. */
+async function fetchStats(): Promise<ProfileStatsResponse | null> {
+  try {
+    const response = await fetch("/api/profile/me/stats", {
+      credentials: "same-origin",
+      headers: { Accept: "application/json" },
+    });
+    const body = (await response.json().catch(() => null)) as ProfileStatsResponse | null;
+    return response.ok ? body : null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchEditable(): Promise<EditableProfile | null> {
   try {
     const response = await fetch("/api/profile/me/editable", {
@@ -229,7 +251,7 @@ async function signedIn(): Promise<boolean | null> {
   }
 }
 
-/** Shows the profile and its editing, both at once (the editable profile is loaded alongside). */
+/** Shows the profile, its statistics and its editing, all at once (loaded alongside, so nothing moves). */
 async function loadProfile(mount: HTMLElement): Promise<void> {
   mount.innerHTML = '<p class="profile-loading loading-note">Loading...</p>';
   try {
@@ -237,9 +259,9 @@ async function loadProfile(mount: HTMLElement): Promise<void> {
       mount.innerHTML = loginRequiredHtml();
       return;
     }
-    let [result, editable] = await Promise.all([fetchProfile(), fetchEditable()]);
+    let [result, editable, stats] = await Promise.all([fetchProfile(), fetchEditable(), fetchStats()]);
     if (result.payload?.code === "PLAYER_PROFILE_NOT_LINKED" && (await createProfile())) {
-      [result, editable] = await Promise.all([fetchProfile(), fetchEditable()]);
+      [result, editable, stats] = await Promise.all([fetchProfile(), fetchEditable(), fetchStats()]);
     }
     if (result.status !== 200) {
       mount.innerHTML = authErrorHtml(result.payload, result.status);
@@ -247,6 +269,7 @@ async function loadProfile(mount: HTMLElement): Promise<void> {
     }
     const card = createProfileCard();
     renderCard(card, result.payload?.profile ?? {});
+    renderProfileStats(card.stats, stats);
     mount.replaceChildren(card.root);
     removeProfileQuery();
     if (!editable) {

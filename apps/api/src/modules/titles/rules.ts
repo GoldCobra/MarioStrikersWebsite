@@ -26,6 +26,9 @@ import { formatSeasonAwardSeasonName } from "../players/mappers.ts";
 import { titleText, type CatalogTitle } from "./availability.ts";
 import { TEMPLATE_RULE_KIND, TITLE_CATEGORY } from "./catalog.ts";
 import { gameByCode, gameByType, gameLabel, type TitleGame, type TitleGameCode } from "./games.ts";
+import { LEGACY_MIN_MATCHES, LEGACY_RANK_NAMES, legacyTier } from "./legacy.ts";
+
+export { legacyTier } from "./legacy.ts";
 
 /** CompetitiveSeasonRewardEarned.TierOrder of Strikers Titan (packages/shared/src/ranks.ts). */
 export const TITAN_REWARD_TIER_ORDER = 7;
@@ -39,11 +42,6 @@ const WORLD_CHAMPIONSHIP_LIKE = /^MSL\b.*\bWorld Championship\b/i;
 
 /** Side brackets and divisions: their wins are not counted for tournament titles until staff decide. */
 export const SIDE_BRACKET = /\b(?:consolation|bracket|division|amateur|rookie)\b|kritter memorial/i;
-
-const LEGACY_RANK_NAMES = ["", "Rookie", "Professional", "Superstar", "Legend", "Megastriker"];
-
-/** Legacy matches a rank needed before it showed (dbo.tr_UpdateRank): 10 in 1v1, 4 in 2v2. */
-const LEGACY_MIN_MATCHES = { "1v1": 10, "2v2": 4 } as const;
 
 export interface TournamentRow {
   readonly id: number;
@@ -134,11 +132,6 @@ export function parseWinners(value: unknown): number[] | null {
     .filter(Boolean)
     .map(Number);
   return ids.every((id) => Number.isInteger(id) && id > 0) ? [...new Set(ids)] : null;
-}
-
-/** The legacy rank tier of a PlayerStats rank: 1-3 Rookie, 4-6 Professional … 13 Megastriker; 0 for none. */
-export function legacyTier(rank: number): number {
-  return Number.isInteger(rank) && rank >= 1 && rank <= 13 ? Math.floor((rank - 1) / 3) + 1 : 0;
 }
 
 /** "Dusk Season 2026" → "DUSK 2026 STRIKERS TITAN". */

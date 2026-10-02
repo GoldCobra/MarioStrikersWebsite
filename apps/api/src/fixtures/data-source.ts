@@ -33,6 +33,7 @@ import {
   toTitleOption,
   type CatalogTitle,
 } from "../modules/titles/availability.ts";
+import { buildProfileStats, type ProfileStats } from "../modules/profile/stats.ts";
 import { TITLE_CATEGORIES, TITLE_CATEGORY, seededCatalog } from "../modules/titles/catalog.ts";
 
 const DAY_MS = 86_400_000;
@@ -309,6 +310,41 @@ function rankNumberForRating(rating: number): number {
 function fakeFriendCode(random: () => number, prefix?: string): string {
   const block = (): string => String(Math.floor(random() * 10000)).padStart(4, "0");
   return `${prefix ? `${prefix}-` : ""}${block()}-${block()}-${block()}`;
+}
+
+/**
+ * MY PROFILE's statistics of the signed-in sample member, as the database's result sets would hold them
+ * (modules/profile/stats.ts reads them the same way): MSBL with every value, MSC without a match in the
+ * current season, SMS with real zeros only (a pre-made 0-0 season row and a 0-0 record, no WHR, no legacy
+ * rank). A profile created at login has no data at all.
+ */
+function sampleProfileStats(): ProfileStats {
+  const rank = (rankNumber: number) => ({ RankNumber: rankNumber, RankName: RANK_NAMES[rankNumber] ?? "" });
+  return buildProfileStats([
+    [{ Id: 3, DisplayName: "Dusk Season 2026" }],
+    [
+      { GameId: 3, Elo: 1187.42, MatchWins: 14, MatchLosses: 6, ...rank(9) },
+      { GameId: 2, Elo: 500, MatchWins: 0, MatchLosses: 0, ...rank(0) },
+    ],
+    [
+      { GameId: 3, ...rank(11) },
+      { GameId: 1, ...rank(7) },
+      { GameId: 2, ...rank(0) },
+    ],
+    [
+      { GameType: 3, Whr: 1612, MatchWins: 212, MatchLosses: 131 },
+      { GameType: 1, Whr: 1404, MatchWins: 88, MatchLosses: 90 },
+      { GameType: 2, Whr: null, MatchWins: 0, MatchLosses: 0 },
+    ],
+    [
+      { GameType: 3, MaxWhr: 1688, Days: 120 },
+      { GameType: 1, MaxWhr: 1530, Days: 64 },
+    ],
+    [
+      { GameType: 3, Rank: 13, Rank2v2: 0, Singles: 64, Teams: 0 },
+      { GameType: 1, Rank: 8, Rank2v2: 5, Singles: 25, Teams: 2 },
+    ],
+  ]);
 }
 
 export interface FixtureOptions {
@@ -909,6 +945,10 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
       return Promise.resolve(created ? buildNewPlayerProfile(created) : null);
     },
     profiles: createProfileService({ store: profileStore, members }),
+    getProfileStatsByDiscordId: (discordId) => {
+      if (discordId === linkedUser.id) return Promise.resolve(sampleProfileStats());
+      return Promise.resolve(createdPlayers.has(discordId) ? buildProfileStats([]) : null);
+    },
     getClubProfile: (clubId) => {
       const club = findClub(clubId);
       return Promise.resolve(club ? buildClubProfile(club) : null);
