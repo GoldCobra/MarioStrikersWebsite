@@ -1,10 +1,14 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "b1479c484a3ba010819f3fd7ea46fec118687f0f",
+  "reference": "1dcaa314c753ddb87eb818af999a43265214c265",
   "changes": [
     {
       "screenshots": ["states/profile-*"],
-      "reason": "Owner feedback on #63: 'Discord name' is the Discord username (as in the Striker Clubs), 'Server name' the name the server shows (nickname, else global name, else username), and the incomplete-code message no longer says 'or leave all three fields empty'. Checked: only the 24 profile state screenshots differ; on the linked profile only the Discord name's value (one line), with the error also the message; the unlinked profile gains its Server name line and the 390px error state its shorter message, so the lines below move."
+      "reason": "Player titles: the profile page gains its Title section before Country (the selected title or 'No title', a pencil opening the member's titles in one select, grouped by category); profile-title-edit is a new state with a title picked, shown at once under the name. Checked: of 349 screenshots only the 24 profile states and the 9 of the new title states differ; the sample player has no title selected, so its header and every popup and Discord card without a title are pixel-identical."
+    },
+    {
+      "screenshots": ["states/player-card-title-*", "states/players-popup-title-*"],
+      "reason": "New states for player titles: the selected title as a line under the name, white on the orange bar (player 5, Discord card) and black on a world champion's gold bar (player 2, popup). The reference commit has no titles, so it shows these players without the line."
     }
   ]
 }

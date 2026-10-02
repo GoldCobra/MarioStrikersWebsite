@@ -49,6 +49,22 @@ body.player-popup-open {
   transform: translateY(-3px);
 }
 
+/* The player title under the name (player-profile-view.ts): FULL CAPS in the popup's text face, smaller
+   than the name. The title groups get their colours later (class is-style-<look>). */
+.player-popup-player-title {
+  max-width: calc(100% - 1.8rem);
+  margin: 0.1rem 0 0;
+  color: #f4f4f4;
+  font-family: var(--reporter-font-stack);
+  font-weight: var(--reporter-font-weight);
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: var(--reporter-letter-spacing);
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+  filter: drop-shadow(-1px 1px 0 #000);
+}
+
 .player-popup-body {
   min-height: 0;
   padding: 0 0.9rem 0.95rem;

@@ -24,6 +24,7 @@ import {
   buildSeasonAwardsQuery,
   buildSeasonRewardLevelQuery,
 } from "./repository.ts";
+import { seededCatalog } from "../titles/catalog.ts";
 
 const NOW = new Date("2026-05-29T12:00:00.000Z");
 
@@ -540,7 +541,10 @@ test("profile batch query reads all profile data in one multi-recordset batch", 
   assert.match(sql, /rating\.PlacementPlayed/);
   assert.match(sql, /rating\.PlacementComplete/);
   assert.match(sql, /SUM\(rating\.MatchWins \+ rating\.MatchLosses\) AS TotalMatches/);
-  assert.match(sql, /GROUP BY rating\.GameId, rating\.ModeCode;$/);
+  assert.match(
+    sql,
+    /GROUP BY rating\.GameId, rating\.ModeCode; SELECT active\.TitleId AS title_id FROM dbo\.PlayerActiveTitle active WHERE active\.PlayerId = @playerId; SELECT unlock\.TitleId AS title_id FROM dbo\.PlayerTitleUnlock unlock WHERE unlock\.PlayerId = @playerId;$/,
+  );
   assert.match(sql, /CompetitiveSeasonRewardProgress/);
   assert.match(sql, /progress\.GameId/);
   assert.match(sql, /progress\.ModeCode/);
@@ -992,4 +996,27 @@ test("SEASON_AWARD_DISPLAY_ORDER covers every award futbot writes, without dupli
     "DUO_OF_THE_SEASON",
   ]);
   assert.equal(new Set(SEASON_AWARD_DISPLAY_ORDER).size, SEASON_AWARD_DISPLAY_ORDER.length);
+});
+
+test("the selected title shows in FULL CAPS while the player can still select it", () => {
+  const catalog = seededCatalog();
+  const id = (code: string): number => catalog.find((title) => title.code === code)?.id ?? 0;
+  const sets = (selected: string, unlocked: readonly string[]): unknown[][] => {
+    const recordsets: unknown[][] = Array.from({ length: 11 }, () => []);
+    recordsets[0] = [{ player_id: 9, name: "Someone" }];
+    recordsets[9] = selected ? [{ title_id: id(selected) }] : [];
+    recordsets[10] = unlocked.map((code) => ({ title_id: id(code) }));
+    return recordsets;
+  };
+  const shown = (selected: string, unlocked: readonly string[]) => {
+    const player = buildPlayerProfileFromRecordsets(sets(selected, unlocked), catalog)?.player;
+    return { title: player?.title, title_style: player?.title_style };
+  };
+  const both = ["tournament-winner", "tournament-winner-green"];
+  assert.deepEqual(shown("tournament-winner-green", both), { title: "TOURNAMENT WINNER", title_style: "green" });
+  assert.deepEqual(shown("og-player", []), { title: "OG PLAYER", title_style: "" });
+  assert.deepEqual(shown("", both), { title: "", title_style: "" });
+  assert.equal(shown("msl-2023-world-champion", []).title, "", "a title no longer unlocked is not shown");
+  assert.equal(shown("tournament-winner", both).title, "", "the plain one is replaced by the green one");
+  assert.equal(buildPlayerProfileFromRecordsets(sets("og-player", []))?.player.title, "", "no catalog, no title");
 });

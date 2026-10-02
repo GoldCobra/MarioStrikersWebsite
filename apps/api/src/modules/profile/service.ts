@@ -3,9 +3,10 @@
 //
 // The editor changes the country and the friend codes in the tables robotic_nightmare's /profile
 // commands use, in their exact form: codes "1234-5678-9012" (GameType 3 / region "SW" for Switch,
-// GameType 1 with region and platform for MSC), LineSeq numbered 1..n per player, game and region. One
-// save is one transaction. It is refused when the profile changed since the editor loaded it (version),
-// so a change made in Discord meanwhile is never overwritten unseen; a code another profile has is refused.
+// GameType 1 with region and platform for MSC), LineSeq numbered 1..n per player, game and region. It also
+// selects the player's title (dbo.PlayerActiveTitle) from the titles they can select. One save is one
+// transaction. It is refused when the profile changed since the editor loaded it (version), so a change
+// made in Discord meanwhile is never overwritten unseen; a code another profile has is refused.
 
 import { createHash } from "node:crypto";
 import {
@@ -20,6 +21,7 @@ import { HttpError } from "../../http/errors.ts";
 import type { GuildMemberLookup, Membership } from "../../integrations/discord/members.ts";
 import { normalizeDiscordId } from "../../lib/discord-id.ts";
 import { isUniqueViolation } from "../../lib/sql-errors.ts";
+import type { TitleOption } from "../titles/availability.ts";
 import { playerNameFromDiscord, type DiscordIdentity } from "./mappers.ts";
 
 export const SWITCH_GAME_TYPE = 3;
@@ -50,6 +52,10 @@ export interface StoredProfile {
   /** dbo.Player.Country; "" for none. */
   readonly country: string;
   readonly codes: readonly StoredFriendCode[];
+  /** The selected title's code; "" for none, also when the player can no longer select it. */
+  readonly title: string;
+  /** The titles the player can select (titles/availability.ts). */
+  readonly titles: readonly TitleOption[];
 }
 
 export interface CountryOption {
@@ -66,6 +72,8 @@ export interface CodeKey {
 export interface ChangePlan {
   /** The new country, or null when it stays. */
   readonly country: string | null;
+  /** The new title's code ("" for none), or null when it stays. */
+  readonly title: string | null;
   readonly deletes: readonly StoredFriendCode[];
   readonly updates: readonly { readonly row: StoredFriendCode; readonly label: string; readonly lineSeq: number }[];
   readonly inserts: readonly StoredFriendCode[];
@@ -118,6 +126,9 @@ export interface EditableProfile {
   readonly mscCodes: readonly MscCodeInput[];
   /** The selectable countries, plus the profile's own when it is no longer offered. */
   readonly countries: readonly CountryOption[];
+  /** The selected title's code, "" for none. */
+  readonly title: string;
+  readonly titles: readonly TitleOption[];
 }
 
 export type SaveOutcome =
@@ -144,16 +155,19 @@ export interface ProfileServiceOptions {
 // ---------------------------------------------------------------------------------------------------
 // Pure helpers, exported for tests
 
-/** A hash of everything the editor shows of the profile; any change by anyone gives a new one. */
-export function profileVersion(profile: StoredProfile): string {
+/**
+ * A hash of everything the editor shows of the profile; any change by anyone gives a new one. The title is
+ * in it only when one is selected, so the versions of profiles without one stay what they were.
+ */
+export function profileVersion(profile: Pick<StoredProfile, "country" | "codes" | "title">): string {
   const codes = profile.codes
     .map((row) =>
       JSON.stringify([row.gameType, row.region.trim().toUpperCase(), row.lineSeq, row.label.trim(), row.code.trim()]),
     )
     .sort();
-  return createHash("sha256")
-    .update(JSON.stringify([profile.country.trim().toLowerCase(), codes]))
-    .digest("base64url");
+  const parts: unknown[] = [profile.country.trim().toLowerCase(), codes];
+  if (profile.title) parts.push(profile.title);
+  return createHash("sha256").update(JSON.stringify(parts)).digest("base64url");
 }
 
 function compareMscRows(a: StoredFriendCode, b: StoredFriendCode): number {
@@ -204,12 +218,14 @@ export function desiredCodes(request: EditableProfileInput): DesiredCode[] {
 /**
  * The writes that turn `current` into the requested profile, or null when they are equal. Codes are
  * matched within their game and region, so an unchanged code keeps its row; per group the kept rows
- * keep their order, new codes follow, and LineSeq becomes 1..n like the bot's procedures leave it.
+ * keep their order, new codes follow, and LineSeq becomes 1..n like the bot's procedures leave it. A
+ * title of undefined leaves the selected title as it is.
  */
 export function planChanges(
   current: StoredProfile,
   country: string,
   desired: readonly StoredFriendCode[],
+  title?: string,
 ): ChangePlan | null {
   const groupKey = (row: StoredFriendCode): string => `${row.gameType}|${row.region.trim().toUpperCase()}`;
   const groups = new Set([...current.codes.map(groupKey), ...desired.map(groupKey)]);
@@ -240,8 +256,11 @@ export function planChanges(
     }
   }
   const countryChange = country !== current.country.trim().toLowerCase() ? country : null;
-  if (countryChange === null && !deletes.length && !updates.length && !inserts.length) return null;
-  return { country: countryChange, deletes, updates, inserts };
+  const titleChange = title !== undefined && title !== current.title ? title : null;
+  if (countryChange === null && titleChange === null && !deletes.length && !updates.length && !inserts.length) {
+    return null;
+  }
+  return { country: countryChange, title: titleChange, deletes, updates, inserts };
 }
 
 /** The profile a plan leaves behind: what the database holds after the writes of buildApplyQuery. */
@@ -254,7 +273,12 @@ export function applyPlan(current: StoredProfile, plan: ChangePlan): StoredProfi
       const update = plan.updates.find((entry) => same(entry.row, row));
       return update ? { ...row, label: update.label, lineSeq: update.lineSeq } : row;
     });
-  return { playerId: current.playerId, country: plan.country ?? current.country, codes: [...codes, ...plan.inserts] };
+  return {
+    ...current,
+    country: plan.country ?? current.country,
+    codes: [...codes, ...plan.inserts],
+    title: plan.title ?? current.title,
+  };
 }
 
 function fieldError(field: string, code: "TAKEN"): FieldError {
@@ -285,6 +309,7 @@ function audit(identity: DiscordIdentity, current: StoredProfile, plan: ChangePl
     discord_id: identity.id,
     source: "website profile editor",
     country: plan.country === null ? undefined : { from: current.country, to: plan.country },
+    title: plan.title === null ? undefined : { from: current.title, to: plan.title },
     removed: plan.deletes.map(describe),
     added: plan.inserts.map(describe),
     changed: plan.updates
@@ -334,6 +359,8 @@ export function createProfileService({ store, members, onChange }: ProfileServic
       switchCode: switchRow ? switchRow.code.trim() : "",
       mscCodes,
       countries: offeredCountries(countries, country),
+      title: stored.title,
+      titles: stored.titles,
     };
   }
 
@@ -387,10 +414,11 @@ export function createProfileService({ store, members, onChange }: ProfileServic
         const checked = validateEditableProfile(body, {
           isAllowedCountry: (code) => allowed.has(code),
           storedPlatform: (region, code) => stored.get(`${region}:${code}`) ?? null,
+          isAvailableTitle: (code) => current.titles.some((title) => title.code === code),
         });
         if (!checked.ok) return { plan: null, audit: "", result: { kind: "invalid", errors: checked.errors } };
         const desired = desiredCodes(checked.value);
-        const plan = planChanges(current, checked.value.country, desired);
+        const plan = planChanges(current, checked.value.country, desired, checked.value.title);
         // Asking for what is saved already succeeds, also with an old version (a double click).
         if (!plan) return { plan: null, audit: "", result: { kind: "saved", changed: false, current } };
         if (version !== profileVersion(current))

@@ -11,7 +11,8 @@ if (process.env.MSC_DEV_FIXTURES === "1") throw new Error("Remove MSC_DEV_FIXTUR
 process.env.NODE_ENV = "development";
 loadEnvFile(path.resolve(process.cwd(), ".env"));
 
-const config = loadConfig({ PORT: "8788", ...process.env });
+// A local server never awards player titles by itself; `npm run ops:title-sync` does on demand.
+const config = loadConfig({ PORT: "8788", TITLE_SYNC_INTERVAL_MS: "0", ...process.env });
 const log = createLogger(config);
 const { port } = await startServer({
   config,

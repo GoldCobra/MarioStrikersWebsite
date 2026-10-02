@@ -18,6 +18,18 @@ const SNAKE_CASED_PATHS = new Set(["/api/competitive-season/current", "/api/wiim
 const AUTH_ME_PATH = "/api/auth/me";
 const UNLINKED_SAMPLE_ACCOUNT = "900000000000000002";
 
+// Player titles: a profile names its player's selected title (player.title, player.title_style).
+const PLAYER_PROFILE_PATH = /^\/api\/players\/\d+\/profile$/;
+
+function withoutPlayerTitle(profile: unknown): unknown {
+  const player = (profile as { player?: unknown } | null)?.player;
+  if (!player || typeof player !== "object") return profile;
+  const rest = { ...(player as Record<string, unknown>) };
+  delete rest.title;
+  delete rest.title_style;
+  return { ...(profile as Record<string, unknown>), player: rest };
+}
+
 function snakeCaseKeys(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(snakeCaseKeys);
   if (!value || typeof value !== "object") return value;
@@ -48,6 +60,10 @@ export function normalizeContract(record: ContractRecord): ContractRecord {
   if (record.status >= 400 && body && typeof body === "object" && "code" in body) {
     const { code, ...rest } = body as Record<string, unknown>;
     if (typeof code === "string" && NEW_ERROR_CODES.has(code)) body = rest;
+  }
+  if (PLAYER_PROFILE_PATH.test(record.path)) body = withoutPlayerTitle(body);
+  if (record.path === "/api/profile/me" && body && typeof body === "object" && "profile" in body) {
+    body = { ...body, profile: withoutPlayerTitle(body.profile) };
   }
   if (record.path === AUTH_ME_PATH && body && typeof body === "object") {
     const rest = { ...(body as Record<string, unknown>) };

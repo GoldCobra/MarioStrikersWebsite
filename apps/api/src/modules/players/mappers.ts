@@ -11,6 +11,7 @@ import {
 import { normalizeText, toText } from "@ms/shared/text";
 import { isActivityActive, toActivityIso, toIsoDateOnly } from "../../lib/dates.ts";
 import { toPositiveIntId, toPositiveIntOrNull, toSafeCount } from "../../lib/numbers.ts";
+import { selectedTitle, titleText, type CatalogTitle } from "../titles/availability.ts";
 import { PROFILE_RECORDSET } from "./repository.ts";
 
 type Row = Record<string, unknown>;
@@ -101,6 +102,10 @@ export interface PlayerProfile {
     results_url: string;
     activity: string | null;
     is_active: boolean;
+    /** The selected player title in FULL CAPS; "" for none. */
+    title: string;
+    /** Its look for the later formatting ("green"); "" for the plain one. */
+    title_style: string;
   };
   friend_codes: FriendCodes;
   season_awards: SeasonAward[];
@@ -511,8 +516,22 @@ function getRecordset(recordsets: unknown, index: number): Row[] {
   return Array.isArray(set) ? (set as Row[]) : [];
 }
 
-/** The profile DTO from the nine result sets of the profile batch; null when the player is missing. */
-export function buildPlayerProfileFromRecordsets(recordsets: unknown): PlayerProfile | null {
+/** The selected title, while the player can still select it (the batch's last two result sets). */
+export function buildPlayerTitle(
+  selectedRows: readonly Row[],
+  unlockedRows: readonly Row[],
+  catalog: readonly CatalogTitle[],
+): Pick<PlayerProfile["player"], "title" | "title_style"> {
+  const unlocked = unlockedRows.map((row) => Number(row.title_id));
+  const title = selectedTitle(catalog, unlocked, toPositiveIntId(selectedRows[0]?.title_id));
+  return { title: title ? titleText(title.name) : "", title_style: title?.styleKey ?? "" };
+}
+
+/** The profile DTO from the eleven result sets of the profile batch; null when the player is missing. */
+export function buildPlayerProfileFromRecordsets(
+  recordsets: unknown,
+  titleCatalog: readonly CatalogTitle[] = [],
+): PlayerProfile | null {
   const playerRow = getRecordset(recordsets, PROFILE_RECORDSET.player)[0];
   const name = normalizeText(playerRow?.name);
   if (!playerRow || !name) return null;
@@ -531,6 +550,11 @@ export function buildPlayerProfileFromRecordsets(recordsets: unknown): PlayerPro
       results_url: normalizeResultsUrl(profileData.ResultsStartGG, normalizeText(playerRow.id_start_gg)),
       activity: toActivityIso(activity),
       is_active: isActivityActive(activity),
+      ...buildPlayerTitle(
+        getRecordset(recordsets, PROFILE_RECORDSET.selectedTitle),
+        getRecordset(recordsets, PROFILE_RECORDSET.unlockedTitles),
+        titleCatalog,
+      ),
     },
     friend_codes: buildFriendCodes(getRecordset(recordsets, PROFILE_RECORDSET.friendCodes)),
     season_awards: buildSeasonAwards(getRecordset(recordsets, PROFILE_RECORDSET.seasonAwards)),

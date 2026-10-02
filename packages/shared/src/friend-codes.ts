@@ -1,6 +1,6 @@
 // Friend codes as robotic_nightmare and the database keep them: twelve digits written "1234-5678-9012",
-// leading zeros included. Also the choices of an MSC code and the rules of the profile editor, which the
-// site checks while typing and the API enforces.
+// leading zeros included. Also the choices of an MSC code and the rules of the profile editor (country,
+// friend codes and the player title), which the site checks while typing and the API enforces.
 
 export const FRIEND_CODE_PATTERN = /^\d{4}-\d{4}-\d{4}$/;
 export const FRIEND_CODE_BLOCK_LENGTH = 4;
@@ -72,7 +72,7 @@ export function pastedFriendCodeDigits(text: string): string | null {
 }
 
 // ---------------------------------------------------------------------------------------------------
-// The profile editor's request: { country, switch_code, msc_codes: [{ region, platform, code }] }.
+// The profile editor's request: { country, switch_code, msc_codes: [{ region, platform, code }], title }.
 
 export interface MscCodeInput {
   readonly region: string;
@@ -86,6 +86,8 @@ export interface EditableProfileInput {
   /** "1234-5678-9012", or "" for none. */
   readonly switch_code: string;
   readonly msc_codes: readonly MscCodeInput[];
+  /** A player title's code, or "" for none; absent when the request leaves the title as it is. */
+  readonly title?: string;
 }
 
 export type FieldErrorCode =
@@ -96,10 +98,11 @@ export type FieldErrorCode =
   | "DUPLICATE"
   | "TOO_MANY"
   | "UNKNOWN_COUNTRY"
+  | "UNKNOWN_TITLE"
   | "TAKEN";
 
 export interface FieldError {
-  /** "country", "switch_code", "msc_codes" or "msc_codes.<index>.<region|platform|code>". */
+  /** "country", "switch_code", "title", "msc_codes" or "msc_codes.<index>.<region|platform|code>". */
   readonly field: string;
   readonly code: FieldErrorCode;
   readonly message: string;
@@ -113,6 +116,7 @@ export const FIELD_ERROR_MESSAGES: Readonly<Record<FieldErrorCode, string>> = {
   DUPLICATE: "This friend code is entered twice.",
   TOO_MANY: `At most ${MAX_MSC_CODES} MSC friend codes can be saved.`,
   UNKNOWN_COUNTRY: "Select a country from the list.",
+  UNKNOWN_TITLE: "Select a title from the list.",
   TAKEN:
     "This friend code is already saved on another profile, so it cannot be added. If it is your code, please contact the MSL staff.",
 };
@@ -136,6 +140,8 @@ export interface ValidationOptions {
    * unchanged, its missing platform.
    */
   storedPlatform(region: string, code: string): string | null;
+  /** A title the player can select (the API's list of their titles). */
+  isAvailableTitle(code: string): boolean;
 }
 
 export type ValidationResult =
@@ -145,7 +151,8 @@ export type ValidationResult =
 /**
  * The editor's rules: a code is empty or exactly twelve digits; an MSC code also needs its region and its
  * platform (an older code saved without one may stay as it is); at most three MSC codes, none twice; the
- * country is one of the list. The API applies them to every request, the site already before it sends.
+ * country is one of the list; the title is one of the player's titles. The API applies them to every
+ * request, the site already before it sends.
  */
 export function validateEditableProfile(raw: unknown, options: ValidationOptions): ValidationResult {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
@@ -204,6 +211,20 @@ export function validateEditableProfile(raw: unknown, options: ValidationOptions
     if (mscCodes.length > MAX_MSC_CODES) errors.push(fieldError("msc_codes", "TOO_MANY"));
   }
 
+  // Without a title in it, the request leaves the selected title as it is.
+  let title: string | undefined;
+  if (record.title !== undefined) {
+    const value = textOf(record, "title");
+    if (value === null) errors.push(fieldError("title", "INVALID"));
+    else {
+      title = value.toLowerCase();
+      if (title && !options.isAvailableTitle(title)) errors.push(fieldError("title", "UNKNOWN_TITLE"));
+    }
+  }
+
   if (errors.length || country === null || switchCode === null) return { ok: false, errors };
-  return { ok: true, value: { country, switch_code: switchCode, msc_codes: mscCodes } };
+  return {
+    ok: true,
+    value: { country, switch_code: switchCode, msc_codes: mscCodes, ...(title === undefined ? {} : { title }) },
+  };
 }

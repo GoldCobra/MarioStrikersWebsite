@@ -1,6 +1,6 @@
 // The signed-in player's own profile: reading it, creating it when the login could not, and the
-// editor's reading and saving of the country and the friend codes. Every route takes the player from the
-// signed session only; no request can name another player.
+// editor's reading and saving of the country, the friend codes and the title. Every route takes the player
+// from the signed session only; no request can name another player.
 
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { HttpError } from "../../http/errors.ts";

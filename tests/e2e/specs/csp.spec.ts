@@ -124,6 +124,12 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await expect(combobox).toContainText("United States");
     await expect(page.locator(".player-popup-flag")).toHaveAttribute("src", /flags\/us\.png$/);
 
+    // The title: one of the member's titles; the line under the name shows it at once.
+    await page.locator("[data-edit-open='title']").click();
+    await page.locator("[data-field='title']").selectOption("msl-2025-world-champion");
+    await expect(page.locator(".player-popup-player-title")).toHaveText("MSL 2025 WORLD CHAMPION");
+    await expect(page.locator("[data-field-row='title']")).toHaveClass(/is-unsaved/);
+
     await page.locator("[data-edit-action='add']").click();
     const added = page.locator("[data-edit-row].is-msc").last();
     await added.locator("[data-field='region']").selectOption("PAL");
@@ -139,10 +145,12 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
       }
       saves += 1;
       const sent = route.request().postDataJSON() as {
+        title?: string;
         country?: string;
         switch_code?: string;
         msc_codes?: { region: string; platform: string; code: string }[];
       };
+      expect(sent.title).toBe("msl-2025-world-champion");
       expect(sent.country).toBe("us");
       expect(sent.switch_code).toBe("0001-0020-0300");
       expect(sent.msc_codes?.at(-1)).toEqual({ region: "PAL", platform: "Dolphin", code: "0000-1111-2222" });

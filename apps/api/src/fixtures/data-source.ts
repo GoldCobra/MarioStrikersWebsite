@@ -25,6 +25,8 @@ import {
   type StoredFriendCode,
   type StoredProfile,
 } from "../modules/profile/service.ts";
+import { availableTitles, selectedTitle, titleText, toTitleOption } from "../modules/titles/availability.ts";
+import { seededCatalog } from "../modules/titles/catalog.ts";
 
 const DAY_MS = 86_400_000;
 const ASSET_VERSION = "20260608-rank-crop-v1";
@@ -212,6 +214,25 @@ const TOURNAMENTS: readonly (readonly [string, string, boolean])[] = [
   ["Demo Doubles Open", "🥈", false],
 ];
 const GAMES: readonly GameCode[] = ["msbl", "msc", "sms"];
+// Player titles: the real catalog with invented unlocks. Player 1 (the signed-in sample, a world champion
+// like its accolades say) has some but none selected; player 2 (a world champion too) shows the longest
+// free title, player 5 (no champion) an unlocked one.
+const FIXTURE_TITLE_UNLOCKS: Readonly<Record<number, readonly string[]>> = {
+  1: [
+    "msl-2025-world-champion",
+    "msl-2-time-world-champion",
+    "tournament-winner",
+    "tournament-winner-green",
+    "legacy-megastriker",
+  ],
+  2: ["tournament-winner", "legacy-legend"],
+  3: ["legacy-rookie"],
+  5: ["legacy-superstar"],
+};
+const FIXTURE_SELECTED_TITLES: Readonly<Record<number, string>> = {
+  2: "self-proclaimed-king-of-strikers",
+  5: "legacy-superstar",
+};
 
 interface RatingEntry {
   readonly player: PlayerListItem & { player_id: number };
@@ -521,6 +542,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
         results_url: index % 3 === 0 ? `https://start.gg/user/sample${player.player_id}/results` : "",
         activity: player.activity,
         is_active: player.is_active,
+        ...titleFieldsOf(player.player_id),
       },
       friend_codes: editedProfiles.has(player.player_id)
         ? editedFriendCodes(player.player_id)
@@ -552,6 +574,23 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
       season_reward_level: rewardLevel(Math.min(7, index % 8)),
       highest_rank_banner_url: "",
     };
+  }
+
+  // The selected title of a player as dbo.PlayerActiveTitle would hold it, edited or invented.
+  const titleCatalog = seededCatalog();
+  const titleIds = new Map(titleCatalog.map((title) => [title.code, title.id]));
+  const unlockedTitleIds = (playerId: number): number[] =>
+    (FIXTURE_TITLE_UNLOCKS[playerId] ?? []).map((code) => titleIds.get(code) ?? 0);
+  const titleOptionsOf = (playerId: number) =>
+    availableTitles(titleCatalog, unlockedTitleIds(playerId)).map(toTitleOption);
+  function selectedTitleOf(playerId: number) {
+    const edited = editedProfiles.get(playerId);
+    const code = edited ? edited.title : (FIXTURE_SELECTED_TITLES[playerId] ?? "");
+    return selectedTitle(titleCatalog, unlockedTitleIds(playerId), titleIds.get(code) ?? null);
+  }
+  function titleFieldsOf(playerId: number): { title: string; title_style: string } {
+    const title = selectedTitleOf(playerId);
+    return { title: title ? titleText(title.name) : "", title_style: title?.styleKey ?? "" };
   }
 
   function buildClubProfile(club: ClubListItem): ClubProfile {
@@ -614,12 +653,12 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
   const createdPlayers = new Map<string, { readonly player_id: number; readonly name: string }>();
   const editedProfiles = new Map<number, StoredProfile>();
 
-  /** A player's country and friend codes as dbo.Player and dbo.FriendCodes would hold them. */
+  /** A player's country, friend codes and title as dbo.Player, dbo.FriendCodes and the title tables would hold them. */
   function storedProfileOf(playerId: number): StoredProfile | null {
     const edited = editedProfiles.get(playerId);
-    if (edited) return edited;
+    if (edited) return { ...edited, titles: titleOptionsOf(playerId) };
     if ([...createdPlayers.values()].some((created) => created.player_id === playerId)) {
-      return { playerId, country: "", codes: [] };
+      return { playerId, country: "", codes: [], title: "", titles: titleOptionsOf(playerId) };
     }
     const player = findPlayer(playerId);
     if (!player) return null;
@@ -631,7 +670,13 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
       codes.push({ gameType: 1, region: "PAL", lineSeq: 1, label: "Wii", code: code(playerId + 100) });
     if (index % 4 === 1)
       codes.push({ gameType: 1, region: "NTSC", lineSeq: 1, label: "Dolphin", code: code(playerId + 200) });
-    return { playerId, country: player.country, codes };
+    return {
+      playerId,
+      country: player.country,
+      codes,
+      title: selectedTitleOf(playerId)?.code ?? "",
+      titles: titleOptionsOf(playerId),
+    };
   }
 
   function editedCountry(playerId: number, country: string): string {
@@ -717,6 +762,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
         results_url: "",
         activity: generatedAt,
         is_active: true,
+        ...titleFieldsOf(player.player_id),
       },
       friend_codes: editedFriendCodes(player.player_id),
       season_awards: [],

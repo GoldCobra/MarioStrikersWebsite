@@ -1,4 +1,4 @@
-// SQL of the player list and profiles. A profile is read in one batch of nine result sets; the
+// SQL of the player list and profiles. A profile is read in one batch of eleven result sets; the
 // recordset order is part of the contract with mappers.ts (see PROFILE_RECORDSET).
 
 import { mssql, type Pool } from "../../db/database.ts";
@@ -14,6 +14,8 @@ export const PROFILE_RECORDSET = {
   accolades: 6,
   seasonAwards: 7,
   competitiveHistory: 8,
+  selectedTitle: 9,
+  unlockedTitles: 10,
 } as const;
 
 // A player's club: the roster entry with the best rank, then by club name.
@@ -217,6 +219,9 @@ export function buildPlayerProfileBatchQuery(): string {
     "WHERE rating.PlayerId = @playerId",
     "  AND player.HideStats = 0",
     "GROUP BY rating.GameId, rating.ModeCode;",
+    // 9 and 10: the selected title and the unlocked ones (titles/availability.ts decides what shows).
+    "SELECT active.TitleId AS title_id FROM dbo.PlayerActiveTitle active WHERE active.PlayerId = @playerId;",
+    "SELECT unlock.TitleId AS title_id FROM dbo.PlayerTitleUnlock unlock WHERE unlock.PlayerId = @playerId;",
   ].join(" ");
 }
 

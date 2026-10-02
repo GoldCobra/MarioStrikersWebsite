@@ -1,5 +1,6 @@
-// Editing on the profile page itself. A pencil opens one field (the country, the Switch code, an MSC code)
-// for editing without saving it; "+" adds an MSC code (at most three) and "−" removes one while it is open.
+// Editing on the profile page itself. A pencil opens one field (the title, the country, the Switch code, an
+// MSC code) for editing without saving it; "+" adds an MSC code (at most three) and "−" removes one while it
+// is open. The title is picked from the member's titles; the line under the name shows it at once.
 // Every change is kept in a draft, marked as unsaved, until SAVE sends the whole profile in one request
 // (PUT /api/profile/me/editable) or DISCARD drops it. When the profile was changed elsewhere meanwhile (in
 // Discord), the draft is laid on top of what is saved now, so nothing is overwritten unseen.
@@ -7,13 +8,14 @@
 import { escapeHtml } from "@ms/shared/html";
 import { LEGACY_MSC_REGIONS, MSC_PLATFORMS, MSC_REGIONS, type FieldError } from "@ms/shared/friend-codes";
 import { loginPath } from "@ms/shared/site/navigation";
-import { showFlag } from "../players/player-profile-view.ts";
+import { showFlag, showPlayerTitle } from "../players/player-profile-view.ts";
 import { countryLabel, countryOptions, createCountrySelect, flagImage, NO_COUNTRY_LABEL } from "./country-select.ts";
 import { bindFriendCodeInput } from "./friend-code-input.ts";
 import {
   COUNTRY_FIELD,
   MSC_LIST_FIELD,
   SWITCH_FIELD,
+  TITLE_FIELD,
   canAddMscCode,
   changedFields,
   checkDraft,
@@ -53,6 +55,7 @@ const MESSAGES = {
   unsaved: "Unsaved changes",
   saving: "Saving…",
   confirmDiscard: "Discard all unsaved changes?",
+  noTitle: "No title",
 } as const;
 
 const icon = (paths: string): string =>
@@ -85,7 +88,25 @@ export interface ProfileEditorOptions {
 }
 
 function savedOf(profile: EditableProfile): SavedProfile {
-  return { country: profile.country, switch_code: profile.switch_code, msc_codes: profile.msc_codes };
+  return {
+    title: profile.title,
+    country: profile.country,
+    switch_code: profile.switch_code,
+    msc_codes: profile.msc_codes,
+  };
+}
+
+/** The title list: "No title", then the member's titles grouped by their category, in the list's order. */
+function titleOptions(titles: EditableProfile["titles"], selected: string): string {
+  const groups = new Map<string, string[]>();
+  for (const title of titles) {
+    const option = `<option value="${escapeHtml(title.code)}"${title.code === selected ? " selected" : ""}>${escapeHtml(title.name)}</option>`;
+    groups.set(title.category_name, [...(groups.get(title.category_name) ?? []), option]);
+  }
+  return [
+    `<option value=""${selected ? "" : " selected"}>${escapeHtml(MESSAGES.noTitle)}</option>`,
+    ...[...groups].map(([label, entries]) => `<optgroup label="${escapeHtml(label)}">${entries.join("")}</optgroup>`),
+  ].join("");
 }
 
 function options(entries: readonly { value: string; label: string }[], selected: string, placeholder: string): string {
@@ -147,6 +168,8 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
   const list = (key: string): HTMLElement | null => root.querySelector<HTMLElement>(`[data-list="${key}"]`);
   const nameOf = (code: string): string =>
     countryLabel(code, profile.countries.find((country) => country.code === code)?.name);
+  const titleOf = (code: string) => profile.titles.find((title) => title.code === code);
+  const titleNameOf = (code: string): string => titleOf(code)?.name ?? code.toUpperCase();
 
   // -------------------------------------------------------------------------------------------------
   // Fields
@@ -171,6 +194,41 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
   function showSection(mount: HTMLElement): void {
     const section = mount.closest<HTMLElement>(".player-popup-section");
     if (section) section.hidden = false;
+  }
+
+  /** "Title" as its own section, before the country: only on this page, not in the popup. */
+  function titleSection(): HTMLElement | null {
+    let mount = list("title");
+    if (mount) return mount;
+    const next = (list("country") ?? list("fc-switch"))?.closest(".player-popup-section");
+    if (!next) return null;
+    const section = document.createElement("section");
+    section.className = "player-popup-section profile-title-section";
+    section.innerHTML =
+      '<h3 id="profile-title-label" class="player-popup-section-title">Title</h3><div class="player-popup-code-list" data-list="title"></div>';
+    next.before(section);
+    mount = section.querySelector<HTMLElement>("[data-list='title']");
+    return mount;
+  }
+
+  function renderTitle(): void {
+    const mount = titleSection();
+    if (!mount) return;
+    if (openFields.has(TITLE_FIELD) && !blocked()) {
+      mount.innerHTML = editRow(
+        TITLE_FIELD,
+        "title",
+        `<select class="profile-edit-select profile-title-select" data-field="title" aria-labelledby="profile-title-label" aria-describedby="${fieldId(TITLE_FIELD)}-error">${titleOptions(profile.titles, draft.title)}</select>`,
+      );
+      return;
+    }
+    const title = titleOf(draft.title);
+    mount.innerHTML = viewRow(
+      TITLE_FIELD,
+      `<span class="player-popup-code-value">${escapeHtml(title ? title.name : MESSAGES.noTitle)}</span>`,
+      pencil(TITLE_FIELD, "Change your title"),
+      title ? " profile-title-row" : " profile-title-row profile-code-missing",
+    );
   }
 
   /** "Country" as its own section, before the Switch code: only on this page, not in the popup. */
@@ -433,6 +491,13 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
     if (flag) showFlag(flag, draft.country);
   }
 
+  /** The line under the name follows the draft's title, like the flag follows its country. */
+  function renderHeaderTitle(): void {
+    const line = root.querySelector<HTMLElement>(".player-popup-player-title");
+    const title = titleOf(draft.title);
+    if (line) showPlayerTitle(line, title?.name ?? "", title?.style ?? "");
+  }
+
   function renderNotice(): void {
     const mount = content();
     let notice = mount?.querySelector<HTMLElement>(":scope > .profile-edit-notice") ?? null;
@@ -467,10 +532,12 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
   function render(): void {
     renderNotice();
     renderCountry();
+    renderTitle();
     renderSwitch();
     renderMsc();
     bindDigitFields();
     renderHeaderFlag();
+    renderHeaderTitle();
     refresh();
   }
 
@@ -519,7 +586,10 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
       (input) => input.value,
     );
     const blocks: Blocks = [digits[0] ?? "", digits[1] ?? "", digits[2] ?? ""];
-    if (field === SWITCH_FIELD) {
+    if (field === TITLE_FIELD) {
+      draft = { ...draft, title: row.querySelector<HTMLSelectElement>("[data-field='title']")?.value ?? "" };
+      renderHeaderTitle();
+    } else if (field === SWITCH_FIELD) {
       draft = { ...draft, switchBlocks: blocks };
     } else if (field.startsWith("msc:")) {
       const value = (name: string): string =>
@@ -548,7 +618,8 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
   /** Escape on an open field: back to what is saved, and closed. */
   function revertField(field: string): void {
     const saved = createDraft(base);
-    if (field === COUNTRY_FIELD) draft = { ...draft, country: saved.country };
+    if (field === TITLE_FIELD) draft = { ...draft, title: saved.title };
+    else if (field === COUNTRY_FIELD) draft = { ...draft, country: saved.country };
     else if (field === SWITCH_FIELD) draft = { ...draft, switchBlocks: saved.switchBlocks };
     else {
       const row = draft.msc.find((entry) => mscField(entry) === field);
@@ -621,7 +692,7 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
 
   function storeDraft(): void {
     try {
-      const stored: StoredDraft = { v: 2, id: profile.discord.id, base, draft };
+      const stored: StoredDraft = { v: 3, id: profile.discord.id, base, draft };
       sessionStorage.setItem(DRAFT_KEY, JSON.stringify(stored));
     } catch {
       // Storage may be unavailable (private mode); the draft stays on the page either way.
@@ -639,7 +710,8 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
   /** Opens the fields that have errors, so their messages can show. */
   function openErrorFields(): void {
     for (const field of errors.keys()) {
-      if (field === COUNTRY_FIELD || field === SWITCH_FIELD || draft.msc.some((row) => mscField(row) === field)) {
+      const isField = [TITLE_FIELD, COUNTRY_FIELD, SWITCH_FIELD].includes(field);
+      if (isField || draft.msc.some((row) => mscField(row) === field)) {
         openFields.add(field);
       }
     }
@@ -648,7 +720,7 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
   async function save(): Promise<void> {
     if (saving || blocked() || !dirty()) return;
     confirming = false;
-    const checked = checkDraft(draft, base, profile.countries);
+    const checked = checkDraft(draft, base, profile.countries, profile.titles);
     if (!checked.ok) {
       errors = checked.errors;
       openErrorFields();
@@ -679,7 +751,7 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
       }
       if (response.status === 409 && body.code === "PROFILE_CHANGED" && body.current) {
         const current = body.current;
-        const rebased = rebaseDraft(draft, base, savedOf(current), nameOf);
+        const rebased = rebaseDraft(draft, base, savedOf(current), nameOf, titleNameOf);
         profile = current;
         base = savedOf(current);
         countries = countryOptions(current.countries);
@@ -813,7 +885,7 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
     const stored = parseStoredDraft(sessionStorage.getItem(DRAFT_KEY), profile.discord.id);
     sessionStorage.removeItem(DRAFT_KEY);
     if (stored && !blocked()) {
-      const rebased = rebaseDraft(stored.draft, stored.base, base, nameOf);
+      const rebased = rebaseDraft(stored.draft, stored.base, base, nameOf, titleNameOf);
       draft = rebased.draft;
       for (const field of changedFields(draft, base)) if (field !== MSC_LIST_FIELD) openFields.add(field);
       restored = dirty();
