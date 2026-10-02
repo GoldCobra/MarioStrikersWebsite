@@ -1,14 +1,10 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "1dcaa314c753ddb87eb818af999a43265214c265",
+  "reference": "dd2af421721c00fba80b6eb5edcb3c94ff465d8b",
   "changes": [
     {
       "screenshots": ["states/profile-*"],
-      "reason": "Player titles: the profile page gains its Title section before Country (the selected title or 'No title', a pencil opening the member's titles in one select, grouped by category); profile-title-edit is a new state with a title picked, shown at once under the name. Checked: of 349 screenshots only the 24 profile states and the 9 of the new title states differ; the sample player has no title selected, so its header and every popup and Discord card without a title are pixel-identical."
-    },
-    {
-      "screenshots": ["states/player-card-title-*", "states/players-popup-title-*"],
-      "reason": "New states for player titles: the selected title as a line under the name, white on the orange bar (player 5, Discord card) and black on a world champion's gold bar (player 2, popup). The reference commit has no titles, so it shows these players without the line."
+      "reason": "Profile follow-ups: no 'Server name' line, the Discord username right of the club line (13px, grey, a line of its own under a long club name on phones); 'No player title' instead of 'No title'; friend code inputs wide enough for four digits, so an open MSC line puts its '−' on a second line from 768px up; a click outside an open field closes it, so in profile-discard the Switch field is closed by the click on DISCARD, its change kept and marked unsaved. Checked: of 349 screenshots only the 27 of the 9 profile states differ; popups, Discord cards and the title states are pixel-identical."
     }
   ]
 }
