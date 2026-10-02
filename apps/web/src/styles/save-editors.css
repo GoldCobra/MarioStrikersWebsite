@@ -480,8 +480,8 @@
   right: 0;
   top: calc(100% + 0.22rem);
   display: grid;
-  gap: 0.18rem;
-  padding: 0.28rem;
+  gap: 0;
+  padding: var(--dropdown-list-pad-y) 0.28rem;
   border: 1px solid rgba(199, 118, 3, 0.8);
   background: rgba(10, 0, 0, 0.96);
   z-index: 4;
@@ -491,12 +491,14 @@
   display: none;
 }
 
+/* Spaced like the options of every dropdown (base.css --dropdown-*). */
 .online-editor-profile-option {
   width: 100%;
+  min-height: var(--dropdown-option-min-height);
   border: 0;
   background: rgba(255, 255, 255, 0.03);
   color: #ffffff;
-  padding: 0.38rem 0.42rem;
+  padding: var(--dropdown-option-pad-y) 0.42rem;
   text-align: left;
   cursor: pointer;
 }

@@ -436,12 +436,12 @@
   line-height: 1.22;
 }
 
-/* Pencils, "+", "−" and the clear button. */
+/* Pencils, "+", "−" and the clear button: as tall as the fields, so a line is as tall open as closed. */
 .profile-edit-icon {
   display: inline-grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: var(--field-control-height);
+  height: var(--field-control-height);
   padding: 0;
   border: 0;
   background: transparent;
@@ -467,14 +467,14 @@
   margin-left: auto;
 }
 
-/* "+" at the right end of the MSC section's title. */
+/* "+" at the right end of the MSC section's title, centred on its line. */
 #player-profile-page .player-popup-section:has(> .profile-section-actions) {
   position: relative;
 }
 
 .profile-section-actions {
   position: absolute;
-  top: -3px;
+  top: calc((var(--field-font-size) * var(--field-line-height) - var(--field-control-height)) / 2);
   right: 0;
 }
 
@@ -516,17 +516,19 @@
   color: var(--color-amber);
 }
 
-/* An open line: the dark row of a code line, with the fields. */
+/* An open line: the box of a closed one (player-popup.css .player-popup-code-row), as tall, with the fields
+   in it; only a line too narrow for its fields (an MSC code on a phone) or with an error grows. */
 .profile-edit-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem 0.45rem;
-  padding: 0.3rem 0.55rem;
+  min-height: var(--field-box-height);
+  padding: var(--field-box-pad-y) var(--field-box-pad-x);
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
-  font-size: 15px;
-  line-height: 1.22;
+  font-size: var(--field-font-size);
+  line-height: var(--field-line-height);
 }
 
 .profile-edit-prefix,
@@ -534,25 +536,34 @@
   color: var(--profile-muted-color);
 }
 
-/* Fields keep 16px text, so phones do not zoom into them. */
+/* The native fields of a line (an MSC code's region and platform, the digits) in the line's type, framed like
+   the dropdown (dropdown.css). */
 .profile-edit-select,
-.profile-edit-digits,
-.profile-country-trigger {
-  min-height: 28px;
-  padding: 0.1rem 0.35rem;
+.profile-edit-digits {
+  min-height: var(--field-control-height);
+  padding: 0 0.35rem;
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 0;
   background: #111;
   color: #fff;
-  font-size: 16px;
+  font-size: inherit;
+  line-height: inherit;
 }
 
-:is(.profile-edit-select, .profile-edit-digits, .profile-country-trigger):focus-visible {
+/* Except on iPhones and iPads: Safari zooms into a text field or select under 16px when it gets the focus. */
+@supports (-webkit-touch-callout: none) {
+  .profile-edit-select,
+  .profile-edit-digits {
+    font-size: 16px;
+  }
+}
+
+:is(.profile-edit-select, .profile-edit-digits):focus-visible {
   outline: 2px solid var(--color-gold);
   outline-offset: 0;
 }
 
-:is(.profile-edit-select, .profile-edit-digits, .profile-country-trigger)[aria-invalid="true"] {
+:is(.profile-edit-select, .profile-edit-digits)[aria-invalid="true"] {
   border-color: #ff8a8a;
 }
 
@@ -580,97 +591,20 @@
 }
 
 
-/* The country field: a combobox with the flags (features/profile/country-select.ts). */
+/* The country and the title field: the site's dropdown (lib/dropdown.ts, dropdown.css), as wide as a line
+   allows up to these widths. The title's options are titles in their look (player-popup.css .player-title). */
 .profile-country-select {
-  position: relative;
   flex: 1 1 16rem;
-  min-width: 0;
   max-width: 22rem;
 }
 
-.profile-country-trigger {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  width: 100%;
-  cursor: pointer;
-}
-
-.profile-country-trigger .profile-country-name {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.profile-country-caret {
-  flex: 0 0 auto;
-  width: 0;
-  height: 0;
-  border-inline: 5px solid transparent;
-  border-top: 6px solid currentColor;
-}
-
-.profile-country-listbox {
-  position: absolute;
-  top: calc(100% + 2px);
-  left: 0;
-  right: 0;
-  z-index: 20;
-  max-height: min(280px, 50vh);
-  margin: 0;
-  padding: 0.2rem 0;
-  overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: #111;
-  list-style: none;
-  overscroll-behavior: contain;
-}
-
-.profile-country-select.opens-up .profile-country-listbox {
-  top: auto;
-  bottom: calc(100% + 2px);
-}
-
-.profile-country-listbox[hidden] {
-  display: none;
-}
-
-.profile-country-option {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  min-height: 32px;
-  padding: 0.15rem 0.5rem;
-  color: #fff;
-  font-size: 16px;
-  line-height: 1.2;
-  cursor: pointer;
-}
-
-.profile-country-option.is-active {
-  background: rgba(199, 118, 3, 0.35);
-}
-
-.profile-country-option[aria-selected="true"] {
-  color: var(--color-gold);
-}
-
-/* The title field: the country field's list without flags, the member's titles in the owner's order and
-   each in its look (player-popup.css), in the list as in the field (features/profile/profile-edit.ts). */
-.profile-country-select.profile-title-select {
+.profile-title-select {
+  flex: 1 1 16rem;
   max-width: 24rem;
 }
 
-.profile-title-select .profile-title-none {
+.profile-title-none {
   color: var(--profile-muted-color);
-}
-
-/* In the list and the field the row's gap already spaces the ball from the name. */
-.profile-title-select .player-title-ball {
-  flex: 0 0 auto;
-  margin-right: 0;
 }
 
 /* SAVE and DISCARD at the end of the card. The slot keeps the bar's height, so nothing moves when the

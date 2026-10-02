@@ -131,15 +131,31 @@ export function titleBallHtml(gameCode: unknown): string {
   return `<img class="player-title-ball" src="${escapeHtml(ball.src)}" alt="${escapeHtml(ball.alt)}" width="16" height="16" decoding="async" data-fallback-src="${escapeHtml(ball.fallback)}">`;
 }
 
+/** A title's content: its game's ball, then the title in FULL CAPS; "" without a title. */
+function playerTitleContent(title: unknown, gameCode: unknown): string {
+  const text = toText(title).trim().toUpperCase();
+  return text ? titleBallHtml(gameCode) + escapeHtml(text) : "";
+}
+
+/**
+ * A player title as every view shows it: the profile's "Player Title" field and the title dropdown's field
+ * and options use this element, the popup's and the Discord card's line (showPlayerTitle) the same content
+ * and classes. Its type and look are .player-title's (styles/player-popup.css), so they cannot drift apart.
+ */
+export function playerTitleHtml(title: unknown, style: unknown, gameCode: unknown, className = ""): string {
+  const classes = className ? `${className} ${titleLookClass(style)}` : titleLookClass(style);
+  return `<span class="${escapeHtml(classes)}">${playerTitleContent(title, gameCode)}</span>`;
+}
+
 /**
  * The player title, the first line of the content (before the friend codes): its game's ball and the title,
  * in FULL CAPS and its look. Without one the line is hidden and takes no room.
  */
 export function showPlayerTitle(line: HTMLElement, title: unknown, style: unknown = "", gameCode: unknown = ""): void {
-  const text = toText(title).trim().toUpperCase();
-  line.innerHTML = text ? titleBallHtml(gameCode) + escapeHtml(text) : "";
-  line.hidden = !text;
-  line.className = text ? `player-popup-player-title ${titleLookClass(style)}` : "player-popup-player-title";
+  const content = playerTitleContent(title, gameCode);
+  line.innerHTML = content;
+  line.hidden = !content;
+  line.className = content ? `player-popup-player-title ${titleLookClass(style)}` : "player-popup-player-title";
 }
 
 function renderPlayerTitle(view: TemplateView, player: PlayerProfile["player"]): void {

@@ -1,14 +1,22 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "aa0be372aea2ad96ccd865a85283b1e6dd7badd6",
+  "reference": "1e5572f4abedd3638490118dde67152a725c8895",
   "changes": [
     {
-      "screenshots": ["states/player-card-title-glow*", "states/players-popup-title-ball*"],
-      "reason": "A title of one game shows that game's 16px ball (the accolades' ball) right before it, on the Discord card (MSL 2025 WORLD CHAMPION, MSBL) and in the popup (green TOURNAMENT WINNER, MSC; players-popup-title-ball is new). Colour, glow, size and the line's height are unchanged; the reference ignores title_game_code."
+      "screenshots": ["states/players-popup*", "states/leaderboard-popup*", "states/whr-popup*"],
+      "reason": "Fields (ADR 0010): a heading is 0.15rem above its first box instead of 0.42rem, each value and code prefix is trimmed to its capitals (text-box) and so centred in its 26px box, about a pixel lower than before; a title's letter spacing is 0.45 instead of 0.6 of the Reporter spacing. Everything else in the popup is unchanged."
     },
     {
-      "screenshots": ["states/profile-title-edit*", "states/profile-title-list*"],
-      "reason": "The sample member's titles are game variants now (2026-10-02): the title list and field show each one's game ball before the name, and MSL titles follow the owner's groups (X-TIME, WORLD, FALL, SUMMER, SPRING CHAMPION), so MSL 2025 WORLD CHAMPION comes before MSL 2026 SPRING CHAMPION."
+      "screenshots": ["states/player-card*"],
+      "reason": "The Discord card has the popup's field changes (heading gap 0.15rem instead of 0.3rem, centred values, tighter title spacing) and looks the same in any window: at 390px it no longer takes the phone rules (Reporter tokens, wrapping code lines, rating card heights), and its name is 1.24rem at every width (at 1024px it was 1.08rem)."
+    },
+    {
+      "screenshots": ["states/account-menu*"],
+      "reason": "The account menu's items are spaced like every dropdown's options (--dropdown-*: 3px padding, at least 24px tall, 2px list padding) instead of 34px rows; type and colours are unchanged."
+    },
+    {
+      "screenshots": ["states/profile-*"],
+      "reason": "Profile page (ADR 0010): headings 0.15rem above their boxes, every line 26px tall open or closed (pencils and fields 24px), values centred; the dropdowns take the line's 15px type and 24px options, show the chosen option with a gold edge and lie over the page; a title in its field and list has the title type of the popup (tighter spacing, glow no longer cut); the native selects and digits take the line's 15px type."
     }
   ]
 }

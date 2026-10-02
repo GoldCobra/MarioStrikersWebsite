@@ -1,0 +1,97 @@
+/* --- Dropdown (lib/dropdown.ts) ------------------------------------- */
+
+/* The site's dropdown: a field showing the chosen option, and the list of options. Field and options take
+   the type of the line around them (--field-font-size on the profile page) and set no size of their own, so
+   an option never looks larger than the value it becomes; its text is a field's text (.dropdown-text, with
+   .player-popup-code-value in player-popup.css). Spacing: --dropdown-* in base.css. A width comes from the
+   class the caller adds (profile.css). */
+.dropdown {
+  position: relative;
+  min-width: 0;
+}
+
+.dropdown-field {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  min-height: var(--field-control-height);
+  padding: 0 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0;
+  background: #111;
+  color: #fff;
+  cursor: pointer;
+}
+
+.dropdown-field:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 0;
+}
+
+.dropdown-field[aria-invalid="true"] {
+  border-color: #ff8a8a;
+}
+
+.dropdown-value {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.dropdown-caret {
+  flex: 0 0 auto;
+  width: 0;
+  height: 0;
+  border-inline: 5px solid transparent;
+  border-top: 6px solid currentColor;
+}
+
+/* The open list, laid over the page: in the top layer (a manual popover) or, in a browser without one,
+   fixed above the page. lib/dropdown.ts sets its place, width and height (at most 280px, else the room
+   on its side); the popover's own defaults (centred, framed, padded) are reset here. */
+.dropdown-list {
+  position: fixed;
+  inset: auto;
+  z-index: 3500;
+  box-sizing: border-box;
+  max-height: 280px;
+  margin: 0;
+  padding: var(--dropdown-list-pad-y) 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: #111;
+  color: #fff;
+  list-style: none;
+  overscroll-behavior: contain;
+}
+
+.dropdown-list[hidden] {
+  display: none;
+}
+
+.dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: var(--dropdown-option-min-height);
+  padding: var(--dropdown-option-pad-y) var(--dropdown-option-pad-x);
+  cursor: pointer;
+}
+
+/* The option the keys or the pointer are on. */
+.dropdown-option.is-active {
+  background-color: rgba(199, 118, 3, 0.35);
+}
+
+/* The chosen option: gold, and a gold edge on its left, which a title in its own colour keeps too. */
+.dropdown-option[aria-selected="true"] {
+  color: var(--color-gold);
+  background-image: linear-gradient(var(--color-gold), var(--color-gold));
+  background-position: left top;
+  background-repeat: no-repeat;
+  background-size: 3px 100%;
+}

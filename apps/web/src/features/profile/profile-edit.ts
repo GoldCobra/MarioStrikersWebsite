@@ -9,16 +9,9 @@
 import { escapeHtml } from "@ms/shared/html";
 import { LEGACY_MSC_REGIONS, MSC_PLATFORMS, MSC_REGIONS, type FieldError } from "@ms/shared/friend-codes";
 import { loginPath } from "@ms/shared/site/navigation";
-import { titleLookClass } from "../players/profile-data.ts";
-import { showFlag, titleBallHtml } from "../players/player-profile-view.ts";
-import {
-  countryLabel,
-  countryOptions,
-  createCountrySelect,
-  flagImage,
-  NO_COUNTRY_LABEL,
-  type CountryOption,
-} from "./country-select.ts";
+import { createDropdown, type DropdownOption } from "../../lib/dropdown.ts";
+import { playerTitleHtml, showFlag } from "../players/player-profile-view.ts";
+import { countryLabel, countryOptions, flagImage, NO_COUNTRY_LABEL } from "./country-select.ts";
 import { bindFriendCodeInput } from "./friend-code-input.ts";
 import {
   COUNTRY_FIELD,
@@ -108,18 +101,20 @@ function savedOf(profile: EditableProfile): SavedProfile {
 
 /**
  * The title list: "No player title", then only the member's titles, in the order the API sends them (by
- * category and each category's own rule, titles/availability.ts), each in its look with its game's ball;
- * no category names.
+ * category and each category's own rule, titles/availability.ts), each as every view shows a title (its
+ * game's ball, FULL CAPS, its look); no category names.
  */
-function titleOptions(titles: EditableProfile["titles"]): CountryOption[] {
+function titleOptions(titles: EditableProfile["titles"]): DropdownOption[] {
   return [
-    { value: "", label: MESSAGES.noTitle, flag: "", className: "profile-title-none" },
+    {
+      value: "",
+      label: MESSAGES.noTitle,
+      html: `<span class="dropdown-text profile-title-none">${escapeHtml(MESSAGES.noTitle)}</span>`,
+    },
     ...titles.map((title) => ({
       value: title.code,
       label: title.name,
-      flag: "",
-      className: titleLookClass(title.style),
-      iconHtml: titleBallHtml(title.game_code),
+      html: playerTitleHtml(title.name, title.style, title.game_code, "dropdown-text"),
     })),
   ];
 }
@@ -233,13 +228,12 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
     if (!mount) return;
     if (openFields.has(TITLE_FIELD) && !blocked()) {
       mount.innerHTML = editRow(TITLE_FIELD, "title", "");
-      const select = createCountrySelect({
+      const select = createDropdown({
         id: "profile-title-select",
         labelledBy: "profile-title-label",
         describedBy: `${fieldId(TITLE_FIELD)}-error`,
         options: titleOptions(profile.titles),
         value: draft.title,
-        flags: false,
         className: "profile-title-select",
         onChange: (value) => {
           draft = { ...draft, title: value };
@@ -255,7 +249,7 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
     mount.innerHTML = viewRow(
       TITLE_FIELD,
       title
-        ? `<span class="player-popup-code-value ${titleLookClass(title.style)}">${titleBallHtml(title.game_code)}${escapeHtml(title.name)}</span>`
+        ? playerTitleHtml(title.name, title.style, title.game_code, "player-popup-code-value")
         : `<span class="player-popup-code-value">${escapeHtml(MESSAGES.noTitle)}</span>`,
       pencil(TITLE_FIELD, "Change your title"),
       title ? " profile-title-row" : " profile-title-row profile-code-missing",
@@ -283,12 +277,13 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
     if (openFields.has(COUNTRY_FIELD) && !blocked()) {
       mount.innerHTML = editRow(COUNTRY_FIELD, "country", "");
       const row = mount.querySelector<HTMLElement>("[data-edit-row]");
-      const select = createCountrySelect({
+      const select = createDropdown({
         id: "profile-country-select",
         labelledBy: "profile-country-label",
         describedBy: `${fieldId(COUNTRY_FIELD)}-error`,
         options: countries,
         value: draft.country,
+        className: "profile-country-select",
         onChange: (value) => {
           draft = { ...draft, country: value };
           clearError(COUNTRY_FIELD);

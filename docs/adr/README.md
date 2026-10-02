@@ -15,3 +15,4 @@ change a record's status instead of deleting it when it is replaced.
 | [0007](0007-profile-writes-in-shared-database.md) | The profile editor writes to the bot's tables |
 | [0008](0008-player-titles.md) | Player titles live in the shared database |
 | [0009](0009-per-game-titles-and-test-unlocks.md) | Titles of one game, fixed owners and test unlocks |
+| [0010](0010-shared-fields-dropdown-and-title-type.md) | One field, one dropdown and one title type for every view |

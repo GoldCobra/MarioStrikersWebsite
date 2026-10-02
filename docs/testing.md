@@ -51,7 +51,14 @@ node tests/e2e/run.ts routes   # status and Location of all URL shapes (needs RO
   opens every page and the interactive flows (popups, sign-in, Gear Builder
   panes and card picture, all save editors) under the policy of
   `infra/nginx/snippets/document-headers.conf`, which the local site server
-  sends as well, and fails on any violation.
+  sends as well, and fails on any violation. Its profile flows also check the
+  shared layout rules ([ADR 0010](adr/0010-shared-fields-dropdown-and-title-type.md)):
+  a dropdown is never cut off or covered, opens above a low field, fits the
+  window and reaches every option; a player title computes the same type, look
+  and ball in the popup, on the Discord card, in the profile's field and in its
+  dropdown; field values sit in the middle of their boxes, headings are equally
+  far from them and an open line is as tall as a closed one; the Discord card is
+  pixel-identical in windows 550 to 1440 px wide.
 - **Save tools.** `specs/save-tools.spec.ts` (run with the contract check)
   drives the MSBL and MSC save editors and the friendlist editor through fixed
   flows on both stacks: loading valid and broken files, every edit, imports and

@@ -14,12 +14,12 @@ test("a profile is a world champion's once any accolade is an MSL World Champion
 
 test("a title's look is one class per group, plain when unknown or empty", () => {
   for (const look of ["free", "season", "special", "msl-world", "msl", "tournament", "tournament-x5", "legacy"]) {
-    assert.equal(titleLookClass(look), `player-title-look is-look-${look}`);
+    assert.equal(titleLookClass(look), `player-title is-look-${look}`);
   }
-  assert.equal(titleLookClass(" MSL-World "), "player-title-look is-look-msl-world");
-  assert.equal(titleLookClass(""), "player-title-look is-look-plain");
-  assert.equal(titleLookClass(undefined), "player-title-look is-look-plain");
-  assert.equal(titleLookClass('x" onclick="y'), "player-title-look is-look-xonclicky");
+  assert.equal(titleLookClass(" MSL-World "), "player-title is-look-msl-world");
+  assert.equal(titleLookClass(""), "player-title is-look-plain");
+  assert.equal(titleLookClass(undefined), "player-title is-look-plain");
+  assert.equal(titleLookClass('x" onclick="y'), "player-title is-look-xonclicky");
 });
 
 test("a title's game ball is the accolades' ball of that game, and none for a title without a game", () => {
