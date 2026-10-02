@@ -1,10 +1,12 @@
-// npm run ops:player-titles: creates the four player title tables when they are missing and adds the
-// categories and titles of modules/titles/catalog.ts the database does not have yet. Nothing existing is
-// changed, so it can run again after a title was added to the catalog. One transaction, checked at the end.
+// npm run ops:player-titles: creates the player title tables when they are missing (and the GameCode column of
+// a dbo.PlayerTitle from before 2026-10-02) and adds the categories and titles of modules/titles/catalog.ts
+// the database does not have yet. Nothing existing is changed, so it can run again after a title was added
+// to the catalog. One transaction, checked at the end.
 
 import { TITLE_CATALOG, TITLE_CATEGORIES } from "../modules/titles/catalog.ts";
 import {
   EXISTING_TABLES_QUERY,
+  GAME_COLUMN_SQL,
   SCHEMA_SQL,
   TITLE_TABLES,
   buildSeedCategoriesQuery,
@@ -21,6 +23,7 @@ await runOperation("ops:player-titles", ({ database }) =>
       ((await transaction.request().query(EXISTING_TABLES_QUERY)).recordset as Row[]).map((row) => String(row.name)),
     );
     await transaction.request().query(SCHEMA_SQL);
+    await transaction.request().query(GAME_COLUMN_SQL);
     const categoryRequest = transaction.request();
     const categories = await insertedRows(categoryRequest, buildSeedCategoriesQuery(TITLE_CATEGORIES, categoryRequest));
     const titleRequest = transaction.request();

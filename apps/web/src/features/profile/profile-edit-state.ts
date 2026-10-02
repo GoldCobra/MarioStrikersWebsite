@@ -45,6 +45,8 @@ export interface TitleOption {
   readonly category: string;
   readonly category_name: string;
   readonly style: string;
+  /** Its game ("MSBL", "MSC", "SMS"), shown as the game's ball; "" for none (older answers lack it). */
+  readonly game_code?: string;
 }
 
 /** What is saved of a profile; the base a draft is compared with. */

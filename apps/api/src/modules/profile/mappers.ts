@@ -75,6 +75,7 @@ export function toEditableResponse(profile: EditableProfile): Record<string, unk
       category: title.category,
       category_name: title.categoryName,
       style: title.style,
+      game_code: title.gameCode,
     })),
   };
 }

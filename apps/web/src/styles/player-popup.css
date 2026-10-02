@@ -103,6 +103,19 @@ body.player-popup-open {
   color: #77c300;
 }
 
+/* The ball of a title's game (MSL, tournament and season titles; player-profile-view.ts titleBallHtml), the
+   same 16px ball as the accolades and season rewards, right before the title: sunk 3px so it sits centred
+   on the capitals and inside the line's height, so a card with a title grows by nothing. No glow (a
+   text-shadow never reaches an image). */
+.player-title-ball {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 0.4em;
+  object-fit: contain;
+  vertical-align: -3px;
+}
+
 .player-popup-body {
   min-height: 0;
   padding: 0 0.9rem 0.95rem;

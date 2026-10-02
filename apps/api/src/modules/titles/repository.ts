@@ -4,12 +4,13 @@
 // be repeated any number of times.
 
 import { normalizeText } from "@ms/shared/text";
-import type { Database } from "../../db/database.ts";
+import type { Database, Queryable } from "../../db/database.ts";
 import { mssql } from "../../db/database.ts";
 import { toIsoDateOnly } from "../../lib/dates.ts";
 import { toPositiveIntId, toSafeCount } from "../../lib/numbers.ts";
 import type { CatalogTitle } from "./availability.ts";
 import type { TitleCategoryDefinition, TitleDefinition } from "./catalog.ts";
+import { titleGameCode } from "./games.ts";
 import {
   TITAN_REWARD_TIER_ORDER,
   type LegacyRankRow,
@@ -28,6 +29,10 @@ const CATALOG_TTL_MS = 5 * 60 * 1000;
 
 /** Grants per INSERT, well below SQL Server's 2100 parameters per request. */
 const GRANT_CHUNK = 200;
+
+/** The game of a title (games.ts): the codes of rocci121_toby.CompetitiveGame, NULL for none. */
+const GAME_CODE_COLUMN =
+  "GameCode VARCHAR(8) NULL CONSTRAINT CK_PlayerTitle_GameCode CHECK (GameCode IN ('MSBL', 'MSC', 'SMS'))";
 
 // ---------------------------------------------------------------------------------------------------
 // Schema (ops:player-titles). Each table is created only when missing; nothing existing is changed.
@@ -56,6 +61,7 @@ export const SCHEMA_SQL = [
   "  ExclusiveLevel INT NULL,",
   "  IsActive BIT NOT NULL CONSTRAINT DF_PlayerTitle_IsActive DEFAULT (1),",
   "  CreatedAtUtc DATETIME2 NOT NULL CONSTRAINT DF_PlayerTitle_CreatedAtUtc DEFAULT (SYSUTCDATETIME()),",
+  `  ${GAME_CODE_COLUMN},`,
   // FULL CAPS, compared byte by byte (the database's collation ignores case), and no surrounding spaces.
   "  CONSTRAINT CK_PlayerTitle_Name CHECK (Name = UPPER(Name) COLLATE Latin1_General_100_BIN2",
   "    AND LEN(Name) > 0 AND DATALENGTH(Name) = DATALENGTH(LTRIM(RTRIM(Name)))),",
@@ -80,9 +86,36 @@ export const SCHEMA_SQL = [
   "  TitleId INT NOT NULL CONSTRAINT FK_PlayerActiveTitle_Title REFERENCES dbo.PlayerTitle (Id),",
   "  SelectedAtUtc DATETIME2 NOT NULL CONSTRAINT DF_PlayerActiveTitle_SelectedAtUtc DEFAULT (SYSUTCDATETIME())",
   ");",
+  // Temporary test unlocks (ops:title-test-unlocks), apart from the regular ones so that removing them can
+  // never touch an earned or fixed title.
+  "IF OBJECT_ID(N'dbo.PlayerTitleTestUnlock', N'U') IS NULL",
+  "CREATE TABLE dbo.PlayerTitleTestUnlock (",
+  "  Id INT IDENTITY(1, 1) NOT NULL CONSTRAINT PK_PlayerTitleTestUnlock PRIMARY KEY,",
+  "  PlayerId INT NOT NULL,",
+  "  TitleId INT NOT NULL CONSTRAINT FK_PlayerTitleTestUnlock_Title REFERENCES dbo.PlayerTitle (Id),",
+  "  GrantedBy NVARCHAR(100) NOT NULL,",
+  "  GrantedAtUtc DATETIME2 NOT NULL CONSTRAINT DF_PlayerTitleTestUnlock_GrantedAtUtc DEFAULT (SYSUTCDATETIME()),",
+  "  Note NVARCHAR(200) NULL,",
+  "  CONSTRAINT UQ_PlayerTitleTestUnlock_Player_Title UNIQUE (PlayerId, TitleId)",
+  ");",
 ].join(" ");
 
-export const TITLE_TABLES = ["PlayerTitleCategory", "PlayerTitle", "PlayerTitleUnlock", "PlayerActiveTitle"] as const;
+export const TITLE_TABLES = [
+  "PlayerTitleCategory",
+  "PlayerTitle",
+  "PlayerTitleUnlock",
+  "PlayerActiveTitle",
+  "PlayerTitleTestUnlock",
+] as const;
+
+/**
+ * dbo.PlayerTitle.GameCode for a table created before 2026-10-02 (ops:title-games --schema, also run by
+ * ops:player-titles). Only adds the column when it is missing.
+ */
+export const GAME_COLUMN_SQL = [
+  "IF COL_LENGTH(N'dbo.PlayerTitle', N'GameCode') IS NULL",
+  `ALTER TABLE dbo.PlayerTitle ADD ${GAME_CODE_COLUMN};`,
+].join(" ");
 
 export const EXISTING_TABLES_QUERY =
   "SELECT name FROM sys.tables WHERE schema_id = SCHEMA_ID(N'dbo') AND name IN (" +
@@ -123,9 +156,12 @@ export function buildSeedTitlesQuery(titles: readonly TitleDefinition[], request
     request.input(`tStyle${index}`, mssql.VarChar(20), title.styleKey ?? null);
     request.input(`tGroup${index}`, mssql.VarChar(40), title.exclusiveGroup ?? null);
     request.input(`tLevel${index}`, mssql.Int, title.exclusiveLevel ?? null);
-    return `(@tCode${index}, @tName${index}, @tCategory${index}, @tSort${index}, @tKind${index}, @tParams${index}, @tStyle${index}, @tGroup${index}, @tLevel${index})`;
+    request.input(`tGame${index}`, mssql.VarChar(8), title.gameCode ?? null);
+    request.input(`tActive${index}`, mssql.Bit, title.isActive ?? true);
+    return `(@tCode${index}, @tName${index}, @tCategory${index}, @tSort${index}, @tKind${index}, @tParams${index}, @tStyle${index}, @tGroup${index}, @tLevel${index}, @tGame${index}, @tActive${index})`;
   });
-  const columns = "Code, Name, CategoryCode, SortOrder, RuleKind, RuleParams, StyleKey, ExclusiveGroup, ExclusiveLevel";
+  const columns =
+    "Code, Name, CategoryCode, SortOrder, RuleKind, RuleParams, StyleKey, ExclusiveGroup, ExclusiveLevel, GameCode, IsActive";
   return [
     `INSERT INTO dbo.PlayerTitle (${columns})`,
     `SELECT ${columns
@@ -143,7 +179,8 @@ export function buildSeedTitlesQuery(titles: readonly TitleDefinition[], request
 
 export const CATALOG_QUERY = [
   "SELECT t.Id, t.Code, t.Name, t.CategoryCode, t.SortOrder, t.RuleKind, t.RuleParams, t.StyleKey,",
-  "  t.ExclusiveGroup, t.ExclusiveLevel, t.IsActive, c.Name AS CategoryName, c.SortOrder AS CategorySort, c.IsGlobal",
+  "  t.ExclusiveGroup, t.ExclusiveLevel, t.GameCode, t.IsActive, c.Name AS CategoryName, c.SortOrder AS CategorySort,",
+  "  c.IsGlobal",
   "FROM dbo.PlayerTitle t",
   "INNER JOIN dbo.PlayerTitleCategory c ON c.Code = t.CategoryCode;",
 ].join(" ");
@@ -165,6 +202,7 @@ export function toCatalogTitle(row: Row): CatalogTitle {
     styleKey: normalizeText(row.StyleKey),
     exclusiveGroup: normalizeText(row.ExclusiveGroup),
     exclusiveLevel: Number(row.ExclusiveLevel) || 0,
+    gameCode: titleGameCode(row.GameCode),
     isActive: isTrue(row.IsActive),
   };
 }
@@ -205,10 +243,10 @@ export function createTitleCatalog(database: Pick<Database, "withPool">, ttlMs =
 export const TITLE_SOURCES_QUERY = [
   CATALOG_QUERY,
   "SELECT u.PlayerId, u.TitleId FROM dbo.PlayerTitleUnlock u;",
-  "SELECT p.ID FROM dbo.Player p;",
+  "SELECT p.ID, p.DiscordID FROM dbo.Player p;",
   "SELECT t.ID, t.Name, t.GameType, t.IsComplete, t.Winner, t.TournamentStartDate FROM dbo.Tournament t;",
   "SELECT s.Id, s.SeasonNumber, s.DisplayName, s.LifecycleStatus FROM rocci121_toby.CompetitiveSeason s;",
-  "SELECT DISTINCT e.SeasonId, e.PlayerId FROM rocci121_toby.CompetitiveSeasonRewardEarned e",
+  "SELECT DISTINCT e.SeasonId, e.PlayerId, e.GameId FROM rocci121_toby.CompetitiveSeasonRewardEarned e",
   `WHERE e.TierOrder = ${TITAN_REWARD_TIER_ORDER};`,
 ].join(" ");
 
@@ -268,28 +306,40 @@ export async function readTitleSources(
   database: Pick<Database, "withPool">,
   options: { readonly legacy: boolean },
 ): Promise<TitleSources> {
-  return database.withPool(async (pool) => {
-    const request = pool.request();
-    request.multiple = true;
-    const sets = (await request.query(TITLE_SOURCES_QUERY)).recordsets as unknown as unknown[];
-    const legacyRanks = options.legacy
-      ? rows((await pool.request().query(LEGACY_RANKS_QUERY)).recordset).flatMap(toLegacyRankRows)
-      : undefined;
-    return {
-      catalog: rows(sets[0]).map(toCatalogTitle),
-      unlocks: rows(sets[1]).map((row) => ({ playerId: Number(row.PlayerId), titleId: Number(row.TitleId) })),
-      playerIds: new Set(rows(sets[2]).map((row) => Number(row.ID))),
-      tournaments: rows(sets[3]).map(toTournament),
-      seasons: rows(sets[4]).map((row) => ({
-        id: Number(row.Id),
-        seasonNumber: Number(row.SeasonNumber) || 0,
-        displayName: normalizeText(row.DisplayName),
-        status: normalizeText(row.LifecycleStatus).toLowerCase(),
-      })),
-      titans: rows(sets[5]).map((row) => ({ seasonId: Number(row.SeasonId), playerId: Number(row.PlayerId) })),
-      ...(legacyRanks ? { legacyRanks } : {}),
-    };
-  });
+  return database.withPool((pool) => readTitleSourcesFrom(pool, options));
+}
+
+/** readTitleSources on a pool or inside a transaction (ops:title-games reads its own changes). */
+export async function readTitleSourcesFrom(
+  db: Queryable,
+  options: { readonly legacy: boolean },
+): Promise<TitleSources> {
+  const request = db.request();
+  request.multiple = true;
+  const sets = (await request.query(TITLE_SOURCES_QUERY)).recordsets as unknown as unknown[];
+  const legacyRanks = options.legacy
+    ? rows((await db.request().query(LEGACY_RANKS_QUERY)).recordset).flatMap(toLegacyRankRows)
+    : undefined;
+  const players = rows(sets[2]);
+  return {
+    catalog: rows(sets[0]).map(toCatalogTitle),
+    unlocks: rows(sets[1]).map((row) => ({ playerId: Number(row.PlayerId), titleId: Number(row.TitleId) })),
+    playerIds: new Set(players.map((row) => Number(row.ID))),
+    discordIds: new Map(players.map((row) => [Number(row.ID), normalizeText(row.DiscordID)])),
+    tournaments: rows(sets[3]).map(toTournament),
+    seasons: rows(sets[4]).map((row) => ({
+      id: Number(row.Id),
+      seasonNumber: Number(row.SeasonNumber) || 0,
+      displayName: normalizeText(row.DisplayName),
+      status: normalizeText(row.LifecycleStatus).toLowerCase(),
+    })),
+    titans: rows(sets[5]).map((row) => ({
+      seasonId: Number(row.SeasonId),
+      playerId: Number(row.PlayerId),
+      gameType: Number(row.GameId) || 0,
+    })),
+    ...(legacyRanks ? { legacyRanks } : {}),
+  };
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -325,8 +375,8 @@ export function buildGrantQuery(count: number): string {
 
 export const NEW_TITLE_QUERY = [
   "IF NOT EXISTS (SELECT 1 FROM dbo.PlayerTitle WHERE Code = @code)",
-  "INSERT INTO dbo.PlayerTitle (Code, Name, CategoryCode, SortOrder, RuleKind, RuleParams)",
-  "VALUES (@code, @name, @category, @sortOrder, @ruleKind, @ruleParams);",
+  "INSERT INTO dbo.PlayerTitle (Code, Name, CategoryCode, SortOrder, RuleKind, RuleParams, GameCode)",
+  "VALUES (@code, @name, @category, @sortOrder, @ruleKind, @ruleParams, @gameCode);",
 ].join(" ");
 
 const LOG_QUERY = `INSERT INTO dbo.CommandLog (Command, Parameters) VALUES (N'${SYNC_LOG_COMMAND}', @log);`;
@@ -336,50 +386,63 @@ export async function insertedRows(request: mssql.Request, sql: string): Promise
   return toSafeCount(rows((await request.query(sql)).recordset)[0]?.inserted);
 }
 
+export interface TitleWriteOptions {
+  readonly grantedBy: string;
+  readonly log: Readonly<Record<string, unknown>>;
+}
+
 /**
- * One transaction: the new season titles, the grants, and the run in dbo.CommandLog. It rolls back when
- * fewer rows were inserted than planned (someone else wrote the same unlocks meanwhile; the next run
- * finds the rest).
+ * One transaction: the new titles (season titles, MSL event variants), the grants, and the run in
+ * dbo.CommandLog. It rolls back when fewer rows were inserted than planned (someone else wrote the same
+ * unlocks meanwhile; the next run finds the rest).
  */
 export async function writeTitleAwards(
   database: Pick<Database, "withTransaction">,
   plan: TitleAwardPlan,
-  options: { readonly grantedBy: string; readonly log: Readonly<Record<string, unknown>> },
+  options: TitleWriteOptions,
 ): Promise<number> {
-  return database.withTransaction(async (transaction) => {
-    for (const title of plan.newTitles) {
-      const request = transaction.request();
-      request.input("code", mssql.VarChar(64), title.code);
-      request.input("name", mssql.NVarChar(60), title.name);
-      request.input("category", mssql.VarChar(40), title.category);
-      request.input("sortOrder", mssql.Int, title.sortOrder);
-      request.input("ruleKind", mssql.VarChar(40), title.ruleKind);
-      request.input("ruleParams", mssql.NVarChar(400), title.ruleParams);
-      await request.query(NEW_TITLE_QUERY);
-    }
-    let inserted = 0;
-    for (let start = 0; start < plan.grants.length; start += GRANT_CHUNK) {
-      const chunk = plan.grants.slice(start, start + GRANT_CHUNK);
-      const request = transaction.request();
-      request.input("grantedBy", mssql.NVarChar(100), options.grantedBy);
-      chunk.forEach((grant, index) => {
-        request.input(`player${index}`, mssql.Int, grant.playerId);
-        request.input(`code${index}`, mssql.VarChar(64), grant.titleCode);
-        request.input(`source${index}`, mssql.VarChar(20), grant.sourceType);
-        request.input(`ref${index}`, mssql.NVarChar(200), grant.sourceRef);
-      });
-      inserted += await insertedRows(request, buildGrantQuery(chunk.length));
-    }
-    if (inserted !== plan.grants.length) {
-      throw new Error(`Planned ${plan.grants.length} title unlocks but inserted ${inserted}; nothing was saved.`);
-    }
-    const log = transaction.request();
-    log.input(
-      "log",
-      mssql.NVarChar(4000),
-      JSON.stringify({ granted_by: options.grantedBy, ...options.log }).slice(0, 4000),
-    );
-    await log.query(LOG_QUERY);
-    return inserted;
-  });
+  return database.withTransaction((transaction) => writeTitleAwardsIn(transaction, plan, options));
+}
+
+/** writeTitleAwards inside a transaction the caller holds (ops:title-games). */
+export async function writeTitleAwardsIn(
+  transaction: Queryable,
+  plan: TitleAwardPlan,
+  options: TitleWriteOptions,
+): Promise<number> {
+  for (const title of plan.newTitles) {
+    const request = transaction.request();
+    request.input("code", mssql.VarChar(64), title.code);
+    request.input("name", mssql.NVarChar(60), title.name);
+    request.input("category", mssql.VarChar(40), title.category);
+    request.input("sortOrder", mssql.Int, title.sortOrder);
+    request.input("ruleKind", mssql.VarChar(40), title.ruleKind);
+    request.input("ruleParams", mssql.NVarChar(400), title.ruleParams);
+    request.input("gameCode", mssql.VarChar(8), title.gameCode);
+    await request.query(NEW_TITLE_QUERY);
+  }
+  let inserted = 0;
+  for (let start = 0; start < plan.grants.length; start += GRANT_CHUNK) {
+    const chunk = plan.grants.slice(start, start + GRANT_CHUNK);
+    const request = transaction.request();
+    request.input("grantedBy", mssql.NVarChar(100), options.grantedBy);
+    chunk.forEach((grant, index) => {
+      request.input(`player${index}`, mssql.Int, grant.playerId);
+      request.input(`code${index}`, mssql.VarChar(64), grant.titleCode);
+      request.input(`source${index}`, mssql.VarChar(20), grant.sourceType);
+      request.input(`ref${index}`, mssql.NVarChar(200), grant.sourceRef);
+    });
+    inserted += await insertedRows(request, buildGrantQuery(chunk.length));
+  }
+  if (inserted !== plan.grants.length) {
+    throw new Error(`Planned ${plan.grants.length} title unlocks but inserted ${inserted}; nothing was saved.`);
+  }
+  const log = transaction.request();
+  log.input(
+    "log",
+    mssql.NVarChar(4000),
+    JSON.stringify({ granted_by: options.grantedBy, ...options.log }).slice(0, 4000),
+  );
+  await log.query(LOG_QUERY);
+  return inserted;
 }

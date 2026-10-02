@@ -543,7 +543,7 @@ test("profile batch query reads all profile data in one multi-recordset batch", 
   assert.match(sql, /SUM\(rating\.MatchWins \+ rating\.MatchLosses\) AS TotalMatches/);
   assert.match(
     sql,
-    /GROUP BY rating\.GameId, rating\.ModeCode; SELECT active\.TitleId AS title_id FROM dbo\.PlayerActiveTitle active WHERE active\.PlayerId = @playerId; SELECT unlock\.TitleId AS title_id FROM dbo\.PlayerTitleUnlock unlock WHERE unlock\.PlayerId = @playerId;$/,
+    /GROUP BY rating\.GameId, rating\.ModeCode; SELECT active\.TitleId AS title_id FROM dbo\.PlayerActiveTitle active WHERE active\.PlayerId = @playerId; SELECT unlock\.TitleId AS title_id FROM dbo\.PlayerTitleUnlock unlock WHERE unlock\.PlayerId = @playerId; SELECT test\.TitleId AS title_id FROM dbo\.PlayerTitleTestUnlock test WHERE test\.PlayerId = @playerId;$/,
   );
   assert.match(sql, /CompetitiveSeasonRewardProgress/);
   assert.match(sql, /progress\.GameId/);
@@ -998,28 +998,46 @@ test("SEASON_AWARD_DISPLAY_ORDER covers every award futbot writes, without dupli
   assert.equal(new Set(SEASON_AWARD_DISPLAY_ORDER).size, SEASON_AWARD_DISPLAY_ORDER.length);
 });
 
-test("the selected title shows in FULL CAPS while the player can still select it", () => {
+test("the selected title shows in FULL CAPS with its game while the player can still select it", () => {
   const catalog = seededCatalog();
   const id = (code: string): number => catalog.find((title) => title.code === code)?.id ?? 0;
-  const sets = (selected: string, unlocked: readonly string[]): unknown[][] => {
-    const recordsets: unknown[][] = Array.from({ length: 11 }, () => []);
-    recordsets[0] = [{ player_id: 9, name: "Someone" }];
+  const sets = (
+    selected: string,
+    unlocked: readonly string[],
+    tests: readonly string[] = [],
+    playerId = 9,
+  ): unknown[][] => {
+    const recordsets: unknown[][] = Array.from({ length: 12 }, () => []);
+    recordsets[0] = [{ player_id: playerId, name: "Someone" }];
     recordsets[9] = selected ? [{ title_id: id(selected) }] : [];
     recordsets[10] = unlocked.map((code) => ({ title_id: id(code) }));
+    recordsets[11] = tests.map((code) => ({ title_id: id(code) }));
     return recordsets;
   };
-  const shown = (selected: string, unlocked: readonly string[]) => {
-    const player = buildPlayerProfileFromRecordsets(sets(selected, unlocked), catalog)?.player;
-    return { title: player?.title, title_style: player?.title_style };
+  const shown = (...args: Parameters<typeof sets>) => {
+    const player = buildPlayerProfileFromRecordsets(sets(...args), catalog)?.player;
+    return { title: player?.title, title_style: player?.title_style, title_game_code: player?.title_game_code };
   };
-  const both = ["tournament-winner", "tournament-winner-green"];
-  assert.deepEqual(shown("tournament-winner-green", both), {
+  const both = ["tournament-winner-msc", "tournament-winner-green-msc"];
+  assert.deepEqual(shown("tournament-winner-green-msc", both), {
     title: "TOURNAMENT WINNER",
     title_style: "tournament-x5",
+    title_game_code: "MSC",
   });
-  assert.deepEqual(shown("og-player", []), { title: "OG PLAYER", title_style: "free" });
-  assert.deepEqual(shown("", both), { title: "", title_style: "" });
-  assert.equal(shown("msl-2023-world-champion", []).title, "", "a title no longer unlocked is not shown");
-  assert.equal(shown("tournament-winner", both).title, "TOURNAMENT WINNER", "the plain one stays selectable");
+  assert.deepEqual(shown("og-player", []), { title: "OG PLAYER", title_style: "free", title_game_code: "" });
+  assert.deepEqual(shown("", both), { title: "", title_style: "", title_game_code: "" });
+  assert.equal(shown("msl-3-time-world-champion-sms", []).title, "", "a title no longer unlocked is not shown");
+  assert.equal(shown("tournament-winner-msc", both).title, "TOURNAMENT WINNER", "the plain one stays selectable");
+  assert.equal(shown("tournament-winner", ["tournament-winner"]).title, "", "a retired title shows nothing");
+  // A fixed title shows only for its player; a test unlock shows it for the tester.
+  assert.equal(
+    shown("wfc-66-0-daily-world-record", ["wfc-66-0-daily-world-record"], [], 223).title,
+    "WFC 66-0 DAILY WORLD RECORD",
+  );
+  assert.equal(shown("wfc-66-0-daily-world-record", ["wfc-66-0-daily-world-record"], [], 17).title, "");
+  assert.equal(
+    shown("wfc-5012-daily-points-world-record", [], ["wfc-5012-daily-points-world-record"], 223).title,
+    "WFC 5012 DAILY POINTS WORLD RECORD",
+  );
   assert.equal(buildPlayerProfileFromRecordsets(sets("og-player", []))?.player.title, "", "no catalog, no title");
 });

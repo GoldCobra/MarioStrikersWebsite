@@ -1,14 +1,5 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "6555017c289e7430b562244624c4d27b2e395369",
-  "changes": [
-    {
-      "screenshots": ["states/player-card-title*", "states/players-popup-title*"],
-      "reason": "Player titles leave the header: the title is the content's first line, before the friend codes, in the section titles' face and size with less letter spacing, coloured by its group (legacy and free titles #b6b6b6; the -glow states show MSL WORLD CHAMPION #ffeb5c with an orange glow and a special title #aef7ff with a blue glow). The reference shows them under the name."
-    },
-    {
-      "screenshots": ["states/profile-*"],
-      "reason": "Profile labels 'Player Title' and 'MSC Friend Codes (max 3)'; the title field is a listbox showing each title in its look (profile-title-list is new: the open list with one title of every look, which the reference's plain select cannot show)."
-    }
-  ]
+  "reference": "aa0be372aea2ad96ccd865a85283b1e6dd7badd6",
+  "changes": []
 }

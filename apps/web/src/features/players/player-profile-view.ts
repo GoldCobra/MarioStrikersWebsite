@@ -16,6 +16,7 @@ import {
   mscFriendCodeLines,
   parseCodeLine,
   switchFriendCodeLines,
+  titleGameBall,
   titleLookClass,
   type Accolade,
   type PlayerProfile,
@@ -121,19 +122,29 @@ export function showFlag(flag: HTMLImageElement, country: unknown): void {
 }
 
 /**
- * The player title, the first line of the content (before the friend codes): only the title, in FULL CAPS
- * and its look. Without one the line is hidden and takes no room.
+ * The ball of a title's game before the title (popup, Discord card, profile field and title list); "" for a
+ * title without a game. It loads at once, not lazily, so the Discord card waits for it before "ready".
  */
-export function showPlayerTitle(line: HTMLElement, title: unknown, style: unknown = ""): void {
+export function titleBallHtml(gameCode: unknown): string {
+  const ball = titleGameBall(gameCode);
+  if (!ball) return "";
+  return `<img class="player-title-ball" src="${escapeHtml(ball.src)}" alt="${escapeHtml(ball.alt)}" width="16" height="16" decoding="async" data-fallback-src="${escapeHtml(ball.fallback)}">`;
+}
+
+/**
+ * The player title, the first line of the content (before the friend codes): its game's ball and the title,
+ * in FULL CAPS and its look. Without one the line is hidden and takes no room.
+ */
+export function showPlayerTitle(line: HTMLElement, title: unknown, style: unknown = "", gameCode: unknown = ""): void {
   const text = toText(title).trim().toUpperCase();
-  line.textContent = text;
+  line.innerHTML = text ? titleBallHtml(gameCode) + escapeHtml(text) : "";
   line.hidden = !text;
   line.className = text ? `player-popup-player-title ${titleLookClass(style)}` : "player-popup-player-title";
 }
 
 function renderPlayerTitle(view: TemplateView, player: PlayerProfile["player"]): void {
   const line = view.slots["player-title"];
-  if (line) showPlayerTitle(line, player?.title, player?.title_style);
+  if (line) showPlayerTitle(line, player?.title, player?.title_style, player?.title_game_code);
 }
 
 /** An MSL World Champion's header turns gold and shows the MSL logo at its right end. */

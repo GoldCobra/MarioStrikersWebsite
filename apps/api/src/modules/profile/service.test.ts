@@ -45,8 +45,16 @@ const TITLES: StoredProfile["titles"] = [
     category: "legacy-rank",
     categoryName: "Legacy Ranks",
     style: "legacy",
+    gameCode: "",
   },
-  { code: "og-player", name: "OG PLAYER", category: "free", categoryName: "Free Titles", style: "free" },
+  {
+    code: "og-player",
+    name: "OG PLAYER",
+    category: "free",
+    categoryName: "Free Titles",
+    style: "free",
+    gameCode: "",
+  },
 ];
 
 const PROFILE: StoredProfile = {

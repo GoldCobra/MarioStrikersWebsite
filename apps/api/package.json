@@ -17,6 +17,8 @@
     "ops:player-titles": "node src/ops/apply-player-titles.ts",
     "ops:title-sync": "node src/ops/sync-player-titles.ts",
     "ops:title-order": "node src/ops/apply-title-order.ts",
+    "ops:title-games": "node src/ops/apply-title-games.ts",
+    "ops:title-test-unlocks": "node src/ops/title-test-unlocks.ts",
     "ops:probe-tls": "node src/ops/probe-tls.ts",
     "test": "node --import ./src/test-support/isolate.ts --test \"src/**/*.test.ts\"",
     "test:smoke": "node --import ./src/test-support/isolate.ts --test src/dev-smoke.test.ts"

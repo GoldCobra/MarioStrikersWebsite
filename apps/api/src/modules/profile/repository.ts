@@ -2,8 +2,9 @@
 // Discord id's key range (UPDLOCK, HOLDLOCK), so parallel logins wait for each other and reuse the row
 // the first one created; the unique index IX_Player_DiscordID stays the last guard against a second row.
 // A save reads the profile under update locks, decides and writes in one transaction. Like the bot's
-// procedures, every creation and every save is written to dbo.CommandLog. The selected title and the
-// player's unlocked titles are read with the profile; the title catalog comes from its cache.
+// procedures, every creation and every save is written to dbo.CommandLog. The selected title, the
+// player's unlocked titles and their temporary test unlocks are read with the profile; the title catalog
+// comes from its cache.
 
 import { normalizeText } from "@ms/shared/text";
 import type { Database, Queryable } from "../../db/database.ts";
@@ -53,7 +54,7 @@ export const FIND_PLAYER_QUERY =
 export const COUNTRIES_QUERY = "SELECT Code, Description FROM dbo.Enumeration WHERE Type = N'country';";
 
 /** Result set positions of buildProfileQuery() (the taken codes of a save follow them). */
-export const PROFILE_SETS = { player: 0, codes: 1, title: 2, unlocks: 3, taken: 4 } as const;
+export const PROFILE_SETS = { player: 0, codes: 1, title: 2, unlocks: 3, testUnlocks: 4, taken: 5 } as const;
 
 /** The profile; with `lock`, under update locks held until the transaction ends. */
 export function buildProfileQuery(lock: boolean): string {
@@ -67,6 +68,7 @@ export function buildProfileQuery(lock: boolean): string {
     "ORDER BY fc.GameType, fc.Region, fc.LineSeq;",
     `SELECT a.TitleId FROM dbo.PlayerActiveTitle a${hint} WHERE a.PlayerId = @playerId;`,
     "SELECT u.TitleId FROM dbo.PlayerTitleUnlock u WHERE u.PlayerId = @playerId;",
+    "SELECT x.TitleId FROM dbo.PlayerTitleTestUnlock x WHERE x.PlayerId = @playerId;",
   ]
     .filter(Boolean)
     .join(" ");
@@ -137,7 +139,11 @@ function toStoredProfile(playerId: number, sets: Row[][], catalog: readonly Cata
   const player = sets[PROFILE_SETS.player]?.[0];
   if (!player) throw new Error(`Player ${playerId} not found.`);
   const unlocked = (sets[PROFILE_SETS.unlocks] ?? []).map((row) => Number(row.TitleId));
-  const selected = selectedTitle(catalog, unlocked, toPositiveIntId(sets[PROFILE_SETS.title]?.[0]?.TitleId));
+  const holder = {
+    playerId,
+    testUnlockedIds: (sets[PROFILE_SETS.testUnlocks] ?? []).map((row) => Number(row.TitleId)),
+  };
+  const selected = selectedTitle(catalog, unlocked, toPositiveIntId(sets[PROFILE_SETS.title]?.[0]?.TitleId), holder);
   return {
     playerId,
     country: typeof player.country === "string" ? player.country.trim() : "",
@@ -149,7 +155,7 @@ function toStoredProfile(playerId: number, sets: Row[][], catalog: readonly Cata
       code: normalizeText(row.Code),
     })),
     title: selected?.code ?? "",
-    titles: availableTitles(catalog, unlocked).map(toTitleOption),
+    titles: availableTitles(catalog, unlocked, holder).map(toTitleOption),
   };
 }
 
