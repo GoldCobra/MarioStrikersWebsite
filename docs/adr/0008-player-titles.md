@@ -19,8 +19,9 @@ the rule that awards it as a kind with JSON parameters), `PlayerTitleUnlock`
 (one row per player and title, unique, with source, reference and who granted
 it) and `PlayerActiveTitle` (the selected title). A global category (Free
 Titles) is available to everyone without unlock rows. Within an exclusive
-group (legacy ranks, N-TIME WORLD CHAMPION, TOURNAMENT WINNER) a player is
-offered only the highest level they unlocked.
+group (legacy ranks, N-TIME WORLD CHAMPION) a player is offered only the
+highest level they unlocked. (Since 2026-10-02 the green and the plain
+TOURNAMENT WINNER are no group: both can be selected.)
 
 `apps/api/src/modules/titles/` holds the rules as pure functions over the
 existing data (tournaments, season rewards, legacy ranks) and one definition of

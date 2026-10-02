@@ -194,7 +194,9 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await expect(page.locator("[data-edit-action='discard-confirm']")).toBeFocused();
     await page.keyboard.press("Escape");
     await expect(page.locator("[data-edit-action='discard']")).toBeVisible();
-    await expect(page.locator("[data-field-row='switch'] .profile-edit-digits").first()).toHaveValue("9999");
+    // The click on DISCARD closed the field; the draft keeps the change.
+    await expect(page.locator("[data-field-row='switch']")).toHaveClass(/is-unsaved/);
+    await expect(value).toContainText("9999");
     await page.locator("[data-edit-action='discard']").click();
     await page.locator("[data-edit-action='discard-confirm']").click();
     await expect(page.locator(".profile-toast")).toHaveText(/Changes discarded\./);
@@ -231,6 +233,91 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await page.locator("[data-edit-action='save']").click();
     await expect(page.locator(".profile-toast")).toHaveText(/Changes saved\./);
     expect(saved.body?.msc_codes?.[0]?.platform).toBe("");
+    await settle(page);
+  },
+  // A click outside an open field closes it and keeps what was entered, unsaved; clicks into its lists do
+  // not close it, a pencil elsewhere opens that field at once, and an empty code line added with "+" goes.
+  // Nothing is sent. The title list holds only the member's titles, in the API's order, without groups.
+  "profile editor closes fields on a click outside": async (page) => {
+    await watchViolations(page);
+    await preparePage(page);
+    await login(page, "linked");
+    let puts = 0;
+    page.on("request", (request) => {
+      if (request.method() === "PUT" && request.url().includes("/api/profile/me/editable")) puts += 1;
+    });
+    await page.goto("/profile");
+    await settle(page, { eagerImages: true });
+    await hideDevNotice(page);
+    const outside = page.locator("#profile-country-label");
+    const open = page.locator("[data-edit-row]");
+    const titleRow = page.locator("[data-field-row='title']");
+    const headerTitle = page.locator(".player-popup-player-title");
+
+    await page.locator("[data-edit-open='title']").click();
+    const select = page.locator("[data-field='title']");
+    await expect(select.locator("optgroup")).toHaveCount(0);
+    const options = await select
+      .locator("option")
+      .evaluateAll((nodes) =>
+        nodes.map((node) => [(node as HTMLOptionElement).value, (node as HTMLOptionElement).text]),
+      );
+    expect(options.slice(0, 7)).toEqual([
+      ["", "No player title"],
+      ["msl-2-time-world-champion", "2-TIME WORLD CHAMPION"],
+      ["msl-2025-world-champion", "MSL 2025 WORLD CHAMPION"],
+      ["tournament-winner-green", "TOURNAMENT WINNER"],
+      ["tournament-winner", "TOURNAMENT WINNER"],
+      ["legacy-megastriker", "LEGACY MEGASTRIKER"],
+      ["three-ghosts", "3 GHOSTS"],
+    ]);
+    await select.click();
+    await select.selectOption("tournament-winner");
+    await expect(open).toHaveCount(1);
+    await outside.click();
+    await expect(open).toHaveCount(0);
+    await expect(titleRow).toHaveClass(/is-unsaved/);
+    await expect(titleRow.locator(".player-popup-code-value")).toHaveText("TOURNAMENT WINNER");
+    await expect(headerTitle).toHaveText("TOURNAMENT WINNER");
+
+    // The country list belongs to its field: picking from it keeps the field open.
+    await page.locator("[data-edit-open='country']").click();
+    await page.locator("[role='combobox']").click();
+    await page.locator("[role='option']", { hasText: "United States" }).click();
+    await expect(page.locator("[data-edit-row][data-field-row='country']")).toHaveCount(1);
+    await page.mouse.click(4, 400);
+    await expect(open).toHaveCount(0);
+    await expect(page.locator("[data-field-row='country']")).toHaveClass(/is-unsaved/);
+    await expect(page.locator("[data-field-row='country'] .player-popup-code-value")).toHaveText("United States");
+
+    // One click on another pencil closes this field and opens that one.
+    await page.locator("[data-edit-open='switch']").click();
+    await page.locator("[data-field-row='switch'] .profile-edit-digits").first().fill("1234");
+    await page.locator("[data-edit-open^='msc:']").first().click();
+    await expect(open).toHaveCount(1);
+    await expect(page.locator("[data-edit-row].is-msc")).toHaveCount(1);
+    await expect(page.locator("[data-field-row='switch']")).toHaveClass(/is-unsaved/);
+    await expect(page.locator("[data-field-row='switch'] .player-popup-code-value")).toContainText("1234");
+    await outside.click();
+    await expect(open).toHaveCount(0);
+
+    // A code line added with "+" and left empty goes when it closes.
+    const codes = page.locator("[data-field-row^='msc:']");
+    const before = await codes.count();
+    await page.locator("[data-edit-action='add']").click();
+    await expect(codes).toHaveCount(before + 1);
+    await outside.click();
+    await expect(codes).toHaveCount(before);
+
+    // "No player title": the field says so, the line under the name is gone.
+    await page.locator("[data-edit-open='title']").click();
+    await select.selectOption("");
+    await outside.click();
+    await expect(titleRow.locator(".player-popup-code-value")).toHaveText("No player title");
+    await expect(headerTitle).toBeHidden();
+
+    await expect(page.locator("[data-edit-action='save']")).toBeEnabled();
+    expect(puts).toBe(0);
     await settle(page);
   },
   "gear builder panes, character menu and card picture": async (page) => {

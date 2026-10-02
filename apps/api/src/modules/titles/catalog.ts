@@ -5,6 +5,16 @@
 
 import type { CatalogTitle } from "./availability.ts";
 
+/** The codes of the categories, as the title order (availability.ts) and the season titles use them. */
+export const TITLE_CATEGORY = {
+  special: "special-pre-2014",
+  msl: "msl",
+  season: "competitive-season",
+  tournament: "tournament",
+  legacy: "legacy-rank",
+  free: "free",
+} as const;
+
 /** How a title is awarded; rules.ts describes each kind and its parameters. */
 export type TitleRuleKind =
   | "everyone"
@@ -22,7 +32,7 @@ export interface TitleCategoryDefinition {
   readonly availability: string;
   /** Every player has every title of the category, without unlock rows. */
   readonly isGlobal: boolean;
-  /** Order of the groups in the profile's title list. */
+  /** Order of the categories in the profile's title list; the global one (Free Titles) is always last. */
   readonly sortOrder: number;
 }
 
@@ -45,36 +55,36 @@ export interface TitleDefinition extends TitleRule {
 }
 
 export const TITLE_CATEGORIES: readonly TitleCategoryDefinition[] = [
-  { code: "msl", name: "MSL Titles", availability: "MSL titles", isGlobal: false, sortOrder: 1 },
   {
-    code: "competitive-season",
+    code: TITLE_CATEGORY.special,
+    name: "Special pre-2014 Titles",
+    availability: "Special titles",
+    isGlobal: false,
+    sortOrder: 1,
+  },
+  { code: TITLE_CATEGORY.msl, name: "MSL Titles", availability: "MSL titles", isGlobal: false, sortOrder: 2 },
+  {
+    code: TITLE_CATEGORY.season,
     name: "Competitive Season Titles",
     availability: "Only Striker Titans during a season",
-    isGlobal: false,
-    sortOrder: 2,
-  },
-  {
-    code: "tournament",
-    name: "Tournament Titles",
-    availability: "Tournament winners (only certain, non-MSL)",
     isGlobal: false,
     sortOrder: 3,
   },
   {
-    code: "special-pre-2014",
-    name: "Special pre-2014 Titles",
-    availability: "Special titles",
+    code: TITLE_CATEGORY.tournament,
+    name: "Tournament Titles",
+    availability: "Tournament winners (only certain, non-MSL)",
     isGlobal: false,
     sortOrder: 4,
   },
   {
-    code: "legacy-rank",
+    code: TITLE_CATEGORY.legacy,
     name: "Legacy Ranks",
     availability: "Old Legacy Titles (only certain)",
     isGlobal: false,
     sortOrder: 5,
   },
-  { code: "free", name: "Free Titles", availability: "Everyone", isGlobal: true, sortOrder: 6 },
+  { code: TITLE_CATEGORY.free, name: "Free Titles", availability: "Everyone", isGlobal: true, sortOrder: 6 },
 ];
 
 const EVERYONE: TitleRule = { ruleKind: "everyone" };
@@ -95,12 +105,11 @@ const worldChampionships = (min: number): TitleRule => ({
 const wonTournament = (...names: string[]): TitleRule =>
   names.length ? { ruleKind: "tournament-name", ruleParams: { names } } : MANUAL;
 
+/** No exclusive group: a player with five wins can select the green and the plain one. */
 const tournamentWins = (min: number, styleKey?: string): TitleRule => ({
   ruleKind: "side-tournament-count",
   ruleParams: { min },
   ...(styleKey ? { styleKey } : {}),
-  exclusiveGroup: "tournament-winner",
-  exclusiveLevel: min,
 });
 
 const legacyRank = (tier: number): TitleRule => ({
@@ -118,7 +127,7 @@ function inCategory(category: string, entries: readonly Entry[]): TitleDefinitio
 
 /** Every title of the list; season titles are created when a season ends with a Strikers Titan (rules.ts). */
 export const TITLE_CATALOG: readonly TitleDefinition[] = [
-  ...inCategory("msl", [
+  ...inCategory(TITLE_CATEGORY.msl, [
     ["msl-5-time-world-champion", "5-TIME WORLD CHAMPION", worldChampionships(5)],
     ["msl-4-time-world-champion", "4-TIME WORLD CHAMPION", worldChampionships(4)],
     ["msl-3-time-world-champion", "3-TIME WORLD CHAMPION", worldChampionships(3)],
@@ -149,26 +158,26 @@ export const TITLE_CATALOG: readonly TitleDefinition[] = [
     ["msl-2026-summer-champion", "MSL 2026 SUMMER CHAMPION", wonTournament("MSL 2026 Summer Series")],
     ["msl-2026-fall-champion", "MSL 2026 FALL CHAMPION", wonTournament("MSL 2026 Fall Series")],
   ]),
-  ...inCategory("tournament", [
+  ...inCategory(TITLE_CATEGORY.tournament, [
     ["tournament-winner", "TOURNAMENT WINNER", tournamentWins(1)],
     ["tournament-winner-green", "TOURNAMENT WINNER", tournamentWins(5, "green")],
   ]),
   // World records and final leaders of Nintendo Wi-Fi Connection (until 2014): staff only.
-  ...inCategory("special-pre-2014", [
+  ...inCategory(TITLE_CATEGORY.special, [
     ["wfc-200-0-season-world-record", "WFC 200-0 SEASON WORLD RECORD", MANUAL],
     ["wfc-66-0-daily-world-record", "WFC 66-0 DAILY WORLD RECORD", MANUAL],
     ["wfc-5012-daily-points-world-record", "WFC 5012 DAILY POINTS WORLD RECORD", MANUAL],
     ["wfc-final-daily-leader", "WFC FINAL DAILY LEADER", MANUAL],
     ["wfc-final-season-leader", "WFC FINAL SEASON LEADER", MANUAL],
   ]),
-  ...inCategory("legacy-rank", [
+  ...inCategory(TITLE_CATEGORY.legacy, [
     ["legacy-rookie", "LEGACY ROOKIE", legacyRank(1)],
     ["legacy-professional", "LEGACY PROFESSIONAL", legacyRank(2)],
     ["legacy-superstar", "LEGACY SUPERSTAR", legacyRank(3)],
     ["legacy-legend", "LEGACY LEGEND", legacyRank(4)],
     ["legacy-megastriker", "LEGACY MEGASTRIKER", legacyRank(5)],
   ]),
-  ...inCategory("free", [
+  ...inCategory(TITLE_CATEGORY.free, [
     ["super-mario-strikers-fan", "SUPER MARIO STRIKERS FAN", EVERYONE],
     ["mario-strikers-charged-fan", "MARIO STRIKERS CHARGED FAN", EVERYONE],
     ["mario-strikers-battle-league-fan", "MARIO STRIKERS: BATTLE LEAGUE FAN", EVERYONE],

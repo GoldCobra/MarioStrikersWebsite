@@ -1017,6 +1017,6 @@ test("the selected title shows in FULL CAPS while the player can still select it
   assert.deepEqual(shown("og-player", []), { title: "OG PLAYER", title_style: "" });
   assert.deepEqual(shown("", both), { title: "", title_style: "" });
   assert.equal(shown("msl-2023-world-champion", []).title, "", "a title no longer unlocked is not shown");
-  assert.equal(shown("tournament-winner", both).title, "", "the plain one is replaced by the green one");
+  assert.equal(shown("tournament-winner", both).title, "TOURNAMENT WINNER", "the plain one stays selectable");
   assert.equal(buildPlayerProfileFromRecordsets(sets("og-player", []))?.player.title, "", "no catalog, no title");
 });

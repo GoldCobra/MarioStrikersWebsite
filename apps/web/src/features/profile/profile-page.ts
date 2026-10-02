@@ -1,6 +1,6 @@
 // The signed-in player's own profile (/profile), from /api/profile/me, or the reason it cannot be shown.
 // It is formatted like the player popup (the same template, renderer and styles; the page itself is no
-// popup), shows the member's Discord names and is edited in place (profile-edit.ts). The login creates a
+// popup), shows the member's Discord username and is edited in place (profile-edit.ts). The login creates a
 // missing profile; when that failed, the page asks for it once more.
 
 import { toText } from "@ms/shared/text";
@@ -59,15 +59,30 @@ function createProfileCard(): ProfileCard {
   return { root, view: templateView(root) };
 }
 
-/** "Member of <club> [<tag>]" as the first line; without a club the line stays, empty. */
-function renderClubLine(card: ProfileCard, player: PlayerProfile["player"]): void {
+/**
+ * The first line under the header: "Member of <club> [<tag>]" on the left (empty without a club) and the
+ * member's Discord username on the right.
+ */
+function topLine(card: ProfileCard): HTMLElement | null {
   const content = card.root.querySelector(".player-popup-content");
-  if (!content) return;
-  let line = content.querySelector<HTMLElement>(":scope > .profile-club-line");
+  if (!content) return null;
+  let line = content.querySelector<HTMLElement>(":scope > .profile-top-line");
+  if (!line) {
+    line = document.createElement("div");
+    line.className = "profile-top-line";
+    content.prepend(line);
+  }
+  return line;
+}
+
+function renderClubLine(card: ProfileCard, player: PlayerProfile["player"]): void {
+  const top = topLine(card);
+  if (!top) return;
+  let line = top.querySelector<HTMLElement>(":scope > .profile-club-line");
   if (!line) {
     line = document.createElement("p");
     line.className = "profile-club-line";
-    content.prepend(line);
+    top.prepend(line);
   }
   const name = toText(player?.club_name).trim();
   const tag = toText(player?.club_tag).trim();
@@ -82,27 +97,17 @@ function renderCard(card: ProfileCard, profile: PlayerProfile): void {
 }
 
 /**
- * The member's names under the club line: the name the server shows (nickname, else global name, else
- * username; the API's server_name) and the Discord username (as the Striker Clubs list it). A name the
- * API does not have leaves its line out.
+ * The member's Discord username (as the Striker Clubs list it) at the right of the first line, without a
+ * label; the name the server shows is the profile's name in the header already. Nothing without one.
  */
-function renderDiscordNames(card: ProfileCard, discord: EditableProfile["discord"]): void {
-  const club = card.root.querySelector(".player-popup-content > .profile-club-line");
-  if (!club) return;
-  const lines = [
-    { label: "Server name", value: toText(discord.server_name).trim() },
-    { label: "Discord name", value: toText(discord.username).trim() },
-  ].filter((line) => line.value);
-  if (!lines.length) return;
-  const list = document.createElement("dl");
-  list.className = "profile-discord-lines";
-  list.innerHTML = lines
-    .map(
-      (line) =>
-        `<div class="profile-discord-line"><dt>${escapeHtml(line.label)}:</dt><dd>${escapeHtml(line.value)}</dd></div>`,
-    )
-    .join("");
-  club.after(list);
+function renderDiscordName(card: ProfileCard, discord: EditableProfile["discord"]): void {
+  const username = toText(discord.username).trim();
+  const top = topLine(card);
+  if (!top || !username) return;
+  const name = document.createElement("p");
+  name.className = "profile-discord-name";
+  name.textContent = username;
+  top.append(name);
 }
 
 /** The result of the login flow, which returns with ?auth=<result>. */
@@ -242,14 +247,14 @@ async function loadProfile(mount: HTMLElement): Promise<void> {
     removeProfileQuery();
     if (!editable) {
       card.root
-        .querySelector(".player-popup-content > .profile-club-line")
+        .querySelector(".player-popup-content > .profile-top-line")
         ?.insertAdjacentHTML(
           "afterend",
           '<p class="profile-edit-notice">Your profile cannot be changed right now. Please try again later.</p>',
         );
       return;
     }
-    renderDiscordNames(card, editable.discord);
+    renderDiscordName(card, editable.discord);
     createProfileEditor({
       root: card.root,
       profile: editable,

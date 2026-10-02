@@ -8,7 +8,7 @@ test("the catalog holds the 63 titles of the title list in their categories", ()
   assert.deepEqual(counts, { msl: 28, tournament: 2, "special-pre-2014": 5, "legacy-rank": 5, free: 23 });
   assert.deepEqual(
     TITLE_CATEGORIES.map((category) => category.code),
-    ["msl", "competitive-season", "tournament", "special-pre-2014", "legacy-rank", "free"],
+    ["special-pre-2014", "msl", "competitive-season", "tournament", "legacy-rank", "free"],
   );
   assert.deepEqual(
     TITLE_CATEGORIES.filter((category) => category.isGlobal).map((category) => category.code),
@@ -46,9 +46,12 @@ test("every rule has the parameters its kind needs", () => {
         assert.ok(Array.isArray(params.names) && params.names.length > 0, title.code);
         break;
       case "world-championship-count":
-      case "side-tournament-count":
         assert.ok(Number.isInteger(params.min) && Number(params.min) > 0, title.code);
         assert.equal(title.exclusiveLevel, params.min, title.code);
+        break;
+      case "side-tournament-count":
+        assert.ok(Number.isInteger(params.min) && Number(params.min) > 0, title.code);
+        assert.equal(title.exclusiveGroup, undefined, title.code);
         break;
       case "legacy-rank":
         assert.ok([1, 2, 3, 4, 5].includes(Number(params.tier)), title.code);
@@ -60,13 +63,13 @@ test("every rule has the parameters its kind needs", () => {
   }
 });
 
-test("the green TOURNAMENT WINNER is a level of the same group with its own look", () => {
+test("both TOURNAMENT WINNER titles stand on their own; the green one has its look", () => {
   const winners = TITLE_CATALOG.filter((title) => title.name === "TOURNAMENT WINNER");
   assert.deepEqual(
-    winners.map((title) => [title.code, title.exclusiveGroup, title.exclusiveLevel, title.styleKey ?? ""]),
+    winners.map((title) => [title.code, title.exclusiveGroup ?? "", title.ruleParams, title.styleKey ?? ""]),
     [
-      ["tournament-winner", "tournament-winner", 1, ""],
-      ["tournament-winner-green", "tournament-winner", 5, "green"],
+      ["tournament-winner", "", { min: 1 }, ""],
+      ["tournament-winner-green", "", { min: 5 }, "green"],
     ],
   );
 });

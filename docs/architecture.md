@@ -151,12 +151,13 @@ login still succeeds and the profile page asks again (`POST /api/profile/me`).
 On the profile page (`/profile`, `features/profile/`) the member changes the
 title, the country and the friend codes in place: a pencil opens one field (the
 title, the country, the Switch code, an MSC code) without saving it, "+" adds an MSC code and "−"
-removes an open one. Changes collect in a draft (`profile-edit-state.ts`), are
+removes an open one; a click outside an open field closes it again, keeping what was entered (an empty
+code line added with "+" goes). Changes collect in a draft (`profile-edit-state.ts`), are
 marked unsaved, and SAVE sends the whole profile in one request, DISCARD (after a
 confirmation) drops them; leaving with unsaved changes warns. The country is a
 combobox with the local flags (`country-select.ts`, `dbo.Enumeration`'s list);
 messages are toasts at the bottom right (`profile-toasts.ts`, `aria-live`). The
-page also shows the member's server name (what the server shows) and Discord username. A save
+page also shows the member's Discord username, right of the club line. A save
 goes to the tables robotic_nightmare's `/profile` commands use, in their exact
 form ([ADR 0007](adr/0007-profile-writes-in-shared-database.md)): one
 transaction, refused with `409 PROFILE_CHANGED` when the profile changed since
@@ -174,8 +175,13 @@ profile page and the Discord card show it under the name, in FULL CAPS. Four
 `dbo` tables hold them: categories, titles (with the rule that awards each one),
 unlocks (one per player and title, with their source) and the selected title.
 Free Titles are available to everyone; of an exclusive group (legacy ranks,
-N-TIME WORLD CHAMPION, TOURNAMENT WINNER) only the highest unlocked level is
-offered (`availability.ts`). `rules.ts` awards from existing data: a season's
+N-TIME WORLD CHAMPION) only the highest unlocked level is offered, while the green
+and the plain TOURNAMENT WINNER can both be selected (`availability.ts`). The same
+file sets the list's order, which the profile page shows as it comes, without
+category names: categories by `SortOrder`, Free Titles always last (a new category
+falls in before them); MSL titles N-TIME first, then by year and the latest event,
+season titles by year and season, the green TOURNAMENT WINNER first, legacy ranks
+from the highest, Free Titles A–Z; equal ranks by code. `rules.ts` awards from existing data: a season's
 Strikers Titans (reward level 5/5, once the season is completed; the season's
 title is created then), winners of named tournaments (MSL titles), counts of
 MSL World Championships and of clear non-MSL wins, and the highest legacy rank

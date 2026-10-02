@@ -59,7 +59,10 @@ test("the seed adds only missing categories and titles, every value a typed para
   assert.equal(titles.inputs[`tName${index}`], "TOURNAMENT WINNER");
   assert.equal(titles.inputs[`tParams${index}`], '{"min":5}');
   assert.equal(titles.inputs[`tStyle${index}`], "green");
-  assert.equal(titles.inputs[`tLevel${index}`], 5);
+  assert.equal(titles.inputs[`tGroup${index}`], null);
+  const legacy = TITLE_CATALOG.findIndex((title) => title.code === "legacy-legend");
+  assert.equal(titles.inputs[`tGroup${legacy}`], "legacy-rank");
+  assert.equal(titles.inputs[`tLevel${legacy}`], 4);
   const free = TITLE_CATALOG.findIndex((title) => title.code === "og-player");
   assert.equal(titles.inputs[`tParams${free}`], null);
   // 9 parameters per title stay far below SQL Server's 2100 per request.
