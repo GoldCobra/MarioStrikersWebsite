@@ -498,7 +498,8 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await settle(page);
   },
   // A player title looks the same wherever it is shown: the popup's line, the Discord card's line, the
-  // profile's field, and the title dropdown's field and options (one definition, .player-title).
+  // profile's field, and the title dropdown's field and options (one definition, .player-title). The Tourney
+  // Accolades and Season Rewards take its type, and a won MSL World Championship its gold, 1:1.
   "player titles look the same in every view": async (page) => {
     const look = (selector: string) =>
       page
@@ -537,6 +538,15 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     const popup = await look("#player-profile-popup .player-popup-player-title");
     expect(popup).toMatchObject({ spacing: "0.6px", caps: "uppercase", text: "MSL 2025 WORLD CHAMPION", ball: "MSBL" });
     expect(popup.glow).not.toBe("none");
+    const typeOf = ({ font, spacing, caps }: { font: string; spacing: string; caps: string }) => ({
+      font,
+      spacing,
+      caps,
+    });
+    await page.locator("#player-profile-popup .player-popup-accolades-details > summary").click();
+    const champion = await look("#player-profile-popup .player-popup-accolade-name.is-world-champion");
+    expect({ ...champion, text: "", ball: "" }).toEqual({ ...popup, text: "", ball: "" });
+    expect(typeOf(await look("#player-profile-popup .player-popup-accolade-date"))).toEqual(typeOf(popup));
 
     await page.goto("/player-card?player=2");
     await page.locator("html[data-player-card='ready']").waitFor();
@@ -546,6 +556,15 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await page.goto("/profile");
     await settle(page, { eagerImages: true });
     await hideDevNotice(page);
+    await page.locator("#player-profile-page .player-popup-season-awards-details > summary").click();
+    expect(typeOf(await look("#player-profile-page .player-popup-season-award-name"))).toEqual(typeOf(popup));
+    expect(typeOf(await look("#player-profile-page .player-popup-season-award-season"))).toEqual(typeOf(popup));
+    await page.locator("#player-profile-page .player-popup-season-awards-details > summary").click();
+    await page.locator("#player-profile-page .player-popup-accolades-details > summary").click();
+    const plainAccolade = "#player-profile-page .player-popup-accolade-name:not(.is-world-champion)";
+    expect(await look(plainAccolade)).toMatchObject({ ...typeOf(popup), glow: "none" });
+    expect(typeOf(await look("#player-profile-page .player-popup-accolade-date"))).toEqual(typeOf(popup));
+    await page.locator("#player-profile-page .player-popup-accolades-details > summary").click();
     await page.locator("[data-edit-open='title']").click();
     await page.locator("#profile-title-select").click();
     const option = "[role='option'][data-value='msl-2025-world-champion-msbl'] .player-title";

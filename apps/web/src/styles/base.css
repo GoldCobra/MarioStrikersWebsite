@@ -80,17 +80,15 @@ body {
   --game-color-msbl: #ffb5b5;
   --game-color-msc: #ffd8b8;
   --game-color-sms: #b4e9ff;
-  /* One definition of the world champion glow, shared by the title (text-shadow) and its medal
-     (drop-shadow), so the two can never drift apart. The far radius doubles as the breathing
-     room the surrounding boxes have to reserve, which is why --accolade-glow-room derives
-     from it instead of repeating the number. */
-  --accolade-champion-glow-near: 2px;
-  --accolade-champion-glow-mid: 5px;
-  --accolade-champion-glow-far: 10px;
-  --accolade-champion-tint-near: rgba(255, 224, 70, 0.98);
-  --accolade-champion-tint-mid: rgba(255, 205, 40, 0.85);
-  --accolade-champion-tint-far: rgba(255, 170, 20, 0.62);
-  --accolade-glow-room: var(--accolade-champion-glow-far);
+  /* The gold of an MSL WORLD CHAMPION, one definition (owner, 2026-10-02): the player title's look
+     (player-popup.css .is-look-msl-world, N-TIME included) and, 1:1, a won MSL World Championship in the
+     Tourney Accolades, its name (text-shadow) and its medal (drop-shadow) alike (profile.css,
+     rating-cards.css). */
+  --world-champion-color: #ffeb5c;
+  --world-champion-glow: 0 0 6px rgba(255, 148, 0, 0.95);
+  /* Room the accolades' scroll box keeps above and below its rows, so a glowing row at its edge keeps its
+     halo (player-popup.css .player-popup-accolades). */
+  --accolade-glow-room: 10px;
   --tab-content-start-gap: 0.56rem;
   --subnav-reserve-height: 48px;
   --content-box-shell-max-width: 1154px;

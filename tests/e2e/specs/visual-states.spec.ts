@@ -128,6 +128,17 @@ const STATES: VisualState[] = [
     act: (page) => clickAndSettle(page, '.players-name-trigger[data-player-id="5"]'),
   },
   {
+    // Season Rewards and Tourney Accolades open: the entries in the player title's type, the won MSL World
+    // Championship in the title's gold (player 1, a world champion).
+    name: "players-popup-accolades",
+    path: "/players",
+    act: async (page) => {
+      await clickAndSettle(page, '.players-name-trigger[data-player-id="1"]');
+      for (const summary of await page.locator("#player-profile-popup details > summary").all()) await summary.click();
+      await settle(page, { eagerImages: true });
+    },
+  },
+  {
     // The fixture player 4 has no match in the current season, so every rating card is greyed out.
     name: "players-popup-inactive",
     path: "/players",
