@@ -219,9 +219,9 @@
 }
 .player-popup-season-award-season {
   white-space: nowrap;
-  /* letter-spacing is also applied AFTER the last glyph, which pushed the ball 1.33px
-     further right than the gap on its other side; cancel that trailing advance. */
-  margin-right: calc(-1 * var(--reporter-letter-spacing));
+  /* letter-spacing is also applied AFTER the last glyph, which pushed the ball further right than the
+     gap on its other side; cancel that trailing advance (the title type's spacing, player-popup.css). */
+  margin-right: calc(-1 * var(--player-title-letter-spacing));
 }
 .player-popup-season-award-name {
   min-width: 0;
@@ -230,14 +230,10 @@
   white-space: nowrap;
 }
 
-/* Reward and accolade entries read as full caps; the "Season Rewards" / "Tourney Accolades"
-   headings above them stay as written. Done here rather than by upper-casing the strings, so the
-   real text still reaches screen readers, copy/paste and the API. */
-.player-popup-season-award-season,
-.player-popup-season-award-name,
-.player-popup-accolade-name {
-  text-transform: uppercase;
-}
+/* Reward and accolade entries (season, reward, tournament, date) take the player title's type, FULL CAPS
+   included (player-popup.css); the "Season Rewards" / "Tourney Accolades" headings above them stay as
+   written. Upper-cased by CSS rather than in the strings, so the real text still reaches screen readers,
+   copy/paste and the API. */
 
 /* Tournament winners are tinted in their game's colour - first place only, and deliberately
    without a glow: the glow is reserved for the world champion titles below, which is why the
@@ -254,23 +250,18 @@
   color: var(--game-color-sms);
 }
 
-/* Gold at an MSL World Championship is the top honour in the scene, so the title glows.
-   Set by is_world_champion from the backend - see players-service.js. */
+/* Gold at an MSL World Championship is the top honour in the scene, so the title glows: in the colour and
+   glow of the MSL WORLD CHAMPION player title, 1:1 (--world-champion-*, base.css; owner, 2026-10-02).
+   Set by is_world_champion from the backend (players/mappers.ts). */
 .player-popup-accolade-name.is-world-champion {
-  color: #ffed60;
-  text-shadow:
-    0 0 var(--accolade-champion-glow-near) var(--accolade-champion-tint-near),
-    0 0 var(--accolade-champion-glow-mid) var(--accolade-champion-tint-mid),
-    0 0 var(--accolade-champion-glow-far) var(--accolade-champion-tint-far);
+  color: var(--world-champion-color);
+  text-shadow: var(--world-champion-glow);
 }
 
 /* The medal gets the same glow. drop-shadow works off the glyph's alpha channel, so the halo
    follows the medal's outline instead of its box - the same reason the reward icons use it. */
 .player-popup-accolade-medal.is-world-champion {
-  filter:
-    drop-shadow(0 0 var(--accolade-champion-glow-near) var(--accolade-champion-tint-near))
-    drop-shadow(0 0 var(--accolade-champion-glow-mid) var(--accolade-champion-tint-mid))
-    drop-shadow(0 0 var(--accolade-champion-glow-far) var(--accolade-champion-tint-far));
+  filter: drop-shadow(var(--world-champion-glow));
 }
 
 /* An MSL World Champion's profile header (page and popup; isWorldChampion in profile-data.ts) keeps

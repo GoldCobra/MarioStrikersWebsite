@@ -371,18 +371,12 @@
 /* The blanket rule above strips every shadow in the popup, so the world champion glow has to be
    re-asserted here with the same !important escape the reward name uses. */
 :is(#player-profile-popup, #player-profile-page) .player-popup-accolade-name.is-world-champion {
-  color: #ffed60;
-  text-shadow:
-    0 0 var(--accolade-champion-glow-near) var(--accolade-champion-tint-near),
-    0 0 var(--accolade-champion-glow-mid) var(--accolade-champion-tint-mid),
-    0 0 var(--accolade-champion-glow-far) var(--accolade-champion-tint-far) !important;
+  color: var(--world-champion-color);
+  text-shadow: var(--world-champion-glow) !important;
 }
 
 :is(#player-profile-popup, #player-profile-page) .player-popup-accolade-medal.is-world-champion {
-  filter:
-    drop-shadow(0 0 var(--accolade-champion-glow-near) var(--accolade-champion-tint-near))
-    drop-shadow(0 0 var(--accolade-champion-glow-mid) var(--accolade-champion-tint-mid))
-    drop-shadow(0 0 var(--accolade-champion-glow-far) var(--accolade-champion-tint-far)) !important;
+  filter: drop-shadow(var(--world-champion-glow)) !important;
 }
 
 /* The world champion's gold header: the MSL logo's drop shadow (profile.css). */

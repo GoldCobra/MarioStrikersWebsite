@@ -61,20 +61,29 @@ body.player-popup-open {
    card mode), the profile's "Player Title" field and its dropdown's field and options (playerTitleHtml in
    player-profile-view.ts). One definition of its type (--player-title-*: the section titles' face and size,
    a little tighter), its FULL CAPS and its look, so every view shows a title alike.
+   The Tourney Accolades and Season Rewards use the same type for their entries (owner, 2026-10-02): the
+   tournament, its date, the season and the reward read like a title, only in their own colours.
    The look (titles/availability.ts titleLook, titleLookClass in profile-data.ts) is its colour and glow.
    The glows follow the owner's reference images (2026-10-02): the text keeps its colour, a 5-6px blur of a
    deeper shade fades out about 7px from the letters, at 95% (owner, 2026-10-02: "a little stronger" than the
    first 80%; the radius and so the glow's room stay). Free, tournament and legacy titles (and a category
    without a look) are plain grey, without a glow. */
-.player-title {
-  --player-title-glow: none;
-  color: #b6b6b6;
+.player-title,
+.player-popup-accolade-name,
+.player-popup-accolade-date,
+.player-popup-season-award-season,
+.player-popup-season-award-name {
   font-family: var(--reporter-font-stack);
   font-weight: var(--reporter-font-weight);
   font-size: var(--player-title-font-size);
   line-height: var(--field-line-height);
   letter-spacing: var(--player-title-letter-spacing);
   text-transform: uppercase;
+}
+
+.player-title {
+  --player-title-glow: none;
+  color: #b6b6b6;
 }
 
 /* The popup and the profile page strip every shadow inside them (rating-cards.css), so the glow is
@@ -95,8 +104,8 @@ body.player-popup-open {
 }
 
 .player-title.is-look-msl-world {
-  --player-title-glow: 0 0 6px rgba(255, 148, 0, 0.95);
-  color: #ffeb5c;
+  --player-title-glow: var(--world-champion-glow);
+  color: var(--world-champion-color);
 }
 
 .player-title.is-look-msl {
@@ -263,7 +272,6 @@ body.player-popup-open {
 
 .player-popup-accolade-date {
   color: rgba(255, 255, 255, 0.72);
-  font-size: 0.92em;
 }
 
 .player-popup-ratings-grid {
