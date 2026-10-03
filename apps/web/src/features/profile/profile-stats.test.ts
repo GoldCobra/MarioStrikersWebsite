@@ -63,10 +63,10 @@ test("every game has the same ten fields in the owner's order", () => {
   }
 });
 
-test("values: W-L, whole numbers and the win rate with two decimals and a percent sign", () => {
+test("values: W-L, whole numbers and the win rate with one decimal and a percent sign", () => {
   assert.deepEqual(
     statsRows(STATS, "MSBL").map((row) => row.value),
-    ["Gold III", "1187", "14-6", "Platinum II", "1612", "1688", "212-131", "343", "61.80%", "Megastriker"],
+    ["Gold III", "1187", "14-6", "Platinum II", "1612", "1688", "212-131", "343", "61.8%", "Megastriker"],
   );
 });
 
@@ -82,6 +82,17 @@ test("real zeros stay; missing values and a win rate without matches show '-'", 
   const odd = { games: [{ game: "MSC", total_wins: 0, total_losses: 0, total_matches: 0, total_win_percent: 0 }] };
   assert.equal(statsRows(odd, "MSC").find((row) => row.label === "Total Win %")?.value, NO_VALUE);
   assert.equal(statsRows(odd, "MSC").find((row) => row.label === "Total W/L")?.value, "0-0");
+});
+
+test("the win rate keeps its one decimal, also for a whole number", () => {
+  const rate = (total_win_percent: number) =>
+    statsRows({ games: [{ game: "SMS", total_matches: 20, total_win_percent }] }, "SMS").find(
+      (row) => row.label === "Total Win %",
+    )?.value;
+  assert.deepEqual(
+    [rate(65), rate(100), rate(0), rate(50.3), rate(42.9)],
+    ["65.0%", "100.0%", "0.0%", "50.3%", "42.9%"],
+  );
 });
 
 test("three areas, each field with its game's ball, values in grey field boxes", () => {

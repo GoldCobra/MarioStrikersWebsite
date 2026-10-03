@@ -49,7 +49,8 @@ function record(wins: unknown, losses: unknown): string {
 }
 
 function percent(value: unknown): string {
-  return isNumber(value) ? `${value.toFixed(2)}%` : NO_VALUE;
+  // The API rounds half up to one decimal (profile/stats.ts winPercent); always shown with that one decimal.
+  return isNumber(value) ? `${value.toFixed(1)}%` : NO_VALUE;
 }
 
 /** The fields of a game, in the owner's order, as label and shown value. */

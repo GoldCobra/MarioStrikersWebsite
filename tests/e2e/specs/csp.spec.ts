@@ -717,7 +717,7 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
       "1688",
       "212-131",
       "343",
-      "61.81%",
+      "61.8%",
       "Megastriker",
     ]);
     expect(rows.msc.slice(0, 4).map((row) => row.value)).toEqual(["-", "-", "-", "Gold I"]);
@@ -731,7 +731,7 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
       "1101",
       "9-12",
       "21",
-      "42.86%",
+      "42.9%",
       "-",
     ]);
     // The statistics come before Season Rewards and Tourney Accolades, which keep working.

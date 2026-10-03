@@ -49,7 +49,7 @@ test("a player with every value: one area per game, MSBL, MSC, SMS, each value f
     totalWins: 212,
     totalLosses: 131,
     totalMatches: 343,
-    totalWinPercent: 61.81,
+    totalWinPercent: 61.8,
     highestLegacyRank: "Megastriker",
   });
 });
@@ -125,7 +125,7 @@ test("a rated player's real zeros stay zeros; without a match the win rate is un
     [sms.seasonRank, sms.seasonElo, sms.seasonWins, sms.seasonLosses, sms.highestSeasonRank],
     ["Unranked", 500, 0, 0, "Bronze III"],
   );
-  assert.deepEqual([sms.totalWins, sms.totalLosses, sms.totalMatches, sms.totalWinPercent], [9, 12, 21, 42.86]);
+  assert.deepEqual([sms.totalWins, sms.totalLosses, sms.totalMatches, sms.totalWinPercent], [9, 12, 21, 42.9]);
   // Rated (here only a recorded season rank) with an empty record: 0-0, 0 matches and no win rate.
   const msc = game(
     buildProfileStats(
@@ -181,10 +181,15 @@ test("the highest legacy rank follows ROOKIE < PROFESSIONAL < SUPERSTAR < LEGEND
   assert.equal(legacy(0), null);
 });
 
-test("win rate: W / (W + L) × 100 with two decimals", () => {
-  assert.equal(winPercent(1, 2), 33.33);
-  assert.equal(winPercent(2, 1), 66.67);
+test("win rate: W / (W + L) × 100 rounded half up to one decimal", () => {
+  assert.equal(winPercent(1, 2), 33.3);
+  assert.equal(winPercent(2, 1), 66.7);
+  assert.equal(winPercent(212, 131), 61.8);
   assert.equal(winPercent(324, 80), 80.2);
+  assert.equal(winPercent(1, 15), 6.3, "6.25");
+  assert.equal(winPercent(201, 199), 50.3, "50.25, which W / (W + L) × 1000 rounds down");
+  assert.equal(winPercent(203, 197), 50.8, "50.75");
+  assert.equal(winPercent(5, 0), 100);
   assert.equal(winPercent(0, 5), 0);
   assert.equal(winPercent(0, 0), null);
 });
