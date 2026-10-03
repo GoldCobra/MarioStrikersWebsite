@@ -55,7 +55,9 @@ MSC and SMS, each with the same ten read-only fields (season rank, ELO and W-L o
 the active season, highest season rank, current and highest WHR, total W-L,
 matches and win rate, highest legacy rank), the game's ball before each name and
 the value right-aligned in a field box; "-" where a value is missing, a real 0 or
-0-0 as such. The API reads them in one batch for the session's player only
+0-0 as such, but only for a player already rated in that game - a game never
+rated shows "-" throughout. The mouse wheel over the card scrolls the page (the popup
+keeps it inside its own boxes, the page does not). The API reads them in one batch for the session's player only
 (`modules/profile/stats-repository.ts`; `stats.ts` names each value's source and
 rule). The popup, the players page and the Discord card keep their rating cards. Shared popup classes in `src/styles/popups.css` are
 `popup-overlay`, `popup-card`, `popup-header`, `popup-title` and `popup-close`.

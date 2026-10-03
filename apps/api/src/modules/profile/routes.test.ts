@@ -363,7 +363,7 @@ test("/api/profile/me/stats: only the signed-in player's own statistics, never a
     );
     assert.equal(body.games[0]?.total_wins, 4);
     assert.equal(body.games[0].total_win_percent, 80);
-    assert.equal(body.games[1]?.total_wins, null);
+    assert.equal(body.games[1]?.total_wins, null, "MSC never played");
   }
   assert.deepEqual(asked, ["123", "123", "123"]);
 });
@@ -385,7 +385,7 @@ test("/api/profile/me/stats reports an account without a player and duplicate li
   assert.equal(conflict.json<{ code: string }>().code, "PLAYER_PROFILE_CONFLICT");
 });
 
-test("the simulated member's statistics: every value, a game without this season, real zeros", async () => {
+test("the simulated member's statistics: every value, a game without this season, a real 0-0", async () => {
   const { app } = await createTestApp();
   const start = await app.inject("/api/auth/discord/start?returnTo=%2Fprofile");
   const stateCookie = cookiePair(setCookies(start.headers["set-cookie"])[0] ?? "");
@@ -398,14 +398,15 @@ test("the simulated member's statistics: every value, a game without this season
     games.map((game) => [
       game.game,
       game.season_rank,
+      game.season_wins,
       game.total_matches,
       game.total_win_percent,
       game.highest_legacy_rank,
     ]),
     [
-      ["MSBL", "Gold III", 343, 61.81, "Megastriker"],
-      ["MSC", null, 178, 49.44, "Superstar"],
-      ["SMS", "Unranked", 0, null, null],
+      ["MSBL", "Gold III", 14, 343, 61.81, "Megastriker"],
+      ["MSC", null, null, 178, 49.44, "Superstar"],
+      ["SMS", "Unranked", 0, 21, 42.86, null],
     ],
   );
 });

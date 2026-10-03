@@ -312,16 +312,23 @@ function fakeFriendCode(random: () => number, prefix?: string): string {
   return `${prefix ? `${prefix}-` : ""}${block()}-${block()}-${block()}`;
 }
 
+const SAMPLE_STATS_SEASON = [{ Id: 3, DisplayName: "Dusk Season 2026" }];
+
+/** A profile created at login: the current season, never rated - "-" in every field of every game. */
+function newProfileStats(): ProfileStats {
+  return buildProfileStats([SAMPLE_STATS_SEASON]);
+}
+
 /**
  * MY PROFILE's statistics of the signed-in sample member, as the database's result sets would hold them
  * (modules/profile/stats.ts reads them the same way): MSBL with every value, MSC without a match in the
- * current season, SMS with real zeros only (a pre-made 0-0 season row and a 0-0 record, no WHR, no legacy
- * rank). A profile created at login has no data at all.
+ * current season, SMS rated before but not yet in this season (its row carried over at the rollover: Unranked,
+ * 500, a real 0-0) and without a legacy rank. A profile created at login was never rated (newProfileStats).
  */
 function sampleProfileStats(): ProfileStats {
   const rank = (rankNumber: number) => ({ RankNumber: rankNumber, RankName: RANK_NAMES[rankNumber] ?? "" });
   return buildProfileStats([
-    [{ Id: 3, DisplayName: "Dusk Season 2026" }],
+    SAMPLE_STATS_SEASON,
     [
       { GameId: 3, Elo: 1187.42, MatchWins: 14, MatchLosses: 6, ...rank(9) },
       { GameId: 2, Elo: 500, MatchWins: 0, MatchLosses: 0, ...rank(0) },
@@ -329,16 +336,17 @@ function sampleProfileStats(): ProfileStats {
     [
       { GameId: 3, ...rank(11) },
       { GameId: 1, ...rank(7) },
-      { GameId: 2, ...rank(0) },
+      { GameId: 2, ...rank(3) },
     ],
     [
       { GameType: 3, Whr: 1612, MatchWins: 212, MatchLosses: 131 },
       { GameType: 1, Whr: 1404, MatchWins: 88, MatchLosses: 90 },
-      { GameType: 2, Whr: null, MatchWins: 0, MatchLosses: 0 },
+      { GameType: 2, Whr: 1043, MatchWins: 9, MatchLosses: 12 },
     ],
     [
       { GameType: 3, MaxWhr: 1688, Days: 120 },
       { GameType: 1, MaxWhr: 1530, Days: 64 },
+      { GameType: 2, MaxWhr: 1101, Days: 14 },
     ],
     [
       { GameType: 3, Rank: 13, Rank2v2: 0, Singles: 64, Teams: 0 },
@@ -947,7 +955,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
     profiles: createProfileService({ store: profileStore, members }),
     getProfileStatsByDiscordId: (discordId) => {
       if (discordId === linkedUser.id) return Promise.resolve(sampleProfileStats());
-      return Promise.resolve(createdPlayers.has(discordId) ? buildProfileStats([]) : null);
+      return Promise.resolve(createdPlayers.has(discordId) ? newProfileStats() : null);
     },
     getClubProfile: (clubId) => {
       const club = findClub(clubId);
