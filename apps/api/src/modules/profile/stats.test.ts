@@ -54,7 +54,7 @@ test("a player with every value: one area per game, MSBL, MSC, SMS, each value f
   });
 });
 
-test("games are kept apart: a player who played one game has '-' (null) everywhere else", () => {
+test("games are kept apart: a game never played has 0-0 and 0 matches, '-' (null) for everything else", () => {
   const stats = buildProfileStats(
     sets({
       season: SEASON,
@@ -66,13 +66,46 @@ test("games are kept apart: a player who played one game has '-' (null) everywhe
   );
   assert.equal(game(stats, "MSC").seasonElo, 846);
   for (const code of ["MSBL", "SMS"]) {
-    const { game: name, ...values } = game(stats, code);
-    assert.equal(name, code);
-    assert.ok(
-      Object.values(values).every((value) => value === null),
-      code,
-    );
+    assert.deepEqual(game(stats, code), {
+      game: code,
+      seasonRank: null,
+      seasonElo: null,
+      seasonWins: 0,
+      seasonLosses: 0,
+      highestSeasonRank: null,
+      currentWhr: null,
+      highestWhr: null,
+      totalWins: 0,
+      totalLosses: 0,
+      totalMatches: 0,
+      totalWinPercent: null,
+      highestLegacyRank: null,
+    });
   }
+});
+
+test("nothing played looks the same in every game, with or without an empty PlayerStats row", () => {
+  // GoldCobra (live, 2026-10-03): empty rows for MSC (1) and MSBL (3) - MSBL from a 2v2 match - none for SMS.
+  const stats = buildProfileStats(
+    sets({
+      season: SEASON,
+      playerStats: [
+        { GameType: 1, Whr: 1000, MatchWins: 0, MatchLosses: 0 },
+        { GameType: 3, Whr: 1000, MatchWins: 0, MatchLosses: 0 },
+      ],
+    }),
+  );
+  const [msbl, msc, sms] = stats.games;
+  assert.deepEqual(msc, { ...msbl, game: "MSC" });
+  assert.deepEqual(sms, { ...msbl, game: "SMS" });
+  assert.deepEqual(
+    [msbl?.seasonWins, msbl?.seasonLosses, msbl?.totalWins, msbl?.totalLosses, msbl?.totalMatches],
+    [0, 0, 0, 0, 0],
+  );
+  assert.deepEqual(
+    [msbl?.seasonRank, msbl?.seasonElo, msbl?.currentWhr, msbl?.totalWinPercent],
+    [null, null, null, null],
+  );
 });
 
 test("no current season: the season values are missing, never taken from an earlier season", () => {
@@ -86,6 +119,8 @@ test("no current season: the season values are missing, never taken from an earl
   const msbl = game(stats, "MSBL");
   assert.equal(stats.season, "");
   assert.deepEqual([msbl.seasonRank, msbl.seasonElo, msbl.seasonWins, msbl.seasonLosses], [null, null, null, null]);
+  const sms = game(stats, "SMS");
+  assert.deepEqual([sms.seasonWins, sms.seasonLosses], [null, null], "no season, no 0-0 for it either");
   assert.equal(msbl.highestSeasonRank, "Silver III", "the history stays");
 });
 
@@ -192,7 +227,7 @@ test("the player comes from the Discord account; an unlinked account reads nothi
   assert.equal(database.queries.filter((query) => query.sql === buildProfileStatsQuery()).length, 1);
 });
 
-test("the response is snake_case and keeps null for '-'", () => {
+test("the response is snake_case: null for '-', zeros for nothing played", () => {
   const response = toProfileStatsResponse(buildProfileStats(sets({})));
   assert.deepEqual(response.season, "");
   assert.deepEqual((response.games as Record<string, unknown>[])[2], {
@@ -204,9 +239,9 @@ test("the response is snake_case and keeps null for '-'", () => {
     highest_season_rank: null,
     current_whr: null,
     highest_whr: null,
-    total_wins: null,
-    total_losses: null,
-    total_matches: null,
+    total_wins: 0,
+    total_losses: 0,
+    total_matches: 0,
     total_win_percent: null,
     highest_legacy_rank: null,
   });

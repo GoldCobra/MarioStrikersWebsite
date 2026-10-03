@@ -312,16 +312,23 @@ function fakeFriendCode(random: () => number, prefix?: string): string {
   return `${prefix ? `${prefix}-` : ""}${block()}-${block()}-${block()}`;
 }
 
+const SAMPLE_STATS_SEASON = [{ Id: 3, DisplayName: "Dusk Season 2026" }];
+
+/** A profile created at login: the current season, no row anywhere - 0-0 and "-" in every game. */
+function newProfileStats(): ProfileStats {
+  return buildProfileStats([SAMPLE_STATS_SEASON]);
+}
+
 /**
  * MY PROFILE's statistics of the signed-in sample member, as the database's result sets would hold them
  * (modules/profile/stats.ts reads them the same way): MSBL with every value, MSC without a match in the
  * current season, SMS with real zeros only (a pre-made 0-0 season row and a 0-0 record, no WHR, no legacy
- * rank). A profile created at login has no data at all.
+ * rank). A profile created at login has played nothing yet (newProfileStats).
  */
 function sampleProfileStats(): ProfileStats {
   const rank = (rankNumber: number) => ({ RankNumber: rankNumber, RankName: RANK_NAMES[rankNumber] ?? "" });
   return buildProfileStats([
-    [{ Id: 3, DisplayName: "Dusk Season 2026" }],
+    SAMPLE_STATS_SEASON,
     [
       { GameId: 3, Elo: 1187.42, MatchWins: 14, MatchLosses: 6, ...rank(9) },
       { GameId: 2, Elo: 500, MatchWins: 0, MatchLosses: 0, ...rank(0) },
@@ -947,7 +954,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
     profiles: createProfileService({ store: profileStore, members }),
     getProfileStatsByDiscordId: (discordId) => {
       if (discordId === linkedUser.id) return Promise.resolve(sampleProfileStats());
-      return Promise.resolve(createdPlayers.has(discordId) ? buildProfileStats([]) : null);
+      return Promise.resolve(createdPlayers.has(discordId) ? newProfileStats() : null);
     },
     getClubProfile: (clubId) => {
       const club = findClub(clubId);

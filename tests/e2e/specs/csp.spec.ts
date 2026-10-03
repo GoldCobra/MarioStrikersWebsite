@@ -720,7 +720,8 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
       "61.81%",
       "Megastriker",
     ]);
-    expect(rows.msc.slice(0, 4).map((row) => row.value)).toEqual(["-", "-", "-", "Gold I"]);
+    // No match in the current season: no rank or ELO yet, but a real 0-0 (owner, 2026-10-03).
+    expect(rows.msc.slice(0, 4).map((row) => row.value)).toEqual(["-", "-", "0-0", "Gold I"]);
     expect(rows.sms.map((row) => row.value)).toEqual([
       "Unranked",
       "500",
@@ -743,6 +744,18 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
       return follows(stats, rewards) && follows(rewards, accolades);
     });
     expect(order).toBe(true);
+    // The mouse wheel over the profile scrolls the page; only the popup keeps it to itself (owner, 2026-10-03).
+    const viewport = page.viewportSize();
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.evaluate(() => {
+      window.scrollTo(0, 0);
+    });
+    const statsBox = await profile.locator(".profile-stats").boundingBox();
+    if (!statsBox) throw new Error("The statistics are not on the page.");
+    await page.mouse.move(statsBox.x + statsBox.width / 2, Math.min(statsBox.y + 40, 680));
+    await page.mouse.wheel(0, 300);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    if (viewport) await page.setViewportSize(viewport);
     await profile.locator(".player-popup-accolades-details > summary").click();
     await expect(profile.locator(".player-popup-accolade-item").first()).toBeVisible();
 

@@ -363,7 +363,8 @@ test("/api/profile/me/stats: only the signed-in player's own statistics, never a
     );
     assert.equal(body.games[0]?.total_wins, 4);
     assert.equal(body.games[0].total_win_percent, 80);
-    assert.equal(body.games[1]?.total_wins, null);
+    assert.equal(body.games[1]?.total_wins, 0, "MSC never played");
+    assert.equal(body.games[1].total_win_percent, null);
   }
   assert.deepEqual(asked, ["123", "123", "123"]);
 });

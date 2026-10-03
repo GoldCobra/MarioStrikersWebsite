@@ -4,7 +4,7 @@
   "changes": [
     {
       "screenshots": ["states/profile-*"],
-      "reason": "Owner 2026-10-03: on MY PROFILE (/profile) the rating cards are replaced by the member's statistics per game (MSBL, MSC, SMS; ten read-only fields each, the game's ball before each name, values right-aligned in field boxes, '-' where missing), before Season Rewards and Tourney Accolades. Everything above them is unchanged; the page is taller, so its background scales with it. The player popup, the players page and the Discord card are unchanged (their states are equal)."
+      "reason": "Owner 2026-10-03: on MY PROFILE (/profile) the rating cards are replaced by the member's statistics per game (MSBL, MSC, SMS; ten read-only fields each, the game's ball before each name, values right-aligned in field boxes, '-' where missing; a game or season not played yet shows 0-0 and 0 matches, alike in every game), before Season Rewards and Tourney Accolades. Everything above them is unchanged; the page is taller, so its background scales with it. The player popup, the players page and the Discord card are unchanged (their states are equal)."
     },
     {
       "screenshots": ["states/player-card-title*"],

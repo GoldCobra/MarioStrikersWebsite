@@ -2,7 +2,10 @@
 // 2026-10-03). One batch reads everything for one player (stats-repository.ts); buildProfileStats turns its
 // result sets into the fields of the three games (no database code here, so the fixtures use it too). Every value comes from data the site already keeps, all of it 1v1 (the ranked
 // ladder, WHR and the match records are 1v1); a value that is missing or cannot be shown reliably is null
-// (the page shows "-"), a real zero stays zero.
+// (the page shows "-"), a real zero stays zero. Nothing played is such a zero: every rated match of the active
+// season has its rating row and every 1v1 match its PlayerStats row (checked on the live data, 2026-10-03),
+// so without the row the season W-L and the totals are 0-0 - in every game alike, whether or not some other
+// record created an empty row there. Rank, ELO and WHR only exist once played and stay "-" until then.
 //
 //   season rank, ELO, W-L  CompetitivePlayerRating of the active season (IsActive and LifecycleStatus
 //                          'active', like the public rating cards), rank names from CompetitiveRankThreshold
@@ -102,12 +105,13 @@ export function buildProfileStats(recordsets: unknown): ProfileStats {
   const games = TITLE_GAMES.map((game): GameStats => {
     const rating = season ? ratings.get(game.gameType) : undefined;
     const elo = numberOrNull(rating?.Elo);
-    const seasonWins = rating ? numberOrNull(rating.MatchWins) : null;
-    const seasonLosses = rating ? numberOrNull(rating.MatchLosses) : null;
+    // Without a row nothing was played (see the top); a row with an unreadable count stays unknown.
+    const seasonWins = season ? (rating ? numberOrNull(rating.MatchWins) : 0) : null;
+    const seasonLosses = season ? (rating ? numberOrNull(rating.MatchLosses) : 0) : null;
     const best = highest.get(game.gameType);
     const record = stats.get(game.gameType);
-    const totalWins = record ? numberOrNull(record.MatchWins) : null;
-    const totalLosses = record ? numberOrNull(record.MatchLosses) : null;
+    const totalWins = record ? numberOrNull(record.MatchWins) : 0;
+    const totalLosses = record ? numberOrNull(record.MatchLosses) : 0;
     const hasTotals = totalWins !== null && totalLosses !== null;
     const history = whr.get(game.gameType);
     const hasWhr = toSafeCount(history?.Days) > 0;

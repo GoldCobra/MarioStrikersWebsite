@@ -456,6 +456,12 @@ body.player-popup-open {
   max-height: none;
 }
 
+/* The popup keeps the mouse wheel inside these boxes (popups.css); on the page that held the wheel over the
+   whole profile, even where nothing was left to scroll. Here it reaches the page again. */
+#player-profile-page :is(.player-popup-content, .player-popup-accolades) {
+  overscroll-behavior: auto;
+}
+
 /* The template hides its parts with the hidden attribute, which the popup enforces on .popup-overlay
    (popups.css). */
 #player-profile-page [hidden] {
