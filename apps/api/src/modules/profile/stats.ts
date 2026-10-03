@@ -18,7 +18,7 @@
 //                          whole by futbot, so this is its current best day, not a frozen record)
 //   total W-L, matches, %  PlayerStats.MatchWins / MatchLosses: the match records the bots keep, legacy
 //                          reports and the competitive mirrors in one count (CompetitiveWhrSync); draws do
-//                          not count, so matches = W + L and the win % is W / (W + L)
+//                          not count, so matches = W + L and the win % is W / (W + L), one decimal
 //   highest legacy rank    the stored legacy rank (PlayerStats.Rank / Rank2v2) as the legacy rank titles count
 //                          it (titles/rules.ts countedLegacyTier: backed by enough legacy matches before the
 //                          competitive start); the stored rank is the last one, earlier peaks were not kept
@@ -43,7 +43,7 @@ export interface GameStats {
   readonly totalWins: number | null;
   readonly totalLosses: number | null;
   readonly totalMatches: number | null;
-  /** W / (W + L) × 100, rounded to two decimals; null without matches. */
+  /** W / (W + L) × 100, rounded to one decimal; null without matches. */
   readonly totalWinPercent: number | null;
   readonly highestLegacyRank: string | null;
 }
@@ -81,10 +81,13 @@ function byGame(rows: readonly Row[], column: string): Map<number, Row> {
   return new Map(rows.map((row) => [Number(row[column]), row]));
 }
 
-/** W / (W + L) × 100 with two decimals; null when no match counts. */
+/**
+ * W / (W + L) × 100 rounded half up to one decimal (owner, 2026-10-03); null when no match counts. One division
+ * of whole numbers, so an exact half rounds up (201-199 is 50.25 → 50.3, where W / (W + L) × 1000 gives 50.2).
+ */
 export function winPercent(wins: number, losses: number): number | null {
   const matches = wins + losses;
-  return matches > 0 ? Math.round((wins / matches) * 10000) / 100 : null;
+  return matches > 0 ? Math.round((wins * 1000) / matches) / 10 : null;
 }
 
 export function buildProfileStats(recordsets: unknown): ProfileStats {

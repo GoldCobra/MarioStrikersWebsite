@@ -53,7 +53,7 @@ the card grows. Instead of the rating cards it shows the member's statistics per
 game (`features/profile/profile-stats.ts`, `GET /api/profile/me/stats`): MSBL,
 MSC and SMS, each with the same ten read-only fields (season rank, ELO and W-L of
 the active season, highest season rank, current and highest WHR, total W-L,
-matches and win rate, highest legacy rank), the game's ball before each name and
+matches and win rate (one decimal), highest legacy rank), the game's ball before each name and
 the value right-aligned in a field box; "-" where a value is missing, a real 0 or
 0-0 as such, but only for a player already rated in that game - a game never
 rated shows "-" throughout. The mouse wheel over the card scrolls the page (the popup

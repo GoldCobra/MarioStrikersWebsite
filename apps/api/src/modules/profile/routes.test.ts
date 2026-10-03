@@ -404,9 +404,9 @@ test("the simulated member's statistics: every value, a game without this season
       game.highest_legacy_rank,
     ]),
     [
-      ["MSBL", "Gold III", 14, 343, 61.81, "Megastriker"],
-      ["MSC", null, null, 178, 49.44, "Superstar"],
-      ["SMS", "Unranked", 0, 21, 42.86, null],
+      ["MSBL", "Gold III", 14, 343, 61.8, "Megastriker"],
+      ["MSC", null, null, 178, 49.4, "Superstar"],
+      ["SMS", "Unranked", 0, 21, 42.9, null],
     ],
   );
 });
