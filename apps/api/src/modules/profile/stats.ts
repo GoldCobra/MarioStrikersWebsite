@@ -2,10 +2,11 @@
 // 2026-10-03). One batch reads everything for one player (stats-repository.ts); buildProfileStats turns its
 // result sets into the fields of the three games (no database code here, so the fixtures use it too). Every value comes from data the site already keeps, all of it 1v1 (the ranked
 // ladder, WHR and the match records are 1v1); a value that is missing or cannot be shown reliably is null
-// (the page shows "-"), a real zero stays zero. Nothing played is such a zero: every rated match of the active
-// season has its rating row and every 1v1 match its PlayerStats row (checked on the live data, 2026-10-03),
-// so without the row the season W-L and the totals are 0-0 - in every game alike, whether or not some other
-// record created an empty row there. Rank, ELO and WHR only exist once played and stay "-" until then.
+// (the page shows "-"). A game the player was never rated in shows "-" throughout, also where an empty 0-0
+// PlayerStats row exists (a 2v2 match creates one; owner, 2026-10-03: 0-0 and 0 only once really rated). On the
+// live data (2026-10-03) every 0-0 PlayerStats row belonged to a player without any rated 1v1 match, and every
+// 0-0 rating row of the active season to a player rated before (carried over at the rollover); so a real zero
+// of a rated player stays zero, and "rated" = a 1v1 match counted, WHR history or any season rank recorded.
 //
 //   season rank, ELO, W-L  CompetitivePlayerRating of the active season (IsActive and LifecycleStatus
 //                          'active', like the public rating cards), rank names from CompetitiveRankThreshold
@@ -105,16 +106,17 @@ export function buildProfileStats(recordsets: unknown): ProfileStats {
   const games = TITLE_GAMES.map((game): GameStats => {
     const rating = season ? ratings.get(game.gameType) : undefined;
     const elo = numberOrNull(rating?.Elo);
-    // Without a row nothing was played (see the top); a row with an unreadable count stays unknown.
-    const seasonWins = season ? (rating ? numberOrNull(rating.MatchWins) : 0) : null;
-    const seasonLosses = season ? (rating ? numberOrNull(rating.MatchLosses) : 0) : null;
+    const seasonWins = rating ? numberOrNull(rating.MatchWins) : null;
+    const seasonLosses = rating ? numberOrNull(rating.MatchLosses) : null;
     const best = highest.get(game.gameType);
     const record = stats.get(game.gameType);
-    const totalWins = record ? numberOrNull(record.MatchWins) : 0;
-    const totalLosses = record ? numberOrNull(record.MatchLosses) : 0;
-    const hasTotals = totalWins !== null && totalLosses !== null;
+    const totalWins = record ? numberOrNull(record.MatchWins) : null;
+    const totalLosses = record ? numberOrNull(record.MatchLosses) : null;
     const history = whr.get(game.gameType);
     const hasWhr = toSafeCount(history?.Days) > 0;
+    // Rated in this game (see the top); an empty record of a player never rated is no 0-0.
+    const rated = (totalWins ?? 0) + (totalLosses ?? 0) > 0 || hasWhr || best !== undefined;
+    const hasTotals = rated && totalWins !== null && totalLosses !== null;
     const currentWhr = hasWhr ? numberOrNull(record?.Whr) : null;
     const maxWhr = hasWhr ? numberOrNull(history?.MaxWhr) : null;
     const legacyTier = legacy.get(game.gameType) ?? 0;

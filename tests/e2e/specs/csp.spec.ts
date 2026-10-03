@@ -720,18 +720,18 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
       "61.81%",
       "Megastriker",
     ]);
-    // No match in the current season: no rank or ELO yet, but a real 0-0 (owner, 2026-10-03).
-    expect(rows.msc.slice(0, 4).map((row) => row.value)).toEqual(["-", "-", "0-0", "Gold I"]);
+    expect(rows.msc.slice(0, 4).map((row) => row.value)).toEqual(["-", "-", "-", "Gold I"]);
+    // Rated before, nothing played in this season yet: a real 0-0 (owner, 2026-10-03: zeros only once rated).
     expect(rows.sms.map((row) => row.value)).toEqual([
       "Unranked",
       "500",
       "0-0",
-      "Unranked",
-      "-",
-      "-",
-      "0-0",
-      "0",
-      "-",
+      "Bronze III",
+      "1043",
+      "1101",
+      "9-12",
+      "21",
+      "42.86%",
       "-",
     ]);
     // The statistics come before Season Rewards and Tourney Accolades, which keep working.
