@@ -7,6 +7,8 @@ import path from "node:path";
 import { COMPETITIVE_SEASON_KEY, MSBL_CLUBS_KEY, PLAYERS_LIST_KEY } from "../cache/public-data-keys.ts";
 import type { CacheResult } from "../cache/public-data-cache.ts";
 import type { DataSource } from "../data-source.ts";
+import { createMemoryAdminAuditStore } from "../modules/admin/audit.ts";
+import type { AdminAccess } from "../modules/admin/guard.ts";
 import type { DiscordLogin, DiscordOAuthClient } from "../modules/auth/discord-oauth.ts";
 import { SessionManager } from "../modules/auth/session.ts";
 import type { ClubListItem, ClubProfile, RosterRow } from "../modules/clubs/mappers.ts";
@@ -38,6 +40,10 @@ import { TITLE_CATEGORIES, TITLE_CATEGORY, seededCatalog } from "../modules/titl
 
 const DAY_MS = 86_400_000;
 const ASSET_VERSION = "20260608-rank-crop-v1";
+
+/** The admin role and admin page path of fixture mode (the "sample-admin" login holds the role). */
+export const FIXTURE_ADMIN_ROLE = "900000000000000900";
+export const FIXTURE_ADMIN_PATH_TOKEN = "fixture-admin-page-0000000";
 const RANK_NAMES = [
   "Unranked",
   "Bronze I",
@@ -375,9 +381,12 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
     global_name: "Unlinked Sample",
     avatar: "",
   };
+  const adminUser = { id: "900000000000000003", username: "sample_admin", global_name: "Sample Admin", avatar: "" };
   const loginsByCode: Readonly<Record<string, DiscordLogin>> = {
-    sample: { user: linkedUser, nick: "[SMP] Sample Player" },
-    "sample-unlinked": { user: unlinkedUser, nick: "" },
+    sample: { user: linkedUser, nick: "[SMP] Sample Player", roles: [] },
+    "sample-unlinked": { user: unlinkedUser, nick: "", roles: [] },
+    // Holds the fixture admin role: the account menu offers the admin page (docs/adr/0011).
+    "sample-admin": { user: adminUser, nick: "", roles: [FIXTURE_ADMIN_ROLE] },
   };
 
   const clubs: ClubListItem[] = CLUB_DEFS.map(([name, tag, status, region, regions], index) => {
@@ -846,8 +855,16 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
         nick: login.nick,
         username: toText(login.user.username),
         globalName: toText(login.user.global_name),
+        roles: login.roles,
       });
     },
+  };
+
+  // The admin page is always on with fixtures; its path and role are invented and public (never production).
+  const admin: AdminAccess = {
+    settings: { roleIds: [FIXTURE_ADMIN_ROLE], pathToken: FIXTURE_ADMIN_PATH_TOKEN, sessionMaxAgeMs: DAY_MS },
+    members,
+    audit: createMemoryAdminAuditStore(nowFn),
   };
 
   // A profile created at login: nothing in it yet but the name.
@@ -983,6 +1000,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
         { region: "R4QK", friendCode: "0000-0000-0004", name: "Turbo Shell" },
       ]),
     login: { sessions, oauth },
+    admin,
     start: () => undefined,
     stop: () => Promise.resolve(),
   };

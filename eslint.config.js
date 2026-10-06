@@ -6,7 +6,15 @@ import tseslint from "typescript-eslint";
 // Lints TypeScript and the root configs. The legacy browser JavaScript under apps/web/public is ignored
 // until it is rewritten in TypeScript.
 export default defineConfig([
-  globalIgnores(["**/node_modules/", "**/.cache/", "apps/web/public/", "apps/web/dist/", "apps/web/.astro/", "docs/"]),
+  globalIgnores([
+    "**/node_modules/",
+    "**/.cache/",
+    "apps/web/public/",
+    "apps/web/dist/",
+    "apps/web/dist-private/",
+    "apps/web/.astro/",
+    "docs/",
+  ]),
   {
     files: ["*.js"],
     extends: [js.configs.recommended],

@@ -80,6 +80,41 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await page.goto("/profile");
     await settle(page, { eagerImages: true });
   },
+  // The hidden admin page (docs/adr/0011): only the admin's menu offers it, built with the menu (never
+  // added later); everyone else gets the ordinary not-found page at its address.
+  "admin menu entry and admin page": async (page) => {
+    await watchViolations(page);
+    await preparePage(page);
+    const notFound = await page.request.get("/does-not-exist");
+    const missing = await notFound.text();
+    const adminPage = "/_/fixture-admin-page-0000000/";
+
+    await login(page, "linked");
+    await page.goto("/");
+    await settle(page, { eagerImages: true });
+    await page.locator("button.nav-top-login.is-signed-in").click();
+    await expect(page.locator(".global-account-menu-item")).toHaveText(["My Profile", "Logout"]);
+    const refused = await page.request.get(adminPage);
+    expect(refused.status()).toBe(404);
+    expect(await refused.text()).toBe(missing);
+
+    await page.context().clearCookies();
+    await login(page, "admin");
+    await page.goto("/");
+    await settle(page, { eagerImages: true });
+    // The entry is in the menu before it is ever opened.
+    await expect(page.locator(".global-account-menu-item")).toHaveText(["My Profile", "Admin", "Logout"]);
+    await page.locator("button.nav-top-login.is-signed-in").click();
+    await page.locator(".global-account-menu-item", { hasText: "Admin" }).click();
+    await page.waitForURL(`**${adminPage}`);
+    await settle(page, { eagerImages: true });
+    await expect(page.locator("#admin-root")).toHaveAttribute("aria-busy", "false");
+    await expect(page.locator("#admin-root h2")).toHaveText("Admin");
+    await expect(page.locator("#admin-root")).toContainText("Signed in as Sample Admin (sample_admin).");
+    await expect(page.locator("#admin-root")).toContainText("page.open · allowed");
+    await expect(page.locator("head meta[name='robots']")).toHaveAttribute("content", "noindex, nofollow");
+    await expect(page.locator("head link[rel='canonical']")).toHaveCount(0);
+  },
   // Editing in the browser: digits only, whole codes pasted with their leading zeros, the country picked
   // by typing, a new MSC code; every change waits in the draft and SAVE sends them all in one request
   // (once, also on a double click). The save is answered here, so the shared fixture stack keeps its data.

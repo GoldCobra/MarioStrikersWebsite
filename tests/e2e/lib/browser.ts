@@ -158,12 +158,15 @@ export async function hideDevNotice(page: Page): Promise<void> {
   await page.addStyleTag({ content: "#dev-data-notice{display:none!important}" });
 }
 
-// Simulated Discord login: "linked" has a player profile, "unlinked" does not.
-export async function login(page: Page, kind: "linked" | "unlinked"): Promise<void> {
+// Simulated Discord login: "linked" has a player profile, "unlinked" does not, "admin" holds the fixture
+// admin role (docs/adr/0011).
+const LOGIN_CODES = { linked: "sample", unlinked: "sample-unlinked", admin: "sample-admin" } as const;
+
+export async function login(page: Page, kind: keyof typeof LOGIN_CODES): Promise<void> {
   const start = await page.request.get("/api/auth/discord/start?returnTo=/", { maxRedirects: 0 });
   const location = start.headers().location;
   if (!location) throw new Error("Simulated login returned no redirect.");
-  const callback = kind === "unlinked" ? location.replace("code=sample&", "code=sample-unlinked&") : location;
+  const callback = location.replace("code=sample&", `code=${LOGIN_CODES[kind]}&`);
   const response = await page.request.get(callback, { maxRedirects: 0 });
   if (response.status() !== 302) throw new Error(`Simulated login failed with HTTP ${response.status()}`);
 }

@@ -22,6 +22,7 @@ __pycache__/
 *.tsbuildinfo
 # Build output
 apps/web/dist/
+apps/web/dist-private/
 apps/web/.astro/
 
 # Written by scripts/deploy.py for the sitemap dates of a release build.

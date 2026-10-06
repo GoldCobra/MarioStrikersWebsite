@@ -3,7 +3,7 @@
 import dns from "node:dns";
 import net from "node:net";
 
-const SERVICE_VARIABLE = /^(MSSQL_|DISCORD_|SESSION_|PUBLIC_DATA_CACHE_|CLUB_LOGO_|FLARESOLVERR_|AUTH_STATE_)/;
+const SERVICE_VARIABLE = /^(MSSQL_|DISCORD_|SESSION_|PUBLIC_DATA_CACHE_|CLUB_LOGO_|FLARESOLVERR_|AUTH_STATE_|ADMIN_)/;
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "::1", "localhost", "[::1]"]);
 
 /** Removes every credential or service address from the environment. */

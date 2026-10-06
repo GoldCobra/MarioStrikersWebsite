@@ -7,11 +7,16 @@ import type { DataSource } from "./data-source.ts";
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;
 
-/** JSON log lines at the configured level. Cookies and tokens are never logged. */
+/** JSON log lines at the configured level. Cookies, tokens and the admin page's path are never logged. */
 export function createLogger(config: Config): PinoLogger {
   return pino({
     level: config.logLevel,
-    redact: ["req.headers.cookie", "req.headers.authorization", 'res.headers["set-cookie"]'],
+    redact: [
+      "req.headers.cookie",
+      "req.headers.authorization",
+      'req.headers["x-original-uri"]',
+      'res.headers["set-cookie"]',
+    ],
   });
 }
 

@@ -12,6 +12,7 @@ let api: Server;
 let site: Server;
 let base = "";
 let root = "";
+let privateRoot = "";
 
 /** A minimal built site: the files a build writes for two pages, a stylesheet and an asset folder. */
 function writeSite(): string {
@@ -26,6 +27,15 @@ function writeSite(): string {
   return dir;
 }
 
+/** The admin page as the build moves it out of the site (apps/web/integrations/private-pages.ts). */
+function writePrivatePages(): string {
+  const dir = mkdtempSync(join(tmpdir(), "strikers-private-"));
+  mkdirSync(join(dir, "admin", "modules"), { recursive: true });
+  writeFileSync(join(dir, "admin", "index.html"), '<!doctype html><body data-page="admin"></body>');
+  writeFileSync(join(dir, "admin", "modules", "admin.js"), "export {};");
+  return dir;
+}
+
 async function listen(server: Server): Promise<string> {
   server.listen(0, "127.0.0.1");
   await once(server, "listening");
@@ -35,6 +45,14 @@ async function listen(server: Server): Promise<string> {
 before(async () => {
   // Stand-in API that echoes what it received.
   api = createServer((request, response) => {
+    // The admin gate: yes only for the admin cookie and the secret path.
+    if (request.url === "/internal/admin-gate") {
+      const allowed =
+        request.headers.cookie === "admin=yes" && String(request.headers["x-original-uri"]).startsWith("/_/secret/");
+      response.writeHead(allowed ? 204 : 401);
+      response.end();
+      return;
+    }
     let body = "";
     request.on("data", (chunk: Buffer) => (body += chunk.toString()));
     request.on("end", () => {
@@ -44,7 +62,8 @@ before(async () => {
   });
   const apiOrigin = await listen(api);
   root = writeSite();
-  site = createSiteServer({ root, apiOrigin });
+  privateRoot = writePrivatePages();
+  site = createSiteServer({ root, apiOrigin, privateRoot });
   base = await listen(site);
 });
 
@@ -52,6 +71,7 @@ after(() => {
   site.close();
   api.close();
   rmSync(root, { recursive: true, force: true });
+  rmSync(privateRoot, { recursive: true, force: true });
 });
 
 test("pages, assets and redirects follow the production routes", async () => {
@@ -113,4 +133,36 @@ test("/api requests reach the API unchanged, with status, cookies and body", asy
     body: "payload",
     cookie: "session=old",
   });
+});
+
+test("the admin page is served only when the gate says yes; anything else is the ordinary not-found page", async () => {
+  const notFound = await fetch(`${base}/does-not-exist`);
+  const expected = { status: notFound.status, body: await notFound.text() };
+  const admin = { Cookie: "admin=yes" };
+  for (const [path, headers] of [
+    ["/_/secret/", {}],
+    ["/_/secret/", { Cookie: "admin=no" }],
+    ["/_/wrong/", admin],
+    ["/_/secret", admin],
+    ["/_/secret/missing.js", admin],
+    ["/_/secret/../404.html", admin],
+    ["/_/", admin],
+  ] as const) {
+    const response = await fetch(`${base}${path}`, { headers });
+    assert.deepEqual(
+      { status: response.status, body: await response.text() },
+      expected,
+      `${path} ${JSON.stringify(headers)}`,
+    );
+  }
+
+  const page = await fetch(`${base}/_/secret/`, { headers: admin });
+  assert.equal(page.status, 200);
+  assert.match(await page.text(), /data-page="admin"/);
+  assert.equal(page.headers.get("cache-control"), "no-store");
+  assert.equal(page.headers.get("x-robots-tag"), "noindex, nofollow");
+  assert.match(page.headers.get("content-security-policy") ?? "", /default-src 'self'/);
+  const module = await fetch(`${base}/_/secret/modules/admin.js`, { headers: admin });
+  assert.equal(module.status, 200);
+  assert.match(module.headers.get("content-type") ?? "", /javascript/);
 });

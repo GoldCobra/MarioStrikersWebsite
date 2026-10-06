@@ -22,8 +22,17 @@ export const DISCORD_TEST_USER = {
 /** The member's server nickname, as robotic_nightmare's nickname sync writes it for club members. */
 export const DISCORD_TEST_NICK = "[CE] GoldCobra";
 
-/** Discord's three OAuth endpoints; member=false answers the membership check with 404 Unknown Member. */
-export function createFakeDiscordFetch({ member = true } = {}): { fetch: typeof fetch; requests: string[] } {
+/** A role id on the test server that the admin tests configure as the admin role. */
+export const DISCORD_TEST_ADMIN_ROLE = "1070908166725967942";
+
+/**
+ * Discord's three OAuth endpoints; member=false answers the membership check with 404 Unknown Member, roles
+ * are the member's role ids.
+ */
+export function createFakeDiscordFetch({ member = true, roles = [] as readonly string[] } = {}): {
+  fetch: typeof fetch;
+  requests: string[];
+} {
   const requests: string[] = [];
   const json = (body: unknown, status = 200): Response =>
     new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
@@ -42,7 +51,7 @@ export function createFakeDiscordFetch({ member = true } = {}): { fetch: typeof 
     if (url.pathname === "/api/users/@me" && authorized) return json(DISCORD_TEST_USER);
     if (url.pathname === "/api/users/@me/guilds/987654321/member" && authorized) {
       return member
-        ? json({ user: { id: DISCORD_TEST_USER.id }, nick: DISCORD_TEST_NICK, roles: [] })
+        ? json({ user: { id: DISCORD_TEST_USER.id }, nick: DISCORD_TEST_NICK, roles })
         : json({ message: "Unknown Member" }, 404);
     }
     return json({ message: "Not found" }, 404);

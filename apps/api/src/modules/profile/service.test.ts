@@ -74,7 +74,7 @@ interface Harness {
 function harness({
   profile = PROFILE,
   taken = [] as CodeKey[],
-  member = { membership: "member", nick: "[CE] Cobra", username: "goldcobra", globalName: "GoldCobra" },
+  member = { membership: "member", nick: "[CE] Cobra", username: "goldcobra", globalName: "GoldCobra", roles: [] },
   failApply,
 }: { profile?: StoredProfile; taken?: CodeKey[]; member?: GuildMember; failApply?: Error } = {}): Harness {
   const state = { changes: 0 };
@@ -176,7 +176,7 @@ test("names fall back to the login when Discord cannot be asked; a non-member is
   assert.equal(unknown.discord.source, "login");
   assert.equal(unknown.discord.serverName, "Cobra");
   const noNick = await editable(
-    harness({ member: { membership: "member", nick: "", username: "goldcobra", globalName: "" } }),
+    harness({ member: { membership: "member", nick: "", username: "goldcobra", globalName: "", roles: [] } }),
   );
   assert.equal(noNick.discord.serverName, "goldcobra");
   const left = await editable(harness({ member: { ...UNKNOWN_MEMBER, membership: "not_member" } }));

@@ -45,6 +45,19 @@ export interface SessionConfig {
   readonly authStateTtlMs: number;
 }
 
+/** The hidden admin page (modules/admin/). Off unless switched on and complete; see adminConfigProblems. */
+export interface AdminConfig {
+  readonly enabled: boolean;
+  /** Roles on the Discord server (DISCORD_GUILD_ID) that make a member an admin, by id. */
+  readonly roleIds: readonly string[];
+  /** The page's secret path segment: /_/<token>/. */
+  readonly pathToken: string;
+  /** How long a member's roles are trusted before Discord is asked again. */
+  readonly roleCacheTtlMs: number;
+  /** How long after the login a session may open the admin page; then the admin logs in again. */
+  readonly sessionMaxAgeMs: number;
+}
+
 export type LogLevel = "fatal" | "error" | "warn" | "info" | "debug" | "trace" | "silent";
 
 export interface Config {
@@ -77,6 +90,7 @@ export interface Config {
   readonly titleSyncIntervalMs: number;
   readonly discord: DiscordConfig;
   readonly session: SessionConfig;
+  readonly admin: AdminConfig;
   readonly mssql: MssqlConfig;
 }
 
@@ -100,8 +114,20 @@ function readBool(env: Env, name: string, fallback: boolean): boolean {
   return fallback;
 }
 
+/** Comma-separated values without blanks. */
+function readList(env: Env, name: string): string[] {
+  return readString(env, name)
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
 const LOG_LEVELS: readonly LogLevel[] = ["fatal", "error", "warn", "info", "debug", "trace", "silent"];
 const MIN_SESSION_SECRET_LENGTH = 32;
+const DISCORD_SNOWFLAKE = /^\d{17,20}$/;
+// At least 128 random bits in base64url (22 characters).
+const ADMIN_PATH_TOKEN = /^[A-Za-z0-9_-]{22,128}$/;
+const ADMIN_ROLE_CACHE_TTL_MS = { min: 1000, max: 5 * 60 * 1000 };
 
 function readLogLevel(env: Env, fallback: LogLevel): LogLevel {
   const value = readString(env, "LOG_LEVEL", fallback);
@@ -172,6 +198,16 @@ export function loadConfig(env: Env, options: LoadConfigOptions = {}): Config {
       ttlMs: readInt(env, "SESSION_TTL_MS", 7 * 24 * 60 * 60 * 1000),
       authStateTtlMs: readInt(env, "AUTH_STATE_TTL_MS", 10 * 60 * 1000),
     },
+    admin: {
+      enabled: readBool(env, "ADMIN_ENABLED", false),
+      roleIds: readList(env, "ADMIN_ROLE_IDS"),
+      pathToken: readString(env, "ADMIN_PATH_TOKEN"),
+      roleCacheTtlMs: Math.min(
+        Math.max(readInt(env, "ADMIN_ROLE_CACHE_TTL_MS", 60_000), ADMIN_ROLE_CACHE_TTL_MS.min),
+        ADMIN_ROLE_CACHE_TTL_MS.max,
+      ),
+      sessionMaxAgeMs: readInt(env, "ADMIN_SESSION_MAX_AGE_MS", 12 * 60 * 60 * 1000),
+    },
     mssql: {
       host: readString(env, "MSSQL_HOST"),
       port: readInt(env, "MSSQL_PORT", 443),
@@ -215,6 +251,28 @@ export function assertMssqlConfigured(mssql: MssqlConfig): void {
 export function isDiscordLoginConfigured(config: Config): boolean {
   const { discord, session } = config;
   return Boolean(discord.clientId && discord.clientSecret && discord.redirectUri && discord.guildId && session.secret);
+}
+
+/**
+ * What keeps a switched-on admin page off: the settings at fault, by variable name (never a value). The page
+ * needs the login (sessions), the bot token (live role checks), at least one role id and a long random path.
+ */
+export function adminConfigProblems(config: Config): string[] {
+  const { admin, discord } = config;
+  const problems: string[] = [];
+  if (!isDiscordLoginConfigured(config)) problems.push("Discord login (DISCORD_* and SESSION_SECRET)");
+  if (!discord.botToken) problems.push("DISCORD_BOT_TOKEN");
+  if (!admin.roleIds.length || !admin.roleIds.every((id) => DISCORD_SNOWFLAKE.test(id))) {
+    problems.push("ADMIN_ROLE_IDS");
+  }
+  if (!ADMIN_PATH_TOKEN.test(admin.pathToken)) problems.push("ADMIN_PATH_TOKEN");
+  if (!(admin.sessionMaxAgeMs > 0)) problems.push("ADMIN_SESSION_MAX_AGE_MS");
+  return problems;
+}
+
+/** The admin page is on only when switched on and completely configured; anything else keeps it off. */
+export function isAdminConfigured(config: Config): boolean {
+  return config.admin.enabled && adminConfigProblems(config).length === 0;
 }
 
 /** Adds variables from a .env file without overriding the real environment. */

@@ -2,7 +2,7 @@
 // request id and answered generically, so database or configuration details never reach clients.
 // Error responses are never cached.
 
-import type { FastifyError, FastifyInstance } from "fastify";
+import type { FastifyError, FastifyInstance, FastifyReply } from "fastify";
 import { NO_STORE } from "./cache-control.ts";
 
 export class HttpError extends Error {
@@ -22,6 +22,14 @@ export class HttpError extends Error {
 export const badRequest = (message: string): HttpError => new HttpError(400, "BAD_REQUEST", message);
 export const notFound = (message: string): HttpError => new HttpError(404, "NOT_FOUND", message);
 
+/**
+ * The answer for a path no route serves. The admin guard sends exactly this, too, so a refused admin
+ * request cannot be told apart from an unknown path.
+ */
+export function sendNotFound(reply: FastifyReply): FastifyReply {
+  return reply.code(404).header("Cache-Control", NO_STORE).send({ error: "Not found.", code: "NOT_FOUND" });
+}
+
 export function registerErrorHandling(app: FastifyInstance): void {
   app.setErrorHandler((error: FastifyError | HttpError, request, reply) => {
     reply.header("Cache-Control", NO_STORE);
@@ -36,7 +44,5 @@ export function registerErrorHandling(app: FastifyInstance): void {
     request.log.error({ err: error }, "Request failed");
     return reply.code(500).send({ error: "Internal server error.", code: "INTERNAL" });
   });
-  app.setNotFoundHandler((_request, reply) =>
-    reply.code(404).header("Cache-Control", NO_STORE).send({ error: "Not found.", code: "NOT_FOUND" }),
-  );
+  app.setNotFoundHandler((_request, reply) => sendNotFound(reply));
 }

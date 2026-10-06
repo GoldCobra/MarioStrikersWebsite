@@ -490,10 +490,29 @@ export const NOT_FOUND_PAGE: PageDefinition = {
   robots: "noindex, follow",
 };
 
+/**
+ * The hidden admin page (docs/adr/0011). Not a public page: it is built apart from the site (dist-private),
+ * served only behind nginx's admin gate under a secret path, and has no URL, sitemap entry or navigation.
+ */
+export const ADMIN_PAGE: PageDefinition = {
+  slug: "admin",
+  title: "Admin | Mario Strikers Community",
+  description: "Administration of the Mario Strikers Community website.",
+  hiddenHeading: "Admin",
+  robots: "noindex, nofollow",
+};
+
 const PAGES_BY_SLUG = new Map(PAGES.map((page) => [page.slug, page]));
 
 export function findPage(slug: string): PageDefinition | undefined {
   return PAGES_BY_SLUG.get(slug);
+}
+
+/** The definition a document is rendered with: a registered page, the not-found page or the admin page. */
+export function findDocumentPage(slug: string): PageDefinition | undefined {
+  if (slug === NOT_FOUND_PAGE.slug) return NOT_FOUND_PAGE;
+  if (slug === ADMIN_PAGE.slug) return ADMIN_PAGE;
+  return findPage(slug);
 }
 
 export function isIndexable(page: PageDefinition): boolean {
