@@ -58,7 +58,13 @@ node tests/e2e/run.ts routes   # status and Location of all URL shapes (needs RO
   and ball in the popup, on the Discord card, in the profile's field and in its
   dropdown; field values sit in the middle of their boxes, headings are equally
   far from them and an open line is as tall as a closed one; the Discord card is
-  pixel-identical in windows 550 to 1440 px wide.
+  pixel-identical in windows 550 to 1440 px wide. The admin flow signs in as
+  `sample` (two menu entries, the admin address answers like an unknown URL) and
+  as `sample-admin` (ADMIN in the menu, the admin page loads under the policy).
+- **Admin gate (nginx).** The CI `containers` job also signs in against the
+  Docker development stack, so the real nginx `auth_request` is exercised: the
+  admin page opens for `sample-admin` only, and every other request below `/_/`
+  answers byte for byte like an unknown URL.
 - **Save tools.** `specs/save-tools.spec.ts` (run with the contract check)
   drives the MSBL and MSC save editors and the friendlist editor through fixed
   flows on both stacks: loading valid and broken files, every edit, imports and

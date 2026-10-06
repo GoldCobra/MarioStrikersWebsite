@@ -38,6 +38,11 @@ export interface Session {
   discord_user_id: string;
   /** The server nickname at login; sessions from before it was stored have none. */
   guild_nick?: string;
+  /**
+   * Only present (true) when the member held an admin role at login. It lets the admin guard skip everyone
+   * else without asking Discord; the guard still checks the role live, so it grants nothing by itself.
+   */
+  adm?: true;
   issued_at?: number;
   expires_at?: number;
 }
@@ -96,7 +101,7 @@ export class SessionManager {
     });
   }
 
-  createSessionCookie(user: DiscordUser, guildNick = ""): string {
+  createSessionCookie(user: DiscordUser, guildNick = "", { adminCandidate = false } = {}): string {
     const now = this.settings.now();
     const publicUser = toPublicDiscordUser(user);
     const token = createSignedToken(
@@ -104,6 +109,7 @@ export class SessionManager {
         discord_user: publicUser,
         discord_user_id: publicUser.id,
         guild_nick: toText(guildNick).trim(),
+        ...(adminCandidate ? { adm: true } : {}),
         issued_at: now,
         expires_at: now + this.settings.ttlMs,
       },

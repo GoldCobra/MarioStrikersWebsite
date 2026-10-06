@@ -8,6 +8,7 @@ import type { Config } from "./config.ts";
 import type { DataSource } from "./data-source.ts";
 import { HttpError, registerErrorHandling } from "./http/errors.ts";
 import type { RouteContext } from "./http/route-context.ts";
+import { registerAdminRoutes } from "./modules/admin/routes.ts";
 import { registerAuthRoutes } from "./modules/auth/routes.ts";
 import { registerClubRoutes } from "./modules/clubs/routes.ts";
 import { registerEventRoutes } from "./modules/events/routes.ts";
@@ -69,6 +70,7 @@ export async function buildApp({ config, data, loggerInstance }: AppOptions): Pr
   const context: RouteContext = { config, data };
   registerHealthRoutes(app, context);
   registerAuthRoutes(app, context);
+  registerAdminRoutes(app, context);
   registerProfileRoutes(app, context);
   registerLeaderboardRoutes(app, context);
   registerPlayerRoutes(app, context);

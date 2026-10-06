@@ -1,7 +1,8 @@
-// A member's current names on the server, looked up with the bot token. The server nickname changes in
-// Discord (robotic_nightmare's nickname sync rewrites it, too), so the profile editor reads it fresh
-// instead of trusting the login. Answers are cached briefly; without a bot token every member is
-// "unknown" and callers fall back to the names of the login.
+// A member's current names and roles on the server, looked up with the bot token. The server nickname
+// changes in Discord (robotic_nightmare's nickname sync rewrites it, too), so the profile editor reads it
+// fresh instead of trusting the login; the admin guard reads the roles the same way. Answers are cached
+// briefly; without a bot token every member is "unknown" and callers fall back to the names of the login
+// (and never to a role).
 
 import { LRUCache } from "lru-cache";
 import { normalizeText } from "@ms/shared/text";
@@ -15,10 +16,13 @@ export interface GuildMember {
   readonly nick: string;
   readonly username: string;
   readonly globalName: string;
+  /** The member's role ids on the server; none for anyone who is not a member. */
+  readonly roles: readonly string[];
 }
 
 export interface GuildMemberLookup {
-  getMember(discordId: string): Promise<GuildMember>;
+  /** fresh skips the cache (an admin's change must see a role removed a moment ago). */
+  getMember(discordId: string, options?: { readonly fresh?: boolean }): Promise<GuildMember>;
 }
 
 export interface DiscordMemberDirectoryOptions extends DiscordRestOptions {
@@ -29,17 +33,27 @@ export interface DiscordMemberDirectoryOptions extends DiscordRestOptions {
   readonly maxEntries?: number;
 }
 
-export const UNKNOWN_MEMBER: GuildMember = { membership: "unknown", nick: "", username: "", globalName: "" };
+export const UNKNOWN_MEMBER: GuildMember = { membership: "unknown", nick: "", username: "", globalName: "", roles: [] };
+
+/** Role ids as Discord sends them (snowflake strings); anything else is dropped. */
+export function toRoleIds(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((id): id is string => typeof id === "string" && /^\d+$/.test(id)) : [];
+}
 
 /** A Discord answer to GET /guilds/{guild}/members/{user}. */
 export function toGuildMember(ok: boolean, status: number, payload: unknown): GuildMember {
   if (ok) {
-    const member = (payload ?? {}) as { nick?: unknown; user?: { username?: unknown; global_name?: unknown } };
+    const member = (payload ?? {}) as {
+      nick?: unknown;
+      roles?: unknown;
+      user?: { username?: unknown; global_name?: unknown };
+    };
     return {
       membership: "member",
       nick: normalizeText(member.nick),
       username: normalizeText(member.user?.username),
       globalName: normalizeText(member.user?.global_name),
+      roles: toRoleIds(member.roles),
     };
   }
   // 404 is Unknown Member (or Unknown User): not on the server.
@@ -60,9 +74,9 @@ export class DiscordMemberDirectory implements GuildMemberLookup {
     this.cache = new LRUCache({ max: options.maxEntries ?? 2000 });
   }
 
-  async getMember(discordId: string): Promise<GuildMember> {
+  async getMember(discordId: string, { fresh = false }: { readonly fresh?: boolean } = {}): Promise<GuildMember> {
     if (!this.options.botToken || !this.options.guildId || !/^\d+$/.test(discordId)) return UNKNOWN_MEMBER;
-    const cached = this.cache.get(discordId);
+    const cached = fresh ? undefined : this.cache.get(discordId);
     if (cached && cached.expiresAt > Date.now()) return cached.value;
 
     const path = `/guilds/${encodeURIComponent(this.options.guildId)}/members/${encodeURIComponent(discordId)}`;

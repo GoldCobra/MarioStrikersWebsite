@@ -1,9 +1,10 @@
 // Discord OAuth2: the authorize URL, the code exchange and the guild membership check, which also
-// reads the member's server nickname. Login needs scopes "identify" and "guilds.members.read"; every
-// call is bounded by a timeout.
+// reads the member's server nickname and roles. Login needs scopes "identify" and "guilds.members.read";
+// every call is bounded by a timeout.
 
 import { normalizeText } from "@ms/shared/text";
 import type { DiscordConfig } from "../../config.ts";
+import { toRoleIds } from "../../integrations/discord/members.ts";
 import { discordApiUrl } from "../../integrations/discord/rest.ts";
 import type { DiscordUser } from "./session.ts";
 
@@ -22,6 +23,8 @@ export interface DiscordLogin {
   readonly user: DiscordUser;
   /** The member's nickname on the server at login; "" without one. */
   readonly nick: string;
+  /** The member's role ids on the server at login (the admin guard checks them again live). */
+  readonly roles: readonly string[];
 }
 
 export interface DiscordOAuthClient {
@@ -77,8 +80,8 @@ export function createDiscordOAuthClient(discord: DiscordConfig, fetchFn: typeof
       if (!user?.id) throw new Error("Discord user request returned no user id.");
       if (memberResponse.status === 403 || memberResponse.status === 404) throw new NotGuildMemberError();
       if (!memberResponse.ok) throw new Error("Discord guild member request failed.");
-      const member = (await memberResponse.json().catch(() => null)) as { nick?: unknown } | null;
-      return { user, nick: normalizeText(member?.nick) };
+      const member = (await memberResponse.json().catch(() => null)) as { nick?: unknown; roles?: unknown } | null;
+      return { user, nick: normalizeText(member?.nick), roles: toRoleIds(member?.roles) };
     },
   };
 }

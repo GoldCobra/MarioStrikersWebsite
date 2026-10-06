@@ -1,4 +1,5 @@
 import { defineConfig } from "astro/config";
+import { privatePages } from "./integrations/private-pages.ts";
 import { siteRoutes } from "./integrations/site-routes.ts";
 
 export default defineConfig({
@@ -10,7 +11,8 @@ export default defineConfig({
   // Keep the markup byte-for-byte: whitespace between inline elements is visible.
   compressHTML: false,
   devToolbar: { enabled: false },
-  integrations: [siteRoutes()],
+  // privatePages() moves the hidden admin page out of dist/ (docs/adr/0011).
+  integrations: [siteRoutes(), privatePages()],
   vite: {
     // Modules stay separate files, so a Content-Security-Policy can allow scripts by origin.
     build: { assetsInlineLimit: 0 },

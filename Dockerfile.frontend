@@ -21,13 +21,15 @@ ARG RELEASE_SHA=development
 LABEL org.opencontainers.image.revision=$RELEASE_SHA
 
 RUN apk add --no-cache nginx nginx-mod-http-brotli \
-    && mkdir -p /run/nginx /usr/share/nginx/html /etc/nginx/snippets \
+    && mkdir -p /run/nginx /usr/share/nginx/html /usr/share/nginx/private /etc/nginx/snippets \
     && rm -f /etc/nginx/http.d/default.conf \
     && chown -R nginx:nginx /run/nginx /var/lib/nginx /var/log/nginx
 
 WORKDIR /usr/share/nginx/html
 
 COPY --from=build /app/apps/web/dist/ ./
+# The hidden admin page, outside the web root: nginx serves it only behind the admin gate (docs/adr/0011).
+COPY --from=build /app/apps/web/dist-private/ /usr/share/nginx/private/
 COPY infra/nginx/frontend.conf /etc/nginx/http.d/default.conf
 COPY infra/nginx/generated/legacy-routes.conf /etc/nginx/snippets/legacy-routes.conf
 COPY infra/nginx/snippets/document-headers.conf /etc/nginx/snippets/document-headers.conf

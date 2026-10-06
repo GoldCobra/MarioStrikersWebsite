@@ -16,3 +16,4 @@ change a record's status instead of deleting it when it is replaced.
 | [0008](0008-player-titles.md) | Player titles live in the shared database |
 | [0009](0009-per-game-titles-and-test-unlocks.md) | Titles of one game, fixed owners and test unlocks |
 | [0010](0010-shared-fields-dropdown-and-title-type.md) | One field, one dropdown and one title type for every view |
+| [0011](0011-hidden-admin-page.md) | A hidden admin page behind the Discord admin role |

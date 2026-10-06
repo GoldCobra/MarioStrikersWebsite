@@ -11,11 +11,13 @@ import {
 } from "./cache/public-data-keys.ts";
 import { PublicDataCache, type PublicDataSource } from "./cache/public-data-cache.ts";
 import type { Config } from "./config.ts";
-import { isDiscordLoginConfigured } from "./config.ts";
+import { adminConfigProblems, isAdminConfigured, isDiscordLoginConfigured } from "./config.ts";
 import { Database } from "./db/database.ts";
 import { DiscordMemberDirectory } from "./integrations/discord/members.ts";
 import { DiscordUserDirectory } from "./integrations/discord/users.ts";
 import type { Logger } from "./lib/logger.ts";
+import { createSqlAdminAuditStore } from "./modules/admin/audit-repository.ts";
+import type { AdminAccess } from "./modules/admin/guard.ts";
 import { createDiscordOAuthClient, type DiscordOAuthClient } from "./modules/auth/discord-oauth.ts";
 import { SessionManager } from "./modules/auth/session.ts";
 import { ClubLogoCache, type LogoFile } from "./modules/clubs/logo-cache.ts";
@@ -57,6 +59,8 @@ export interface DataSource {
   getWiimmfiPlayers(): Promise<WiimmfiPlayer[]>;
   /** Absent when Discord login is not configured; auth routes then report it as unavailable. */
   readonly login: { readonly sessions: SessionManager; readonly oauth: DiscordOAuthClient } | null;
+  /** Absent unless the admin page is switched on and configured (and the login is); then nobody is an admin. */
+  readonly admin: AdminAccess | null;
   start(): void;
   stop(): Promise<void>;
 }
@@ -141,6 +145,29 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
       }
     : null;
 
+  // The admin page (docs/adr/0011): roles are read with the bot token and trusted for ADMIN_ROLE_CACHE_TTL_MS;
+  // a failed lookup is asked again after at most 15 s and counts as "no admin" meanwhile.
+  const adminProblems = config.admin.enabled ? adminConfigProblems(config) : [];
+  if (adminProblems.length) {
+    log.error({ settings: adminProblems }, "[admin] ADMIN_ENABLED is set, but the admin page stays off");
+  }
+  const admin: AdminAccess | null = isAdminConfigured(config)
+    ? {
+        settings: {
+          roleIds: config.admin.roleIds,
+          pathToken: config.admin.pathToken,
+          sessionMaxAgeMs: config.admin.sessionMaxAgeMs,
+        },
+        members: new DiscordMemberDirectory({
+          ...discordRest,
+          guildId: config.discord.guildId,
+          cacheTtlMs: config.admin.roleCacheTtlMs,
+          failureCacheTtlMs: Math.min(15_000, config.admin.roleCacheTtlMs),
+        }),
+        audit: createSqlAdminAuditStore(database),
+      }
+    : null;
+
   return {
     source: "mssql",
     now: Date.now,
@@ -172,6 +199,7 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     getCommunityEvents: () => events.get(),
     getWiimmfiPlayers: () => wiimmfi.getPlayers(),
     login,
+    admin,
     start() {
       database.startKeepalive();
       publicData.start();

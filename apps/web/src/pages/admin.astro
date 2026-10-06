@@ -1,0 +1,22 @@
+---
+// The hidden admin page (docs/adr/0011). The build moves it and its own modules out of the public site into
+// dist-private/admin/ (integrations/private-pages.ts); nginx serves it only behind the admin gate.
+import SiteLayout from "../layouts/SiteLayout.astro";
+---
+<SiteLayout slug="admin" mainClass="partners-page" mainLabel="Admin">
+    <section id="admin-root" class="partners-root" aria-label="Admin" aria-live="polite" aria-busy="true">
+      <article class="content-box">
+        <div class="content-box-top" aria-hidden="true">
+          <div class="content-box-top-left"></div>
+          <div class="content-box-top-main"></div>
+        </div>
+        <div class="content-box-center">
+          <div class="content-box-texture" aria-hidden="true"></div>
+          <div class="content-box-content competitive-rules" data-admin-content>
+            <p class="profile-loading">Loading the admin overview...</p>
+          </div>
+        </div>
+        <div class="content-box-bottom" aria-hidden="true"></div>
+      </article>
+    </section>
+  <Fragment slot="scripts"><script src="../entries/admin-page.ts"></script></Fragment></SiteLayout>

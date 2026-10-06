@@ -6,7 +6,7 @@
 // and must stay as the hand-written pages had it; the parts Astro would reflow are inserted as strings.
 import { escapeHtml } from "@ms/shared/html";
 import { breadcrumbItems, pageLabel, resolvePageState } from "@ms/shared/site/page-state";
-import { NOT_FOUND_PAGE, canonicalUrl, findPage } from "@ms/shared/site/pages";
+import { canonicalUrl, findDocumentPage, findPage } from "@ms/shared/site/pages";
 import { SITE_NAME, SITE_ORIGIN } from "@ms/shared/site/site";
 import { GLOBAL_CSS_PATH } from "../styles/global.ts";
 import { STYLESHEETS, type StylesheetName } from "./assets.ts";
@@ -27,14 +27,15 @@ const { slug, mainClass, mainLabel, stylesheets = [], jsonLd = [] } = Astro.prop
 // Link previews (rendered by tools/src/render-og-image.ts).
 const SHARE_IMAGE = `${SITE_ORIGIN}/assets/og/mariostrikers-og.jpg`;
 const SHARE_IMAGE_ALT = "Mario Strikers Discord Server logo: Battle League, Charged, Super Mario Strikers";
-const page = slug === NOT_FOUND_PAGE.slug ? NOT_FOUND_PAGE : findPage(slug);
+const page = findDocumentPage(slug);
 if (!page) throw new Error(`Page "${slug}" is not in the page registry.`);
 
 const state = resolvePageState(slug);
 const subNav = renderSubNav(state);
 const breadcrumbs = breadcrumbItems(state, page.breadcrumbName ?? pageLabel(page.title));
-// The not-found page is served at every unknown URL, so it has no URL of its own.
-const canonical = page === NOT_FOUND_PAGE ? undefined : canonicalUrl(slug);
+// Only registered pages have a URL of their own: the not-found page is served at every unknown URL, the
+// admin page under a secret one.
+const canonical = findPage(slug) ? canonicalUrl(slug) : undefined;
 
 // The content tabs follow the hidden page heading, or open <main> when the page has none.
 const heading = page.hiddenHeading ? `\n    <h1 class="visually-hidden">${escapeHtml(page.hiddenHeading)}</h1>` : "";

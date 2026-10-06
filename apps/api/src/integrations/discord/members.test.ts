@@ -36,19 +36,35 @@ test("members are read with their nickname, username and global name", async () 
     nick: "[CE] GoldCobra",
     username: "goldcobra",
     globalName: "GoldCobra",
+    roles: [],
   });
   // A second lookup within the cache time asks Discord nothing.
   await members.getMember(MEMBER);
   assert.deepEqual(requests, [`/api/guilds/${GUILD}/members/${MEMBER}`]);
 });
 
-test("members without a nickname or global name have empty ones", () => {
+test("members are read with their role ids; a fresh lookup skips the cache", async () => {
+  let roles: unknown = ["1070908166725967942", "902508392227176489"];
+  const { members, requests } = directory(() => json({ roles, user: { id: MEMBER, username: "goldcobra" } }));
+  assert.deepEqual((await members.getMember(MEMBER)).roles, ["1070908166725967942", "902508392227176489"]);
+  roles = [];
+  assert.deepEqual((await members.getMember(MEMBER)).roles, ["1070908166725967942", "902508392227176489"]);
+  assert.deepEqual((await members.getMember(MEMBER, { fresh: true })).roles, []);
+  // The fresh answer replaces the cached one.
+  assert.deepEqual((await members.getMember(MEMBER)).roles, []);
+  assert.equal(requests.length, 2);
+});
+
+test("members without a nickname or global name have empty ones; malformed roles are dropped", () => {
   assert.deepEqual(toGuildMember(true, 200, { nick: null, user: { username: "tester", global_name: null } }), {
     membership: "member",
     nick: "",
     username: "tester",
     globalName: "",
+    roles: [],
   });
+  assert.deepEqual(toGuildMember(true, 200, { roles: ["123", 456, "<@&789>", null, "  1 "] }).roles, ["123"]);
+  assert.deepEqual(toGuildMember(true, 200, { roles: "123" }).roles, []);
 });
 
 test("404 means the account is not on the server; other failures are unknown", async () => {

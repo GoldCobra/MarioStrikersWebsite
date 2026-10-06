@@ -17,4 +17,5 @@ docs/archive/
 *.md
 *.yml
 apps/web/dist/
+apps/web/dist-private/
 apps/web/.astro/

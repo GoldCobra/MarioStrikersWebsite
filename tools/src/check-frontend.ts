@@ -1,5 +1,7 @@
 // Checks the built site (apps/web/dist; run npm run build first): browser scripts for syntax errors and
-// every literal local asset reference in its HTML and CSS for a matching file.
+// every literal local asset reference in its HTML and CSS for a matching file. The hidden admin page in
+// apps/web/dist-private (docs/adr/0011) is checked the same way, as nginx serves it under /_/<token>/, and
+// must have left the public site completely; neither output may carry source maps.
 
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -13,6 +15,10 @@ if (!fs.existsSync(path.join(root, "index.html"))) {
   console.error("[frontend] No built site in apps/web/dist; run npm run build first.");
   process.exit(1);
 }
+// The admin page as nginx serves it: /_/<token>/<file> is dist-private/admin/<file>.
+const privateRoot = path.resolve(root, "../dist-private");
+const PRIVATE_PAGE_DIR = path.join(privateRoot, "admin");
+const PRIVATE_PAGE_PATH = "/_/token/";
 const ASSET_EXTENSION = /\.(?:html|css|js|mjs|json|png|jpe?g|gif|webp|avif|svg|ico|woff2?|ttf|otf|mp4|webm|xml)$/i;
 const errors: string[] = [];
 
@@ -24,13 +30,20 @@ function walk(directory: string): string[] {
 }
 
 function relative(file: string): string {
+  const fromPrivate = path.relative(privateRoot, file);
+  if (!fromPrivate.startsWith("..") && !path.isAbsolute(fromPrivate)) {
+    return `dist-private/${fromPrivate.split(path.sep).join("/")}`;
+  }
   return path.relative(root, file).split(path.sep).join("/");
 }
 
 // The URL a browser resolves the file's relative references against. Pages in pages/ are served at
-// /<slug>; fetched fragments are inserted into such a page.
+// /<slug>; fetched fragments are inserted into such a page; the admin page lives under /_/<token>/.
 function servedUrl(file: string): URL {
   const name = relative(file);
+  if (name.startsWith("dist-private/admin/")) {
+    return new URL(PRIVATE_PAGE_PATH + name.slice("dist-private/admin/".length), "https://site.test");
+  }
   if (name.startsWith("pages/templates/")) return new URL("https://site.test/page");
   const page = /^pages\/([a-z\d-]+)\.html$/.exec(name)?.[1];
   return new URL(page ? `/${page}` : `/${name}`, "https://site.test");
@@ -48,21 +61,41 @@ function checkReference(file: string, raw: string): void {
   }
   // Extensionless page URLs and API calls are checked by the route and API tests.
   if (!ASSET_EXTENSION.test(pathname)) return;
-  let target = path.join(root, pathname.slice(1));
+  const inPrivatePage = pathname.startsWith(PRIVATE_PAGE_PATH);
+  const base = inPrivatePage ? PRIVATE_PAGE_DIR : root;
+  let target = inPrivatePage
+    ? path.join(PRIVATE_PAGE_DIR, pathname.slice(PRIVATE_PAGE_PATH.length))
+    : path.join(root, pathname.slice(1));
   // Legacy root HTML page aliases map to physical files in pages/.
-  if (!fs.existsSync(target) && /^\/[a-z\d-]+\.html$/i.test(pathname)) {
+  if (!inPrivatePage && !fs.existsSync(target) && /^\/[a-z\d-]+\.html$/i.test(pathname)) {
     target = path.join(root, "pages", pathname.slice(1));
   }
-  const withinRoot = path.relative(root, target);
+  const withinRoot = path.relative(base, target);
   if (withinRoot.startsWith("..") || path.isAbsolute(withinRoot) || !fs.existsSync(target)) {
     errors.push(`${relative(file)}: missing local asset ${value}`);
   }
 }
 
-// The bundled modules and the Gear Builder snapshot's own scripts.
-const scripts = [...walk(path.join(root, "_astro")), ...walk(path.join(root, "assets/gear-builder"))].filter((file) =>
-  /\.(?:js|mjs)$/.test(file),
-);
+// The admin page has left the public site (apps/web/integrations/private-pages.ts), and nothing the build
+// bundles carries a source map (the Gear Builder snapshot under assets/ is its authors' and left as it is).
+const privateHtml = path.join(PRIVATE_PAGE_DIR, "index.html");
+if (!fs.existsSync(privateHtml)) errors.push("dist-private/admin/index.html: the admin page was not built");
+if (fs.existsSync(path.join(root, "admin.html"))) errors.push("admin.html: the admin page is in the public site");
+const privateFiles = fs.existsSync(privateRoot) ? walk(privateRoot) : [];
+const privateModules = privateFiles.filter((file) => file.endsWith(".js"));
+for (const file of [...walk(path.join(root, "_astro")), ...walk(path.join(root, "css")), ...privateFiles]) {
+  if (file.endsWith(".map")) errors.push(`${relative(file)}: source map`);
+  else if (/\.(?:js|css)$/.test(file) && fs.readFileSync(file, "utf8").includes("sourceMappingURL")) {
+    errors.push(`${relative(file)}: source map reference`);
+  }
+}
+
+// The bundled modules (the admin page's own included) and the Gear Builder snapshot's own scripts.
+const scripts = [
+  ...walk(path.join(root, "_astro")),
+  ...privateModules,
+  ...walk(path.join(root, "assets/gear-builder")),
+].filter((file) => /\.(?:js|mjs)$/.test(file));
 for (const file of scripts) {
   try {
     execFileSync(process.execPath, ["--check", file], { stdio: "pipe" });
@@ -74,6 +107,7 @@ for (const file of scripts) {
 
 const rootPages = fs.readdirSync(root).map((name) => path.join(root, name));
 const htmlFiles = [...rootPages, ...walk(path.join(root, "pages"))].filter((file) => file.endsWith(".html"));
+if (fs.existsSync(privateHtml)) htmlFiles.push(privateHtml);
 const cssFiles = [...walk(path.join(root, "css")), ...walk(path.join(root, "assets/gear-builder"))].filter((file) =>
   file.endsWith(".css"),
 );
@@ -102,7 +136,7 @@ function checkInlineCode(file: string, source: string): void {
   if (INLINE_HANDLER.test(source)) errors.push(`${relative(file)}: inline event handler`);
   if (INLINE_SCRIPT.test(source)) errors.push(`${relative(file)}: inline script`);
 }
-for (const file of walk(path.join(root, "_astro")).filter((name) => name.endsWith(".js"))) {
+for (const file of [...walk(path.join(root, "_astro")), ...privateModules]) {
   if (/\son(?:error|load|click)=\\?["']/.test(fs.readFileSync(file, "utf8"))) {
     errors.push(`${relative(file)}: markup with an inline event handler`);
   }

@@ -102,6 +102,55 @@ jobs:
               assert 'no-store' in response.headers['Cache-Control']
           print('Docker development serves synthetic data, clean routes, templates and uncached assets.')
           PY
+      - name: Admin page only behind nginx's gate (docs/adr/0011)
+        run: |
+          python3 - <<'PY'
+          import http.client, json, re
+          PAGE = '/_/fixture-admin-page-0000000/'
+
+          def get(path, cookie=None):
+              conn = http.client.HTTPConnection('127.0.0.1', 8080, timeout=10)
+              conn.request('GET', path, headers={'Cookie': cookie} if cookie else {})
+              response = conn.getresponse()
+              body = response.read()
+              conn.close()
+              return response, body
+
+          def login(code):
+              start, _ = get('/api/auth/discord/start?returnTo=%2F')
+              state_cookie = start.getheader('Set-Cookie').split(';')[0]
+              callback = start.getheader('Location').replace('code=sample&', 'code=' + code + '&')
+              done, _ = get(callback, state_cookie)
+              assert done.status == 302, (code, done.status)
+              return next(c.split(';')[0] for c in done.msg.get_all('Set-Cookie') if c.startswith('msc_dev_session='))
+
+          not_found, missing = get('/does-not-exist')
+          assert not_found.status == 404
+          def refused(path, cookie=None):
+              response, body = get(path, cookie)
+              assert response.status == 404 and body == missing, (path, response.status)
+              for header in ['Content-Type', 'Cache-Control', 'Content-Security-Policy', 'X-Robots-Tag']:
+                  assert response.getheader(header) == not_found.getheader(header), (path, header)
+
+          admin = login('sample-admin')
+          page, html = get(PAGE, admin)
+          assert page.status == 200 and b'data-page="admin"' in html, page.status
+          assert page.getheader('Cache-Control') == 'no-store' and page.getheader('X-Robots-Tag') == 'noindex, nofollow'
+          module = re.search(rb'src="(modules/[^"]+\.js)"', html).group(1).decode()
+          assert get(PAGE + module, admin)[0].status == 200
+          me = json.loads(get('/api/auth/me', admin)[1])
+          assert me['account_links'] == [{'label': 'Admin', 'href': PAGE}], me
+          assert json.loads(get('/api/admin/overview', admin)[1])['admin']['username'] == 'sample_admin'
+
+          member = login('sample')
+          assert 'account_links' not in json.loads(get('/api/auth/me', member)[1])
+          for cookie in [None, member]:
+              for path in [PAGE, PAGE + module, PAGE + 'index.html', '/_/x/', PAGE[:-1], '/__admin_gate', '/internal/admin-gate']:
+                  refused(path, cookie)
+              response, body = get('/api/admin/overview', cookie)
+              assert response.status == 404 and body == get('/api/no-such-route')[1]
+          print('The admin page opens for the admin only; everyone else gets the ordinary not-found page.')
+          PY
       - name: Install end-to-end tools
         run: |
           npm ci

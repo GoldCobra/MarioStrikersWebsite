@@ -39,6 +39,7 @@ test("identities come from the login or the session", () => {
     identityFromLogin({
       user: { id: " 123 ", username: "tester", global_name: null, avatar: "hash" },
       nick: " Nick ",
+      roles: [],
     }),
     { id: "123", username: "tester", globalName: "", nick: "Nick" },
   );

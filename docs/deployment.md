@@ -144,3 +144,25 @@ them from strictest to laxest against the real database. The backend reads
 `.env` when its container is created, so redeploy the current release after a
 change. Keep this procedure, the CI job names and
 the [GitHub rulesets](github-maintenance.md) aligned.
+
+## Admin page
+
+The hidden admin page ([ADR 0011](adr/0011-hidden-admin-page.md)) ships with every
+release but stays off until `backend/.env` switches it on. Once, before the
+first switch-on, create its audit table (a dry run first):
+
+```sh
+docker exec msc-website-backend node apps/api/src/ops/apply-admin-audit.ts
+docker exec msc-website-backend node apps/api/src/ops/apply-admin-audit.ts --apply
+```
+
+Then back up `backend/.env` and set `ADMIN_ENABLED=true`, `ADMIN_ROLE_IDS` (the
+admin role ids of the server) and `ADMIN_PATH_TOKEN` (generated on the server,
+never shown or committed:
+`node -e "console.log(crypto.randomBytes(24).toString('base64url'))"`), and
+recreate the backend like after any `.env` change. The API logs
+`[admin] ADMIN_ENABLED is set, but the admin page stays off` with the settings
+at fault when something is missing. Admins log in once more, so their session
+carries the role. Check from outside that `/_/<token>/` without a login answers
+exactly like an unknown URL. Off again: `ADMIN_ENABLED=false` and recreate the
+backend; a new path: a new `ADMIN_PATH_TOKEN`.

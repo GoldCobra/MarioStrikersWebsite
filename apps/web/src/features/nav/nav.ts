@@ -130,6 +130,18 @@ function discordAvatarUrl(user: DiscordUser): string {
   return `https://cdn.discordapp.com/avatars/${id}/${encodeURIComponent(avatar)}.png?size=128`;
 }
 
+/** A further menu entry the account carries (/api/auth/me account_links), e.g. a page only some members have. */
+interface AccountLink {
+  readonly label?: string;
+  readonly href?: string;
+}
+
+/** A path on this site, or "" for anything else (another site, a protocol-relative or a script URL). */
+function sameSiteHref(href: unknown): string {
+  const value = typeof href === "string" ? href.trim() : "";
+  return value.startsWith("/") && !value.startsWith("//") && !value.includes("\\") ? value : "";
+}
+
 interface Account {
   /** The login button as the page has it (a link to the Discord login). */
   readonly link: HTMLAnchorElement;
@@ -173,10 +185,11 @@ function logout(account: Account, item: Element): void {
 
 /**
  * Signed in, the login button becomes the account button: the member's avatar covers the login figure,
- * and a click opens the menu (My Profile, Logout). The menu lives in <body>, as the navigation's
- * transform would hold a fixed menu inside the header, which clips it.
+ * and a click opens the menu (My Profile, the account's own links, Logout). The menu lives in <body>, as
+ * the navigation's transform would hold a fixed menu inside the header, which clips it. It is built once,
+ * with every entry, before it can be opened, so no entry appears later.
  */
-function showSignedIn(link: HTMLAnchorElement, user: DiscordUser): void {
+function showSignedIn(link: HTMLAnchorElement, user: DiscordUser, links: readonly AccountLink[]): void {
   const name = (user.global_name || user.username || "your account").trim();
   const button = document.createElement("button");
   button.type = "button";
@@ -204,6 +217,13 @@ function showSignedIn(link: HTMLAnchorElement, user: DiscordUser): void {
   menu.hidden = true;
   menu.innerHTML = [
     '<a class="global-account-menu-item" role="menuitem" href="/profile">My Profile</a>',
+    ...links.flatMap(({ label, href }) => {
+      const path = sameSiteHref(href);
+      const text = typeof label === "string" ? label.trim() : "";
+      return path && text
+        ? [`<a class="global-account-menu-item" role="menuitem" href="${escapeHtml(path)}">${escapeHtml(text)}</a>`]
+        : [];
+    }),
     '<button class="global-account-menu-item" role="menuitem" type="button" data-account-action="logout">Logout</button>',
   ].join("");
   link.replaceWith(button);
@@ -271,10 +291,20 @@ function initAccount(link: HTMLAnchorElement | null): void {
     .then((response) => {
       if (!response.ok) throw new Error("Auth status failed.");
       if (response.headers.get("X-Data-Source") === "fixtures") showFixtureNotice();
-      return response.json() as Promise<{ authenticated?: boolean; user?: DiscordUser } | null>;
+      return response.json() as Promise<{
+        authenticated?: boolean;
+        user?: DiscordUser;
+        account_links?: unknown;
+      } | null>;
     })
     .then((payload) => {
-      if (payload?.authenticated) showSignedIn(link, payload.user ?? {});
+      if (!payload?.authenticated) return;
+      const links: AccountLink[] = Array.isArray(payload.account_links)
+        ? payload.account_links.filter(
+            (entry: unknown): entry is AccountLink => typeof entry === "object" && entry !== null,
+          )
+        : [];
+      showSignedIn(link, payload.user ?? {}, links);
     })
     .catch(() => {
       // The login link stays.

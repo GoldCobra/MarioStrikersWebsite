@@ -114,8 +114,18 @@ The private `/profile` page is excluded from indexing. `/sitemap.xml` is
 generated from the indexable pages of the registry; its `lastmod` is the date the page's
 content last changed, which `scripts/deploy.py` records from the git history
 before the image build (`src/lib/lastmod.ts`). Unknown URLs get the site's
-own not-found page (`src/pages/404.astro`) with status 404, and API responses
-carry `X-Robots-Tag: noindex`.
+own not-found page (`src/pages/404.astro`) with status 404 (never stored), and
+API responses carry `X-Robots-Tag: noindex`.
+
+**Admin page** ([ADR 0011](adr/0011-hidden-admin-page.md)). `src/pages/admin.astro`
+is no registered page (`ADMIN_PAGE` in `pages.ts`, like the not-found page):
+after the build `integrations/private-pages.ts` moves it and the modules only it
+uses (`entries/admin-page.ts`, `features/admin/`) to `apps/web/dist-private/admin/`,
+and `npm run check:frontend` fails when anything of it stays in `dist/`. nginx
+keeps it outside the web root and serves `/_/<token>/` only when the API's
+internal gate says yes (`auth_request`); `tools/src/site-server.ts` does the same
+locally. The fixtures switch it on with an invented path
+(`/_/fixture-admin-page-0000000/`) and the `sample-admin` login.
 
 The global stylesheet is delivered as one minified file named by its content
 hash (`/css/global.<hash>.css`), so browsers cache it for a year and a change
@@ -167,7 +177,8 @@ PARTNERS, `rel="nofollow"`, active on `/profile`), is static and starts the
 login; without a configured login it leads to the profile page's explanation.
 Signed in (`/api/auth/me`), `features/nav/nav.ts` turns it into the account
 button: the member's Discord avatar covers its login figure, and a click opens
-MY PROFILE and LOGOUT. All six buttons stand 1px apart and shrink only where the
+MY PROFILE, the links the account carries (`account_links`: ADMIN for an admin,
+nothing for anyone else) and LOGOUT; the menu is built once, with every entry. All six buttons stand 1px apart and shrink only where the
 row would otherwise reach the logo.
 `/api/profile/me` maps the Discord user to `Player.DiscordID` (unique). A member
 without a player profile gets one at login (`modules/profile/`): one batch locks
@@ -196,6 +207,19 @@ code saved without a platform may stay so, a new or changed one needs it. Saves
 are refused for members who left the server, checked with the bot token
 (`integrations/discord/members.ts`).
 A bot token enables Discord name lookups and event discovery.
+
+**Admins** (`modules/admin/`, [ADR 0011](adr/0011-hidden-admin-page.md)). The login
+keeps the member's server roles and marks the session when one of
+`ADMIN_ROLE_IDS` is among them. `guard.ts` is the one check for the admin page,
+its API and the menu link: a marked session not older than
+`ADMIN_SESSION_MAX_AGE_MS` whose member holds the role now (bot token, cached
+`ADMIN_ROLE_CACHE_TTL_MS`; a change asks without the cache). Anything else, a
+Discord failure included, is no. `/api/admin/*` routes sit in one plugin whose
+first hook is the guard and answer a refusal with the standard 404 (`sendNotFound`,
+no rate limit headers); `/internal/admin-gate` answers nginx (204/401) and is not
+reachable from outside. The audit log is `dbo.WebsiteAdminAudit`
+(`audit-repository.ts`, `npm run ops:admin-audit`). Off unless `ADMIN_ENABLED` and
+complete (`.env.example`).
 
 **Player titles** ([ADR 0008](adr/0008-player-titles.md), [ADR 0009](adr/0009-per-game-titles-and-test-unlocks.md),
 `modules/titles/`).
@@ -297,13 +321,14 @@ All endpoints below use the same origin as the website.
 | GET | `/api/wiimmfi/msc-charged` | Online MSC players |
 | GET | `/api/auth/discord/start?returnTo=/profile` | Begin login |
 | GET | `/api/auth/discord/callback` | Complete login |
-| GET | `/api/auth/me` | Current login state and whether login is available |
+| GET | `/api/auth/me` | Current login state, whether login is available, and an admin's `account_links` |
 | POST | `/api/auth/logout` | Clear session |
 | GET | `/api/profile/me` | Authenticated user's linked profile |
 | POST | `/api/profile/me` | Create the authenticated user's profile when the login could not |
 | GET | `/api/profile/me/editable` | The editor's profile: Discord names, title, country, friend codes, the member's titles, countries |
 | GET | `/api/profile/me/stats` | MY PROFILE's statistics per game (MSBL, MSC, SMS) of the signed-in player; `null` for a value not available |
 | PUT | `/api/profile/me/editable` | Save the editor's title, country and friend codes (JSON, with `version`) |
+| GET | `/api/admin/overview` | Admin only (404 otherwise): the admin, the access window, the latest admin activity |
 | GET | `/api/health` | Service health |
 
 Leaderboard games are `msbl`, `msc` and `sms`; modes are `elo1v1`,

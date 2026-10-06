@@ -67,6 +67,23 @@ test("session cookies round-trip and fail closed", () => {
   assert.deepEqual(SessionManager.toAuthMeResponse(null), { authenticated: false });
 });
 
+test("only an admin candidate's session carries the admin claim; it never reaches /api/auth/me", () => {
+  const manager = createManager();
+  const admin = manager.readSession(
+    cookiePair(manager.createSessionCookie({ id: "123" }, "", { adminCandidate: true })),
+  );
+  assert.equal(admin?.adm, true);
+  assert.equal(JSON.stringify(SessionManager.toAuthMeResponse(admin)).includes("adm"), false);
+  for (const cookie of [
+    manager.createSessionCookie({ id: "123" }),
+    manager.createSessionCookie({ id: "123" }, "", { adminCandidate: false }),
+  ]) {
+    const session = manager.readSession(cookiePair(cookie));
+    assert.equal(session?.discord_user_id, "123");
+    assert.equal(Object.hasOwn(session, "adm"), false);
+  }
+});
+
 test("the session keeps the server nickname of the login", () => {
   const manager = createManager();
   const cookie = manager.createSessionCookie({ id: "123", username: "tester" }, "  [CE] Tester  ");
