@@ -12,28 +12,44 @@
 
 .content-box-list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 5px;
 }
 
+/* The art is drawn for a 1154px box. --content-box-px is one pixel of it: 1px, or from 761px up the
+   box's width / 1154, so a box in a narrower column scales down as a whole, and the header line above
+   it keeps to its shoulder (up to 760px the box has the mobile layout of partners.css/mobile.css). */
 .content-box {
+  --content-box-px: 1px;
   --content-box-native-width: 1154px;
-  --content-box-left-shoulder: 53px;
-  --content-box-main-width: 1102px;
-  --content-box-top-height: 42px;
-  --content-box-bottom-height: 41px;
+  --content-box-left-shoulder: calc(53 * var(--content-box-px));
+  --content-box-main-width: calc(1102 * var(--content-box-px));
+  --content-box-top-height: calc(42 * var(--content-box-px));
+  --content-box-bottom-height: calc(41 * var(--content-box-px));
   --content-box-center-min-height: 200px;
   --content-box-texture-offset-x: 0px;
-  --content-box-texture-offset-y: -20px;
-  --content-box-texture-width: 308px;
-  --content-box-texture-height: 235px;
+  --content-box-texture-offset-y: calc(-20 * var(--content-box-px));
+  --content-box-texture-width: calc(308 * var(--content-box-px));
+  --content-box-texture-height: calc(235 * var(--content-box-px));
   --content-box-bottom-offset-x: 0px;
-  --content-box-bottom-bg-size: 1154px var(--content-box-bottom-height);
   --content-box-content-padding-top: clamp(0.95rem, 1.75vw, 1.2rem);
   --content-box-content-padding-inline: clamp(1.55rem, 2.8vw, 2.35rem);
   --content-box-content-padding-bottom: clamp(1rem, 1.9vw, 1.28rem);
   position: relative;
-  width: var(--content-box-native-width);
+  width: min(var(--content-box-native-width), 100%);
   overflow: visible;
+}
+
+@media (min-width: 761px) {
+  :root {
+    --rules-header-offset-left: min(53px, 100% * 53 / 1154);
+    --rules-header-offset-right: min(18px, 100% * 18 / 1154);
+  }
+
+  .content-box {
+    --content-box-px: calc(100cqw / 1154);
+    container-type: inline-size;
+  }
 }
 
 .content-box-top {
@@ -55,7 +71,7 @@
   background-image: url("../assets/text-boxes/BoxBgTop.png");
   background-repeat: no-repeat;
   background-position: left top;
-  background-size: auto;
+  background-size: 100% 100%;
 }
 
 .content-box-center {
@@ -68,7 +84,7 @@
   background-image: url("../assets/text-boxes/BoxBgCenter.png");
   background-repeat: repeat-y;
   background-position: left top;
-  background-size: auto;
+  background-size: 100% auto;
 }
 
 .content-box-texture {
@@ -81,6 +97,7 @@
   background-image: url("../assets/text-boxes/BoxBgTexture.png");
   background-repeat: no-repeat;
   background-position: left top;
+  background-size: var(--content-box-texture-width) var(--content-box-texture-height);
   pointer-events: none;
 }
 
@@ -103,11 +120,11 @@
 }
 
 .content-box-bottom {
-  width: var(--content-box-native-width);
+  width: 100%;
   height: var(--content-box-bottom-height);
   background-image: url("../assets/text-boxes/BoxBgBottom.png");
   background-repeat: no-repeat;
   background-position: var(--content-box-bottom-offset-x) bottom;
-  background-size: var(--content-box-bottom-bg-size);
+  background-size: 100% 100%;
 }
 
