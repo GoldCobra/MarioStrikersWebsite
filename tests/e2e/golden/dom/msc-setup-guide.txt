@@ -59,6 +59,9 @@
     <div id="global-content-tabs">
       <section class="global-tabs-shell" aria-label="MSC tabs">
         <div class="global-tabs-list">
+          <a class="global-tab" href="/msc-recharged" aria-label="Recharged">
+            #text "RECHARGED"
+          </a>
           <a class="global-tab is-active" href="/msc-setup-guide" aria-label="Setup Guide" aria-current="page">
             #text "SETUP GUIDE"
           </a>

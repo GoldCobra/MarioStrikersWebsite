@@ -825,6 +825,46 @@
     "location": null
   },
   {
+    "path": "/msc-recharged",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/msc-recharged/",
+    "status": 301,
+    "location": "/msc-recharged"
+  },
+  {
+    "path": "/pages/msc-recharged.html",
+    "status": 301,
+    "location": "/msc-recharged"
+  },
+  {
+    "path": "/pages/msc-recharged",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/msc-recharged/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-recharged.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MSC-RECHARGED",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/msc-recharged?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
     "path": "/msc-save-editor",
     "status": 200,
     "location": null

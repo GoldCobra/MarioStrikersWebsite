@@ -29,6 +29,7 @@ export const PAGE_SLUGS = [
   "msc",
   "msc-competitiverules",
   "msc-elo1v1",
+  "msc-recharged",
   "msc-save-editor",
   "msc-setup-guide",
   "msc-tierlist",
