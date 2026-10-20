@@ -57,9 +57,11 @@ Agree on the task before editing shared navigation, global CSS or the same PSD.
    and at most 60 characters), description (120 to 160 characters), hidden
    heading and robots.
 2. Place it in `navigation.ts` if it needs a menu entry or tab.
-3. Create `apps/web/src/pages/pages/<slug>.astro` with `SiteLayout` or a page
-   family from `src/components/pages/`.
-4. Record its markup golden: `node tests/e2e/run.ts dom --update`.
+3. Create `apps/web/src/pages/pages/<slug>.astro` with a page family from
+   `src/components/pages/`; a text page (about, policy, a tab with text) uses
+   `ContentPage`, so it looks and sits exactly like the setup guides.
+4. Record its markup golden: `node tests/e2e/run.ts dom --update`, and add its
+   URL shapes to `tests/e2e/golden/routes.json` (copy a neighbour's block).
 
 Renaming or removing a page keeps its old URL working: add it to
 `packages/shared/src/site/legacy-routes.ts` and run `npm run generate:nginx`.

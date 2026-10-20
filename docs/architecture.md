@@ -8,7 +8,7 @@ in the browser. In `apps/web/`:
 | Location | Purpose |
 | --- | --- |
 | `src/pages/index.astro`, `src/pages/pages/<slug>.astro` | One file per page; built to `/index.html` and `/pages/<slug>.html`, served at `/` and `/<slug>` |
-| `src/components/pages/` | Page families: section overviews, leaderboards, rules and tier lists |
+| `src/components/pages/` | Page families: section overviews, text pages (one box in the setup guide layout), leaderboards, rules and tier lists |
 | `src/layouts/SiteLayout.astro` | The document around every page: head metadata from the page registry, navigation, content tabs, footer, the page's module |
 | `src/layouts/site-shell.ts` | Markup of the navigation, tabs and footer, rendered from the navigation model |
 | `src/content/` | Page content as typed data, rendered at build time: competitive rules, tier lists, Gear Builder characters |

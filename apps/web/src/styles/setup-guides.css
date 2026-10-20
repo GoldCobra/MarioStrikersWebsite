@@ -36,26 +36,10 @@
   transform: none;
 }
 
-.setup-guide-page #msc-setup-guide-root,
-.setup-guide-page #sms-setup-guide-root {
-  display: block;
-  padding-top: 0;
-}
-
-body[data-subnav="off"] .setup-guide-page #msc-setup-guide-root,
-body[data-subnav="off"] .setup-guide-page #sms-setup-guide-root {
-  padding-top: 0;
-}
-
 @supports (content-visibility: auto) {
   .setup-guide-page .setup-guide-section {
     content-visibility: auto;
     contain-intrinsic-size: auto 1080px;
-  }
-
-  .partners-page .partner-guide-card {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 420px;
   }
 }
 

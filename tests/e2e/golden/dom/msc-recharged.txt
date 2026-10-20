@@ -55,7 +55,11 @@
     #text "\n  "
   </div>
   #text "\n\n  "
-  <main class="page-content partners-page">
+  <main class="page-content competitive-rules-page setup-guide-page">
+    #text "\n    "
+    <h1 class="visually-hidden">
+      #text "Recharged: Mario Strikers Charged Native PC Port"
+    </h1>
     <div id="global-content-tabs">
       <section class="global-tabs-shell" aria-label="MSC tabs">
         <div class="global-tabs-list">
@@ -73,50 +77,51 @@
       </section>
     </div>
     #text "\n    "
-    <section class="partners-root" aria-label="Recharged">
+    <section id="msc-recharged-root" aria-label="Recharged">
       #text "\n      "
-      <article class="content-box">
+      <article class="competitive-rules setup-guide-article content-box-list" aria-label="Recharged content">
         #text "\n        "
-        <div class="content-box-top" aria-hidden="true">
+        <section class="content-box cr-section setup-guide-section">
           #text "\n          "
-          <div class="content-box-top-left"/>
-          #text "\n          "
-          <div class="content-box-top-main"/>
-          #text "\n        "
-        </div>
-        #text "\n        "
-        <div class="content-box-center">
-          #text "\n          "
-          <div class="content-box-texture" aria-hidden="true"/>
-          #text "\n          "
-          <div class="content-box-content competitive-rules">
-            #text "\n\n            "
-            <h1 class="about-page-title">
-              #text "Recharged — a native PC port of Mario Strikers Charged"
-            </h1>
-            #text "\n\n            "
-            <p>
-              #text "Play Mario Strikers Charged natively on Windows, Linux, macOS and Steam Deck. Recharged compiles the reconstructed source code of the original Wii game into a real PC program. It is not an emulator: the game's own code runs unchanged, and Recharged supplies what the Wii hardware used to provide: graphics, sound, controllers, disc access and saves."
-            </p>
-            #text "\n\n            "
-            <h3>
-              #text "GitHub / Download"
-            </h3>
-            #text "\n            "
-            <p>
-              <a class="cr-link cr-link-preserve-case" href="https://github.com/previouslevelgames/recharged" target="_blank" rel="noopener noreferrer">
-                #text "github.com/"
-                <wbr/>
-                #text "previouslevelgames/recharged"
-              </a>
-            </p>
-            #text "\n\n          "
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
           </div>
+          #text "\n          "
+          <div class="content-box-center">
+            #text "\n            "
+            <div class="content-box-texture" aria-hidden="true"/>
+            #text "\n            "
+            <div class="content-box-content">
+              #text "\n          "
+              <h2>
+                #text "Recharged — a native PC port of Mario Strikers Charged"
+              </h2>
+              #text "\n          "
+              <p>
+                #text "Play Mario Strikers Charged natively on Windows, Linux, macOS and Steam Deck. Recharged compiles the reconstructed source code of the original Wii game into a real PC program. It is not an emulator: the game's own code runs unchanged, and Recharged supplies what the Wii hardware used to provide: graphics, sound, controllers, disc access and saves."
+              </p>
+              #text "\n          "
+              <h3>
+                #text "GitHub / Download"
+              </h3>
+              #text "\n          "
+              <p>
+                <a class="cr-link cr-link-preserve-case" href="https://github.com/previouslevelgames/recharged" target="_blank" rel="noopener noreferrer">
+                  #text "github.com/"
+                  <wbr/>
+                  #text "previouslevelgames/recharged"
+                </a>
+              </p>
+              #text "\n  "
+            </div>
+            #text "\n          "
+          </div>
+          #text "\n          "
+          <div class="content-box-bottom" aria-hidden="true"/>
           #text "\n        "
-        </div>
-        #text "\n        "
-        <div class="content-box-bottom" aria-hidden="true"/>
-        #text "\n      "
+        </section>
+        #text "\n        \n      "
       </article>
       #text "\n    "
     </section>

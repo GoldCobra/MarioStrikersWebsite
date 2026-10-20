@@ -63,6 +63,7 @@ export const PAGES: readonly PageDefinition[] = [
     title: "About the Mario Strikers Community",
     description:
       "Learn about the fan-run Mario Strikers Community: regular matches, events and tournaments across all Mario Strikers games, and the Mario Strikers League.",
+    hiddenHeading: "About the Mario Strikers Community",
     breadcrumbName: "About Us",
     jsonLd: [
       {
@@ -259,6 +260,7 @@ export const PAGES: readonly PageDefinition[] = [
     title: "Mario Strikers Charged Native PC Port: Recharged (MSC)",
     description:
       "Recharged is a native PC port of Mario Strikers Charged (MSC) for Windows, Linux, macOS and Steam Deck. Not an emulator: the game's own code runs unchanged.",
+    hiddenHeading: "Recharged: Mario Strikers Charged Native PC Port",
     breadcrumbName: "Recharged",
     jsonLd: [
       {
@@ -448,6 +450,7 @@ export const PAGES: readonly PageDefinition[] = [
     title: "Super Mario Strikers Native Multi-Platform Port (SMS)",
     description:
       "Strikers is a native port of Super Mario Strikers (SMS) for Windows, Linux, macOS and Nintendo Switch, with modern display support and configurable controls.",
+    hiddenHeading: "Strikers: Super Mario Strikers Native Multi-Platform Port",
     breadcrumbName: "Strikers (PC Port)",
     jsonLd: [
       {

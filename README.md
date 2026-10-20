@@ -88,7 +88,7 @@ breaks the Content Security Policy.
 | Location | Contents |
 | --- | --- |
 | `packages/shared/src/` | Page registry (`site/pages.ts`), menu model (`site/navigation.ts`), routing and helpers shared by site and API |
-| `apps/web/src/pages/` | One `.astro` file per page; page families (leaderboards, rules, tier lists) in `src/components/pages/` |
+| `apps/web/src/pages/` | One `.astro` file per page; page families (text pages, leaderboards, rules, tier lists) in `src/components/pages/` |
 | `apps/web/src/content/` | Page content kept as typed data: competitive rules, tier lists, Gear Builder characters |
 | `apps/web/src/features/` | Browser code, one folder per feature; `src/entries/` picks the features of each page type |
 | `apps/web/src/styles/` | The global stylesheet as partials named after their component; `global.ts` fixes the order |

@@ -83,15 +83,6 @@ body[data-subnav="off"] .competitive-rules-page #competitive-rules-root {
   filter: drop-shadow(-4px 3px 0 #000);
 }
 
-.competitive-rules .about-page-title {
-  margin-top: 0;
-  font-size: calc(clamp(1.1rem, 1.45vw, 1.45rem) + 2px);
-  color: #fff;
-  -webkit-text-stroke: 2px #000;
-  paint-order: stroke fill;
-  filter: drop-shadow(-3px 2px 0 #000);
-}
-
 .competitive-rules h3 {
   margin-top: 0.95rem;
   font-size: calc(clamp(0.98rem, 1.25vw, 1.2rem) + 2px);

@@ -37,199 +37,200 @@
     #text "\n  "
   </div>
   #text "\n\n  "
-  <main class="page-content partners-page">
+  <main class="page-content competitive-rules-page setup-guide-page">
     #text "\n    "
     <h1 class="visually-hidden">
       #text "Privacy Policy"
     </h1>
     <div id="global-content-tabs"/>
     #text "\n    "
-    <section class="partners-root privacy-policy-root" aria-label="Privacy Policy">
+    <section id="privacy-policy-root" aria-label="Privacy Policy">
       #text "\n      "
-      <article class="content-box">
+      <article class="competitive-rules setup-guide-article content-box-list" aria-label="Privacy Policy content">
         #text "\n        "
-        <div class="content-box-top" aria-hidden="true">
+        <section class="content-box cr-section setup-guide-section">
           #text "\n          "
-          <div class="content-box-top-left"/>
-          #text "\n          "
-          <div class="content-box-top-main"/>
-          #text "\n        "
-        </div>
-        #text "\n        "
-        <div class="content-box-center">
-          #text "\n          "
-          <div class="content-box-texture" aria-hidden="true"/>
-          #text "\n          "
-          <div class="content-box-content competitive-rules">
-            #text "\n\n            "
-            <h2>
-              #text "Privacy Policy"
-            </h2>
-            #text "\n            "
-            <p>
-              #text "This Privacy Policy explains what data Mario Strikers Community collects, how we use it, and your rights. Questions? Reach out via our "
-              <a class="cr-link cr-link-preserve-case" href="https://discord.gg/de2YaWg" target="_blank" rel="noopener noreferrer">
-                #text "Discord"
-              </a>
-              #text "."
-            </p>
-            #text "\n\n            "
-            <h3>
-              #text "What We Display Publicly"
-            </h3>
-            #text "\n            "
-            <ul>
-              #text "\n              "
-              <li>
-                <strong>
-                  #text "Usernames"
-                </strong>
-                #text " - shown on leaderboards and player profiles. Your username may be your real name; please be mindful when choosing it."
-              </li>
-              #text "\n              "
-              <li>
-                <strong>
-                  #text "Country flag"
-                </strong>
-                #text " - shown if you choose to set one. Entirely optional."
-              </li>
-              #text "\n              "
-              <li>
-                <strong>
-                  #text "Friend codes"
-                </strong>
-                #text " - your Switch and Mario Strikers Charged friend codes, shown on your profile if you add them. Entirely optional."
-              </li>
-              #text "\n              "
-              <li>
-                <strong>
-                  #text "Competitive stats"
-                </strong>
-                #text " - ratings, match records, and tournament results linked to your username."
-              </li>
-              #text "\n            "
-            </ul>
-            #text "\n\n            "
-            <h3>
-              #text "What We Collect Internally"
-            </h3>
-            #text "\n            "
-            <p>
-              #text "Beyond publicly visible data, we may process the following for security and operational purposes:"
-            </p>
-            #text "\n            "
-            <ul>
-              #text "\n              "
-              <li>
-                #text "Your IP address and basic browser information - never publicly visible. Used solely to detect and prevent abuse."
-              </li>
-              #text "\n              "
-              <li>
-                #text "If you log in with Discord: your Discord user ID, username, display name and your nickname on our Discord server. We use them to find your player profile, or to create one at your first login. We never receive your Discord password or email address."
-              </li>
-              #text "\n            "
-            </ul>
-            #text "\n            "
-            <p>
-              #text "We do not sell your data or use it for advertising."
-            </p>
-            #text "\n\n            "
-            <h3>
-              #text "Why We Process Your Data"
-            </h3>
-            #text "\n            "
-            <ul>
-              #text "\n              "
-              <li>
-                #text "To operate leaderboards, player profiles, and community features."
-              </li>
-              #text "\n              "
-              <li>
-                #text "To detect and prevent abuse, cheating, and ban circumvention."
-              </li>
-              #text "\n              "
-              <li>
-                #text "To maintain accurate historical tournament and rating records."
-              </li>
-              #text "\n            "
-            </ul>
-            #text "\n\n            "
-            <h3>
-              #text "Legal Basis (GDPR)"
-            </h3>
-            #text "\n            "
-            <p>
-              #text "For users in the EU/EEA and UK, we process data under:"
-            </p>
-            #text "\n            "
-            <ul>
-              #text "\n              "
-              <li>
-                <strong>
-                  #text "Art. 6(1)(b) GDPR"
-                </strong>
-                #text " - necessary to provide the service."
-              </li>
-              #text "\n              "
-              <li>
-                <strong>
-                  #text "Art. 6(1)(f) GDPR"
-                </strong>
-                #text " - legitimate interest in maintaining security and community integrity."
-              </li>
-              #text "\n            "
-            </ul>
-            #text "\n\n            "
-            <h3>
-              #text "Data Retention & Deletion"
-            </h3>
-            #text "\n            "
-            <p>
-              #text "You may request removal of your data at any time via Discord. We reserve the right to retain:"
-            </p>
-            #text "\n            "
-            <ul>
-              #text "\n              "
-              <li>
-                #text "Data necessary to enforce bans and prevent circumvention."
-              </li>
-              #text "\n              "
-              <li>
-                #text "Historical tournament results and rating records, which form part of shared community history."
-              </li>
-              #text "\n            "
-            </ul>
-            #text "\n\n            "
-            <h3>
-              #text "Your Rights"
-            </h3>
-            #text "\n            "
-            <p>
-              #text "You have the right to access, correct, or request deletion of your personal data. Contact us via Discord to exercise these rights."
-            </p>
-            #text "\n\n            "
-            <h3>
-              #text "Cookies"
-            </h3>
-            #text "\n            "
-            <p>
-              #text "We use only strictly necessary cookies for session management and security: when you log in with Discord, a session cookie keeps you logged in for up to 7 days. No advertising or third-party tracking cookies are used."
-            </p>
-            #text "\n\n            "
-            <h3>
-              #text "Changes"
-            </h3>
-            #text "\n            "
-            <p>
-              #text "We may update this policy occasionally. Continued use of the site constitutes acceptance of the current version."
-            </p>
-            #text "\n\n          "
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
           </div>
+          #text "\n          "
+          <div class="content-box-center">
+            #text "\n            "
+            <div class="content-box-texture" aria-hidden="true"/>
+            #text "\n            "
+            <div class="content-box-content">
+              #text "\n          "
+              <h2>
+                #text "Privacy Policy"
+              </h2>
+              #text "\n          "
+              <p>
+                #text "This Privacy Policy explains what data Mario Strikers Community collects, how we use it, and your rights. Questions? Reach out via our "
+                <a class="cr-link cr-link-preserve-case" href="https://discord.gg/de2YaWg" target="_blank" rel="noopener noreferrer">
+                  #text "Discord"
+                </a>
+                #text "."
+              </p>
+              #text "\n          "
+              <h3>
+                #text "What We Display Publicly"
+              </h3>
+              #text "\n          "
+              <ul>
+                #text "\n            "
+                <li>
+                  <strong>
+                    #text "Usernames"
+                  </strong>
+                  #text " - shown on leaderboards and player profiles. Your username may be your real name; please be mindful when choosing it."
+                </li>
+                #text "\n            "
+                <li>
+                  <strong>
+                    #text "Country flag"
+                  </strong>
+                  #text " - shown if you choose to set one. Entirely optional."
+                </li>
+                #text "\n            "
+                <li>
+                  <strong>
+                    #text "Friend codes"
+                  </strong>
+                  #text " - your Switch and Mario Strikers Charged friend codes, shown on your profile if you add them. Entirely optional."
+                </li>
+                #text "\n            "
+                <li>
+                  <strong>
+                    #text "Competitive stats"
+                  </strong>
+                  #text " - ratings, match records, and tournament results linked to your username."
+                </li>
+                #text "\n          "
+              </ul>
+              #text "\n          "
+              <h3>
+                #text "What We Collect Internally"
+              </h3>
+              #text "\n          "
+              <p>
+                #text "Beyond publicly visible data, we may process the following for security and operational purposes:"
+              </p>
+              #text "\n          "
+              <ul>
+                #text "\n            "
+                <li>
+                  #text "Your IP address and basic browser information - never publicly visible. Used solely to detect and prevent abuse."
+                </li>
+                #text "\n            "
+                <li>
+                  #text "If you log in with Discord: your Discord user ID, username, display name and your nickname on our Discord server. We use them to find your player profile, or to create one at your first login. We never receive your Discord password or email address."
+                </li>
+                #text "\n          "
+              </ul>
+              #text "\n          "
+              <p>
+                #text "We do not sell your data or use it for advertising."
+              </p>
+              #text "\n          "
+              <h3>
+                #text "Why We Process Your Data"
+              </h3>
+              #text "\n          "
+              <ul>
+                #text "\n            "
+                <li>
+                  #text "To operate leaderboards, player profiles, and community features."
+                </li>
+                #text "\n            "
+                <li>
+                  #text "To detect and prevent abuse, cheating, and ban circumvention."
+                </li>
+                #text "\n            "
+                <li>
+                  #text "To maintain accurate historical tournament and rating records."
+                </li>
+                #text "\n          "
+              </ul>
+              #text "\n          "
+              <h3>
+                #text "Legal Basis (GDPR)"
+              </h3>
+              #text "\n          "
+              <p>
+                #text "For users in the EU/EEA and UK, we process data under:"
+              </p>
+              #text "\n          "
+              <ul>
+                #text "\n            "
+                <li>
+                  <strong>
+                    #text "Art. 6(1)(b) GDPR"
+                  </strong>
+                  #text " - necessary to provide the service."
+                </li>
+                #text "\n            "
+                <li>
+                  <strong>
+                    #text "Art. 6(1)(f) GDPR"
+                  </strong>
+                  #text " - legitimate interest in maintaining security and community integrity."
+                </li>
+                #text "\n          "
+              </ul>
+              #text "\n          "
+              <h3>
+                #text "Data Retention & Deletion"
+              </h3>
+              #text "\n          "
+              <p>
+                #text "You may request removal of your data at any time via Discord. We reserve the right to retain:"
+              </p>
+              #text "\n          "
+              <ul>
+                #text "\n            "
+                <li>
+                  #text "Data necessary to enforce bans and prevent circumvention."
+                </li>
+                #text "\n            "
+                <li>
+                  #text "Historical tournament results and rating records, which form part of shared community history."
+                </li>
+                #text "\n          "
+              </ul>
+              #text "\n          "
+              <h3>
+                #text "Your Rights"
+              </h3>
+              #text "\n          "
+              <p>
+                #text "You have the right to access, correct, or request deletion of your personal data. Contact us via Discord to exercise these rights."
+              </p>
+              #text "\n          "
+              <h3>
+                #text "Cookies"
+              </h3>
+              #text "\n          "
+              <p>
+                #text "We use only strictly necessary cookies for session management and security: when you log in with Discord, a session cookie keeps you logged in for up to 7 days. No advertising or third-party tracking cookies are used."
+              </p>
+              #text "\n          "
+              <h3>
+                #text "Changes"
+              </h3>
+              #text "\n          "
+              <p>
+                #text "We may update this policy occasionally. Continued use of the site constitutes acceptance of the current version."
+              </p>
+              #text "\n  "
+            </div>
+            #text "\n          "
+          </div>
+          #text "\n          "
+          <div class="content-box-bottom" aria-hidden="true"/>
           #text "\n        "
-        </div>
-        #text "\n        "
-        <div class="content-box-bottom" aria-hidden="true"/>
-        #text "\n      "
+        </section>
+        #text "\n        \n      "
       </article>
       #text "\n    "
     </section>

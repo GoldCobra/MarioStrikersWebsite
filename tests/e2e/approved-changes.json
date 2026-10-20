@@ -38,6 +38,10 @@
         "pages/sms-pc-port-*"
       ],
       "reason": "Owner 2026-10-20: Games > Super Mario Strikers gets a new first tab STRIKERS (PC PORT) (/sms-pc-port) before SETUP GUIDE, so the SMS overview and setup guide show two tabs; the rest of those pages is unchanged. The label is longer than the tab width, so that one tab is wider (tabs now have 0.6em side padding, less than the room every other label already has: no other tab moves). /sms-pc-port is new (the reference shows the not-found page): one content box with the title, the text about the multi-platform port and the GitHub / download link."
+    },
+    {
+      "screenshots": ["pages/about-us-*", "pages/privacy-policy-*"],
+      "reason": "Owner 2026-10-20: every text page has the setup guide layout (ContentPage family, the same markup as the SMS setup guide): About Us and Privacy Policy move from the old About Us box (partners-page, white About Us title) to it, so their box sits, sizes and wraps like a setup guide's at every width and the About Us title is a setup guide heading. Their text is unchanged."
     }
   ]
 }

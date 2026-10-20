@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { advance, hideDevNotice, login, preparePage, settle } from "../lib/browser.ts";
 import { MSBL_SAVE, MSC_SAVE_PAL, buildOnlineFile } from "../lib/save-files.ts";
-import { DOM_WIDTH, PAGE_SLUGS, pagePath } from "../lib/site.ts";
+import { DOM_WIDTH, PAGE_SLUGS, STATE_WIDTHS, pagePath } from "../lib/site.ts";
 
 // The Content Security Policy of infra/nginx/snippets/document-headers.conf, which the local site server
 // sends too: no page and no interaction may trip it. Violations fire as events whether the policy is
@@ -811,6 +811,30 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await expect(page.locator(".profile-stats")).toHaveCount(0);
     expect(asked).toBe(0);
     await settle(page);
+  },
+  "content tabs sit at the same height on every page that has them": async (page) => {
+    await open(page, pagePath("index"));
+    /** The first content tab's top edge and height, or "" on a page without content tabs. */
+    const tabPlace = async (slug: string) => {
+      await page.goto(pagePath(slug));
+      return page.evaluate(async () => {
+        await document.fonts.ready;
+        const tab = document.querySelector("#global-content-tabs .global-tab")?.getBoundingClientRect();
+        return tab ? `top ${tab.top.toFixed(1)}, height ${tab.height.toFixed(1)}` : "";
+      });
+    };
+    let tabbed: readonly string[] = PAGE_SLUGS;
+    for (const width of STATE_WIDTHS) {
+      await page.setViewportSize({ width, height: 900 });
+      const places = new Map<string, string[]>();
+      for (const slug of tabbed) {
+        const place = await tabPlace(slug);
+        if (place) places.set(place, [...(places.get(place) ?? []), slug]);
+      }
+      tabbed = [...places.values()].flat();
+      expect(tabbed.length).toBeGreaterThan(1);
+      expect([...places], `the tab strip at ${width}px`).toHaveLength(1);
+    }
   },
   "the Discord card looks the same in any window": async (page) => {
     await open(page, "/player-card?player=2");

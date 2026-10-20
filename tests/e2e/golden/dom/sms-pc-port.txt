@@ -55,7 +55,11 @@
     #text "\n  "
   </div>
   #text "\n\n  "
-  <main class="page-content partners-page">
+  <main class="page-content competitive-rules-page setup-guide-page">
+    #text "\n    "
+    <h1 class="visually-hidden">
+      #text "Strikers: Super Mario Strikers Native Multi-Platform Port"
+    </h1>
     <div id="global-content-tabs">
       <section class="global-tabs-shell" aria-label="SMS tabs">
         <div class="global-tabs-list">
@@ -70,50 +74,51 @@
       </section>
     </div>
     #text "\n    "
-    <section class="partners-root" aria-label="Strikers (PC Port)">
+    <section id="sms-pc-port-root" aria-label="Strikers (PC Port)">
       #text "\n      "
-      <article class="content-box">
+      <article class="competitive-rules setup-guide-article content-box-list" aria-label="Strikers (PC Port) content">
         #text "\n        "
-        <div class="content-box-top" aria-hidden="true">
+        <section class="content-box cr-section setup-guide-section">
           #text "\n          "
-          <div class="content-box-top-left"/>
-          #text "\n          "
-          <div class="content-box-top-main"/>
-          #text "\n        "
-        </div>
-        #text "\n        "
-        <div class="content-box-center">
-          #text "\n          "
-          <div class="content-box-texture" aria-hidden="true"/>
-          #text "\n          "
-          <div class="content-box-content competitive-rules">
-            #text "\n\n            "
-            <h1 class="about-page-title">
-              #text "A native multi-platform port of Super Mario Strikers"
-            </h1>
-            #text "\n\n            "
-            <p>
-              #text "Super Mario Strikers, rebuilt to run natively on Windows, Linux, macOS and Nintendo Switch, with modern display support, configurable controls and a focus on performance across both powerful and low-power hardware."
-            </p>
-            #text "\n\n            "
-            <h3>
-              #text "GitHub / Download"
-            </h3>
-            #text "\n            "
-            <p>
-              <a class="cr-link cr-link-preserve-case" href="https://github.com/new-coke/strikers" target="_blank" rel="noopener noreferrer">
-                #text "github.com/"
-                <wbr/>
-                #text "new-coke/strikers"
-              </a>
-            </p>
-            #text "\n\n          "
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
           </div>
+          #text "\n          "
+          <div class="content-box-center">
+            #text "\n            "
+            <div class="content-box-texture" aria-hidden="true"/>
+            #text "\n            "
+            <div class="content-box-content">
+              #text "\n          "
+              <h2>
+                #text "A native multi-platform port of Super Mario Strikers"
+              </h2>
+              #text "\n          "
+              <p>
+                #text "Super Mario Strikers, rebuilt to run natively on Windows, Linux, macOS and Nintendo Switch, with modern display support, configurable controls and a focus on performance across both powerful and low-power hardware."
+              </p>
+              #text "\n          "
+              <h3>
+                #text "GitHub / Download"
+              </h3>
+              #text "\n          "
+              <p>
+                <a class="cr-link cr-link-preserve-case" href="https://github.com/new-coke/strikers" target="_blank" rel="noopener noreferrer">
+                  #text "github.com/"
+                  <wbr/>
+                  #text "new-coke/strikers"
+                </a>
+              </p>
+              #text "\n  "
+            </div>
+            #text "\n          "
+          </div>
+          #text "\n          "
+          <div class="content-box-bottom" aria-hidden="true"/>
           #text "\n        "
-        </div>
-        #text "\n        "
-        <div class="content-box-bottom" aria-hidden="true"/>
-        #text "\n      "
+        </section>
+        #text "\n        \n      "
       </article>
       #text "\n    "
     </section>

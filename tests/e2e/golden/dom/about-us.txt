@@ -37,65 +37,70 @@
     #text "\n  "
   </div>
   #text "\n\n  "
-  <main class="page-content partners-page">
+  <main class="page-content competitive-rules-page setup-guide-page">
+    #text "\n    "
+    <h1 class="visually-hidden">
+      #text "About the Mario Strikers Community"
+    </h1>
     <div id="global-content-tabs"/>
     #text "\n    "
-    <section class="partners-root" aria-label="About Us">
+    <section id="about-us-root" aria-label="About Us">
       #text "\n      "
-      <article class="content-box">
+      <article class="competitive-rules setup-guide-article content-box-list" aria-label="About Us content">
         #text "\n        "
-        <div class="content-box-top" aria-hidden="true">
+        <section class="content-box cr-section setup-guide-section">
           #text "\n          "
-          <div class="content-box-top-left"/>
-          #text "\n          "
-          <div class="content-box-top-main"/>
-          #text "\n        "
-        </div>
-        #text "\n        "
-        <div class="content-box-center">
-          #text "\n          "
-          <div class="content-box-texture" aria-hidden="true"/>
-          #text "\n          "
-          <div class="content-box-content competitive-rules">
-            #text "\n\n            "
-            <h1 class="about-page-title">
-              #text "About Us"
-            </h1>
-            #text "\n\n            "
-            <h3>
-              #text "What We Offer"
-            </h3>
-            #text "\n            "
-            <p>
-              #text "Welcome to our Mario Strikers community!"
-            </p>
-            #text "\n            "
-            <p>
-              #text "Here you can meet other fans, talk about everything related to the series, find regular matches, and join events and tournaments across all Mario Strikers games."
-            </p>
-            #text "\n            "
-            <p>
-              #text "We also run the Mario Strikers League, where players compete to climb the ranks and become one of the greatest Strikers of all time."
-            </p>
-            #text "\n            "
-            <p>
-              #text "Whether you're here to play casually, improve your skills, or compete at the highest level - you're welcome to join the fun!"
-            </p>
-            #text "\n\n            "
-            <h3>
-              #text "Copyright & Trademarks"
-            </h3>
-            #text "\n            "
-            <p>
-              #text "Mario Strikers and related trademarks are the property of Nintendo. Mario Strikers Community is an independent, fan-run community and is not endorsed by or affiliated with Nintendo in any way."
-            </p>
-            #text "\n\n          "
+          <div class="content-box-top" aria-hidden="true">
+            <div class="content-box-top-left"/>
+            <div class="content-box-top-main"/>
           </div>
+          #text "\n          "
+          <div class="content-box-center">
+            #text "\n            "
+            <div class="content-box-texture" aria-hidden="true"/>
+            #text "\n            "
+            <div class="content-box-content">
+              #text "\n          "
+              <h2>
+                #text "About Us"
+              </h2>
+              #text "\n          "
+              <h3>
+                #text "What We Offer"
+              </h3>
+              #text "\n          "
+              <p>
+                #text "Welcome to our Mario Strikers community!"
+              </p>
+              #text "\n          "
+              <p>
+                #text "Here you can meet other fans, talk about everything related to the series, find regular matches, and join events and tournaments across all Mario Strikers games."
+              </p>
+              #text "\n          "
+              <p>
+                #text "We also run the Mario Strikers League, where players compete to climb the ranks and become one of the greatest Strikers of all time."
+              </p>
+              #text "\n          "
+              <p>
+                #text "Whether you're here to play casually, improve your skills, or compete at the highest level - you're welcome to join the fun!"
+              </p>
+              #text "\n          "
+              <h3>
+                #text "Copyright & Trademarks"
+              </h3>
+              #text "\n          "
+              <p>
+                #text "Mario Strikers and related trademarks are the property of Nintendo. Mario Strikers Community is an independent, fan-run community and is not endorsed by or affiliated with Nintendo in any way."
+              </p>
+              #text "\n  "
+            </div>
+            #text "\n          "
+          </div>
+          #text "\n          "
+          <div class="content-box-bottom" aria-hidden="true"/>
           #text "\n        "
-        </div>
-        #text "\n        "
-        <div class="content-box-bottom" aria-hidden="true"/>
-        #text "\n      "
+        </section>
+        #text "\n        \n      "
       </article>
       #text "\n    "
     </section>
