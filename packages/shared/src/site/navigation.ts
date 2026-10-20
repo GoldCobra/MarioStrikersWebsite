@@ -132,6 +132,11 @@ export const SECTION_MODELS: Readonly<Record<"games" | "competitive" | "players"
         slug: "msc",
         children: [
           {
+            key: "recharged",
+            label: "Recharged",
+            slug: "msc-recharged",
+          },
+          {
             key: "setup-guide",
             label: "Setup Guide",
             slug: "msc-setup-guide",
@@ -304,6 +309,11 @@ export const PAGE_CONTEXT_MAP: Readonly<Record<string, PageContext>> = {
   sms: {
     topKey: "games",
     secondKey: "sms",
+  },
+  "msc-recharged": {
+    topKey: "games",
+    secondKey: "msc",
+    leafKey: "recharged",
   },
   "msc-setup-guide": {
     topKey: "games",

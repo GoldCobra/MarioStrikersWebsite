@@ -255,6 +255,26 @@ export const PAGES: readonly PageDefinition[] = [
     hiddenHeading: "Mario Strikers Charged 1v1 ELO Rankings",
   },
   {
+    slug: "msc-recharged",
+    title: "Mario Strikers Charged Native PC Port: Recharged (MSC)",
+    description:
+      "Recharged is a native PC port of Mario Strikers Charged (MSC) for Windows, Linux, macOS and Steam Deck. Not an emulator: the game's own code runs unchanged.",
+    breadcrumbName: "Recharged",
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        name: "Recharged",
+        url: "https://mariostrikers.gg/msc-recharged",
+        description:
+          "Recharged is a native PC port of Mario Strikers Charged (MSC) for Windows, Linux, macOS and Steam Deck. Not an emulator: the game's own code runs unchanged.",
+        applicationCategory: "GameApplication",
+        operatingSystem: "Windows, Linux, macOS, SteamOS",
+        downloadUrl: "https://github.com/previouslevelgames/recharged",
+      },
+    ],
+  },
+  {
     slug: "msc-save-editor",
     title: "Mario Strikers Charged Save Editor (MSC)",
     description:
