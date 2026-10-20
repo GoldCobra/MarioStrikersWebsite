@@ -230,8 +230,8 @@ const TOURNAMENTS: readonly (readonly [string, string, boolean])[] = [
 const GAMES: readonly GameCode[] = ["msbl", "msc", "sms"];
 // Player titles: the real catalog plus one season title and two MSL event variants (as the sync creates them
 // when a season ends with a Strikers Titan or an MSL event has a winner), with invented unlocks. Player 1 (the
-// signed-in sample, a world champion like its accolades say) has a title of every look, of every game, but
-// none selected; player 2 (a world champion too) shows the longest free title, player 5 (no champion) an
+// signed-in sample, a world champion like its accolades say) has a title of every look but the developer one
+// (RECHARGED DEV is fixed to two real players), of every game, but none selected; player 2 (a world champion too) shows the longest free title, player 5 (no champion) an
 // unlocked one.
 const FIXTURE_SEASON_TITLE = {
   code: "season-titan-1-msbl",

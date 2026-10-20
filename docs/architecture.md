@@ -244,7 +244,8 @@ the green and the plain TOURNAMENT WINNER can both be selected; an MSL event
 template is never offered, a fixed title only to its owners, and test unlocks add
 every level on top (`availability.ts`). The same file sets the list's order, which
 the profile page shows as it comes, without category names: categories by
-`SortOrder`, Free Titles always last (a new category falls in before them); MSL in
+`SortOrder` (the WFC titles first, then the developer titles), Free Titles always
+last (a new category falls in before them); MSL in
 groups X-TIME WORLD CHAMPION (5 down to 2), WORLD, FALL, SUMMER, SPRING CHAMPION,
 each by year (newest first); season titles by year and season, the green
 TOURNAMENT WINNER first, legacy ranks from the highest, Free Titles A–Z; the same
@@ -252,15 +253,17 @@ title in several games MSBL, MSC, SMS; equal ranks by code. `rules.ts` awards fr
 existing data, each title in its game: a season's Strikers Titans (reward level
 5/5, once the season is completed; the season's title of that game is created
 then), MSL event winners (the template creates the game variant), counts of MSL
-World Championships and of clear non-MSL wins in one game, the fixed WFC titles to
-their owners (player and Discord id), and the highest legacy rank held when the
+World Championships and of clear non-MSL wins in one game, the fixed titles (WFC
+records, RECHARGED DEV in #bfff72) to their owners (player and Discord id), and the
+highest legacy rank held when the
 competitive ranks began (no game). Unclear data awards nothing and is reported. The
 API runs the rules once a day (`TITLE_SYNC_INTERVAL_MS`; the last run is logged in
 `dbo.CommandLog`); `npm run ops:player-titles` creates the tables and adds missing
 titles of `catalog.ts`, `npm run ops:title-sync` awards on demand (a dry run
 without `-- --apply`); `npm run ops:title-order` and `npm run ops:title-games`
 brought the changes of 2026-10-02 into existing rows (backups
-`dbo.*_Backup_20261002` and `_20261002b`); `npm run ops:title-test-unlocks` grants
+`dbo.*_Backup_20261002` and `_20261002b`), `ops:title-order` also the developer
+titles' place of 2026-10-20 (`_20261020`); `npm run ops:title-test-unlocks` grants
 or revokes a player's test unlocks. A new title of a known kind is one row in
 `dbo.PlayerTitle` (or a line in `catalog.ts` plus `ops:player-titles`).
 

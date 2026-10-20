@@ -3,7 +3,7 @@ import test from "node:test";
 import { createFakeDatabase, type QueryHandler } from "../../test-support/fake-database.ts";
 import { TITLE_ORDER_BACKUPS, applyTitleOrder } from "./title-order.ts";
 
-/** The title tables as #66 left them (2026-10-02 08:01 UTC), held in memory. */
+/** The title tables after ops:player-titles of 2026-10-20 added the developer category, held in memory. */
 function liveTables(): {
   categories: Map<string, number>;
   titles: Map<string, { group: string | null; level: number | null }>;
@@ -11,22 +11,23 @@ function liveTables(): {
 } {
   return {
     categories: new Map([
-      ["msl", 1],
-      ["competitive-season", 2],
-      ["tournament", 3],
-      ["special-pre-2014", 4],
+      ["special-pre-2014", 1],
+      ["developer", 1],
+      ["msl", 2],
+      ["competitive-season", 3],
+      ["tournament", 4],
       ["legacy-rank", 5],
       ["free", 6],
     ]),
     titles: new Map([
-      ["tournament-winner", { group: "tournament-winner", level: 1 }],
-      ["tournament-winner-green", { group: "tournament-winner", level: 5 }],
+      ["tournament-winner", { group: null, level: null }],
+      ["tournament-winner-green", { group: null, level: null }],
     ]),
     backups: new Set<string>(),
   };
 }
 
-function handlerFor(tables: ReturnType<typeof liveTables>, options: { lostTitle?: boolean } = {}): QueryHandler {
+function handlerFor(tables: ReturnType<typeof liveTables>, options: { lostCategory?: boolean } = {}): QueryHandler {
   return (sql, inputs) => {
     if (sql.startsWith("SELECT Code, SortOrder FROM dbo.PlayerTitleCategory")) {
       return { recordset: [...tables.categories].map(([Code, SortOrder]) => ({ Code, SortOrder })) };
@@ -49,7 +50,7 @@ function handlerFor(tables: ReturnType<typeof liveTables>, options: { lostTitle?
     }
     if (sql.startsWith("UPDATE dbo.PlayerTitleCategory")) {
       const code = String(inputs.code);
-      if (tables.categories.get(code) !== inputs.from) return { rowsAffected: [0] };
+      if (options.lostCategory || tables.categories.get(code) !== inputs.from) return { rowsAffected: [0] };
       tables.categories.set(code, Number(inputs.to));
       return { rowsAffected: [1] };
     }
@@ -58,7 +59,6 @@ function handlerFor(tables: ReturnType<typeof liveTables>, options: { lostTitle?
       for (const code of [inputs.t0, inputs.t1].map(String)) {
         const title = tables.titles.get(code);
         if (!title || (title.group === null && title.level === null)) continue;
-        if (options.lostTitle && code === "tournament-winner-green") continue;
         tables.titles.set(code, { group: null, level: null });
         changed += 1;
       }
@@ -70,51 +70,38 @@ function handlerFor(tables: ReturnType<typeof liveTables>, options: { lostTitle?
 
 const writes = (sqls: readonly string[]): string[] => sqls.filter((sql) => /^(?:UPDATE|SELECT \* INTO)/.test(sql));
 
-test("a dry run reports the 4 categories and 2 titles and writes nothing", async () => {
+test("a dry run reports the special category's move and writes nothing", async () => {
   const tables = liveTables();
   const db = createFakeDatabase(handlerFor(tables));
   const report = await applyTitleOrder(db, false);
   assert.equal(report.applied, false);
-  assert.deepEqual(report.categorySortOrder, [
-    "special-pre-2014: 4 -> 1",
-    "msl: 1 -> 2",
-    "competitive-season: 2 -> 3",
-    "tournament: 3 -> 4",
-  ]);
-  assert.deepEqual(report.ungroupedTitles, [
-    "tournament-winner: tournament-winner/1 -> NULL/NULL",
-    "tournament-winner-green: tournament-winner/5 -> NULL/NULL",
-  ]);
+  assert.deepEqual(report.categorySortOrder, ["special-pre-2014: 1 -> 0"]);
+  assert.deepEqual(report.ungroupedTitles, []);
   assert.deepEqual(writes(db.queries.map((query) => query.sql)), []);
-  assert.equal(tables.categories.get("msl"), 1);
+  assert.equal(tables.categories.get("special-pre-2014"), 1);
 });
 
-test("--apply backs both tables up, then changes exactly those rows; a second run finds nothing", async () => {
+test("--apply backs both tables up, then changes exactly that row; a second run finds nothing", async () => {
   const tables = liveTables();
   const db = createFakeDatabase(handlerFor(tables));
   const report = await applyTitleOrder(db, true);
   assert.equal(report.applied, true);
-  assert.equal(report.status, "changed 4 categories and 2 titles");
+  assert.equal(report.status, "changed 1 categories and 0 titles");
   assert.deepEqual([...tables.backups], TITLE_ORDER_BACKUPS);
   const sqls = db.queries.map((query) => query.sql);
   assert.ok(
     sqls.findIndex((sql) => sql.startsWith("SELECT * INTO")) < sqls.findIndex((sql) => sql.startsWith("UPDATE")),
   );
+  // The developer titles follow the WFC titles; the others keep their SortOrder.
   assert.deepEqual(Object.fromEntries(tables.categories), {
-    "special-pre-2014": 1,
+    "special-pre-2014": 0,
+    developer: 1,
     msl: 2,
     "competitive-season": 3,
     tournament: 4,
     "legacy-rank": 5,
     free: 6,
   });
-  assert.deepEqual(
-    [...tables.titles.values()],
-    [
-      { group: null, level: null },
-      { group: null, level: null },
-    ],
-  );
   assert.deepEqual(db.transactions, ["begin", "commit"]);
 
   const again = createFakeDatabase(handlerFor(tables));
@@ -124,20 +111,26 @@ test("--apply backs both tables up, then changes exactly those rows; a second ru
 });
 
 test("an unexpected database or a different count changes nothing", async () => {
-  const partly = liveTables();
-  partly.categories.set("special-pre-2014", 1);
-  const db = createFakeDatabase(handlerFor(partly));
-  await assert.rejects(applyTitleOrder(db, true), /Expected 4 categories and 2 titles to change, found 3 and 2/);
+  const missing = liveTables();
+  missing.categories.delete("developer");
+  const first = createFakeDatabase(handlerFor(missing));
+  await assert.rejects(applyTitleOrder(first, true), /Category developer is missing; run ops:player-titles first/);
+  assert.deepEqual(writes(first.queries.map((query) => query.sql)), []);
+
+  const grouped = liveTables();
+  grouped.titles.set("tournament-winner", { group: "tournament-winner", level: 1 });
+  const db = createFakeDatabase(handlerFor(grouped));
+  await assert.rejects(applyTitleOrder(db, true), /Expected 1 categories and 0 titles to change, found 1 and 1/);
   assert.deepEqual(writes(db.queries.map((query) => query.sql)), []);
   assert.deepEqual(db.transactions, ["begin", "rollback"]);
 
   const backedUp = liveTables();
-  backedUp.backups.add("dbo.PlayerTitle_Backup_20261002");
+  backedUp.backups.add("dbo.PlayerTitle_Backup_20261020");
   const second = createFakeDatabase(handlerFor(backedUp));
   await assert.rejects(applyTitleOrder(second, true), /exists already/);
   assert.deepEqual(writes(second.queries.map((query) => query.sql)), []);
 
-  const raced = createFakeDatabase(handlerFor(liveTables(), { lostTitle: true }));
-  await assert.rejects(applyTitleOrder(raced, true), /Changed 4 categories and 1 titles instead of 4 and 2/);
+  const raced = createFakeDatabase(handlerFor(liveTables(), { lostCategory: true }));
+  await assert.rejects(applyTitleOrder(raced, true), /Changed 0 categories and 0 titles instead of 1 and 0/);
   assert.deepEqual(raced.transactions, ["begin", "rollback"]);
 });

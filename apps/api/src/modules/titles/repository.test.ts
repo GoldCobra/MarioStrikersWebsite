@@ -69,8 +69,8 @@ test("the seed adds only missing categories and titles, every value a typed para
   const categories = recordingRequest();
   const categorySql = buildSeedCategoriesQuery(TITLE_CATEGORIES, categories.request);
   assert.match(categorySql, /WHERE NOT EXISTS \(SELECT 1 FROM dbo\.PlayerTitleCategory c WHERE c\.Code = v\.Code\);/);
-  assert.equal(categories.inputs.cCode5, "free");
-  assert.equal(categories.inputs.cGlobal5, true);
+  assert.equal(categories.inputs.cCode6, "free");
+  assert.equal(categories.inputs.cGlobal6, true);
 
   const titles = recordingRequest();
   const titleSql = buildSeedTitlesQuery(TITLE_CATALOG, titles.request);

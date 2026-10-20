@@ -103,6 +103,11 @@ body.player-popup-open {
   color: #aef7ff;
 }
 
+.player-title.is-look-developer {
+  --player-title-glow: 0 0 6px rgba(88, 230, 0, 0.95);
+  color: #bfff72;
+}
+
 .player-title.is-look-msl-world {
   --player-title-glow: var(--world-champion-glow);
   color: var(--world-champion-color);

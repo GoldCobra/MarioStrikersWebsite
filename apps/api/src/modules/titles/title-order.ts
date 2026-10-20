@@ -1,9 +1,11 @@
-// The title rules of 2026-10-02 in the database (npm run ops:title-order): the categories' SortOrder of
-// catalog.ts (special, MSL, season, tournament, legacy, free) and no exclusive group for the two TOURNAMENT
-// WINNER titles, so a player can select both. ops:player-titles only adds missing rows, so these existing
-// rows need their own change. Without `apply` it only reports. With it, both tables are copied first and
-// exactly 4 categories and 2 titles change in one transaction; any other count rolls everything back. Run
-// again, it finds nothing to change.
+// The title list's order in the database (npm run ops:title-order): the categories' SortOrder of catalog.ts
+// and no exclusive group for the two TOURNAMENT WINNER titles, so a player can select both. ops:player-titles
+// only adds missing rows, so these existing rows need their own change. 2026-10-02 it changed 4 categories
+// and 2 titles (special, MSL, season, tournament, legacy, free; backups *_Backup_20261002); 2026-10-20 the
+// special category moves from 1 to 0, so the developer titles (1, added by ops:player-titles first) follow
+// the WFC titles. Without `apply` it only reports. With it, both tables are copied first and exactly the
+// expected rows change in one transaction; any other count rolls everything back. Run again, it finds
+// nothing to change.
 
 import { toText } from "@ms/shared/text";
 import { mssql, type Database, type Queryable } from "../../db/database.ts";
@@ -11,10 +13,10 @@ import { TITLE_CATALOG, TITLE_CATEGORIES } from "./catalog.ts";
 
 type Row = Record<string, unknown>;
 
-export const TITLE_ORDER_BACKUPS = ["dbo.PlayerTitleCategory_Backup_20261002", "dbo.PlayerTitle_Backup_20261002"];
+export const TITLE_ORDER_BACKUPS = ["dbo.PlayerTitleCategory_Backup_20261020", "dbo.PlayerTitle_Backup_20261020"];
 const UNGROUPED = ["tournament-winner", "tournament-winner-green"];
-/** What the database of 2026-10-02 needs: msl, competitive-season, tournament, special; both TOURNAMENT WINNER. */
-const EXPECTED = { categories: 4, titles: 2 };
+/** What the database of 2026-10-20 needs: special-pre-2014 from 1 to 0, no title. */
+const EXPECTED = { categories: 1, titles: 0 };
 
 export interface TitleOrderReport {
   readonly applied: boolean;

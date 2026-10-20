@@ -13,7 +13,7 @@ import {
   toTitleOption,
   type CatalogTitle,
 } from "./availability.ts";
-import { GIANT, GOLDCOBRA, TITLE_CATALOG, seededCatalog } from "./catalog.ts";
+import { GIANT, GOLDCOBRA, GOLDENPALAZZO, TITLE_CATALOG, seededCatalog } from "./catalog.ts";
 import { TITLE_GAMES, type TitleGameCode } from "./games.ts";
 
 const CATALOG = seededCatalog();
@@ -84,6 +84,21 @@ test("a fixed title is offered only to its player", () => {
   assert.deepEqual(of(), []);
   assert.deepEqual([...(fixedTitleOwners(catalogTitle("wfc-final-daily-leader")) ?? [])], [GOLDCOBRA.player_id]);
   assert.equal(fixedTitleOwners(catalogTitle("wfc-final-season-leader")), null);
+});
+
+test("RECHARGED DEV is offered only to its developers, unlocked or not", () => {
+  const dev = id("recharged-dev");
+  const of = (playerId: number, unlocked: number[] = [dev]): boolean =>
+    availableTitles(CATALOG, unlocked, { playerId }).some((title) => title.id === dev);
+  assert.deepEqual(
+    [...(fixedTitleOwners(catalogTitle("recharged-dev")) ?? [])],
+    [GOLDCOBRA.player_id, GOLDENPALAZZO.player_id],
+  );
+  assert.equal(of(GOLDCOBRA.player_id), true);
+  assert.equal(of(GOLDENPALAZZO.player_id), true);
+  // An unlock alone is not enough: someone else, or a developer without the unlock, gets nothing.
+  assert.equal(of(GIANT.player_id), false);
+  assert.equal(of(GOLDENPALAZZO.player_id, []), false);
 });
 
 test("test unlocks add every title on top, every level, but never a template or a retired title", () => {
@@ -195,6 +210,8 @@ test("the list follows the owner's order of categories and titles", () => {
     "wfc-final-daily-leader",
     "wfc-final-season-leader",
   ]);
+  // The developer titles right after the WFC titles (owner, 2026-10-20).
+  assert.equal(order[5], "recharged-dev");
   // MSL in the owner's groups: X-TIME (5 down to 2), then WORLD, FALL, SUMMER, SPRING CHAMPION, each by year
   // (newest first, MSL SEASON 1 = 2021); the same title in several games in the order MSBL, MSC, SMS.
   const years = ["2026", "2025", "2024", "2023", "2022", "season-1"];
@@ -215,11 +232,11 @@ test("the list follows the owner's order of categories and titles", () => {
     ...games.map((game) => `tournament-winner-green-${game}`),
     ...games.map((game) => `tournament-winner-${game}`),
   ]);
-  // Category blocks in order: special, MSL, season, tournament, legacy, free.
+  // Category blocks in order: special, developer, MSL, season, tournament, legacy, free.
   const block = (code: string): string => catalog.find((title) => title.code === code)?.category ?? "";
   assert.deepEqual(
     [...new Set(order.map(block))],
-    ["special-pre-2014", "msl", "competitive-season", "tournament", "legacy-rank", "free"],
+    ["special-pre-2014", "developer", "msl", "competitive-season", "tournament", "legacy-rank", "free"],
   );
 });
 
@@ -310,6 +327,7 @@ test("every title has the look of its group: colour and glow are set once per lo
   const looks = Object.fromEntries(CATALOG.map((title) => [title.code, titleLook(title)]));
   assert.equal(looks["og-player"], "free");
   assert.equal(looks["wfc-final-season-leader"], "special");
+  assert.equal(looks["recharged-dev"], "developer");
   assert.equal(looks["msl-2025-world-champion"], "msl-world");
   assert.equal(looks["msl-season-1-world-champion"], "msl-world");
   assert.equal(looks["msl-5-time-world-champion"], "msl-world");

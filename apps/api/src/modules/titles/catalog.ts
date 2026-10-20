@@ -14,6 +14,7 @@ import { TITLE_GAMES, type TitleGame, type TitleGameCode } from "./games.ts";
 /** The codes of the categories, as the title order (availability.ts) and the season titles use them. */
 export const TITLE_CATEGORY = {
   special: "special-pre-2014",
+  developer: "developer",
   msl: "msl",
   season: "competitive-season",
   tournament: "tournament",
@@ -39,6 +40,8 @@ export const TEMPLATE_RULE_KIND = "msl-event";
 /** The owners of the fixed WFC titles (owner, 2026-10-02): the player and the Discord account it must have. */
 export const GOLDCOBRA = { player_id: 223, discord_id: "195905866527014912" } as const;
 export const GIANT = { player_id: 17, discord_id: "110442894686453760" } as const;
+/** Developers of MSC Recharged with a player (owner, 2026-10-20); Anosch follows once he has one. */
+export const GOLDENPALAZZO = { player_id: 2441, discord_id: "330705166703525888" } as const;
 
 export interface TitleCategoryDefinition {
   readonly code: string;
@@ -73,11 +76,20 @@ export interface TitleDefinition extends TitleRule {
   readonly sortOrder: number;
 }
 
+// The developer titles follow the WFC titles (owner, 2026-10-20): the special category moved from 1 to 0, so
+// the categories after them keep their SortOrder (ops:title-order).
 export const TITLE_CATEGORIES: readonly TitleCategoryDefinition[] = [
   {
     code: TITLE_CATEGORY.special,
     name: "Special pre-2014 Titles",
     availability: "Special titles",
+    isGlobal: false,
+    sortOrder: 0,
+  },
+  {
+    code: TITLE_CATEGORY.developer,
+    name: "Developer Titles",
+    availability: "Developers (only certain)",
     isGlobal: false,
     sortOrder: 1,
   },
@@ -136,7 +148,7 @@ const tournamentWins = (min: number, styleKey?: string, game?: TitleGame): Title
   ...(game ? { gameCode: game.code } : {}),
 });
 
-/** Only these players, each as long as dbo.Player still has this Discord account. */
+/** Only these players, each as long as dbo.Player still has this Discord account (WFC records, developers). */
 const fixedTo = (...players: readonly { readonly player_id: number; readonly discord_id: string }[]): TitleRule => ({
   ruleKind: "fixed-players",
   ruleParams: { players: players.map((player) => ({ ...player })) },
@@ -264,6 +276,8 @@ export const TITLE_CATALOG: readonly TitleDefinition[] = [
     ]),
     3,
   ),
+  // The developers of MSC Recharged, the PC port (owner, 2026-10-20): limited to them.
+  ...inCategory(TITLE_CATEGORY.developer, [["recharged-dev", "RECHARGED DEV", fixedTo(GOLDCOBRA, GOLDENPALAZZO)]]),
 ];
 
 /** The catalog as the database holds it after ops:player-titles (ids in list order), for fixtures and tests. */

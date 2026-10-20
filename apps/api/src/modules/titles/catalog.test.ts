@@ -1,16 +1,28 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { GIANT, GOLDCOBRA, TITLE_CATALOG, TITLE_CATEGORIES, seededCatalog } from "./catalog.ts";
+import { GIANT, GOLDCOBRA, GOLDENPALAZZO, TITLE_CATALOG, TITLE_CATEGORIES, seededCatalog } from "./catalog.ts";
 import { TITLE_GAMES } from "./games.ts";
 
-test("the catalog holds the 63 titles of the title list and the 18 game variants of 2026-10-02", () => {
+test("the catalog holds the 63 titles of the title list, the 18 game variants of 2026-10-02 and RECHARGED DEV", () => {
   const counts: Record<string, number> = {};
   for (const title of TITLE_CATALOG) counts[title.category] = (counts[title.category] ?? 0) + 1;
-  assert.deepEqual(counts, { msl: 40, tournament: 8, "special-pre-2014": 5, "legacy-rank": 5, free: 23 });
+  assert.deepEqual(counts, {
+    msl: 40,
+    tournament: 8,
+    "special-pre-2014": 5,
+    "legacy-rank": 5,
+    free: 23,
+    developer: 1,
+  });
   assert.equal(TITLE_CATALOG.filter((title) => title.gameCode).length, 18);
   assert.deepEqual(
     TITLE_CATEGORIES.map((category) => category.code),
-    ["special-pre-2014", "msl", "competitive-season", "tournament", "legacy-rank", "free"],
+    ["special-pre-2014", "developer", "msl", "competitive-season", "tournament", "legacy-rank", "free"],
+  );
+  // The order of the list (owner, 2026-10-20: the developer titles right after the WFC titles).
+  assert.deepEqual(
+    TITLE_CATEGORIES.map((category) => category.sortOrder),
+    [0, 1, 2, 3, 4, 5, 6],
   );
   assert.deepEqual(
     TITLE_CATEGORIES.filter((category) => category.isGlobal).map((category) => category.code),
@@ -118,7 +130,7 @@ test("the titles without a game that counted wins are retired; their variants co
   }
 });
 
-test("four WFC titles belong to their record holders for good", () => {
+test("four WFC titles belong to their record holders for good, RECHARGED DEV to its developers", () => {
   const owners = Object.fromEntries(
     TITLE_CATALOG.filter((title) => title.ruleKind === "fixed-players").map((title) => [
       title.code,
@@ -130,9 +142,13 @@ test("four WFC titles belong to their record holders for good", () => {
     "wfc-66-0-daily-world-record": [GOLDCOBRA],
     "wfc-5012-daily-points-world-record": [GIANT],
     "wfc-final-daily-leader": [GOLDCOBRA],
+    "recharged-dev": [GOLDCOBRA, GOLDENPALAZZO],
   });
   assert.deepEqual(GOLDCOBRA, { player_id: 223, discord_id: "195905866527014912" });
   assert.deepEqual(GIANT, { player_id: 17, discord_id: "110442894686453760" });
+  assert.deepEqual(GOLDENPALAZZO, { player_id: 2441, discord_id: "330705166703525888" });
+  const dev = TITLE_CATALOG.find((title) => title.code === "recharged-dev");
+  assert.deepEqual([dev?.name, dev?.category, dev?.gameCode], ["RECHARGED DEV", "developer", undefined]);
 });
 
 test("the seeded catalog is the list as the database holds it", () => {
