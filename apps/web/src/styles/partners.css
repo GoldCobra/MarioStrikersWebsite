@@ -175,3 +175,9 @@
   }
 }
 
+@supports (content-visibility: auto) {
+  .partners-page .partner-guide-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 420px;
+  }
+}

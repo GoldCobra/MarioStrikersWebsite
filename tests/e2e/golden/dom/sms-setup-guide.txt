@@ -104,7 +104,7 @@
                 </div>
                 #text "\n          "
               </figure>
-              #text "\n            "
+              #text "\n        \n  "
             </div>
             #text "\n          "
           </div>
