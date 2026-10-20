@@ -1,47 +1,35 @@
 {
   "$comment": "Intended visual changes, allowed only while visual-reference.sha is the reference below; see lib/approvals.ts.",
-  "reference": "da8757b762743df25000bc5dd198b6325e232dcc",
+  "reference": "428e0488fa055e5fe5e3a9b778cc60417cb50e45",
   "changes": [
     {
-      "screenshots": ["states/profile-*"],
-      "reason": "Owner 2026-10-03: on MY PROFILE (/profile) the rating cards are replaced by the member's statistics per game (MSBL, MSC, SMS; ten read-only fields each, the game's ball before each name, values right-aligned in field boxes, '-' where missing, also in every field of a game the member was never rated in; 0-0 and 0 only once rated; the win rate with one decimal), before Season Rewards and Tourney Accolades. Everything above them is unchanged; the page is taller, so its background scales with it. The player popup, the players page and the Discord card are unchanged (their states are equal)."
-    },
-    {
       "screenshots": ["states/player-card-title*"],
-      "reason": "NOT a change of this PR: player 5's card is untouched (its DOM and all other card and popup states are equal). The state differs intermittently by ~273 px inside the three SILVER season-reward icons only (raster noise of the scaled icon with its drop-shadow filter); a self comparison of one tree fails 7 of 36 repeats the same way, and CI failed three reruns of #73 on it. Excepted for this reference only until the flakiness is fixed separately."
+      "reason": "NOT a change of this PR (carried over from the previous reference, still unfixed): player 5's card is untouched (its DOM and all other card and popup states are equal). The state differs intermittently by ~273 px inside the three SILVER season-reward icons only (raster noise of the scaled icon with its drop-shadow filter); a self comparison of one tree fails 7 of 36 repeats the same way, and CI failed three reruns of #73 on it. Excepted until the flakiness is fixed separately."
     },
     {
       "screenshots": [
-        "pages/msc-320-*",
-        "pages/msc-390-*",
-        "pages/msc-768-*",
-        "pages/msc-1024-*",
-        "pages/msc-1280-*",
-        "pages/msc-1440-*",
-        "pages/msc-setup-guide-*",
-        "pages/msc-save-editor-*",
-        "pages/msc-wiimmfi-*",
-        "states/error-wiimmfi-*",
-        "pages/msc-recharged-*"
+        "pages/about-us-768-*",
+        "pages/about-us-1024-*",
+        "pages/privacy-policy-768-*",
+        "pages/privacy-policy-1024-*",
+        "pages/msc-recharged-768-*",
+        "pages/msc-recharged-1024-*",
+        "pages/sms-pc-port-768-*",
+        "pages/sms-pc-port-1024-*",
+        "pages/sms-setup-guide-768-*",
+        "pages/sms-setup-guide-1024-*",
+        "pages/msc-setup-guide-768-*",
+        "pages/msc-setup-guide-1024-*",
+        "pages/msbl-competitiverules-768-*",
+        "pages/msbl-competitiverules-1024-*",
+        "pages/msc-competitiverules-768-*",
+        "pages/msc-competitiverules-1024-*",
+        "pages/sms-competitiverules-768-*",
+        "pages/sms-competitiverules-1024-*",
+        "pages/partners-768-*",
+        "pages/partners-1024-*"
       ],
-      "reason": "Owner 2026-10-20: Games > Strikers Charged gets a new first tab RECHARGED (/msc-recharged) before SETUP GUIDE and SAVE EDITOR, so the tab strip of the MSC game pages (overview, setup guide, save editor, the hidden Wiimmfi page) has three tabs; the rest of those pages is unchanged. /msc-recharged is new (the reference shows the not-found page): one content box with the title, the text about the native PC port and the GitHub / download link."
-    },
-    {
-      "screenshots": [
-        "pages/sms-320-*",
-        "pages/sms-390-*",
-        "pages/sms-768-*",
-        "pages/sms-1024-*",
-        "pages/sms-1280-*",
-        "pages/sms-1440-*",
-        "pages/sms-setup-guide-*",
-        "pages/sms-pc-port-*"
-      ],
-      "reason": "Owner 2026-10-20: Games > Super Mario Strikers gets a new first tab STRIKERS (PC PORT) (/sms-pc-port) before SETUP GUIDE, so the SMS overview and setup guide show two tabs; the rest of those pages is unchanged. The label is longer than the tab width, so that one tab is wider (tabs now have 0.6em side padding, less than the room every other label already has: no other tab moves). /sms-pc-port is new (the reference shows the not-found page): one content box with the title, the text about the multi-platform port and the GitHub / download link."
-    },
-    {
-      "screenshots": ["pages/about-us-*", "pages/privacy-policy-*"],
-      "reason": "Owner 2026-10-20: every text page has the setup guide layout (ContentPage family, the same markup as the SMS setup guide): About Us and Privacy Policy move from the old About Us box (partners-page, white About Us title) to it, so their box sits, sizes and wraps like a setup guide's at every width and the About Us title is a setup guide heading. Their text is unchanged."
+      "reason": "Owner 2026-10-20: at tablet widths the content box no longer keeps its native 1154px width (it ran past the right edge at 768 and 1024px, cutting off text and box edge). From 761px up the whole box (top, center and bottom art, texture) scales with the column, so it sits at the page gutter on both sides (13.8px at 768, 17.6px at 1024) and the text wraps inside; the header line, notes and credits keep to the box's scaled shoulder, and partner cards scale their logo, title indent and text offsets with it. Text size is unchanged. Every other width (320, 390, 1280, 1440) and every other page and state is pixel-identical."
     }
   ]
 }
