@@ -25,6 +25,19 @@
         "pages/msc-recharged-*"
       ],
       "reason": "Owner 2026-10-20: Games > Strikers Charged gets a new first tab RECHARGED (/msc-recharged) before SETUP GUIDE and SAVE EDITOR, so the tab strip of the MSC game pages (overview, setup guide, save editor, the hidden Wiimmfi page) has three tabs; the rest of those pages is unchanged. /msc-recharged is new (the reference shows the not-found page): one content box with the title, the text about the native PC port and the GitHub / download link."
+    },
+    {
+      "screenshots": [
+        "pages/sms-320-*",
+        "pages/sms-390-*",
+        "pages/sms-768-*",
+        "pages/sms-1024-*",
+        "pages/sms-1280-*",
+        "pages/sms-1440-*",
+        "pages/sms-setup-guide-*",
+        "pages/sms-pc-port-*"
+      ],
+      "reason": "Owner 2026-10-20: Games > Super Mario Strikers gets a new first tab STRIKERS (PC PORT) (/sms-pc-port) before SETUP GUIDE, so the SMS overview and setup guide show two tabs; the rest of those pages is unchanged. The label is longer than the tab width, so that one tab is wider (tabs now have 0.6em side padding, less than the room every other label already has: no other tab moves). /sms-pc-port is new (the reference shows the not-found page): one content box with the title, the text about the multi-platform port and the GitHub / download link."
     }
   ]
 }

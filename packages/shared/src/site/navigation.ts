@@ -161,6 +161,11 @@ export const SECTION_MODELS: Readonly<Record<"games" | "competitive" | "players"
         slug: "sms",
         children: [
           {
+            key: "pc-port",
+            label: "Strikers (PC Port)",
+            slug: "sms-pc-port",
+          },
+          {
             key: "setup-guide",
             label: "Setup Guide",
             slug: "sms-setup-guide",
@@ -329,6 +334,11 @@ export const PAGE_CONTEXT_MAP: Readonly<Record<string, PageContext>> = {
     topKey: "games",
     secondKey: "msc",
     leafKey: "wiimmfi",
+  },
+  "sms-pc-port": {
+    topKey: "games",
+    secondKey: "sms",
+    leafKey: "pc-port",
   },
   "sms-setup-guide": {
     topKey: "games",

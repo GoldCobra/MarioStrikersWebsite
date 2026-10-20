@@ -48,6 +48,7 @@ export const PAGE_SLUGS = [
   "sms",
   "sms-competitiverules",
   "sms-elo1v1",
+  "sms-pc-port",
   "sms-setup-guide",
   "sms-tierlist",
   "sms-whr",

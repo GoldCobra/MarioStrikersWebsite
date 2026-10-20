@@ -444,6 +444,26 @@ export const PAGES: readonly PageDefinition[] = [
     hiddenHeading: "Super Mario Strikers 1v1 ELO Rankings",
   },
   {
+    slug: "sms-pc-port",
+    title: "Super Mario Strikers Native Multi-Platform Port (SMS)",
+    description:
+      "Strikers is a native port of Super Mario Strikers (SMS) for Windows, Linux, macOS and Nintendo Switch, with modern display support and configurable controls.",
+    breadcrumbName: "Strikers (PC Port)",
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        name: "Strikers",
+        url: "https://mariostrikers.gg/sms-pc-port",
+        description:
+          "Strikers is a native port of Super Mario Strikers (SMS) for Windows, Linux, macOS and Nintendo Switch, with modern display support and configurable controls.",
+        applicationCategory: "GameApplication",
+        operatingSystem: "Windows, Linux, macOS, Nintendo Switch",
+        downloadUrl: "https://github.com/new-coke/strikers",
+      },
+    ],
+  },
+  {
     slug: "sms-setup-guide",
     title: "Super Mario Strikers Online Setup Guide (SMS)",
     description:

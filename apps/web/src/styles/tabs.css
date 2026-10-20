@@ -114,7 +114,8 @@ body[data-subnav="off"] .page-content {
   flex: 0 0 var(--tabs-tab-width);
   height: var(--tabs-tab-height);
   min-height: var(--tabs-tab-height);
-  padding: 0;
+  /* Only a label longer than the tab width widens it (every other label has more room than this). */
+  padding: 0 0.6em;
   border-top: 2px solid #8c3320;
   border-left: 2px solid #8c3320;
   border-right: 0;

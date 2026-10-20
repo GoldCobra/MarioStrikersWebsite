@@ -38,7 +38,7 @@ test("URLs are clean and canonical", () => {
   assert.equal(pagePath("msc-tierlist"), "/msc-tierlist");
   assert.equal(canonicalUrl("index"), "https://mariostrikers.gg/");
   assert.equal(canonicalUrl("msc-tierlist"), "https://mariostrikers.gg/msc-tierlist");
-  assert.equal(PAGES.filter(isIndexable).length, 25);
+  assert.equal(PAGES.filter(isIndexable).length, 26);
 });
 
 const GAME_NAMES: Readonly<Record<string, string>> = {

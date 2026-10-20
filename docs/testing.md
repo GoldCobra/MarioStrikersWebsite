@@ -33,7 +33,7 @@ node tests/e2e/run.ts routes   # status and Location of all URL shapes (needs RO
   frames fire only when a check advances time in fixed steps, so countdowns and
   debounced layout code render the same moment every run. Third-party requests
   are blocked.
-- **Visual.** 44 pages at 320, 390, 768, 1024, 1280 and 1440 px (first screen
+- **Visual.** 45 pages at 320, 390, 768, 1024, 1280 and 1440 px (first screen
   and full length), plus popups, login, error and Gear Builder states. No pixel
   may move; colour deltas up to 2/255 are software raster noise and ignored.
 - **Goldens.** `tests/e2e/golden/` is committed: `dom/` and `head/` per page,
