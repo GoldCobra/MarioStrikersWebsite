@@ -1585,6 +1585,46 @@
     "location": null
   },
   {
+    "path": "/sms-pc-port",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/sms-pc-port/",
+    "status": 301,
+    "location": "/sms-pc-port"
+  },
+  {
+    "path": "/pages/sms-pc-port.html",
+    "status": 301,
+    "location": "/sms-pc-port"
+  },
+  {
+    "path": "/pages/sms-pc-port",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/sms-pc-port/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/sms-pc-port.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/SMS-PC-PORT",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/sms-pc-port?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
     "path": "/sms-setup-guide",
     "status": 200,
     "location": null

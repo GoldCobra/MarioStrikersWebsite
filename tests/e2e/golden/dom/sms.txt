@@ -63,6 +63,9 @@
     <div id="global-content-tabs">
       <section class="global-tabs-shell" aria-label="SMS tabs">
         <div class="global-tabs-list">
+          <a class="global-tab" href="/sms-pc-port" aria-label="Strikers (PC Port)">
+            #text "STRIKERS (PC PORT)"
+          </a>
           <a class="global-tab" href="/sms-setup-guide" aria-label="Setup Guide">
             #text "SETUP GUIDE"
           </a>
