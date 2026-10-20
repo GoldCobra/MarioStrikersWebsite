@@ -60,7 +60,8 @@ export function normalizeTitleCode(code: unknown): string {
 }
 
 // The order of the title list (owner, 2026-10-02). Categories by their SortOrder, the global one (Free
-// Titles) always last, so a new category falls in before it. Inside a category by its own rule:
+// Titles) always last, so a new category falls in before it (the developer titles follow the WFC titles,
+// owner 2026-10-20). Inside a category by its own rule:
 //   msl                 in groups: X-TIME WORLD CHAMPION (5 down to 2), WORLD CHAMPION, FALL, SUMMER, SPRING
 //                       CHAMPION; within a group by year, newest first (MSL SEASON 1 is 2021)
 //   competitive-season  by year, newest first; within a year the later season (SortOrder = season number)
@@ -208,13 +209,23 @@ export function selectedTitle(
  *   free, tournament, legacy  #b6b6b6
  *   season                    #ff0000 with glow
  *   special                   #aef7ff with glow
+ *   developer                 #bfff72 with glow (RECHARGED DEV, owner 2026-10-20)
  *   msl-world                 #ffeb5c with glow (every MSL title naming WORLD CHAMPION, N-TIME included)
  *   msl                       #e09e00 (the SPRING, SUMMER and FALL CHAMPION titles)
  *   tournament-x5             #77c300 (the green TOURNAMENT WINNER, style key "green")
  *   plain                     a category without a look of its own, like the Free Titles
  */
 export type TitleLook =
-  "free" | "season" | "special" | "msl-world" | "msl" | "tournament" | "tournament-x5" | "legacy" | "plain";
+  | "free"
+  | "season"
+  | "special"
+  | "developer"
+  | "msl-world"
+  | "msl"
+  | "tournament"
+  | "tournament-x5"
+  | "legacy"
+  | "plain";
 
 export function titleLook(title: Pick<CatalogTitle, "category" | "name" | "styleKey">): TitleLook {
   switch (title.category) {
@@ -224,6 +235,8 @@ export function titleLook(title: Pick<CatalogTitle, "category" | "name" | "style
       return "season";
     case TITLE_CATEGORY.special:
       return "special";
+    case TITLE_CATEGORY.developer:
+      return "developer";
     case TITLE_CATEGORY.msl:
       return titleText(title.name).includes("WORLD CHAMPION") ? "msl-world" : "msl";
     case TITLE_CATEGORY.tournament:

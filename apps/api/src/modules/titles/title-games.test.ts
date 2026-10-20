@@ -5,6 +5,7 @@ import { GIANT, GOLDCOBRA, TITLE_CATALOG, TITLE_CATEGORIES, seededCatalog } from
 import { TITLE_GAMES } from "./games.ts";
 import {
   EXPECTED_CHANGES,
+  LATER_TITLES,
   SCHEMA_STATE_QUERY,
   TITLE_GAMES_BACKUPS,
   applyTitleGames,
@@ -44,7 +45,7 @@ interface Tables {
 
 /** The 63 titles as #66/#67 left them in the database (no game, nothing fixed, no templates). */
 function liveTitles(): TitleRow[] {
-  return TITLE_CATALOG.filter((title) => !title.gameCode).map((title, index) => {
+  return TITLE_CATALOG.filter((title) => !title.gameCode && !LATER_TITLES.has(title.code)).map((title, index) => {
     const event = title.ruleKind === "msl-event";
     const names = (title.ruleParams?.names as string[] | undefined) ?? [];
     const manual = title.ruleKind === "fixed-players" || (event && !names.length);
@@ -354,6 +355,8 @@ test("the data step changes exactly the rows of 2026-10-02 and keeps every unloc
 
   // 18 game variants and BURST 2026 STRIKERS TITAN of each game.
   assert.equal(report.insertedTitles.length, 21);
+  // A title added to catalog.ts later is left to ops:player-titles.
+  assert.ok(!tables.titles.some((title) => LATER_TITLES.has(title.Code)));
   for (const game of TITLE_GAMES) {
     const season = tables.titles.find((title) => title.Code === `season-titan-2-${game.suffix}`);
     assert.deepEqual(

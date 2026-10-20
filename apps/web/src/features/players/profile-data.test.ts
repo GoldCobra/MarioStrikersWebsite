@@ -13,7 +13,8 @@ test("a profile is a world champion's once any accolade is an MSL World Champion
 });
 
 test("a title's look is one class per group, plain when unknown or empty", () => {
-  for (const look of ["free", "season", "special", "msl-world", "msl", "tournament", "tournament-x5", "legacy"]) {
+  const looks = ["free", "season", "special", "developer", "msl-world", "msl", "tournament", "tournament-x5", "legacy"];
+  for (const look of looks) {
     assert.equal(titleLookClass(look), `player-title is-look-${look}`);
   }
   assert.equal(titleLookClass(" MSL-World "), "player-title is-look-msl-world");

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { CatalogTitle } from "./availability.ts";
-import { GIANT, GOLDCOBRA, seededCatalog } from "./catalog.ts";
+import { GIANT, GOLDCOBRA, GOLDENPALAZZO, seededCatalog } from "./catalog.ts";
 import {
   countedWins,
   legacyTier,
@@ -74,6 +74,7 @@ function tournament(name: string, winner: string, extra: Partial<TournamentRow> 
 const OWNERS = new Map<number, string>([
   [GOLDCOBRA.player_id, GOLDCOBRA.discord_id],
   [GIANT.player_id, GIANT.discord_id],
+  [GOLDENPALAZZO.player_id, GOLDENPALAZZO.discord_id],
 ]);
 
 function sources(overrides: Partial<TitleSources> = {}): TitleSources {
@@ -81,7 +82,7 @@ function sources(overrides: Partial<TitleSources> = {}): TitleSources {
   return {
     catalog: CATALOG,
     unlocks: [],
-    playerIds: new Set([1, 2, 3, 4, 5, 6, 7, 8, GIANT.player_id, GOLDCOBRA.player_id]),
+    playerIds: new Set([1, 2, 3, 4, 5, 6, 7, 8, GIANT.player_id, GOLDCOBRA.player_id, GOLDENPALAZZO.player_id]),
     discordIds: OWNERS,
     tournaments: [
       tournament("MSL 2023 World Championship", "1"),
@@ -144,6 +145,8 @@ test("the data awards exactly the clear titles of each game, with their sources"
     "msl-2023-summer-champion-msc:2:ACCOLADE",
     "msl-2023-world-champion-msc:1:ACCOLADE",
     "msl-2024-world-champion-msbl:1:ACCOLADE",
+    "recharged-dev:223:MANUAL",
+    "recharged-dev:2441:MANUAL",
     "season-titan-2-msbl:7:SEASON",
     "tournament-winner-msbl:2:TOURNAMENT",
     "tournament-winner-msc:2:TOURNAMENT",

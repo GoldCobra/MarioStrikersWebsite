@@ -1,7 +1,8 @@
-// npm run ops:title-order [-- --apply]: the title list's category order and the TOURNAMENT WINNER rule of
-// 2026-10-02 in the database (modules/titles/title-order.ts). Without --apply it only reports what it would
-// change; with it, both title tables are backed up first and exactly 4 categories and 2 titles change in one
-// transaction. The API's title catalog cache takes the change within five minutes.
+// npm run ops:title-order [-- --apply]: the title list's category order and the TOURNAMENT WINNER rule in the
+// database (modules/titles/title-order.ts; 2026-10-20: the developer titles after the WFC titles). Without
+// --apply it only reports what it would change; with it, both title tables are backed up first and exactly
+// the expected rows change in one transaction. The API's title catalog cache takes the change within five
+// minutes.
 
 import { TITLE_ORDER_BACKUPS, applyTitleOrder } from "../modules/titles/title-order.ts";
 import { runOperation } from "./run-operation.ts";

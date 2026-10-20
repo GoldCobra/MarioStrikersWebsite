@@ -84,8 +84,8 @@ test("without apply the run only reports; with apply it writes and logs", async 
     granted: 1,
     titles: { "msl-2023-world-champion-msc": 1 },
     new_titles: ["MSL 2023 WORLD CHAMPION"],
-    // The fixed WFC titles (their players are not in this data) and MSL 2025 SPRING CHAMPION.
-    open_points: 5,
+    // The fixed WFC titles and RECHARGED DEV (their players are not in this data), MSL 2025 SPRING CHAMPION.
+    open_points: 7,
   });
 });
 

@@ -45,6 +45,10 @@ const BACKED_UP = ["dbo.PlayerTitle", "dbo.PlayerTitleUnlock", "dbo.PlayerActive
 
 /** The rows of 2026-10-02 this step changes: MSL templates, retired titles, fixed WFC titles. */
 export const EXPECTED_CHANGES = { template: 24, retired: 6, fixed: 4 } as const;
+
+/** Titles catalog.ts gained after this step; ops:player-titles adds them, this step leaves them alone. */
+export const LATER_TITLES: ReadonlySet<string> = new Set(["recharged-dev"]);
+const STEP_CATALOG = TITLE_CATALOG.filter((title) => !LATER_TITLES.has(title.code));
 /** The completed season whose STRIKERS TITAN titles the owner wanted for the test unlocks. */
 export const TEST_SEASON_NAME = "Burst Season 2026";
 const GRANTED_BY = "ops:title-games";
@@ -110,7 +114,7 @@ const jsonParams = (value: Readonly<Record<string, unknown>> | undefined): strin
 export function plannedRowChanges(stored: readonly Row[]): RowChange[] {
   const byCode = new Map(stored.map((row) => [String(row.Code), row]));
   const changes: RowChange[] = [];
-  for (const title of TITLE_CATALOG) {
+  for (const title of STEP_CATALOG) {
     const row = byCode.get(title.code);
     if (!row) continue;
     const want = {
@@ -307,7 +311,7 @@ async function migrate(transaction: Queryable): Promise<TitleGamesReport> {
     await transaction.request().query("SELECT Id, Code, RuleKind, RuleParams, IsActive, GameCode FROM dbo.PlayerTitle;")
   ).recordset as Row[];
   const storedCodes = new Set(stored.map((row) => String(row.Code)));
-  const toInsert = [...TITLE_CATALOG, ...(await testSeasonTitles(transaction))].filter(
+  const toInsert = [...STEP_CATALOG, ...(await testSeasonTitles(transaction))].filter(
     (title) => !storedCodes.has(title.code),
   );
   const changes = plannedRowChanges(stored);
