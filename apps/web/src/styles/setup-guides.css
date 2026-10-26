@@ -59,6 +59,10 @@
   max-width: 50%;
 }
 
+.setup-guide-media .setup-guide-logo {
+  width: min(100%, 360px);
+}
+
 .setup-guide-video-frame {
   width: min(100%, 960px);
   margin: 0 auto;

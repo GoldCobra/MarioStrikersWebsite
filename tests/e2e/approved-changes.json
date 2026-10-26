@@ -30,6 +30,10 @@
         "pages/partners-1024-*"
       ],
       "reason": "Owner 2026-10-20: at tablet widths the content box no longer keeps its native 1154px width (it ran past the right edge at 768 and 1024px, cutting off text and box edge). From 761px up the whole box (top, center and bottom art, texture) scales with the column, so it sits at the page gutter on both sides (13.8px at 768, 17.6px at 1024) and the text wraps inside; the header line, notes and credits keep to the box's scaled shoulder, and partner cards scale their logo, title indent and text offsets with it. Text size is unchanged. Every other width (320, 390, 1280, 1440) and every other page and state is pixel-identical."
+    },
+    {
+      "screenshots": ["pages/msc-recharged-*"],
+      "reason": "Owner 2026-10-26: the Recharged logo sits between the title and the description of /msc-recharged (assets/pc-ports/recharged-logo.webp, 720x393, cropped to the artwork; shown left-aligned like the setup guide images, min(100%, 360px) wide: 360px from 768px up, the full text column on phones). Everything below it moves down by the logo's height; the rest of the page and every other page are unchanged."
     }
   ]
 }

@@ -98,6 +98,10 @@
                 #text "Recharged — a native PC port of Mario Strikers Charged"
               </h2>
               #text "\n          "
+              <figure class="setup-guide-media">
+                <img class="setup-guide-logo" decoding="async" src="/assets/pc-ports/recharged-logo.webp" width="720" height="393" alt="Recharged logo"/>
+              </figure>
+              #text "\n          "
               <p>
                 #text "Play Mario Strikers Charged natively on Windows, Linux, macOS and Steam Deck. Recharged compiles the reconstructed source code of the original Wii game into a real PC program. It is not an emulator: the game's own code runs unchanged, and Recharged supplies what the Wii hardware used to provide: graphics, sound, controllers, disc access and saves."
               </p>
