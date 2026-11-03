@@ -1,8 +1,11 @@
 # Deployment and rollback
 
 Production runs Caddy for HTTPS, Nginx for the frontend and the Fastify API
-using `docker-compose.prod.yml`. FlareSolverr is an additional service. Database
-and Discord credentials, along with runtime cache volumes, remain on the server.
+using `docker-compose.prod.yml`. FlareSolverr is an additional service. The API
+also joins the external Docker network `mssql`, where the SQL Server container of
+the same server answers as host `mssql`; that network must exist before `up`.
+Database and Discord credentials, along with runtime cache volumes, remain on the
+server.
 
 **GoldCobra releases an explicitly selected commit.** Pull requests, CI and
 merges never deploy automatically. Use the commands below on the production

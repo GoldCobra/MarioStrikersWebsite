@@ -31,6 +31,8 @@ services:
     restart: unless-stopped
     networks:
       - strikers-network
+      # The SQL Server container on the same server (/opt/mssql), reachable as host "mssql".
+      - mssql
 
   caddy:
     image: caddy:2.11.3@sha256:ec18ee54aab3315c22e25f3b2babda73ff8007d39b13b3bd1bfffa2f0444c7d9
@@ -69,6 +71,8 @@ services:
 networks:
   strikers-network:
     driver: bridge
+  mssql:
+    external: true
 
 volumes:
   backend-cache:
