@@ -81,7 +81,7 @@ test("several changes are kept together and sent in one request", () => {
   let draft = createDraft(SAVED);
   draft = { ...draft, country: "us", switchBlocks: ["9999", "8888", "7777"] };
   draft = { ...draft, msc: draft.msc.filter((row) => row.original !== "4444-5555-6666") };
-  draft = withNewCode(draft, "PAL", "Dolphin", "0001-0002-0003");
+  draft = withNewCode(draft, "PAL", "Recharged", "0001-0002-0003");
   const fields = changedFields(draft, SAVED);
   assert.deepEqual([...fields].sort(), ["country", "msc", "msc:new:1", "switch"]);
   const { request, rowKeys } = draftRequest(draft);
@@ -91,7 +91,7 @@ test("several changes are kept together and sent in one request", () => {
     switch_code: "9999-8888-7777",
     msc_codes: [
       { region: "PAL", platform: "Wii", code: "1111-2222-3333" },
-      { region: "PAL", platform: "Dolphin", code: "0001-0002-0003" },
+      { region: "PAL", platform: "Recharged", code: "0001-0002-0003" },
     ],
   });
   assert.deepEqual(rowKeys, ["saved:1111-2222-3333", "new:1"]);
@@ -184,7 +184,7 @@ test("after a change elsewhere, untouched fields follow it and changed ones stay
     country: "us",
     switch_code: "0012-0000-0340",
     msc_codes: [
-      { region: "PAL", platform: "Dolphin", code: "1111-2222-3333" },
+      { region: "PAL", platform: "Recharged", code: "1111-2222-3333" },
       { region: "NTSC", platform: "Wii", code: "4444-5555-6666" },
       { region: "PAL", platform: "Wii", code: "7777-7777-7777" },
     ],
@@ -195,7 +195,7 @@ test("after a change elsewhere, untouched fields follow it and changed ones stay
   assert.deepEqual(
     rebased.draft.msc.map((row) => [row.original, row.platform]),
     [
-      ["1111-2222-3333", "Dolphin"],
+      ["1111-2222-3333", "Recharged"],
       ["4444-5555-6666", "Wii"],
       ["7777-7777-7777", "Wii"],
     ],

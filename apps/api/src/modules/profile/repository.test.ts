@@ -124,7 +124,7 @@ test("a plan becomes deletes, ascending updates, inserts and the audit row, all 
       country: "us",
       title: null,
       deletes: [row(1, "1111-1111-1111")],
-      updates: [{ row: row(2, "2222-2222-2222"), label: "Dolphin", lineSeq: 1 }],
+      updates: [{ row: row(2, "2222-2222-2222"), label: "Recharged", lineSeq: 1 }],
       inserts: [{ gameType: 3, region: "SW", lineSeq: 1, label: "", code: "0001-0002-0003" }],
     },
     request,
@@ -137,9 +137,9 @@ test("a plan becomes deletes, ascending updates, inserts and the audit row, all 
   assert.match(sql, /INSERT INTO dbo\.CommandLog \(Command, Parameters\) VALUES \(N'WebsiteProfileSave', @audit\);$/);
   assert.equal(inputs.country, "us");
   assert.equal(inputs.delSeq0, 1);
-  assert.deepEqual([inputs.updSeq0, inputs.updNewSeq0, inputs.updLabel0], [2, 1, "Dolphin"]);
+  assert.deepEqual([inputs.updSeq0, inputs.updNewSeq0, inputs.updLabel0], [2, 1, "Recharged"]);
   assert.equal(inputs.insCode0, "0001-0002-0003");
-  assert.doesNotMatch(sql, /0001-0002-0003|Dolphin/);
+  assert.doesNotMatch(sql, /0001-0002-0003|Recharged/);
 });
 
 test("a save reads, decides and writes in one transaction; a failure rolls it back", async () => {

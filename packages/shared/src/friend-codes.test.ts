@@ -99,13 +99,17 @@ test("every MSC code needs its region and platform, the bot's choices only", () 
     "msc_codes.0.platform:INVALID",
   ]);
   assert.deepEqual(msc({ region: "NTSC", platform: "Wii U", code: "1234-5678-9012" }), []);
-  assert.deepEqual(msc({ region: "NTSC", platform: "Dolphin", code: "1234-5678-9012" }), []);
+  assert.deepEqual(msc({ region: "NTSC", platform: "Recharged", code: "1234-5678-9012" }), []);
+  // Recharged replaced Dolphin; no new code is saved as Dolphin.
+  assert.deepEqual(msc({ region: "PAL", platform: "Dolphin", code: "1234-5678-9012" }), [
+    "msc_codes.0.platform:INVALID",
+  ]);
 });
 
 test("legacy NTSC-J/K codes may stay but none can be added", () => {
   const msc = (row: Record<string, unknown>): string[] => errorsOf({ ...valid, msc_codes: [row] });
   assert.deepEqual(msc({ region: "JPN", platform: "Wii", code: "1111-2222-3333" }), []);
-  assert.deepEqual(msc({ region: "JPN", platform: "Dolphin", code: "1111-2222-3333" }), []);
+  assert.deepEqual(msc({ region: "JPN", platform: "Recharged", code: "1111-2222-3333" }), []);
   assert.deepEqual(msc({ region: "JPN", platform: "Wii", code: "9999-2222-3333" }), ["msc_codes.0.region:INVALID"]);
   assert.deepEqual(msc({ region: "KOR", platform: "Wii", code: "1111-2222-3333" }), ["msc_codes.0.region:INVALID"]);
 });
@@ -113,7 +117,7 @@ test("legacy NTSC-J/K codes may stay but none can be added", () => {
 test("an older code saved without a platform may stay so, but a changed or new code needs one", () => {
   const msc = (row: Record<string, unknown>): string[] => errorsOf({ ...valid, msc_codes: [row] });
   assert.deepEqual(msc({ region: "PAL", platform: "", code: "5555-6666-7777" }), []);
-  assert.deepEqual(msc({ region: "PAL", platform: "Dolphin", code: "5555-6666-7777" }), []);
+  assert.deepEqual(msc({ region: "PAL", platform: "Recharged", code: "5555-6666-7777" }), []);
   assert.deepEqual(msc({ region: "NTSC", platform: "", code: "5555-6666-7777" }), [
     "msc_codes.0.platform:PLATFORM_REQUIRED",
   ]);

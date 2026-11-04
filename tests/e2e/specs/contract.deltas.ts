@@ -22,6 +22,15 @@ const UNLINKED_SAMPLE_ACCOUNT = "900000000000000002";
 // game (player.title_game_code, since 2026-10-02).
 const PLAYER_PROFILE_PATH = /^\/api\/players\/\d+\/profile$/;
 
+// 2026-11-04: the MSC platform Dolphin became Recharged, and the fixtures' Dolphin codes with it.
+function withRechargedPlatform(value: unknown): unknown {
+  if (typeof value === "string")
+    return value === "Dolphin" ? "Recharged" : value.replaceAll("(Dolphin)", "(Recharged)");
+  if (Array.isArray(value)) return value.map(withRechargedPlatform);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, withRechargedPlatform(entry)]));
+}
+
 function withoutPlayerTitle(profile: unknown): unknown {
   const player = (profile as { player?: unknown } | null)?.player;
   if (!player || typeof player !== "object") return profile;
@@ -67,6 +76,7 @@ export function normalizeContract(record: ContractRecord): ContractRecord {
   if (record.path === "/api/profile/me" && body && typeof body === "object" && "profile" in body) {
     body = { ...body, profile: withoutPlayerTitle(body.profile) };
   }
+  if (PLAYER_PROFILE_PATH.test(record.path) || record.path === "/api/profile/me") body = withRechargedPlatform(body);
   if (record.path === AUTH_ME_PATH && body && typeof body === "object") {
     const rest = { ...(body as Record<string, unknown>) };
     delete rest.login_available;
