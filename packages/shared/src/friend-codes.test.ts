@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   FRIEND_CODE_PATTERN,
+  MSC_PLATFORMS,
   formatFriendCode,
   friendCodeBlocks,
   friendCodeFromBlocks,
@@ -104,6 +105,10 @@ test("every MSC code needs its region and platform, the bot's choices only", () 
   assert.deepEqual(msc({ region: "PAL", platform: "Dolphin", code: "1234-5678-9012" }), [
     "msc_codes.0.platform:INVALID",
   ]);
+});
+
+test("Recharged, the community's main version, is the first platform offered", () => {
+  assert.deepEqual(MSC_PLATFORMS, ["Recharged", "Wii", "Wii U"]);
 });
 
 test("legacy NTSC-J/K codes may stay but none can be added", () => {
