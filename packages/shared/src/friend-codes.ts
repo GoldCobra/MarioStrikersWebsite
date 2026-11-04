@@ -16,8 +16,11 @@ export const MSC_REGIONS = [
 /** Regions of older MSC codes: they can be kept or deleted, never added. */
 export const LEGACY_MSC_REGIONS: Readonly<Record<string, string>> = { JPN: "NTSC-J", KOR: "NTSC-K" };
 
-/** Where an MSC code is played (dbo.FriendCodes.Label), as the bot offers it. */
-export const MSC_PLATFORMS = ["Wii", "Wii U", "Recharged"] as const;
+/**
+ * Where an MSC code is played (dbo.FriendCodes.Label), as the bot offers it: Recharged (the PC port) first, the
+ * community's main version.
+ */
+export const MSC_PLATFORMS = ["Recharged", "Wii", "Wii U"] as const;
 
 export type MscRegion = (typeof MSC_REGIONS)[number]["value"];
 export type MscPlatform = (typeof MSC_PLATFORMS)[number];
