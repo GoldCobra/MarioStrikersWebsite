@@ -17,7 +17,7 @@ export const MSC_REGIONS = [
 export const LEGACY_MSC_REGIONS: Readonly<Record<string, string>> = { JPN: "NTSC-J", KOR: "NTSC-K" };
 
 /** Where an MSC code is played (dbo.FriendCodes.Label), as the bot offers it. */
-export const MSC_PLATFORMS = ["Wii", "Wii U", "Dolphin"] as const;
+export const MSC_PLATFORMS = ["Wii", "Wii U", "Recharged"] as const;
 
 export type MscRegion = (typeof MSC_REGIONS)[number]["value"];
 export type MscPlatform = (typeof MSC_PLATFORMS)[number];

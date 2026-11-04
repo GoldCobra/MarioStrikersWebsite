@@ -626,7 +626,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
             msc: index % 3 === 2 ? [] : [`PAL (Wii): ${fakeFriendCode(createRandom(player.player_id + 100))}`],
             msc_pal: index % 3 === 2 ? [] : [`PAL (Wii): ${fakeFriendCode(createRandom(player.player_id + 100))}`],
             msc_ntsc:
-              index % 4 === 1 ? [`NTSC (Dolphin): ${fakeFriendCode(createRandom(player.player_id + 200))}`] : [],
+              index % 4 === 1 ? [`NTSC (Recharged): ${fakeFriendCode(createRandom(player.player_id + 200))}`] : [],
             msc_kor: [],
             msc_jpn: [],
           },
@@ -779,7 +779,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
     if (index % 3 !== 2)
       codes.push({ gameType: 1, region: "PAL", lineSeq: 1, label: "Wii", code: code(playerId + 100) });
     if (index % 4 === 1)
-      codes.push({ gameType: 1, region: "NTSC", lineSeq: 1, label: "Dolphin", code: code(playerId + 200) });
+      codes.push({ gameType: 1, region: "NTSC", lineSeq: 1, label: "Recharged", code: code(playerId + 200) });
     return {
       playerId,
       country: player.country,

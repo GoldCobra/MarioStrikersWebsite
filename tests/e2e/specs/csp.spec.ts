@@ -172,7 +172,7 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await page.locator("[data-edit-action='add']").click();
     const added = page.locator("[data-edit-row].is-msc").last();
     await added.locator("[data-field='region']").selectOption("PAL");
-    await added.locator("[data-field='platform']").selectOption("Dolphin");
+    await added.locator("[data-field='platform']").selectOption("Recharged");
     await added.locator(".profile-edit-digits").first().focus();
     await paste(page, "0000-1111-2222");
 
@@ -192,7 +192,7 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
       expect(sent.title).toBe("msl-2025-world-champion-msbl");
       expect(sent.country).toBe("us");
       expect(sent.switch_code).toBe("0001-0020-0300");
-      expect(sent.msc_codes?.at(-1)).toEqual({ region: "PAL", platform: "Dolphin", code: "0000-1111-2222" });
+      expect(sent.msc_codes?.at(-1)).toEqual({ region: "PAL", platform: "Recharged", code: "0000-1111-2222" });
       const current = (await (await route.fetch({ method: "GET" })).json()) as Record<string, unknown>;
       await route.fulfill({
         status: 200,

@@ -175,7 +175,7 @@ const STATES: VisualState[] = [
     login: "linked",
     act: async (page) => {
       if (!(await openProfileField(page, "[data-edit-open^='msc:']"))) return;
-      await page.locator("[data-edit-row] [data-field='platform']").selectOption("Dolphin");
+      await page.locator("[data-edit-row] [data-field='platform']").selectOption("Wii U");
       await settle(page);
     },
   },

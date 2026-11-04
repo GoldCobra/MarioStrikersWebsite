@@ -203,7 +203,7 @@ test("a save changes the member's own profile only, keeps leading zeros and is i
     player_id: 2,
     country: "scotland",
     switch_code: before.switch_code,
-    msc_codes: [...before.msc_codes, { region: "NTSC", platform: "Dolphin", code: "0000-0000-0001" }],
+    msc_codes: [...before.msc_codes, { region: "NTSC", platform: "Recharged", code: "0000-0000-0001" }],
   };
   const put = () => app.inject({ method: "PUT", url: EDITABLE_URL, headers: { cookie, ...JSON_HEADERS }, payload });
   const saved = await put();
@@ -211,7 +211,7 @@ test("a save changes the member's own profile only, keeps leading zeros and is i
   const after = saved.json<Editable & { changed: boolean }>();
   assert.equal(after.changed, true);
   assert.equal(after.country, "scotland");
-  assert.deepEqual(after.msc_codes.at(-1), { region: "NTSC", platform: "Dolphin", code: "0000-0000-0001" });
+  assert.deepEqual(after.msc_codes.at(-1), { region: "NTSC", platform: "Recharged", code: "0000-0000-0001" });
   assert.notEqual(after.version, before.version);
 
   // The profile page shows it; player_id in the body changed nothing about whose profile it is.
@@ -220,7 +220,7 @@ test("a save changes the member's own profile only, keeps leading zeros and is i
   }>();
   assert.equal(profile.profile.player.id, 1);
   assert.equal(profile.profile.player.country, "gb-sct");
-  assert.ok(profile.profile.friend_codes.msc.includes("NTSC-U (Dolphin): 0000-0000-0001"));
+  assert.ok(profile.profile.friend_codes.msc.includes("NTSC-U (Recharged): 0000-0000-0001"));
 
   const again = await put();
   assert.equal(again.statusCode, 200);

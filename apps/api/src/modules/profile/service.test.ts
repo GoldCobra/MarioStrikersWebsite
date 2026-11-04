@@ -142,7 +142,7 @@ function request(h: { version: string }, overrides: Record<string, unknown> = {}
     switch_code: "0012-0000-0340",
     msc_codes: [
       { region: "PAL", platform: "Wii", code: "1111-2222-3333" },
-      { region: "NTSC", platform: "Dolphin", code: "4444-5555-6666" },
+      { region: "NTSC", platform: "Recharged", code: "4444-5555-6666" },
     ],
     ...overrides,
   };
@@ -199,7 +199,7 @@ test("a save writes only what changed and keeps the bot's LineSeq numbering", as
     request(profile, {
       country: "us",
       msc_codes: [
-        { region: "NTSC", platform: "Dolphin", code: "4444-5555-6666" },
+        { region: "NTSC", platform: "Recharged", code: "4444-5555-6666" },
         { region: "NTSC", platform: "Wii U", code: "0000-0000-0001" },
       ],
     }),
@@ -210,7 +210,7 @@ test("a save writes only what changed and keeps the bot's LineSeq numbering", as
   assert.equal(h.store.saved.country, "us");
   assert.deepEqual(
     h.store.saved.codes.map((row) => `${row.gameType}:${row.region}:${row.lineSeq}:${row.label}:${row.code}`).sort(),
-    ["1:NTSC:1:Dolphin:4444-5555-6666", "1:NTSC:2:Wii U:0000-0000-0001", "3:SW:1::0012-0000-0340"],
+    ["1:NTSC:1:Recharged:4444-5555-6666", "1:NTSC:2:Wii U:0000-0000-0001", "3:SW:1::0012-0000-0340"],
   );
   // The saved profile comes back with its new version; leading zeros are kept.
   assert.ok(outcome.profile.mscCodes.some((entry) => entry.code === "0000-0000-0001"));
@@ -233,7 +233,7 @@ test("a profile changed elsewhere since it was loaded is not overwritten", async
   const h = harness();
   const profile = await editable(h);
   // Meanwhile the bot adds a code.
-  h.store.saved = { ...h.store.saved, codes: [...h.store.saved.codes, msc("PAL", 2, "Dolphin", "7777-8888-9999")] };
+  h.store.saved = { ...h.store.saved, codes: [...h.store.saved.codes, msc("PAL", 2, "Recharged", "7777-8888-9999")] };
   const outcome = await h.service.saveEditableProfile(IDENTITY, request(profile, { country: "us" }));
   assert.ok(outcome.kind === "conflict");
   assert.ok(outcome.current.mscCodes.some((entry) => entry.code === "7777-8888-9999"));
@@ -320,7 +320,7 @@ test("the plan keeps rows of unchanged codes and renumbers the rest from 1", () 
   };
   const plan = planChanges(current, "", [
     msc("PAL", 0, "Wii", "3333-3333-3333"),
-    msc("PAL", 0, "Dolphin", "2222-2222-2222"),
+    msc("PAL", 0, "Recharged", "2222-2222-2222"),
     msc("NTSC", 0, "Wii U", "4444-4444-4444"),
   ]);
   assert.ok(plan);
@@ -328,7 +328,7 @@ test("the plan keeps rows of unchanged codes and renumbers the rest from 1", () 
   assert.deepEqual(
     plan.updates.map((update) => [update.row.lineSeq, update.lineSeq, update.label]),
     [
-      [2, 1, "Dolphin"],
+      [2, 1, "Recharged"],
       [3, 2, "Wii"],
     ],
   );
