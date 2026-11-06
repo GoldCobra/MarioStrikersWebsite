@@ -16,6 +16,21 @@ export interface Queryable {
   request(): mssql.Request;
 }
 
+/**
+ * Runs `work` with the database's Player.Activity triggers paused: an admin rewrite (a title
+ * selection moved or cleared by an ops tool) is no activity of the player. `transaction` has to be
+ * one transaction, so that `work` runs on the connection the flag is set on. The flag is cleared in
+ * a finally: sp_set_session_context survives a rollback, and the connection goes back to the pool.
+ */
+export async function withoutActivityStamp<T>(transaction: Queryable, work: () => Promise<T>): Promise<T> {
+  await transaction.request().query("EXEC sys.sp_set_session_context @key = N'SkipPlayerActivity', @value = 1;");
+  try {
+    return await work();
+  } finally {
+    await transaction.request().query("EXEC sys.sp_set_session_context @key = N'SkipPlayerActivity', @value = NULL;");
+  }
+}
+
 export function createConnectionConfig(settings: MssqlConfig): mssql.config {
   assertMssqlConfigured(settings);
   return {

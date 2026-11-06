@@ -41,6 +41,9 @@ interface Tables {
   tests: { PlayerId: number; TitleId: number }[];
   backups: Set<string>;
   log: string[];
+  /** SkipPlayerActivity as the session would have it, and its value at every moved or cleared selection. */
+  activityPaused: boolean;
+  selectionWritesWhilePaused: boolean[];
 }
 
 /** The 63 titles as #66/#67 left them in the database (no game, nothing fixed, no templates). */
@@ -165,6 +168,8 @@ function liveTables(): Tables {
     tests: [],
     backups: new Set(),
     log: [],
+    activityPaused: false,
+    selectionWritesWhilePaused: [],
   };
 }
 
@@ -288,12 +293,18 @@ function handlerFor(tables: Tables, options: { seasonStatus?: string } = {}): Qu
       tables.log.push(String(inputs.log));
       return { rowsAffected: [1] };
     }
+    if (sql.startsWith("EXEC sys.sp_set_session_context @key = N'SkipPlayerActivity'")) {
+      tables.activityPaused = sql.includes("@value = 1;");
+      return {};
+    }
     if (sql.startsWith("UPDATE dbo.PlayerActiveTitle SET TitleId")) {
       tables.active.set(Number(inputs.playerId), Number(inputs.titleId));
+      tables.selectionWritesWhilePaused.push(tables.activityPaused);
       return { rowsAffected: [1] };
     }
     if (sql.startsWith("DELETE FROM dbo.PlayerActiveTitle")) {
       tables.active.delete(Number(inputs.playerId));
+      tables.selectionWritesWhilePaused.push(tables.activityPaused);
       return { rowsAffected: [1] };
     }
     if (sql.startsWith("SELECT u.PlayerId, t.Code, u.SourceRef FROM dbo.PlayerTitleUnlock u")) {
@@ -414,6 +425,9 @@ test("the data step changes exactly the rows of 2026-10-02 and keeps every unloc
   ]);
   assert.equal(codeOf(tables, tables.active.get(GOLDCOBRA.player_id)), "three-ghosts");
   assert.deepEqual(report.clearedSelections, []);
+  // Moving selections is no activity of the players, and the pause ends with it.
+  assert.deepEqual(tables.selectionWritesWhilePaused, [true, true]);
+  assert.equal(tables.activityPaused, false);
   assert.ok(
     report.openPoints.includes(
       "Title msl-2025-spring-champion: no tournament named yet, so MSL 2025 SPRING CHAMPION waits for staff.",

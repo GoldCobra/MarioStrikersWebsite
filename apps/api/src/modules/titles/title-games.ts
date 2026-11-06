@@ -20,7 +20,7 @@
 
 import { toText } from "@ms/shared/text";
 import type { Database, Queryable } from "../../db/database.ts";
-import { mssql } from "../../db/database.ts";
+import { mssql, withoutActivityStamp } from "../../db/database.ts";
 import { availableTitles, isTemplateTitle, selectedTitle, type CatalogTitle } from "./availability.ts";
 import { TEMPLATE_RULE_KIND, TITLE_CATALOG, TITLE_CATEGORY, type TitleDefinition } from "./catalog.ts";
 import { TITLE_GAMES, gameByCode, gameByType, gameRank, type TitleGame } from "./games.ts";
@@ -389,7 +389,8 @@ async function migrate(transaction: Queryable): Promise<TitleGamesReport> {
   // 5. selections, 6. checks (a selection the player could not select before stays as it was: it shows nothing)
   const sources = await readTitleSourcesFrom(transaction, { legacy: false });
   const tests = await readTestUnlocks(transaction);
-  const { moved, cleared } = await moveSelections(transaction, sources, tests);
+  // Moving or clearing a selection here is no activity of the player.
+  const { moved, cleared } = await withoutActivityStamp(transaction, () => moveSelections(transaction, sources, tests));
   const lapsed = await checkCoverage(transaction, sources);
   const invalid = (await invalidSelections(transaction, sources, tests)).filter(
     (entry) => !invalidBefore.includes(entry),

@@ -11,7 +11,7 @@
 // (WebsiteTitleTestUnlock); a second run changes nothing.
 
 import type { Database, Queryable } from "../../db/database.ts";
-import { mssql } from "../../db/database.ts";
+import { mssql, withoutActivityStamp } from "../../db/database.ts";
 import { isTemplateTitle, selectedTitle, type CatalogTitle } from "./availability.ts";
 import { CATALOG_QUERY, toCatalogTitle } from "./repository.ts";
 
@@ -120,9 +120,12 @@ export async function runTestUnlocks(
         throw new Error("The test unlocks changed meanwhile; nothing was removed.");
       }
       if (!keeps) {
-        const clear = transaction.request();
-        clear.input("playerId", mssql.Int, playerId);
-        await clear.query("DELETE FROM dbo.PlayerActiveTitle WHERE PlayerId = @playerId;");
+        // Clearing a selection only a test unlock allowed is no activity of the player.
+        await withoutActivityStamp(transaction, async () => {
+          const clear = transaction.request();
+          clear.input("playerId", mssql.Int, playerId);
+          await clear.query("DELETE FROM dbo.PlayerActiveTitle WHERE PlayerId = @playerId;");
+        });
       }
     }
 
