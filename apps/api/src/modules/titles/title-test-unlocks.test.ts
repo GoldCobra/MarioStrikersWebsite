@@ -13,6 +13,9 @@ interface State {
   selected: number | null;
   log: string[];
   touchedRegular: boolean;
+  /** SkipPlayerActivity as the session would have it, and its value at every cleared selection. */
+  activityPaused: boolean;
+  clearsWhilePaused: boolean[];
 }
 
 function handlerFor(state: State, playerExists = true): QueryHandler {
@@ -49,6 +52,10 @@ function handlerFor(state: State, playerExists = true): QueryHandler {
         ],
       };
     }
+    if (sql.startsWith("EXEC sys.sp_set_session_context @key = N'SkipPlayerActivity'")) {
+      state.activityPaused = sql.includes("@value = 1;");
+      return {};
+    }
     if (sql.startsWith("INSERT INTO dbo.PlayerTitleTestUnlock")) {
       const titleId = Number(inputs.titleId);
       if (state.tests.includes(titleId)) return { rowsAffected: [0] };
@@ -62,6 +69,7 @@ function handlerFor(state: State, playerExists = true): QueryHandler {
     }
     if (sql.startsWith("DELETE FROM dbo.PlayerActiveTitle")) {
       state.selected = null;
+      state.clearsWhilePaused.push(state.activityPaused);
       return { rowsAffected: [1] };
     }
     if (sql.startsWith("INSERT INTO dbo.CommandLog")) {
@@ -79,6 +87,8 @@ const goldCobra = (): State => ({
   selected: id("three-ghosts"),
   log: [],
   touchedRegular: false,
+  activityPaused: false,
+  clearsWhilePaused: [],
 });
 
 test("test unlocks cover every selectable title the player has not earned, nothing global, retired or a template", () => {
@@ -144,6 +154,9 @@ test("revoke removes only the test unlocks, and a selection only a test unlock a
   assert.equal(state.selected, null);
   assert.equal(state.regular.length, 3, "earned and fixed titles stay");
   assert.equal(state.touchedRegular, false);
+  // An admin tool clearing the selection is no activity of the player, and the pause ends with it.
+  assert.deepEqual(state.clearsWhilePaused, [true]);
+  assert.equal(state.activityPaused, false);
 
   // A selection of an earned title stays.
   const keeps = goldCobra();

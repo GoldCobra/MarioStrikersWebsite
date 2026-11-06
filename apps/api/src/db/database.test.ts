@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { loadConfig } from "../config.ts";
 import { silentLogger } from "../lib/logger.ts";
-import { Database, createConnectionConfig } from "./database.ts";
+import { Database, createConnectionConfig, withoutActivityStamp, type Queryable } from "./database.ts";
 
 const BASE_ENV = {
   MSSQL_HOST: "db.example.test",
@@ -78,4 +78,29 @@ test("mssql keepalive starts once and can be stopped", () => {
   assert.notEqual(third, first);
   assert.equal(calls, 2);
   database.stopKeepalive();
+});
+
+test("an admin rewrite runs with the activity triggers paused, and the pause ends even on an error", async () => {
+  const ran: string[] = [];
+  const transaction = {
+    request: () => ({ query: (sql: string) => Promise.resolve(void ran.push(sql)) }),
+  } as unknown as Queryable;
+  const pause = "EXEC sys.sp_set_session_context @key = N'SkipPlayerActivity', @value = 1;";
+  const resume = "EXEC sys.sp_set_session_context @key = N'SkipPlayerActivity', @value = NULL;";
+
+  assert.equal(
+    await withoutActivityStamp(transaction, () => {
+      ran.push("work");
+      return Promise.resolve(7);
+    }),
+    7,
+  );
+  assert.deepEqual(ran, [pause, "work", resume]);
+
+  ran.length = 0;
+  await assert.rejects(
+    withoutActivityStamp(transaction, () => Promise.reject(new Error("work failed"))),
+    /work failed/,
+  );
+  assert.deepEqual(ran, [pause, resume]);
 });
