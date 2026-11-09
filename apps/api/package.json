@@ -25,16 +25,16 @@
     "test:smoke": "node --import ./src/test-support/isolate.ts --test src/dev-smoke.test.ts"
   },
   "dependencies": {
-    "@fastify/cors": "11.3.0",
-    "@fastify/etag": "6.2.0",
-    "@fastify/rate-limit": "11.2.0",
+    "@fastify/cors": "11.4.1",
+    "@fastify/etag": "6.2.2",
+    "@fastify/rate-limit": "11.2.2",
     "@ms/shared": "*",
-    "fastify": "5.12.5",
+    "fastify": "5.12.8",
     "lru-cache": "11.5.3",
-    "mssql": "11.0.1",
-    "pino": "10.3.1"
+    "mssql": "12.7.14",
+    "pino": "10.4.0"
   },
   "devDependencies": {
-    "@types/mssql": "9.1.11"
+    "@types/mssql": "12.3.0"
   }
 }

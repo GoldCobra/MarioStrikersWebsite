@@ -15,10 +15,10 @@
   },
   "dependencies": {
     "@ms/shared": "*",
-    "astro": "7.3.5"
+    "astro": "7.4.7"
   },
   "devDependencies": {
-    "@astrojs/check": "0.9.10",
+    "@astrojs/check": "0.9.12",
     "lightningcss": "1.33.0"
   }
 }

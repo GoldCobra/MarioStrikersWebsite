@@ -7,5 +7,9 @@ export default {
     // The cascade is deliberate: the partials are ordered in global.ts, and later rules override
     // earlier ones of higher specificity on purpose (media blocks in tablet.css and mobile.css last).
     "no-descending-specificity": null,
+    // New in stylelint 18. The visually hidden helpers keep the classic `clip` and setup-guides.css keeps
+    // `word-break: break-word` on purpose: both still work everywhere, and replacing them could move text.
+    "property-no-deprecated": null,
+    "declaration-property-value-keyword-no-deprecated": null,
   },
 };
