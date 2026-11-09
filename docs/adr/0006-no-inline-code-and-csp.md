@@ -12,8 +12,10 @@ or Cross-Origin-Opener-Policy.
 
 Markup carries no inline scripts or event handlers. An image declares its
 fallback (`data-fallback-src`, `data-on-error`) and one listener in
-`apps/web/src/lib/image-fallbacks.ts` handles it; the Gear Builder host turns
-the snapshot's `onclick` attributes into listeners. nginx sends the CSP,
+`apps/web/src/lib/image-fallbacks.ts` handles it; the Gear Builder host renames
+the snapshot's `onclick`/`onchange` attributes before the markup is parsed
+(Chromium 158+ reports an inline handler as soon as it is parsed) and turns
+them into listeners. nginx sends the CSP,
 Permissions-Policy and COOP with every document from
 `infra/nginx/snippets/document-headers.conf`; Caddy keeps HSTS and the other
 transport headers. The policy was first sent report-only and enforced after
