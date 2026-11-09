@@ -204,18 +204,32 @@ function runMissedLoadHandler(): void {
   }
 }
 
+/** An inline handler attribute inside a tag: ` onchange="fn()"` → event name and quoted value. */
+const INLINE_HANDLER = /\son([a-z]+)\s*=\s*("[^"]*"|'[^']*')/gi;
+
 /**
  * The snapshot's markup calls its global functions from inline handlers such as onclick="fn()" and
- * onchange="fn()" (a Content Security Policy blocks those); each becomes a listener for the same event
- * that calls the same function.
+ * onchange="fn()" (a Content Security Policy blocks those). They are renamed to data-inline-on<event>
+ * before the markup is parsed: newer Chromium (158+) reports every inline handler as a CSP violation as
+ * soon as markup with one is parsed, even in a template or a DOMParser document.
+ */
+function renameInlineHandlers(markup: string): string {
+  return markup.replace(/<[^>]+>/g, (tag) => tag.replace(INLINE_HANDLER, " data-inline-on$1=$2"));
+}
+
+/**
+ * Each renamed handler (and any inline handler the renaming missed) becomes a listener for the same
+ * event that calls the same global function.
  */
 function bindInlineHandlers(root: ParentNode): void {
   for (const node of Array.from(root.querySelectorAll<HTMLElement>("*"))) {
-    for (const attribute of Array.from(node.attributes).filter((entry) => /^on[a-z]+$/.test(entry.name))) {
+    for (const attribute of Array.from(node.attributes)) {
+      const event = /^(?:data-inline-)?on([a-z]+)$/.exec(attribute.name)?.[1];
+      if (!event) continue;
       const name = /^\s*([A-Za-z_$][\w$]*)\(\)\s*;?\s*$/.exec(attribute.value)?.[1];
       node.removeAttribute(attribute.name);
       if (!name) continue;
-      node.addEventListener(attribute.name.slice(2), () => {
+      node.addEventListener(event, () => {
         const handler: unknown = Reflect.get(window, name);
         if (typeof handler === "function") (handler as () => void)();
       });
@@ -298,7 +312,7 @@ export async function initGearBuilder(host: HTMLElement): Promise<void> {
   try {
     const response = await fetch(TEMPLATE_URL, { headers: { Accept: "text/html" } });
     if (!response.ok) throw new Error("Template request failed.");
-    host.innerHTML = preferWebp(await response.text());
+    host.innerHTML = renameInlineHandlers(preferWebp(await response.text()));
     bindInlineHandlers(host);
     attachWebpFallbacks(host);
     for (const script of SCRIPTS) await loadScript(script);

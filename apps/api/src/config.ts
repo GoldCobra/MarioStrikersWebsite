@@ -17,7 +17,7 @@ export interface MssqlConfig {
   readonly poolIdleTimeoutMs: number;
   readonly connectionTimeoutMs: number;
   readonly requestTimeoutMs: number;
-  /** The shared Arvixe host has used an untrusted certificate; tighten only after probing it. */
+  /** The SQL Server on the VPS presents its own self-signed certificate; tighten only after probing it. */
   readonly trustServerCertificate: boolean;
   readonly tlsMinVersion: "TLSv1" | "TLSv1.1" | "TLSv1.2" | "TLSv1.3";
 }
