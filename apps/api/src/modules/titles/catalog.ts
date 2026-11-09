@@ -278,6 +278,15 @@ export const TITLE_CATALOG: readonly TitleDefinition[] = [
   ),
   // The developers of MSC Recharged, the PC port (owner, 2026-10-20): limited to them.
   ...inCategory(TITLE_CATEGORY.developer, [["recharged-dev", "RECHARGED DEV", fixedTo(GOLDCOBRA, GOLDENPALAZZO)]]),
+  // Two more Free Titles (owner, 2026-11-09): for everyone, A-Z in the list like the others.
+  ...inCategory(
+    TITLE_CATEGORY.free,
+    [
+      ["feeling-so-recharged", "FEELING SO RECHARGED", EVERYONE],
+      ["msc-is-so-back", "MSC IS SO BACK!", EVERYONE],
+    ],
+    24,
+  ),
 ];
 
 /** The catalog as the database holds it after ops:player-titles (ids in list order), for fixtures and tests. */

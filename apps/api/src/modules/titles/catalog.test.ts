@@ -3,7 +3,7 @@ import test from "node:test";
 import { GIANT, GOLDCOBRA, GOLDENPALAZZO, TITLE_CATALOG, TITLE_CATEGORIES, seededCatalog } from "./catalog.ts";
 import { TITLE_GAMES } from "./games.ts";
 
-test("the catalog holds the 63 titles of the title list, the 18 game variants of 2026-10-02 and RECHARGED DEV", () => {
+test("the catalog holds the 63 titles of the title list, the 18 game variants of 2026-10-02 and the later ones", () => {
   const counts: Record<string, number> = {};
   for (const title of TITLE_CATALOG) counts[title.category] = (counts[title.category] ?? 0) + 1;
   assert.deepEqual(counts, {
@@ -11,9 +11,22 @@ test("the catalog holds the 63 titles of the title list, the 18 game variants of
     tournament: 8,
     "special-pre-2014": 5,
     "legacy-rank": 5,
-    free: 23,
+    free: 25,
     developer: 1,
   });
+  // The Free Titles of 2026-11-09: for everyone, after the 23 of the list.
+  assert.deepEqual(
+    TITLE_CATALOG.filter((title) => title.category === "free" && title.sortOrder > 23).map((title) => [
+      title.code,
+      title.name,
+      title.ruleKind,
+      title.sortOrder,
+    ]),
+    [
+      ["feeling-so-recharged", "FEELING SO RECHARGED", "everyone", 24],
+      ["msc-is-so-back", "MSC IS SO BACK!", "everyone", 25],
+    ],
+  );
   assert.equal(TITLE_CATALOG.filter((title) => title.gameCode).length, 18);
   assert.deepEqual(
     TITLE_CATEGORIES.map((category) => category.code),

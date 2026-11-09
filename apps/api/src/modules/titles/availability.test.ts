@@ -249,6 +249,8 @@ test("legacy ranks run from MEGASTRIKER down, Free Titles A-Z", () => {
   const free = availableTitles(CATALOG, []).map((title) => title.name);
   assert.equal(free[0], "3 GHOSTS");
   assert.equal(free.at(-1), "WINS WITHOUT A GOALIE");
+  // Free Titles need no unlock: a player without any has the ones of 2026-11-09 as well.
+  assert.ok(free.includes("FEELING SO RECHARGED") && free.includes("MSC IS SO BACK!"));
   for (let index = 1; index < free.length; index += 1) {
     assert.ok(
       (free[index - 1] ?? "").localeCompare(free[index] ?? "", "en", { sensitivity: "base", numeric: true }) <= 0,
