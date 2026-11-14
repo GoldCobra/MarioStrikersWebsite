@@ -290,7 +290,8 @@ export const TITLE_CATALOG: readonly TitleDefinition[] = [
     24,
   ),
   // HOT FRIDAY #1 CHAMPION (owner, 2026-11-14): the first Hot Friday, an MSC tournament on the owner's stream;
-  // only these two players. Its look "hot-friday" is the orange the MSL SPRING/SUMMER/FALL CHAMPION titles had.
+  // only these two players. Its look "hot-friday" is the orange the MSL SPRING/SUMMER/FALL CHAMPION titles had,
+  // a little darker and more orange (availability.ts titleLook).
   ...inCategory(
     TITLE_CATEGORY.tournament,
     [

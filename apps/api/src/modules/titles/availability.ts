@@ -65,8 +65,8 @@ export function normalizeTitleCode(code: unknown): string {
 //   msl                 in groups: X-TIME WORLD CHAMPION (5 down to 2), WORLD CHAMPION, FALL, SUMMER, SPRING
 //                       CHAMPION; within a group by year, newest first (MSL SEASON 1 is 2021)
 //   competitive-season  by year, newest first; within a year the later season (SortOrder = season number)
-//   tournament          the green TOURNAMENT WINNER before the plain one, then the titles of one event
-//                       (HOT FRIDAY #1 CHAMPION, 2026-11-14) in list order
+//   tournament          first the titles of one event in list order (HOT FRIDAY #1 CHAMPION, right after the
+//                       season titles: owner 2026-11-14), then the green TOURNAMENT WINNER before the plain one
 //   legacy-rank         MEGASTRIKER down to ROOKIE
 //   free                A-Z
 //   any other           its place in the list (SortOrder)
@@ -105,7 +105,7 @@ function titleKey(title: CatalogTitle): SortKey {
       return [-titleYear(name), -title.sortOrder, game];
     case TITLE_CATEGORY.tournament: {
       const winner = title.ruleKind === "side-tournament-count";
-      return [winner ? (title.styleKey === "green" ? 0 : 1) : 2, game, title.sortOrder];
+      return [winner ? (title.styleKey === "green" ? 1 : 2) : 0, game, title.sortOrder];
     }
     case TITLE_CATEGORY.legacy:
       return [-title.exclusiveLevel, -title.sortOrder];
@@ -217,7 +217,8 @@ export function selectedTitle(
  *   msl                       #e8bc00 (the SPRING, SUMMER and FALL CHAMPION titles; #e09e00 until 2026-11-14,
  *                             a little yellower since then so they differ clearly from hot-friday, owner)
  *   tournament-x5             #77c300 (the green TOURNAMENT WINNER, style key "green")
- *   hot-friday                #e09e00 (HOT FRIDAY #1 CHAMPION, style key "hot-friday", owner 2026-11-14)
+ *   hot-friday                #da9000 (HOT FRIDAY #1 CHAMPION, style key "hot-friday", owner 2026-11-14: the old
+ *                             msl orange, a little darker and more orange)
  *   plain                     a category without a look of its own, like the Free Titles
  */
 export type TitleLook =
