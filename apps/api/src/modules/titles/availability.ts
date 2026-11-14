@@ -62,8 +62,8 @@ export function normalizeTitleCode(code: unknown): string {
 // The order of the title list (owner, 2026-10-02). Categories by their SortOrder, the global one (Free
 // Titles) always last, so a new category falls in before it (the developer titles follow the WFC titles,
 // owner 2026-10-20). Inside a category by its own rule:
-//   msl                 in groups: X-TIME WORLD CHAMPION (5 down to 2), WORLD CHAMPION, FALL, SUMMER, SPRING
-//                       CHAMPION; within a group by year, newest first (MSL SEASON 1 is 2021)
+//   msl                 per game, MSBL, MSC, SMS (owner 2026-11-14): X-TIME WORLD CHAMPION (5 down to 2), then
+//                       by year, newest first (MSL SEASON 1 is 2021), within a year WORLD, FALL, SUMMER, SPRING
 //   competitive-season  by year, newest first; within a year the later season (SortOrder = season number)
 //   tournament          first the titles of one event in list order (HOT FRIDAY #1 CHAMPION, right after the
 //                       season titles: owner 2026-11-14), then the green TOURNAMENT WINNER before the plain one
@@ -97,9 +97,9 @@ function titleKey(title: CatalogTitle): SortKey {
   switch (title.category) {
     case TITLE_CATEGORY.msl: {
       const times = N_TIME_WORLD_CHAMPION.exec(name);
-      if (times) return [0, -Number(times[1]), game, title.sortOrder];
+      if (times) return [game, 0, -Number(times[1]), 0, title.sortOrder];
       const event = MSL_EVENTS.findIndex((word) => name.includes(` ${word} `));
-      return [1 + (event < 0 ? MSL_EVENTS.length : event), -titleYear(name), game, title.sortOrder];
+      return [game, 1, -titleYear(name), event < 0 ? MSL_EVENTS.length : event, title.sortOrder];
     }
     case TITLE_CATEGORY.season:
       return [-titleYear(name), -title.sortOrder, game];
