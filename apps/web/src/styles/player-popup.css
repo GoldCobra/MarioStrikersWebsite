@@ -113,12 +113,19 @@ body.player-popup-open {
   color: var(--world-champion-color);
 }
 
+/* MSL SPRING/SUMMER/FALL CHAMPION: #e09e00 until 2026-11-14, then a little yellower (owner) so they differ
+   clearly from HOT FRIDAY #1 CHAMPION, which took that orange (CIEDE2000 9.9 from it, 11.9 from the world
+   champion's gold). */
 .player-title.is-look-msl {
-  color: #e09e00;
+  color: #e8bc00;
 }
 
 .player-title.is-look-tournament-x5 {
   color: #77c300;
+}
+
+.player-title.is-look-hot-friday {
+  color: #e09e00;
 }
 
 /* The ball of a title's game (MSL, tournament and season titles; player-profile-view.ts titleBallHtml), the

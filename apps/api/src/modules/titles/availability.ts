@@ -65,7 +65,8 @@ export function normalizeTitleCode(code: unknown): string {
 //   msl                 in groups: X-TIME WORLD CHAMPION (5 down to 2), WORLD CHAMPION, FALL, SUMMER, SPRING
 //                       CHAMPION; within a group by year, newest first (MSL SEASON 1 is 2021)
 //   competitive-season  by year, newest first; within a year the later season (SortOrder = season number)
-//   tournament          the green TOURNAMENT WINNER before the plain one
+//   tournament          the green TOURNAMENT WINNER before the plain one, then the titles of one event
+//                       (HOT FRIDAY #1 CHAMPION, 2026-11-14) in list order
 //   legacy-rank         MEGASTRIKER down to ROOKIE
 //   free                A-Z
 //   any other           its place in the list (SortOrder)
@@ -102,8 +103,10 @@ function titleKey(title: CatalogTitle): SortKey {
     }
     case TITLE_CATEGORY.season:
       return [-titleYear(name), -title.sortOrder, game];
-    case TITLE_CATEGORY.tournament:
-      return [title.styleKey === "green" ? 0 : 1, game, title.sortOrder];
+    case TITLE_CATEGORY.tournament: {
+      const winner = title.ruleKind === "side-tournament-count";
+      return [winner ? (title.styleKey === "green" ? 0 : 1) : 2, game, title.sortOrder];
+    }
     case TITLE_CATEGORY.legacy:
       return [-title.exclusiveLevel, -title.sortOrder];
     case TITLE_CATEGORY.free:
@@ -211,8 +214,10 @@ export function selectedTitle(
  *   special                   #aef7ff with glow
  *   developer                 #bfff72 with glow (RECHARGED DEV, owner 2026-10-20)
  *   msl-world                 #ffeb5c with glow (every MSL title naming WORLD CHAMPION, N-TIME included)
- *   msl                       #e09e00 (the SPRING, SUMMER and FALL CHAMPION titles)
+ *   msl                       #e8bc00 (the SPRING, SUMMER and FALL CHAMPION titles; #e09e00 until 2026-11-14,
+ *                             a little yellower since then so they differ clearly from hot-friday, owner)
  *   tournament-x5             #77c300 (the green TOURNAMENT WINNER, style key "green")
+ *   hot-friday                #e09e00 (HOT FRIDAY #1 CHAMPION, style key "hot-friday", owner 2026-11-14)
  *   plain                     a category without a look of its own, like the Free Titles
  */
 export type TitleLook =
@@ -224,6 +229,7 @@ export type TitleLook =
   | "msl"
   | "tournament"
   | "tournament-x5"
+  | "hot-friday"
   | "legacy"
   | "plain";
 
@@ -240,7 +246,8 @@ export function titleLook(title: Pick<CatalogTitle, "category" | "name" | "style
     case TITLE_CATEGORY.msl:
       return titleText(title.name).includes("WORLD CHAMPION") ? "msl-world" : "msl";
     case TITLE_CATEGORY.tournament:
-      return title.styleKey === "green" ? "tournament-x5" : "tournament";
+      if (title.styleKey === "green") return "tournament-x5";
+      return title.styleKey === "hot-friday" ? "hot-friday" : "tournament";
     case TITLE_CATEGORY.legacy:
       return "legacy";
     default:

@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { GIANT, GOLDCOBRA, GOLDENPALAZZO, TITLE_CATALOG, TITLE_CATEGORIES, seededCatalog } from "./catalog.ts";
+import {
+  EINBIRNENBAUM,
+  GIANT,
+  GOLDCOBRA,
+  GOLDENPALAZZO,
+  TITLE_CATALOG,
+  TITLE_CATEGORIES,
+  seededCatalog,
+} from "./catalog.ts";
 import { TITLE_GAMES } from "./games.ts";
 
 test("the catalog holds the 63 titles of the title list, the 18 game variants of 2026-10-02 and the later ones", () => {
@@ -8,7 +16,7 @@ test("the catalog holds the 63 titles of the title list, the 18 game variants of
   for (const title of TITLE_CATALOG) counts[title.category] = (counts[title.category] ?? 0) + 1;
   assert.deepEqual(counts, {
     msl: 40,
-    tournament: 8,
+    tournament: 9,
     "special-pre-2014": 5,
     "legacy-rank": 5,
     free: 25,
@@ -27,7 +35,20 @@ test("the catalog holds the 63 titles of the title list, the 18 game variants of
       ["msc-is-so-back", "MSC IS SO BACK!", "everyone", 25],
     ],
   );
-  assert.equal(TITLE_CATALOG.filter((title) => title.gameCode).length, 18);
+  // HOT FRIDAY #1 CHAMPION of 2026-11-14: an MSC title after the tournament titles of the list and their variants.
+  assert.deepEqual(
+    TITLE_CATALOG.filter((title) => title.category === "tournament" && title.sortOrder > 8).map((title) => [
+      title.code,
+      title.name,
+      title.ruleKind,
+      title.styleKey,
+      title.gameCode,
+      title.sortOrder,
+    ]),
+    [["hot-friday-1-champion", "HOT FRIDAY #1 CHAMPION", "fixed-players", "hot-friday", "MSC", 9]],
+  );
+  // The 18 game variants of 2026-10-02 and HOT FRIDAY #1 CHAMPION.
+  assert.equal(TITLE_CATALOG.filter((title) => title.gameCode).length, 19);
   assert.deepEqual(
     TITLE_CATEGORIES.map((category) => category.code),
     ["special-pre-2014", "developer", "msl", "competitive-season", "tournament", "legacy-rank", "free"],
@@ -143,7 +164,7 @@ test("the titles without a game that counted wins are retired; their variants co
   }
 });
 
-test("four WFC titles belong to their record holders for good, RECHARGED DEV to its developers", () => {
+test("four WFC titles belong to their record holders for good, RECHARGED DEV to its developers, HOT FRIDAY #1 CHAMPION to its two", () => {
   const owners = Object.fromEntries(
     TITLE_CATALOG.filter((title) => title.ruleKind === "fixed-players").map((title) => [
       title.code,
@@ -156,8 +177,10 @@ test("four WFC titles belong to their record holders for good, RECHARGED DEV to 
     "wfc-5012-daily-points-world-record": [GIANT],
     "wfc-final-daily-leader": [GOLDCOBRA],
     "recharged-dev": [GOLDCOBRA, GOLDENPALAZZO],
+    "hot-friday-1-champion": [GOLDCOBRA, EINBIRNENBAUM],
   });
   assert.deepEqual(GOLDCOBRA, { player_id: 223, discord_id: "195905866527014912" });
+  assert.deepEqual(EINBIRNENBAUM, { player_id: 9, discord_id: "415217672104574977" });
   assert.deepEqual(GIANT, { player_id: 17, discord_id: "110442894686453760" });
   assert.deepEqual(GOLDENPALAZZO, { player_id: 2441, discord_id: "330705166703525888" });
   const dev = TITLE_CATALOG.find((title) => title.code === "recharged-dev");

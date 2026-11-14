@@ -139,6 +139,8 @@ test("winner columns, legacy tiers and season title names are read strictly", ()
 test("the data awards exactly the clear titles of each game, with their sources", () => {
   const plan = planTitleAwards(sources());
   assert.deepEqual(describe(plan).sort(), [
+    // Player 9 is no player of this data, so of HOT FRIDAY #1 CHAMPION's two only GoldCobra gets it here.
+    "hot-friday-1-champion:223:MANUAL",
     "legacy-megastriker:1:LEGACY_RANK",
     "legacy-rookie:4:LEGACY_RANK",
     "legacy-superstar:2:LEGACY_RANK",

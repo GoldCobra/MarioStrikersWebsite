@@ -47,7 +47,12 @@ const BACKED_UP = ["dbo.PlayerTitle", "dbo.PlayerTitleUnlock", "dbo.PlayerActive
 export const EXPECTED_CHANGES = { template: 24, retired: 6, fixed: 4 } as const;
 
 /** Titles catalog.ts gained after this step; ops:player-titles adds them, this step leaves them alone. */
-export const LATER_TITLES: ReadonlySet<string> = new Set(["recharged-dev", "feeling-so-recharged", "msc-is-so-back"]);
+export const LATER_TITLES: ReadonlySet<string> = new Set([
+  "recharged-dev",
+  "feeling-so-recharged",
+  "msc-is-so-back",
+  "hot-friday-1-champion",
+]);
 const STEP_CATALOG = TITLE_CATALOG.filter((title) => !LATER_TITLES.has(title.code));
 /** The completed season whose STRIKERS TITAN titles the owner wanted for the test unlocks. */
 export const TEST_SEASON_NAME = "Burst Season 2026";
