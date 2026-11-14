@@ -226,18 +226,17 @@ test("the list follows the owner's order of categories and titles", () => {
   ]);
   // The developer titles right after the WFC titles (owner, 2026-10-20).
   assert.equal(order[5], "recharged-dev");
-  // MSL per game, MSBL, MSC, SMS (owner, 2026-11-14): X-TIME (5 down to 2), then by year (newest first, MSL SEASON
-  // 1 = 2021), within a year WORLD, FALL, SUMMER, SPRING CHAMPION.
+  // MSL (owner, 2026-11-14): the world champions in their own section, X-TIME (5 down to 2) and then WORLD CHAMPION
+  // by year, each in the order MSBL, MSC, SMS; then the split titles per game, by year (newest first, MSL SEASON 1 =
+  // 2021), within a year FALL, SUMMER, SPRING CHAMPION.
   const years = ["2026", "2025", "2024", "2023", "2022", "season-1"];
-  assert.deepEqual(
-    at("msl-"),
-    games.flatMap((game) => [
-      ...[5, 4, 3, 2].map((times) => `msl-${String(times)}-time-world-champion-${game}`),
-      ...years.flatMap((year) =>
-        ["world", "fall", "summer", "spring"].map((event) => `msl-${year}-${event}-champion-${game}`),
-      ),
-    ]),
-  );
+  assert.deepEqual(at("msl-"), [
+    ...[5, 4, 3, 2].flatMap((times) => games.map((game) => `msl-${String(times)}-time-world-champion-${game}`)),
+    ...years.flatMap((year) => games.map((game) => `msl-${year}-world-champion-${game}`)),
+    ...games.flatMap((game) =>
+      years.flatMap((year) => ["fall", "summer", "spring"].map((event) => `msl-${year}-${event}-champion-${game}`)),
+    ),
+  ]);
   assert.deepEqual(at("season-titan-"), [
     "season-titan-5-msbl",
     "season-titan-4-msbl",
