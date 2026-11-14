@@ -13,7 +13,7 @@ import {
   toTitleOption,
   type CatalogTitle,
 } from "./availability.ts";
-import { GIANT, GOLDCOBRA, GOLDENPALAZZO, TITLE_CATALOG, seededCatalog } from "./catalog.ts";
+import { EINBIRNENBAUM, GIANT, GOLDCOBRA, GOLDENPALAZZO, TITLE_CATALOG, seededCatalog } from "./catalog.ts";
 import { TITLE_GAMES, type TitleGameCode } from "./games.ts";
 
 const CATALOG = seededCatalog();
@@ -99,6 +99,20 @@ test("RECHARGED DEV is offered only to its developers, unlocked or not", () => {
   // An unlock alone is not enough: someone else, or a developer without the unlock, gets nothing.
   assert.equal(of(GIANT.player_id), false);
   assert.equal(of(GOLDENPALAZZO.player_id, []), false);
+});
+
+test("HOT FRIDAY #1 CHAMPION is offered only to its two players, with their unlock", () => {
+  const champion = id("hot-friday-1-champion");
+  const of = (playerId: number, unlocked: number[] = [champion]): boolean =>
+    availableTitles(CATALOG, unlocked, { playerId }).some((title) => title.id === champion);
+  assert.deepEqual(
+    [...(fixedTitleOwners(catalogTitle("hot-friday-1-champion")) ?? [])],
+    [GOLDCOBRA.player_id, EINBIRNENBAUM.player_id],
+  );
+  assert.equal(of(GOLDCOBRA.player_id), true);
+  assert.equal(of(EINBIRNENBAUM.player_id), true);
+  assert.equal(of(GOLDENPALAZZO.player_id), false);
+  assert.equal(of(EINBIRNENBAUM.player_id, []), false);
 });
 
 test("test unlocks add every title on top, every level, but never a template or a retired title", () => {
@@ -232,6 +246,8 @@ test("the list follows the owner's order of categories and titles", () => {
     ...games.map((game) => `tournament-winner-green-${game}`),
     ...games.map((game) => `tournament-winner-${game}`),
   ]);
+  // The title of one event follows the TOURNAMENT WINNER titles (2026-11-14).
+  assert.equal(order[order.indexOf("tournament-winner-sms") + 1], "hot-friday-1-champion");
   // Category blocks in order: special, developer, MSL, season, tournament, legacy, free.
   const block = (code: string): string => catalog.find((title) => title.code === code)?.category ?? "";
   assert.deepEqual(
@@ -342,6 +358,7 @@ test("every title has the look of its group: colour and glow are set once per lo
   assert.equal(looks["msl-4-time-world-champion-sms"], "msl-world");
   assert.equal(looks["tournament-winner-msbl"], "tournament");
   assert.equal(looks["tournament-winner-green-sms"], "tournament-x5");
+  assert.equal(looks["hot-friday-1-champion"], "hot-friday");
   assert.equal(looks["legacy-megastriker"], "legacy");
   // Every game variant keeps the look of the title it replaces.
   for (const title of TITLE_CATALOG.filter((entry) => entry.gameCode)) {

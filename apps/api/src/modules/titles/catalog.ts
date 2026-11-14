@@ -42,6 +42,8 @@ export const GOLDCOBRA = { player_id: 223, discord_id: "195905866527014912" } as
 export const GIANT = { player_id: 17, discord_id: "110442894686453760" } as const;
 /** Developers of MSC Recharged with a player (owner, 2026-10-20); Anosch follows once he has one. */
 export const GOLDENPALAZZO = { player_id: 2441, discord_id: "330705166703525888" } as const;
+/** HOT FRIDAY #1 CHAMPION goes to him and to the owner (owner, 2026-11-14). */
+export const EINBIRNENBAUM = { player_id: 9, discord_id: "415217672104574977" } as const;
 
 export interface TitleCategoryDefinition {
   readonly code: string;
@@ -286,6 +288,19 @@ export const TITLE_CATALOG: readonly TitleDefinition[] = [
       ["msc-is-so-back", "MSC IS SO BACK!", EVERYONE],
     ],
     24,
+  ),
+  // HOT FRIDAY #1 CHAMPION (owner, 2026-11-14): the first Hot Friday, an MSC tournament on the owner's stream;
+  // only these two players. Its look "hot-friday" is the orange the MSL SPRING/SUMMER/FALL CHAMPION titles had.
+  ...inCategory(
+    TITLE_CATEGORY.tournament,
+    [
+      [
+        "hot-friday-1-champion",
+        "HOT FRIDAY #1 CHAMPION",
+        { ...fixedTo(GOLDCOBRA, EINBIRNENBAUM), styleKey: "hot-friday", gameCode: "MSC" },
+      ],
+    ],
+    9,
   ),
 ];
 
