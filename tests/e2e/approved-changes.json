@@ -45,6 +45,14 @@
     {
       "screenshots": ["pages/msc-recharged-*"],
       "reason": "Owner 2026-10-26: the Recharged logo sits between the title and the description of /msc-recharged (assets/pc-ports/recharged-logo.webp, 720x393, cropped to the artwork; shown left-aligned like the setup guide images, min(100%, 360px) wide: 360px from 768px up, the full text column on phones). Everything below it moves down by the logo's height; the rest of the page and every other page are unchanged."
+    },
+    {
+      "screenshots": [
+        "states/profile-title-list-390",
+        "states/profile-title-list-1024",
+        "states/profile-title-list-1440"
+      ],
+      "reason": "Owner 2026-11-14 (#90): the MSL SPRING/SUMMER/FALL CHAMPION look turns a little yellower, #e09e00 -> #e8bc00, because HOT FRIDAY #1 CHAMPION takes that orange. The sample player's list holds one such title (MSL 2026 SPRING CHAMPION), so only that line's text changes colour (~1,060 px in each width; CI run 43580631116). The new title is not in the list (it belongs to two real players only); every other line, page and state is unchanged."
     }
   ]
 }
