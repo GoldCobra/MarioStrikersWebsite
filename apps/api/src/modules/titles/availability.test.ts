@@ -246,10 +246,13 @@ test("the list follows the owner's order of categories and titles", () => {
     ...games.map((game) => `tournament-winner-green-${game}`),
     ...games.map((game) => `tournament-winner-${game}`),
   ]);
-  // The title of one event follows the TOURNAMENT WINNER titles (2026-11-14).
-  assert.equal(order[order.indexOf("tournament-winner-sms") + 1], "hot-friday-1-champion");
   // Category blocks in order: special, developer, MSL, season, tournament, legacy, free.
   const block = (code: string): string => catalog.find((title) => title.code === code)?.category ?? "";
+  // The title of one event opens the tournament block: between the season titles and the green TOURNAMENT
+  // WINNER (owner, 2026-11-14).
+  const hotFriday = order.indexOf("hot-friday-1-champion");
+  assert.equal(block(order[hotFriday - 1] ?? ""), "competitive-season");
+  assert.equal(order[hotFriday + 1], "tournament-winner-green-msbl");
   assert.deepEqual(
     [...new Set(order.map(block))],
     ["special-pre-2014", "developer", "msl", "competitive-season", "tournament", "legacy-rank", "free"],
