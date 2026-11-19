@@ -267,6 +267,18 @@ titles' place of 2026-10-20 (`_20261020`); `npm run ops:title-test-unlocks` gran
 or revokes a player's test unlocks. A new title of a known kind is one row in
 `dbo.PlayerTitle` (or a line in `catalog.ts` plus `ops:player-titles`).
 
+**Club management** ([ADR 0012](adr/0012-club-management-on-the-website.md),
+`modules/clubs/`; being built). Clubs are going to be managed on the website only;
+Robotic Nightmare performs the effects (DMs, nickname tags, #club-transfers posts)
+from the outbox `dbo.ClubEvent`. `schema.ts` holds the additive schema: `dbo.Club`
+gains `PublicId` (the backend club id) and the timestamps of the new-club counter,
+`dbo.ClubRoster` the join date and the absence stamp, and new tables hold the mode
+(`dbo.ClubSystemState`), invitations, per-player state, rejoin blocks, the outbox and
+uploaded logos. `npm run ops:club-schema` applies it in steps (`-- --backup`, a dry
+run, `-- --apply`, `-- --drop-backups`); `npm run ops:club-cleanup -- --ids=…`
+deletes listed clubs without members (a dry run without `-- --apply`). The game's
+value lists and the name, tag and id rules live in `packages/shared/src/clubs.ts`.
+
 Responses use snake_case keys throughout; code inside the API uses camelCase
 and converts at the route (the season route shows how, since its cached
 snapshot keeps the service's shape).
