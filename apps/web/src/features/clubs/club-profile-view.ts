@@ -136,12 +136,16 @@ export function createdDate(value: unknown): string {
   return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
 }
 
-/** The role's badge: the club's owner (on My Club its captain) and its officers; nothing for a member. */
+/**
+ * The role's badge: CAPTAIN for the club's captain (the API's "owner" in the public profile, "captain" on My Club;
+ * owner 2026-11-19) and OFFICER; nothing for a member.
+ */
 export function roleBadgeHtml(role: unknown): string {
   const normalized = toText(role).trim().toLowerCase();
   if (normalized !== "owner" && normalized !== "captain" && normalized !== "officer") return "";
   const look = normalized === "officer" ? "officer" : "owner";
-  return `<span class="club-popup-role-badge is-${look}"><span class="club-popup-role-label">${normalized.toUpperCase()}</span></span>`;
+  const label = normalized === "officer" ? "OFFICER" : "CAPTAIN";
+  return `<span class="club-popup-role-badge is-${look}"><span class="club-popup-role-label">${label}</span></span>`;
 }
 
 /** One roster line: flag, name and Discord username, the role's badge, and `extra` (My Club's actions). */
