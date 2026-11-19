@@ -8,7 +8,7 @@ function recordset(result: { recordset?: unknown }): Row[] {
   return Array.isArray(result.recordset) ? (result.recordset as Row[]) : [];
 }
 
-/** Clubs with at least one member, biggest first. */
+/** Clubs with at least one member, biggest first, with the new-club counter's inactive mark. */
 export async function fetchClubs(pool: Pool): Promise<Row[]> {
   const query = [
     "SELECT",
@@ -25,10 +25,11 @@ export async function fetchClubs(pool: Pool): Promise<Row[]> {
     "  c.ClubCode3 AS club_code3,",
     "  c.Logo AS logo,",
     "  c.Activity AS activity,",
+    "  c.InactiveSinceUtc AS inactive_since,",
     "  COUNT(cr.Player) AS member_count",
     "FROM Club c",
     "LEFT JOIN ClubRoster cr ON cr.Club = c.ID",
-    "GROUP BY c.ID, c.ClanTag, c.ClubName, c.JoinConditions, c.IsOpen, c.Region, c.Region2, c.Region3, c.ClubCode, c.ClubCode2, c.ClubCode3, c.Logo, c.Activity",
+    "GROUP BY c.ID, c.ClanTag, c.ClubName, c.JoinConditions, c.IsOpen, c.Region, c.Region2, c.Region3, c.ClubCode, c.ClubCode2, c.ClubCode3, c.Logo, c.Activity, c.InactiveSinceUtc",
     "HAVING COUNT(cr.Player) > 0",
     "ORDER BY COUNT(cr.Player) DESC, LTRIM(RTRIM(ISNULL(c.ClubName, ''))) ASC, LTRIM(RTRIM(ISNULL(c.ClanTag, ''))) ASC",
   ].join(" ");

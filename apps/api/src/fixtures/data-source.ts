@@ -8,10 +8,14 @@ import { COMPETITIVE_SEASON_KEY, MSBL_CLUBS_KEY, PLAYERS_LIST_KEY } from "../cac
 import type { CacheResult } from "../cache/public-data-cache.ts";
 import type { DataSource } from "../data-source.ts";
 import { createMemoryAdminAuditStore } from "../modules/admin/audit.ts";
-import type { AdminAccess } from "../modules/admin/guard.ts";
+import { AdminGuard, type AdminAccess } from "../modules/admin/guard.ts";
 import type { DiscordLogin, DiscordOAuthClient } from "../modules/auth/discord-oauth.ts";
 import { SessionManager } from "../modules/auth/session.ts";
+import { createClubManagement } from "../modules/clubs/management.ts";
 import type { ClubListItem, ClubProfile, RosterRow } from "../modules/clubs/mappers.ts";
+import type { GuildMemberSnapshot, SnapshotMember } from "../integrations/discord/guild-members.ts";
+import { clubNameKey, CLUB_PUBLIC_ID_ALPHABET } from "@ms/shared/clubs";
+import { createMemoryClubStore, type MemoryClub } from "./club-store.ts";
 import type { EventsPayload } from "../modules/events/service.ts";
 import { assertGameAndMode, parseLimit, parseOffset, type GameCode } from "../modules/leaderboards/params.ts";
 import type { LeaderboardRow } from "../modules/leaderboards/service.ts";
@@ -364,6 +368,8 @@ function sampleProfileStats(): ProfileStats {
 export interface FixtureOptions {
   /** MSC_FIXTURE_NOW: pins every timestamp and the session clock. */
   readonly fixedNow?: string;
+  /** My Club's mode with fixtures (default "on", so the page can be developed locally). */
+  readonly clubMode?: "off" | "admins" | "on";
 }
 
 export function createFixtureDataSource(options: FixtureOptions = {}): DataSource {
@@ -432,6 +438,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
   });
   for (const club of clubs) club.member_count = players.filter((player) => player.club_id === club.club_id).length;
 
+  const fakeDiscordId = (playerId: number): string => `9200000000000${String(playerId).padStart(5, "0")}`;
   const discordIdFor = (player: { player_id: number }): string | null => {
     if (player.player_id === 1) return linkedUser.id;
     return player.player_id % 3 === 0 ? `9100000000000000${String(player.player_id).padStart(2, "0")}` : null;
@@ -946,6 +953,117 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
     throw new Error("Unknown fixture data key.");
   }
 
+  // My Club with fixtures (docs/adr/0012): the fixture clubs and players in memory; the sample logins are on the
+  // server since 400 days, fixture players with a Discord id too.
+  const fixtureClubId = (clubId: number): string =>
+    Array.from({ length: 8 }, (_, index) => CLUB_PUBLIC_ID_ALPHABET.charAt((clubId * 7 + index * 13) % 57)).join("");
+  const clubStore = createMemoryClubStore({
+    keyOf: clubNameKey,
+    mode: { mode: options.clubMode ?? "on", goLiveAt: null },
+    clubs: clubs.map((club, index): MemoryClub => {
+      const clubId = club.club_id ?? index + 1;
+      const first = players.find((player) => player.club_id === clubId);
+      return {
+        clubId,
+        publicId: fixtureClubId(clubId),
+        name: club.name,
+        tag: club.tag,
+        ownerDiscordId: first ? (discordIdFor(first) ?? fakeDiscordId(first.player_id)) : "",
+        settings: {
+          isOpen: club.is_open,
+          regions: club.regions,
+          clubCodes: club.club_codes,
+          firstUniform: "",
+          secondUniform: "",
+          stadium: "",
+          discordUrl: "",
+        },
+        logoUrl: club.logo,
+        createdAt: now - (400 + clubId * 30) * DAY_MS,
+        establishedAt: now - 300 * DAY_MS,
+        streakSince: null,
+        inactiveSince: null,
+        inactiveWarnedAt: null,
+        deletionWarnedAt: null,
+        activity: club.activity ? Date.parse(club.activity) : null,
+      };
+    }),
+    players: players.map((player) => ({
+      playerId: player.player_id,
+      discordId: discordIdFor(player) ?? fakeDiscordId(player.player_id),
+      name: player.name,
+      country: player.country,
+    })),
+  });
+  for (const club of clubs) {
+    players
+      .filter((player) => player.club_id === club.club_id)
+      .forEach((player, index) => {
+        clubStore.addMember(club.club_id ?? 0, player.player_id, { isOfficer: index < 2 });
+      });
+  }
+  const loginMember = (login: DiscordLogin): SnapshotMember => ({
+    id: toText(login.user.id),
+    username: toText(login.user.username),
+    globalName: toText(login.user.global_name),
+    nick: login.nick,
+    roles: login.roles,
+    joinedAt: now - 400 * DAY_MS,
+  });
+  const memberSnapshot: GuildMemberSnapshot = {
+    takenAt: now,
+    members: new Map([
+      ...Object.values(loginsByCode).map((login): [string, SnapshotMember] => [
+        toText(login.user.id),
+        loginMember(login),
+      ]),
+      ...players
+        .filter((player) => discordIdFor(player) !== null)
+        .map((player): [string, SnapshotMember] => {
+          const id = discordIdFor(player) ?? "";
+          const username = player.name.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+          return [id, { id, username, globalName: player.name, nick: "", roles: [], joinedAt: now - 500 * DAY_MS }];
+        }),
+    ]),
+  };
+  const clubMembers: GuildMemberLookup = {
+    getMember: (discordId) => {
+      const listed = memberSnapshot.members.get(discordId);
+      if (!listed) return Promise.resolve({ ...UNKNOWN_MEMBER, membership: "not_member" });
+      return Promise.resolve({
+        membership: "member",
+        nick: listed.nick,
+        username: listed.username,
+        globalName: listed.globalName,
+        roles: listed.roles,
+        ...(listed.joinedAt === null ? {} : { joinedAt: listed.joinedAt }),
+      });
+    },
+  };
+  const profiles = createProfileService({ store: profileStore, members });
+  const fixtureAdminGuard = new AdminGuard(admin, sessions, nowFn);
+  const clubManagement = createClubManagement({
+    store: clubStore,
+    members: clubMembers,
+    memberList: { get: () => Promise.resolve(memberSnapshot) },
+    ensurePlayer: async (identity) => {
+      const { playerId } = await profiles.ensurePlayer(identity);
+      if (!clubStore.players.has(playerId)) {
+        clubStore.players.set(playerId, {
+          playerId,
+          discordId: identity.id,
+          name: identity.globalName || identity.username,
+          country: "",
+        });
+      }
+      return { playerId };
+    },
+    isAdmin: async (cookie) => (await fixtureAdminGuard.check(cookie)).ok,
+    adminRoleIds: [FIXTURE_ADMIN_ROLE],
+    logoUrl: (club) => Promise.resolve(club.logoUrl),
+    now: nowFn,
+  });
+
   return {
     source: "fixtures",
     now: nowFn,
@@ -969,7 +1087,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
       const created = createdPlayers.get(discordId);
       return Promise.resolve(created ? buildNewPlayerProfile(created) : null);
     },
-    profiles: createProfileService({ store: profileStore, members }),
+    profiles,
     getProfileStatsByDiscordId: (discordId) => {
       if (discordId === linkedUser.id) return Promise.resolve(sampleProfileStats());
       return Promise.resolve(createdPlayers.has(discordId) ? newProfileStats() : null);
@@ -1001,6 +1119,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
       ]),
     login: { sessions, oauth },
     admin,
+    clubs: clubManagement,
     start: () => undefined,
     stop: () => Promise.resolve(),
   };

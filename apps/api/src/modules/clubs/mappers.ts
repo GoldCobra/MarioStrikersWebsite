@@ -5,6 +5,8 @@ import { normalizeText, toText } from "@ms/shared/text";
 import { isActivityActive, toActivityIso } from "../../lib/dates.ts";
 import { normalizeDiscordId } from "../../lib/discord-id.ts";
 import { normalizeSourceUrl } from "./logo-cache.ts";
+import type { InviteCandidate, MyClubView } from "./management.ts";
+import type { ClubRefusal } from "./rules.ts";
 
 type Row = Record<string, unknown>;
 
@@ -97,6 +99,11 @@ function isExcludedClubLogo(tag: string, name: string): boolean {
   );
 }
 
+/** The stored logo URL a club's logo is downloaded from; "" for none (and for logos that belong to someone else). */
+export function clubLogoSource(tag: string, name: string, logo: unknown): string {
+  return isExcludedClubLogo(tag, name) ? "" : normalizeSourceUrl(logo);
+}
+
 function normalizeMemberCount(value: unknown): number {
   const parsed = Number(value);
   return !Number.isFinite(parsed) || parsed < 0 ? 0 : Math.floor(parsed);
@@ -138,10 +145,11 @@ export function toMsblClubDTO(
     club_code: isOpen ? normalizeText(row.club_code) : "",
     club_codes: isOpen ? compactTextList([row.club_code, row.club_code2, row.club_code3]) : [],
     regions: compactTextList([row.region, row.region2, row.region3]),
-    logo_source: isExcludedClubLogo(tag, name) ? "" : normalizeSourceUrl(row.logo),
+    logo_source: clubLogoSource(tag, name, row.logo),
     logo: "",
     activity: toActivityIso(row.activity),
-    is_active: isActivityActive(row.activity, options.now, options.activityWindowDays),
+    // The 90-day rule; a new club the counter marked inactive (dbo.Club.InactiveSinceUtc) is inactive regardless.
+    is_active: !row.inactive_since && isActivityActive(row.activity, options.now, options.activityWindowDays),
     member_count: normalizeMemberCount(row.member_count),
   };
 }
@@ -183,5 +191,111 @@ export function buildRosterRow(row: Row, ownerDiscordId: string): RosterRow {
     is_owner: isOwner,
     is_officer: isOfficer,
     role: toRosterRole(isOwner, isOfficer),
+  };
+}
+
+// ---------------------------------------------------------------------------------------------------
+// My Club (management.ts) as the API sends it
+
+const isoOrNull = (value: number | null): string | null => (value === null ? null : new Date(value).toISOString());
+
+export function toRefusalBody(refusal: ClubRefusal): Record<string, unknown> {
+  return {
+    error: refusal.message,
+    code: refusal.code,
+    ...(refusal.until === undefined ? {} : { until: new Date(refusal.until).toISOString() }),
+  };
+}
+
+export function toMyClubResponse(view: MyClubView): Record<string, unknown> {
+  const { club } = view;
+  return {
+    player_id: view.playerId,
+    club: club
+      ? {
+          club_id: club.clubId,
+          name: club.name,
+          tag: club.tag,
+          logo: club.logo,
+          is_open: club.settings.isOpen,
+          status: resolveOpenStatus(club.settings.isOpen),
+          regions: club.settings.regions,
+          club_codes: club.settings.clubCodes,
+          first_uniform: club.settings.firstUniform,
+          second_uniform: club.settings.secondUniform,
+          stadium: club.settings.stadium,
+          discord_url: club.settings.discordUrl,
+          settings_version: club.settingsVersion,
+          activity: isoOrNull(club.activity),
+          is_active: club.isActive,
+          created_at: isoOrNull(club.createdAt),
+          inactive_at: isoOrNull(club.inactiveAt),
+          deletion_at: isoOrNull(club.deletionAt),
+          role: club.role,
+          permissions: {
+            invite: club.permissions.invite,
+            edit_settings: club.permissions.editSettings,
+            confirm_activity: club.permissions.confirmActivity,
+            promote: club.permissions.promote,
+            delete_club: club.permissions.deleteClub,
+            leave: club.permissions.leave,
+          },
+          officers: { count: club.officers.count, max: club.officers.max },
+          members: club.members.map((member) => ({
+            player_id: member.playerId,
+            name: member.name,
+            country: member.country,
+            discord_name: member.discordName,
+            role: member.role,
+            joined_at: isoOrNull(member.joinedAt),
+            absent: member.absent,
+            actions: { ...member.actions },
+          })),
+          invitations: club.invitations.map((invitation) => ({
+            id: invitation.id,
+            player_id: invitation.playerId,
+            name: invitation.name,
+            invited_by: invitation.invitedBy,
+            created_at: new Date(invitation.createdAt).toISOString(),
+            expires_at: new Date(invitation.expiresAt).toISOString(),
+          })),
+        }
+      : null,
+    invitations: view.invitations.map((invitation) => ({
+      id: invitation.id,
+      club_id: invitation.clubId,
+      club_name: invitation.clubName,
+      club_tag: invitation.clubTag,
+      invited_by: invitation.invitedBy,
+      created_at: new Date(invitation.createdAt).toISOString(),
+      expires_at: new Date(invitation.expiresAt).toISOString(),
+    })),
+    create: {
+      allowed: view.create.allowed,
+      reason: view.create.refusal ? toRefusalBody(view.create.refusal) : null,
+    },
+    join_cooldown_until: isoOrNull(view.joinCooldownUntil),
+    join_blocks: view.joinBlocks.map((block) => ({
+      club_id: block.clubId,
+      until: new Date(block.until).toISOString(),
+    })),
+  };
+}
+
+export function toCandidatesResponse(result: {
+  readonly candidates: readonly InviteCandidate[];
+  readonly total: number;
+  readonly page: number;
+}): Record<string, unknown> {
+  return {
+    total: result.total,
+    page: result.page,
+    candidates: result.candidates.map((candidate) => ({
+      player_id: candidate.playerId,
+      name: candidate.name,
+      discord_name: candidate.discordName,
+      country: candidate.country,
+      invitable_from: isoOrNull(candidate.blockedUntil),
+    })),
   };
 }

@@ -14,6 +14,9 @@ import {
   toClubRegion,
   toClubStadium,
   toClubUniform,
+  validateClubSettings,
+  validateNewClub,
+  type ClubSettingsValue,
 } from "./clubs.ts";
 
 test("the club id alphabet has 57 symbols without look-alikes", () => {
@@ -75,4 +78,90 @@ test("only Discord invite links count as a club's Discord", () => {
   ]) {
     assert.equal(isDiscordInviteUrl(url), false, url);
   }
+});
+
+const SETTINGS = {
+  is_open: true,
+  regions: ["eu", "North America"],
+  club_codes: ["ABC1234"],
+  first_uniform: "red",
+  second_uniform: "Blue",
+  stadium: "planetoid",
+  discord_url: "https://discord.gg/abc",
+};
+
+function settingsErrors(input: unknown, stored?: ClubSettingsValue): string[] {
+  const result = validateClubSettings(input, stored);
+  return result.ok ? [] : result.errors.map((error) => `${error.field}:${error.code}`);
+}
+
+test("valid settings come back in their stored form", () => {
+  assert.deepEqual(validateClubSettings(SETTINGS), {
+    ok: true,
+    value: {
+      isOpen: true,
+      regions: ["EU", "NA"],
+      clubCodes: ["ABC1234"],
+      firstUniform: "Red",
+      secondUniform: "Blue",
+      stadium: "Planetoid",
+      discordUrl: "https://discord.gg/abc",
+    },
+  });
+  const minimal = { is_open: false, regions: ["SSA"], club_codes: ["ZZZ9999"] };
+  assert.equal(validateClubSettings(minimal).ok, true, "uniforms, stadium and Discord are optional");
+});
+
+test("regions and club codes: one to three, from the list, each once", () => {
+  assert.deepEqual(settingsErrors({ ...SETTINGS, regions: [] }), ["regions:REQUIRED"]);
+  assert.deepEqual(settingsErrors({ ...SETTINGS, regions: ["EU", "NA", "SA", "OCE"] }), ["regions:TOO_MANY"]);
+  assert.deepEqual(settingsErrors({ ...SETTINGS, regions: ["EU", "eu"] }), ["regions:DUPLICATE"]);
+  assert.deepEqual(settingsErrors({ ...SETTINGS, regions: ["Mars"] }), ["regions:INVALID"]);
+  assert.deepEqual(settingsErrors({ ...SETTINGS, club_codes: [] }), ["club_codes:REQUIRED"]);
+  assert.deepEqual(settingsErrors({ ...SETTINGS, club_codes: ["ABC123", "ABC1234"] }), ["club_codes.0:INVALID"]);
+  assert.deepEqual(settingsErrors({ ...SETTINGS, club_codes: ["ABC1234", "abc1234"] }), ["club_codes.1:DUPLICATE"]);
+  assert.deepEqual(settingsErrors({ ...SETTINGS, club_codes: ["AAAAAAA", "BBBBBBB", "CCCCCCC", "DDDDDDD"] }), [
+    "club_codes:TOO_MANY",
+  ]);
+  assert.deepEqual(settingsErrors({ ...SETTINGS, regions: "EU" }), ["regions:INVALID"]);
+});
+
+test("uniforms are both or none, one warm and one cool", () => {
+  assert.deepEqual(settingsErrors({ ...SETTINGS, second_uniform: "" }), ["uniforms:UNIFORM_PAIR"]);
+  assert.deepEqual(settingsErrors({ ...SETTINGS, second_uniform: "Green" }), ["uniforms:UNIFORM_GROUPS"]);
+  assert.deepEqual(settingsErrors({ ...SETTINGS, second_uniform: "Silver" }), ["uniforms:INVALID"]);
+  assert.deepEqual(settingsErrors({ ...SETTINGS, first_uniform: "", second_uniform: "" }), []);
+});
+
+test("an older pair, stadium or link may stay while it is left unchanged", () => {
+  const stored: ClubSettingsValue = {
+    isOpen: false,
+    regions: [],
+    clubCodes: [],
+    firstUniform: "o.red",
+    secondUniform: "b.white",
+    stadium: "",
+    discordUrl: "https://discord.io/h0axttv",
+  };
+  const legacy = { ...SETTINGS, first_uniform: "o.red", second_uniform: "b.white", discord_url: stored.discordUrl };
+  assert.deepEqual(settingsErrors(legacy, stored), []);
+  assert.deepEqual(settingsErrors(legacy), ["uniforms:INVALID", "discord_url:INVALID"], "without the stored values");
+  assert.deepEqual(settingsErrors({ ...legacy, second_uniform: "Blue" }, stored), ["uniforms:INVALID"]);
+  assert.deepEqual(settingsErrors({ ...SETTINGS, regions: [] }, stored), ["regions:REQUIRED"], "F8: a region now");
+});
+
+test("a new club needs a name, a tag that is not blocked, and valid settings", () => {
+  const result = validateNewClub({ ...SETTINGS, name: "  Hammer   Bros ", tag: "HB" });
+  assert.equal(result.ok, true);
+  assert.equal(result.value.name, "Hammer Bros");
+  const errors = (input: unknown): string[] => {
+    const outcome = validateNewClub(input);
+    return outcome.ok ? [] : outcome.errors.map((error) => `${error.field}:${error.code}`);
+  };
+  assert.deepEqual(errors({ ...SETTINGS, name: "", tag: "" }), ["name:REQUIRED", "tag:REQUIRED"]);
+  assert.deepEqual(errors({ ...SETTINGS, name: "Ross’ Strikers", tag: "H.O.F" }), ["name:INVALID", "tag:INVALID"]);
+  assert.deepEqual(errors({ ...SETTINGS, name: "x".repeat(51), tag: "TOOLONG" }), ["name:TOO_LONG", "tag:TOO_LONG"]);
+  assert.deepEqual(errors({ ...SETTINGS, name: "Staff", tag: "mod" }), ["tag:BLOCKED"]);
+  assert.deepEqual(errors({ name: "Club", tag: "CL" }), ["is_open:INVALID", "regions:REQUIRED", "club_codes:REQUIRED"]);
+  assert.deepEqual(errors("nope"), ["request:INVALID"]);
 });

@@ -23,10 +23,10 @@ import {
   backupTableName,
   deleteEmptyClubs,
   dropClubBackups,
-  generateClubPublicId,
   publicIdDefaultSql,
   utcStamp,
 } from "./schema.ts";
+import { generateClubPublicId } from "./rules.ts";
 
 const STAMP = "20261119";
 

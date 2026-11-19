@@ -14,7 +14,8 @@ events and Wiimmfi results from `apps/api/src/fixtures/data-source.ts`. It does 
 require or use production credentials. Login with Discord is simulated locally:
 you can inspect a sample account and log out without contacting Discord; the
 second sample account has no profile and gets a new one at login. Changes made
-on the profile page are kept in memory until the API restarts. It does not validate real OAuth, guild
+on the profile page and in My Club (`/api/my-club`, open in fixture mode; the
+fixture clubs and players, an in-memory store) are kept in memory until the API restarts. It does not validate real OAuth, guild
 membership or live database behavior.
 
 `npm run dev` selects fixtures explicitly; `npm start` remains the live API
@@ -52,7 +53,7 @@ at **http://localhost:8787** (the API reads `apps/api/.env`). Missing service co
 corresponding API calls to fail; other pages and browser save tools remain
 available. A live database smoke check is `npm run ops:check-db --workspace=@ms/api`;
 run it only when the intended database connection is configured. Live development
-never awards player titles by itself; `npm run ops:title-sync --workspace=@ms/api`
+never awards player titles or runs the club lifecycle job by itself; `npm run ops:title-sync --workspace=@ms/api`
 reports what the data would award (and writes it with `-- --apply`).
 
 ## Checks and troubleshooting
