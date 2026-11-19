@@ -26,10 +26,12 @@ export async function fetchClubs(pool: Pool): Promise<Row[]> {
     "  c.Logo AS logo,",
     "  c.Activity AS activity,",
     "  c.InactiveSinceUtc AS inactive_since,",
+    "  l.Hash AS logo_hash,",
     "  COUNT(cr.Player) AS member_count",
     "FROM Club c",
     "LEFT JOIN ClubRoster cr ON cr.Club = c.ID",
-    "GROUP BY c.ID, c.ClanTag, c.ClubName, c.JoinConditions, c.IsOpen, c.Region, c.Region2, c.Region3, c.ClubCode, c.ClubCode2, c.ClubCode3, c.Logo, c.Activity, c.InactiveSinceUtc",
+    "LEFT JOIN dbo.ClubLogo l ON l.ClubId = c.ID",
+    "GROUP BY c.ID, c.ClanTag, c.ClubName, c.JoinConditions, c.IsOpen, c.Region, c.Region2, c.Region3, c.ClubCode, c.ClubCode2, c.ClubCode3, c.Logo, c.Activity, c.InactiveSinceUtc, l.Hash",
     "HAVING COUNT(cr.Player) > 0",
     "ORDER BY COUNT(cr.Player) DESC, LTRIM(RTRIM(ISNULL(c.ClubName, ''))) ASC, LTRIM(RTRIM(ISNULL(c.ClanTag, ''))) ASC",
   ].join(" ");
@@ -58,8 +60,10 @@ export async function fetchClub(pool: Pool, clubId: number): Promise<Row | undef
     "  c.DiscordServer AS discord_server,",
     "  c.Logo AS logo,",
     "  c.Owner AS owner_raw,",
-    "  c.CreatedAtUtc AS created_at",
+    "  c.CreatedAtUtc AS created_at,",
+    "  l.Hash AS logo_hash",
     "FROM Club c",
+    "LEFT JOIN dbo.ClubLogo l ON l.ClubId = c.ID",
     "WHERE c.ID = @clubId",
   ].join(" ");
   return recordset(await request.query(query))[0];
@@ -80,4 +84,24 @@ export async function fetchRoster(pool: Pool, clubId: number): Promise<Row[]> {
     "WHERE cr.Club = @clubId",
   ].join(" ");
   return recordset(await request.query(query));
+}
+
+/** Every uploaded logo's club id and hash (the logo route's index, uploaded-logos.ts). */
+export async function fetchUploadedLogoHashes(pool: Pool): Promise<Map<number, string>> {
+  const rows = recordset(await pool.request().query("SELECT ClubId, Hash FROM dbo.ClubLogo;"));
+  return new Map(rows.map((row) => [Number(row.ClubId), String(row.Hash)]));
+}
+
+/** An uploaded logo (dbo.ClubLogo), served by the logo route; undefined when the club has none. */
+export async function fetchUploadedLogo(
+  pool: Pool,
+  clubId: number,
+): Promise<{ contentType: string; hash: string; data: Buffer } | undefined> {
+  const request = pool.request();
+  request.input("clubId", clubId);
+  const row = recordset(
+    await request.query("SELECT ContentType, Hash, Data FROM dbo.ClubLogo WHERE ClubId = @clubId;"),
+  )[0];
+  if (!row || !Buffer.isBuffer(row.Data)) return undefined;
+  return { contentType: String(row.ContentType), hash: String(row.Hash), data: row.Data };
 }

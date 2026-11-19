@@ -144,6 +144,15 @@ export interface NewClubRow {
   readonly activity: number;
 }
 
+/** A processed logo as dbo.ClubLogo stores it. */
+export interface StoredLogo {
+  readonly contentType: "image/webp";
+  readonly data: Uint8Array;
+  readonly width: number;
+  readonly height: number;
+  readonly hash: string;
+}
+
 export interface ClubEventDraft {
   readonly type: ClubEventType;
   readonly clubId: ClubRef;
@@ -188,6 +197,9 @@ export type PlanStep =
       readonly expiresAt: number;
     }
   | { readonly kind: "closeInvitations"; readonly ids: readonly number[]; readonly status: InvitationStatus }
+  /** F6: the processed logo (dbo.ClubLogo), replacing the club's previous one. */
+  | { readonly kind: "setLogo"; readonly clubId: number; readonly logo: StoredLogo }
+  | { readonly kind: "removeLogo"; readonly clubId: number }
   | { readonly kind: "event"; readonly event: ClubEventDraft }
   | { readonly kind: "log"; readonly command: string; readonly parameters: Readonly<Record<string, unknown>> };
 
@@ -217,7 +229,12 @@ export type ClubRefusalCode =
   | "NAME_TAKEN"
   | "TAG_TAKEN"
   | "CONFIRMATION_MISMATCH"
-  | "CLUB_CHANGED";
+  | "CLUB_CHANGED"
+  | "LOGO_TYPE"
+  | "LOGO_TOO_LARGE"
+  | "LOGO_DIMENSIONS"
+  | "LOGO_ANIMATED"
+  | "LOGO_UNREADABLE";
 
 export interface ClubRefusal {
   readonly ok: false;
@@ -966,6 +983,42 @@ export function decideConfirmActivity(state: LockedState): Decision<{ readonly a
     ],
     { activity: state.now },
   );
+}
+
+/**
+ * F6: the captain and the officers set the club's logo; Club.Logo then names its public URL (with the hash), so
+ * the bot's /club info and its API show the uploaded logo too.
+ */
+export function decideSetLogo(
+  state: LockedState,
+  logo: StoredLogo,
+  urlOf: (clubId: number) => string,
+): Decision<{ readonly hash: string }> {
+  const club = managersClub(state);
+  if ("ok" in club) return club;
+  return done(
+    [
+      { kind: "setLogo", clubId: club.clubId, logo },
+      { kind: "updateClub", clubId: club.clubId, set: { logo: urlOf(club.clubId) } },
+      log("WebsiteClubLogo", { club_id: club.clubId, by: state.actor.playerId, hash: logo.hash }),
+    ],
+    { hash: logo.hash },
+  );
+}
+
+/** The logo goes (an uploaded one and an older link alike). */
+export function removeLogoPlan(club: Pick<ClubState, "clubId">, by: Record<string, unknown>): PlanStep[] {
+  return [
+    { kind: "removeLogo", clubId: club.clubId },
+    { kind: "updateClub", clubId: club.clubId, set: { logo: null } },
+    log("WebsiteClubLogoRemoved", { club_id: club.clubId, ...by }),
+  ];
+}
+
+export function decideRemoveLogo(state: LockedState): Decision<{ readonly clubId: number }> {
+  const club = managersClub(state);
+  if ("ok" in club) return club;
+  return done(removeLogoPlan(club, { by: state.actor.playerId }), { clubId: club.clubId });
 }
 
 /** C2: only the captain, confirmed by typing the club's tag exactly. */

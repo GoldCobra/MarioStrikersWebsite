@@ -27,6 +27,8 @@ import { ClubLogoCache, type LogoFile } from "./modules/clubs/logo-cache.ts";
 import { createSqlClubStore } from "./modules/clubs/management-repository.ts";
 import { createClubManagement, type ClubManagement } from "./modules/clubs/management.ts";
 import { clubLogoSource, type ClubProfile } from "./modules/clubs/mappers.ts";
+import { fetchUploadedLogo, fetchUploadedLogoHashes } from "./modules/clubs/repository.ts";
+import { createUploadedLogos, type UploadedLogo } from "./modules/clubs/uploaded-logos.ts";
 import { getMsblClubProfile, getMsblClubs } from "./modules/clubs/service.ts";
 import { CommunityEventsCache, fetchCommunityEvents, type EventsPayload } from "./modules/events/service.ts";
 import { getLeaderboardRows, type LeaderboardQuery, type LeaderboardRow } from "./modules/leaderboards/service.ts";
@@ -40,6 +42,8 @@ import { getCompetitiveSeasonStatus } from "./modules/season/service.ts";
 import { createTitleCatalog } from "./modules/titles/repository.ts";
 import { createTitleSyncSchedule } from "./modules/titles/service.ts";
 import { WiimmfiService, fetchWiimmfiPlayers, type WiimmfiPlayer } from "./modules/wiimmfi/service.ts";
+
+export type { UploadedLogo };
 
 export interface DataSource {
   /** Reported by /api/health; deploy checks require "mssql" in production. */
@@ -60,6 +64,8 @@ export interface DataSource {
   /** null when no club has this (validated) id. */
   getClubProfile(clubId: number): Promise<ClubProfile | null>;
   getClubLogoFile(clubIdRaw: unknown): Promise<LogoFile | null>;
+  /** A logo the club uploaded (dbo.ClubLogo); it wins over the cached link. Null without one. */
+  getUploadedClubLogo(clubId: number): Promise<UploadedLogo | null>;
   getCommunityEvents(): Promise<EventsPayload>;
   getWiimmfiPlayers(): Promise<WiimmfiPlayer[]>;
   /** Absent when Discord login is not configured; auth routes then report it as unavailable. */
@@ -192,8 +198,16 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     },
   });
 
-  // My Club (docs/adr/0012): the club list and the player list show a club change at once.
+  const uploadedLogos = createUploadedLogos(
+    {
+      hashes: () => database.withPool(fetchUploadedLogoHashes),
+      logo: (clubId) => database.withPool((pool) => fetchUploadedLogo(pool, clubId)),
+    },
+    { log },
+  );
+  // My Club (docs/adr/0012): the club list and the player list show a club change at once, the logo route too.
   const refreshClubLists = (): void => {
+    uploadedLogos.invalidate();
     for (const key of [MSBL_CLUBS_KEY, PLAYERS_LIST_KEY]) {
       publicData.refresh(key).catch((err: unknown) => {
         log.warn({ err, key }, "[clubs] List refresh after a club change failed");
@@ -217,13 +231,11 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
         ensurePlayer: (identity) => profiles.ensurePlayer(identity),
         isAdmin: async (cookie) => (adminGuard ? (await adminGuard.check(cookie)).ok : false),
         adminRoleIds: config.admin.roleIds,
-        logoUrl: async (club) =>
-          club.logoHash
-            ? `/api/clubs/msbl/${String(club.clubId)}/logo?v=${club.logoHash}`
-            : logos.ensureClubLogo({
-                club_id: club.clubId,
-                logo_source: clubLogoSource(club.tag, club.name, club.logoUrl),
-              }),
+        logoUrl: (club) =>
+          logos.ensureClubLogo({
+            club_id: club.clubId,
+            logo_source: clubLogoSource(club.tag, club.name, club.logoUrl),
+          }),
         onChange: refreshClubLists,
       })
     : null;
@@ -248,6 +260,7 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     profiles,
     getClubProfile: (clubId) => getMsblClubProfile(database, { logoCache: logos, users }, clubId),
     getClubLogoFile: (clubIdRaw) => logos.getLogoFile(clubIdRaw),
+    getUploadedClubLogo: (clubId) => uploadedLogos.get(clubId),
     getCommunityEvents: () => events.get(),
     getWiimmfiPlayers: () => wiimmfi.getPlayers(),
     login,

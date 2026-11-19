@@ -46,6 +46,18 @@ export type ClubStadium = (typeof CLUB_STADIUMS)[number];
 export const MAX_CLUB_REGIONS = 3;
 export const MAX_CLUB_CODES = 3;
 
+/**
+ * F6: an uploaded logo — PNG, JPG or WebP (no GIF, no SVG), at most 2 MB, between 256×256 and 2048×2048 pixels; it is
+ * stored fitted into 512×512 (the club popup shows it at 330 px, the list at 100 px).
+ */
+export const CLUB_LOGO_LIMITS = {
+  types: ["image/png", "image/jpeg", "image/webp"],
+  maxBytes: 2 * 1024 * 1024,
+  minSide: 256,
+  maxSide: 2048,
+  outputSide: 512,
+} as const;
+
 /** The numbers of the club rules, for the API's decisions and the page's explanations. */
 export const CLUB_LIMITS = {
   /** Officers besides the captain. */

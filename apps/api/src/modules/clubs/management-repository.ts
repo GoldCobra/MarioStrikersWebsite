@@ -133,6 +133,11 @@ export interface ChangeExtras {
   /** clubNameKey() of every club name and tag (a creation only). */
   readonly names: ReadonlySet<string>;
   readonly tags: ReadonlySet<string>;
+  /**
+   * dbo.ClubSystemState.Mode, read in the change's own transaction with a shared lock held to its end: a switch of
+   * the mode waits for running changes, and a change after the switch sees it (the service's cache gates reads only).
+   */
+  readonly mode: ClubSystemRow["mode"];
 }
 
 class StaleScope extends Error {}
@@ -145,11 +150,12 @@ export const SCOPE_QUERY = [
   "  (SELECT TOP 1 ClubId FROM dbo.ClubInvitation WHERE Id = @invitation) AS invitation_club;",
 ].join(" ");
 
-/** The locking read: clubs, roster, invitations, player states and rejoin blocks, in this order. */
+/** The locking read: the mode row, clubs, roster, invitations, player states and rejoin blocks, in this order. */
 export function buildLockedStateQuery(clubIds: readonly number[]): string {
   const clubs = idList(clubIds);
   return [
     "SET XACT_ABORT ON;",
+    "SELECT TOP 1 Mode FROM dbo.ClubSystemState WITH (HOLDLOCK) WHERE Id = 1;",
     `SELECT ${CLUB_COLUMNS_SQL} FROM dbo.Club c WITH (UPDLOCK, HOLDLOCK) WHERE c.ID IN (${clubs}) ORDER BY c.ID;`,
     `SELECT ${MEMBER_COLUMNS_SQL} FROM dbo.ClubRoster cr WITH (UPDLOCK, HOLDLOCK)`,
     `INNER JOIN dbo.Player p ON p.ID = cr.Player WHERE cr.Club IN (${clubs}) OR cr.Player IN (@actor, @target);`,
@@ -191,9 +197,10 @@ async function readLockedState(
   request.input("actor", mssql.Int, scope.actorPlayerId);
   request.input("target", mssql.Int, target);
   request.input("since", mssql.DateTime2(0), new Date(now - 14 * DAY_MS));
-  const [clubRows = [], memberRows = [], invitationRows = [], playerRows = [], blockRows = []] = recordsets(
-    await request.query(buildLockedStateQuery(clubIds)),
-  );
+  const [modeRows = [], clubRows = [], memberRows = [], invitationRows = [], playerRows = [], blockRows = []] =
+    recordsets(await request.query(buildLockedStateQuery(clubIds)));
+  const storedMode = normalizeText(modeRows[0]?.Mode);
+  const mode: ClubSystemRow["mode"] = storedMode === "admins" || storedMode === "on" ? storedMode : "off";
 
   const members = memberRows.map((row) => ({ row, member: toMember(row) }));
   const clubs = new Map<number, ClubState>();
@@ -229,12 +236,13 @@ async function readLockedState(
   // The actor joined or left a club between the two reads: read again with that club locked.
   if (actor.clubId !== null && !clubs.has(actor.clubId)) throw new StaleScope();
 
-  let extras: ChangeExtras = { names: new Set(), tags: new Set() };
+  let extras: ChangeExtras = { names: new Set(), tags: new Set(), mode };
   if (scope.names) {
     const rows = rowsOf(await tx.request().query(NAMES_QUERY));
     extras = {
       names: new Set(rows.map((row) => keyOf(normalizeText(row.ClubName)))),
       tags: new Set(rows.map((row) => keyOf(normalizeText(row.ClanTag)))),
+      mode,
     };
   }
   const joinBlocks: JoinBlockState[] = blockRows.map((row) => ({
@@ -371,6 +379,14 @@ export const EVENT_SQL = [
 
 export const LOG_SQL = "INSERT INTO dbo.CommandLog (Command, Parameters) VALUES (@command, @parameters);";
 
+export const SET_LOGO_SQL = [
+  "UPDATE dbo.ClubLogo SET ContentType = @type, Hash = @hash, Width = @width, Height = @height, Data = @data,",
+  "  UpdatedAtUtc = @now WHERE ClubId = @club;",
+  "IF @@ROWCOUNT = 0",
+  "  INSERT INTO dbo.ClubLogo (ClubId, ContentType, Hash, Width, Height, Data, UpdatedAtUtc)",
+  "  VALUES (@club, @type, @hash, @width, @height, @data, @now);",
+].join(" ");
+
 /** Deletes a club with everything attached to it: lobby rows, invitations, rejoin blocks, logo, members. */
 export const DELETE_CLUB_SQL = [
   ...CLUB_ATTACHMENT_DELETES.map(({ table, column }) => `DELETE FROM dbo.${table} WHERE ${column} = @club;`),
@@ -505,6 +521,19 @@ async function applyPlan(tx: Queryable, plan: readonly PlanStep[], now: number):
         await request.query(EVENT_SQL);
         break;
       }
+      case "setLogo":
+        request.input("club", mssql.Int, step.clubId);
+        request.input("type", mssql.VarChar(20), step.logo.contentType);
+        request.input("hash", mssql.Char(64), step.logo.hash);
+        request.input("width", mssql.Int, step.logo.width);
+        request.input("height", mssql.Int, step.logo.height);
+        request.input("data", mssql.VarBinary(mssql.MAX), Buffer.from(step.logo.data));
+        await request.query(SET_LOGO_SQL);
+        break;
+      case "removeLogo":
+        request.input("club", mssql.Int, step.clubId);
+        await request.query("DELETE FROM dbo.ClubLogo WHERE ClubId = @club;");
+        break;
       case "log":
         request.input("command", mssql.NVarChar(100), step.command);
         request.input("parameters", mssql.NVarChar(4000), JSON.stringify(step.parameters).slice(0, 4000));

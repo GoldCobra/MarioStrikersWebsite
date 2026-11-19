@@ -99,6 +99,13 @@ function isExcludedClubLogo(tag: string, name: string): boolean {
   );
 }
 
+/** The logo route's URL of an uploaded logo (dbo.ClubLogo), with its hash; "" without one. */
+export function uploadedLogoUrl(clubId: unknown, hash: unknown): string {
+  const id = Number(clubId);
+  const key = normalizeText(hash);
+  return key && Number.isInteger(id) && id > 0 ? `/api/clubs/msbl/${String(id)}/logo?v=${key}` : "";
+}
+
 /** The stored logo URL a club's logo is downloaded from; "" for none (and for logos that belong to someone else). */
 export function clubLogoSource(tag: string, name: string, logo: unknown): string {
   return isExcludedClubLogo(tag, name) ? "" : normalizeSourceUrl(logo);
@@ -145,8 +152,9 @@ export function toMsblClubDTO(
     club_code: isOpen ? normalizeText(row.club_code) : "",
     club_codes: isOpen ? compactTextList([row.club_code, row.club_code2, row.club_code3]) : [],
     regions: compactTextList([row.region, row.region2, row.region3]),
-    logo_source: clubLogoSource(tag, name, row.logo),
-    logo: "",
+    // An uploaded logo (its hash in the URL) wins; else the stored link, downloaded into the logo cache.
+    logo_source: normalizeText(row.logo_hash) ? "" : clubLogoSource(tag, name, row.logo),
+    logo: uploadedLogoUrl(row.club_id, row.logo_hash),
     activity: toActivityIso(row.activity),
     // The 90-day rule; a new club the counter marked inactive (dbo.Club.InactiveSinceUtc) is inactive regardless.
     is_active: !row.inactive_since && isActivityActive(row.activity, options.now, options.activityWindowDays),

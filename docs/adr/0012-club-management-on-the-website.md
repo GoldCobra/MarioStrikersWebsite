@@ -38,9 +38,11 @@ joining, leaving, succession and the life of new clubs; `/club info` and
   never exposes it) with a shared secret.
 - **One mode for both systems.** `dbo.ClubSystemState` holds `off`, `admins`
   (My Club for confirmed admins only, for tests on the live site) or `on`. The
-  bot reads it before every `/club` write command, the API caches it briefly;
-  one update closes the bot's write commands and opens the website without the
-  two ever being open together.
+  bot reads it before every `/club` write command; the API caches it briefly
+  for reads and reads it again inside every change's transaction, with a shared
+  lock held to the end, so a switch waits for running changes. One update
+  closes the bot's write commands and opens the website without the two ever
+  being open together.
 - **Additive schema** (`modules/clubs/schema.ts`, `npm run ops:club-schema`):
   new columns and tables only. The legacy procedures stay as they are; they
   write with column lists, so new columns with defaults or NULL break none of

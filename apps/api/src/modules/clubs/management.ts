@@ -15,8 +15,11 @@ import {
 import type { GuildMemberSnapshot } from "../../integrations/discord/guild-members.ts";
 import type { GuildMember, GuildMemberLookup } from "../../integrations/discord/members.ts";
 import type { DiscordIdentity } from "../profile/mappers.ts";
+import { SITE_ORIGIN } from "@ms/shared/site/site";
 import { duplicateKeyName } from "../../lib/sql-errors.ts";
-import type { ChangeScope, ClubStore, ClubSystemRow, MyClubRow } from "./management-repository.ts";
+import { processClubLogo } from "./logo-upload.ts";
+import { uploadedLogoUrl } from "./mappers.ts";
+import type { ChangeExtras, ChangeScope, ClubStore, ClubSystemRow, MyClubRow } from "./management-repository.ts";
 import {
   DAY_MS,
   createEligibility,
@@ -29,9 +32,11 @@ import {
   decideJoin,
   decideLeave,
   decideRemove,
+  decideRemoveLogo,
   decideRevoke,
   decideSetOfficer,
   decideSettings,
+  decideSetLogo,
   inClubOrder,
   memberActionsOf,
   officersOf,
@@ -179,6 +184,9 @@ export interface ClubManagement {
   ): Promise<ClubOutcome<{ readonly accepted: boolean; readonly clubName: string; readonly clubTag: string }>>;
   confirmActivity(request: ClubRequest): Promise<ClubOutcome<MyClubView>>;
   deleteClub(request: ClubRequest, confirmTag: string): Promise<ClubOutcome<MyClubView>>;
+  /** F6: the uploaded image, checked and encoded anew (logo-upload.ts), becomes the club's logo. */
+  uploadLogo(request: ClubRequest, bytes: Buffer): Promise<ClubOutcome<MyClubView>>;
+  removeLogo(request: ClubRequest): Promise<ClubOutcome<MyClubView>>;
 }
 
 export interface ClubManagementOptions {
@@ -193,7 +201,7 @@ export interface ClubManagementOptions {
   readonly isAdmin: (cookie: unknown) => Promise<boolean>;
   /** The server roles that make a member an admin, for members without a session (DM buttons, invitees). */
   readonly adminRoleIds: readonly string[];
-  /** The URL a club's logo is shown from ("" for none). */
+  /** The URL an older logo link is shown from (the logo cache; "" for none); an uploaded logo needs no lookup. */
   readonly logoUrl: (club: {
     readonly clubId: number;
     readonly logoUrl: string;
@@ -223,11 +231,20 @@ export function createClubManagement(options: ClubManagementOptions): ClubManage
     return mode.value;
   }
 
-  async function isOpen(cookie: unknown): Promise<boolean> {
+  /** The cached gate (reads and the cheap first check); a change checks the mode again under its own lock. */
+  async function access(cookie: unknown): Promise<{ readonly open: boolean; readonly admin: boolean }> {
     const { mode: current } = await system();
-    if (current === "on") return true;
-    return current === "admins" && (await options.isAdmin(cookie));
+    if (current === "off") return { open: false, admin: false };
+    const admin = await options.isAdmin(cookie);
+    return { open: current === "on" || admin, admin };
   }
+
+  async function isOpen(cookie: unknown): Promise<boolean> {
+    return (await access(cookie)).open;
+  }
+
+  const openIn = (mode: ClubSystemRow["mode"], admin: boolean): boolean =>
+    mode === "on" || (mode === "admins" && admin);
 
   const isAdminMember = (member: Pick<GuildMember, "roles">): boolean =>
     member.roles.some((role) => options.adminRoleIds.includes(role));
@@ -268,13 +285,15 @@ export function createClubManagement(options: ClubManagementOptions): ClubManage
         clubId: club.clubId,
         name: club.name,
         tag: club.tag,
-        logo: await options.logoUrl({
-          clubId: club.clubId,
-          logoUrl: club.logoUrl,
-          logoHash: club.logoHash,
-          tag: club.tag,
-          name: club.name,
-        }),
+        logo:
+          uploadedLogoUrl(club.clubId, club.logoHash) ||
+          (await options.logoUrl({
+            clubId: club.clubId,
+            logoUrl: club.logoUrl,
+            logoHash: club.logoHash,
+            tag: club.tag,
+            name: club.name,
+          })),
         settings: club.settings,
         settingsVersion: settingsVersion(club.settings),
         activity: club.activity,
@@ -350,26 +369,30 @@ export function createClubManagement(options: ClubManagementOptions): ClubManage
   async function change<T>(
     request: ClubRequest,
     scope: (playerId: number) => Omit<ChangeScope, "actorPlayerId">,
-    decide: (
-      state: LockedState,
-      member: GuildMember,
-      extras: { names: ReadonlySet<string>; tags: ReadonlySet<string> },
-    ) => Decision<T>,
+    decide: (state: LockedState, member: GuildMember, extras: ChangeExtras) => Decision<T>,
   ): Promise<ClubOutcome<MyClubView>> {
-    if (!(await isOpen(request.cookie))) return { kind: "closed" };
+    const gate = await access(request.cookie);
+    if (!gate.open) return { kind: "closed" };
     const member = await liveMember(request.identity.id);
     if (isOutcome(member)) return member;
     const { playerId } = await options.ensurePlayer(request.identity);
     let outcome: { readonly decision: Decision<T> };
+    const closed = { now: false };
     try {
-      outcome = await store.change({ ...scope(playerId), actorPlayerId: playerId }, now(), (state, extras) =>
-        decide(state, member, extras),
-      );
+      outcome = await store.change({ ...scope(playerId), actorPlayerId: playerId }, now(), (state, extras) => {
+        // The mode under the change's own lock decides; a switch since the cached read closes the change.
+        if (!openIn(extras.mode, gate.admin)) {
+          closed.now = true;
+          return refuse("NOT_ALLOWED", "My Club is not open.");
+        }
+        return decide(state, member, extras);
+      });
     } catch (error) {
       const refusal = refusalOfDuplicate(error);
       if (refusal) return { kind: "refused", refusal };
       throw error;
     }
+    if (closed.now) return { kind: "closed" };
     if (!outcome.decision.ok) return { kind: "refused", refusal: outcome.decision };
     if (outcome.decision.plan.length) options.onChange?.();
     return { kind: "ok", result: await readView(playerId) };
@@ -521,26 +544,23 @@ export function createClubManagement(options: ClubManagementOptions): ClubManage
     },
 
     async invite(request, playerId) {
-      const { mode: current } = await system();
-      // The invitee is asked live: on the server, and an admin while the feature is in mode "admins".
+      // The invitee is asked live: on the server, and an admin while the feature is in mode "admins" (the mode
+      // read under the change's lock decides; an unknown player is left to the rules' own refusal).
       let targetOnServer = false;
-      let targetAllowed = true;
+      let testable = true;
       const discordId = await store.discordIdOf(playerId);
       if (discordId) {
         const live = await members.getMember(discordId).catch(() => null);
         targetOnServer = live?.membership === "member";
-        targetAllowed = current !== "admins" || (live !== null && isAdminMember(live));
-      }
-      if (!targetAllowed) {
-        return {
-          kind: "refused",
-          refusal: refuse("NOT_ALLOWED", "While My Club is being tested, only admins can be invited."),
-        };
+        testable = live !== null && isAdminMember(live);
       }
       return change(
         request,
         () => ({ targetPlayerId: playerId }),
-        (state) => decideInvite(state, { targetOnServer }),
+        (state, _member, extras) =>
+          extras.mode === "admins" && !testable
+            ? refuse("NOT_ALLOWED", "While My Club is being tested, only admins can be invited.")
+            : decideInvite(state, { targetOnServer }),
       );
     },
 
@@ -571,9 +591,14 @@ export function createClubManagement(options: ClubManagementOptions): ClubManage
         return { kind: "refused", refusal: refuse("INVITATION_NOT_FOUND", "This invitation does not exist.") };
       let clubName = "";
       let clubTag = "";
+      const closedNow = { value: false };
       let outcome: { readonly decision: Decision<{ readonly clubId: number; readonly accepted: boolean }> };
       try {
-        outcome = await store.change({ actorPlayerId: playerId, invitationId }, now(), (state) => {
+        outcome = await store.change({ actorPlayerId: playerId, invitationId }, now(), (state, extras) => {
+          if (!openIn(extras.mode, isAdminMember(member))) {
+            closedNow.value = true;
+            return refuse("NOT_ALLOWED", "My Club is not open.");
+          }
           const invitation = state.invitations.find((entry) => entry.id === invitationId);
           const club = invitation ? state.clubs.get(invitation.clubId) : undefined;
           clubName = club?.name ?? "";
@@ -585,6 +610,7 @@ export function createClubManagement(options: ClubManagementOptions): ClubManage
         if (refusal) return { kind: "refused", refusal };
         throw error;
       }
+      if (closedNow.value) return { kind: "closed" };
       if (!outcome.decision.ok) return { kind: "refused", refusal: outcome.decision };
       options.onChange?.();
       return { kind: "ok", result: { accepted: outcome.decision.result.accepted, clubName, clubTag } };
@@ -603,6 +629,28 @@ export function createClubManagement(options: ClubManagementOptions): ClubManage
         request,
         () => ({}),
         (state) => decideDelete(state, confirmTag),
+      );
+    },
+
+    async uploadLogo(request, bytes) {
+      if (!(await isOpen(request.cookie))) return { kind: "closed" };
+      // Decoding and encoding happen before the transaction, never while its locks are held.
+      const processed = await processClubLogo(bytes);
+      if (!processed.ok) return { kind: "refused", refusal: refuse(processed.code, processed.message) };
+      const { logo } = processed;
+      return change(
+        request,
+        () => ({}),
+        (state) =>
+          decideSetLogo(state, logo, (clubId) => `${SITE_ORIGIN}/api/clubs/msbl/${String(clubId)}/logo?v=${logo.hash}`),
+      );
+    },
+
+    async removeLogo(request) {
+      return change(
+        request,
+        () => ({}),
+        (state) => decideRemoveLogo(state),
       );
     },
   };

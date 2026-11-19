@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import sharp from "sharp";
 import { clubNameKey } from "@ms/shared/clubs";
 import { createMemoryClubStore, type MemoryClubStore } from "../../fixtures/club-store.ts";
 import type { GuildMemberSnapshot, SnapshotMember } from "../../integrations/discord/guild-members.ts";
@@ -138,6 +139,23 @@ test("My Club is closed in mode off, and in mode admins open to confirmed admins
   assert.equal((await testing.clubs.view(testing.as(1, "admin"))).kind, "ok");
   assert.equal(await testing.clubs.isOpen("admin"), true);
   assert.equal(await testing.clubs.isOpen("member"), false);
+});
+
+test("a change decides on the mode read under its own lock, not on the cached one", async () => {
+  const { clubs, as, store, changes } = world();
+  ok(await clubs.view(as(8)));
+  store.mode = { mode: "off", goLiveAt: null };
+  assert.equal((await clubs.join(as(8), 5)).kind, "closed", "switched off since the cached read");
+  assert.equal(store.memberClub(8), null);
+  assert.deepEqual(changes, []);
+
+  const testing = world();
+  ok(await testing.clubs.view(testing.as(11, "admin")));
+  testing.store.mode = { mode: "admins", goLiveAt: null };
+  assert.equal((await testing.clubs.join(testing.as(8), 5)).kind, "closed", "members wait for the go-live");
+  assert.equal(refused(await testing.clubs.invite(testing.as(1, "admin"), 9)), "NOT_ALLOWED", "Ivy is no admin");
+  ok(await testing.clubs.join(testing.as(11, "admin"), 5));
+  assert.equal(testing.store.memberClub(11), 5);
 });
 
 test("every change checks the server live and fails closed when Discord cannot be asked", async () => {
@@ -299,4 +317,23 @@ test("a change refreshes the public lists; a refused one does not", async () => 
   assert.deepEqual(changes, []);
   ok(await clubs.join(as(8), 5));
   assert.deepEqual(changes, ["change"]);
+});
+
+test("F6: officers upload a logo, it is shown with its hash and Club.Logo names its public URL; it can go again", async () => {
+  const { clubs, as, store } = world();
+  const png = await sharp({ create: { width: 600, height: 600, channels: 4, background: "#c33" } })
+    .png()
+    .toBuffer();
+  assert.equal(refused(await clubs.uploadLogo(as(4), png)), "NOT_ALLOWED");
+  assert.equal(refused(await clubs.uploadLogo(as(2), Buffer.from("GIF89a...."))), "LOGO_TYPE");
+  const uploaded = ok(await clubs.uploadLogo(as(2), png));
+  const logo = store.logos.get(5);
+  assert.ok(logo);
+  assert.deepEqual([logo.width, logo.height], [512, 512]);
+  assert.equal(uploaded.club?.logo, "/api/clubs/msbl/5/logo?v=" + logo.hash);
+  assert.equal(store.clubs.get(5)?.logoUrl, "https://mariostrikers.gg/api/clubs/msbl/5/logo?v=" + logo.hash);
+  const removed = ok(await clubs.removeLogo(as(1)));
+  assert.equal(removed.club?.logo, "");
+  assert.equal(store.logos.has(5), false);
+  assert.ok(store.logs.some((entry) => entry.command === "WebsiteClubLogoRemoved"));
 });

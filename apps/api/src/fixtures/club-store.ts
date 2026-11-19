@@ -23,6 +23,7 @@ import {
   type LockedState,
   type PlanStep,
   type PlayerState,
+  type StoredLogo,
 } from "../modules/clubs/rules.ts";
 
 export interface MemoryClub {
@@ -67,6 +68,8 @@ export interface MemoryClubStore extends ClubStore {
     readonly invitationId: number | null;
   })[];
   readonly logs: { readonly command: string; readonly parameters: Readonly<Record<string, unknown>> }[];
+  /** Uploaded logos (dbo.ClubLogo), by club. */
+  readonly logos: Map<number, StoredLogo>;
   /** Puts a player into a club, as the bot or an earlier change did. */
   addMember(
     clubId: number,
@@ -94,6 +97,7 @@ export function createMemoryClubStore(
   let joinBlocks: JoinBlockState[] = [];
   const events: MemoryClubStore["events"] = [];
   const logs: MemoryClubStore["logs"] = [];
+  const logos = new Map<number, StoredLogo>();
   let nextClubId = Math.max(1000, ...[...clubs.keys()].map((id) => id + 1));
   let nextInvitationId = 1;
 
@@ -207,6 +211,7 @@ export function createMemoryClubStore(
         }
         case "deleteClub":
           clubs.delete(step.clubId);
+          logos.delete(step.clubId);
           for (const [playerId, entry] of roster) if (entry.clubId === step.clubId) roster.delete(playerId);
           invitations = invitations.filter((invitation) => invitation.clubId !== step.clubId);
           joinBlocks = joinBlocks.filter((block) => block.clubId !== step.clubId);
@@ -301,6 +306,12 @@ export function createMemoryClubStore(
           });
           break;
         }
+        case "setLogo":
+          logos.set(step.clubId, step.logo);
+          break;
+        case "removeLogo":
+          logos.delete(step.clubId);
+          break;
         case "log":
           logs.push({ command: step.command, parameters: step.parameters });
           break;
@@ -344,6 +355,7 @@ export function createMemoryClubStore(
     players,
     events,
     logs,
+    logos,
 
     addMember(clubId, playerId, options = {}) {
       const ranks = [...roster.values()].filter((entry) => entry.clubId === clubId).map((entry) => entry.rank);
@@ -370,8 +382,9 @@ export function createMemoryClubStore(
         ? {
             names: new Set([...clubs.values()].map((club) => keyOf(club.name))),
             tags: new Set([...clubs.values()].map((club) => keyOf(club.tag))),
+            mode: store.mode.mode,
           }
-        : { names: new Set(), tags: new Set() };
+        : { names: new Set(), tags: new Set(), mode: store.mode.mode };
       const decision = decide(state, extras);
       try {
         const created = decision.ok ? apply(decision.plan, now) : {};
@@ -403,7 +416,9 @@ export function createMemoryClubStore(
       const name = (id: number): string => players.get(id)?.name ?? "";
       return Promise.resolve({
         player,
-        club: entry ? { ...clubState(entry), logoUrl: entry.logoUrl, logoHash: "" } : null,
+        club: entry
+          ? { ...clubState(entry), logoUrl: entry.logoUrl, logoHash: logos.get(entry.clubId)?.hash ?? "" }
+          : null,
         clubInvitations: invitations
           .filter((invitation) => invitation.clubId === clubId && invitation.status === "open")
           .map((invitation) => ({

@@ -277,8 +277,14 @@ once), the decision answers with a plan (the writes and the bot's events, `event
 or a refusal, and the store applies the plan in the same transaction.
 `management.ts` is the service behind `/api/my-club`: the member from the session, the
 mode of `dbo.ClubSystemState` (`off`, `admins` = confirmed admins only, `on`; cached
-30 s), the member's server membership asked live on every change (refused when Discord
-cannot be asked), the request checked by `packages/shared/src/clubs.ts`. The server's
+30 s for reads, read again under the lock of every change), the member's server
+membership asked live on every change (refused when Discord cannot be asked), the
+request checked by `packages/shared/src/clubs.ts`. An uploaded logo
+([ADR 0013](adr/0013-club-logo-uploads-with-sharp.md), `logo-upload.ts`) is checked
+(type from its bytes, 2 MB, 256–2048 px, no animation), decoded and re-encoded with
+sharp as a 512 px WebP without metadata, and stored in `dbo.ClubLogo`; the logo route
+serves it before a link logo (`uploaded-logos.ts` knows which clubs have one, read once
+a minute and after every change), and `Club.Logo` gets its public URL. The server's
 member list (`integrations/discord/guild-members.ts`, read with the bot token every ten
 minutes) answers who is on the server for the invite list, succession and the absence
 rule. `/internal/clubs/invitations/:id/answer` takes the bot's Accept/Decline buttons
@@ -333,7 +339,7 @@ Uncached routes (profiles, login) are rate-limited per client address in
 production. The Discord login binds its OAuth state to the browser with a
 short-lived `msc_oauth_state` cookie, logout and profile changes refuse
 cross-site requests, and club logos are only downloaded from public HTTPS
-addresses.
+addresses; uploaded ones are never passed through, only re-encoded.
 
 ## API reference
 
@@ -345,7 +351,7 @@ All endpoints below use the same origin as the website.
 | GET | `/api/leaderboards/:game/:mode/top?limit=25` | Top ranked rows |
 | GET | `/api/clubs/msbl` (alias `/api/clubs`) | Club list |
 | GET | `/api/clubs/msbl/:clubId/profile` | Club details and roster |
-| GET | `/api/clubs/msbl/:clubId/logo` | Cached club image |
+| GET | `/api/clubs/msbl/:clubId/logo` | Club image: the uploaded logo (immutable under `?v=<hash>`), else the cached link image |
 | GET | `/api/players` | Player list |
 | GET | `/api/players/:playerId/profile` | Player profile |
 | GET | `/api/competitive-season/current` | Current competitive season |
@@ -371,6 +377,8 @@ All endpoints below use the same origin as the website.
 | POST | `/api/my-club/invitations` | Invite a player (JSON: `player_id`) |
 | DELETE | `/api/my-club/invitations/:invitationId` | Revoke an invitation |
 | POST | `/api/my-club/invitations/:invitationId/accept` | Accept an invitation (also `.../decline`) |
+| PUT | `/api/my-club/logo` | Upload the club's logo (the raw image as the body: `image/png`, `image/jpeg` or `image/webp`, at most 2 MB) |
+| DELETE | `/api/my-club/logo` | Remove the uploaded logo |
 | POST | `/api/my-club/activity` | Confirm the club's activity |
 | POST | `/api/my-club/delete` | Delete the club (JSON: `confirm_tag`, the exact tag) |
 | GET | `/api/admin/overview` | Admin only (404 otherwise): the admin, the access window, the latest admin activity |
