@@ -220,7 +220,11 @@ first hook is the guard and answer a refusal with the standard 404 (`sendNotFoun
 no rate limit headers); `/internal/admin-gate` answers nginx (204/401) and is not
 reachable from outside. The audit log is `dbo.WebsiteAdminAudit`
 (`audit-repository.ts`, `npm run ops:admin-audit`). Off unless `ADMIN_ENABLED` and
-complete (`.env.example`).
+complete (`.env.example`). The Admin Panel moderates clubs (club management B2): it lists every
+club with its backend id, and renames one (name and/or tag, the shared rules, unique), removes its
+logo or deletes it, through the club service (`management.ts` `admin*`, rules in `rules.ts`) while
+My Club is in mode `admins` or `on`; each action is a `club.*` line in the audit log with what was
+asked and how it ended (`features/admin/admin-clubs.ts` draws it, only in the private bundle).
 
 **Player titles** ([ADR 0008](adr/0008-player-titles.md), [ADR 0009](adr/0009-per-game-titles-and-test-unlocks.md),
 `modules/titles/`).
@@ -388,6 +392,10 @@ All endpoints below use the same origin as the website.
 | POST | `/api/my-club/activity` | Confirm the club's activity |
 | POST | `/api/my-club/delete` | Delete the club (JSON: `confirm_tag`, the exact tag) |
 | GET | `/api/admin/overview` | Admin only (404 otherwise): the admin, the access window, the latest admin activity |
+| GET | `/api/admin/clubs` | Admin only: every club with its backend id, members and logo, and the club mode |
+| POST | `/api/admin/clubs/:clubId/rename` | Admin only: a club's new name and/or tag (JSON: `name`, `tag`), logged |
+| DELETE | `/api/admin/clubs/:clubId/logo` | Admin only: remove a club's logo, logged |
+| POST | `/api/admin/clubs/:clubId/delete` | Admin only: delete a club (JSON: `confirm_tag`, the exact tag), logged |
 | GET | `/api/health` | Service health |
 
 Leaderboard games are `msbl`, `msc` and `sms`; modes are `elo1v1`,

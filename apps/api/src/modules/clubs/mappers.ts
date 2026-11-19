@@ -5,7 +5,7 @@ import { normalizeText, toText } from "@ms/shared/text";
 import { isActivityActive, toActivityIso } from "../../lib/dates.ts";
 import { normalizeDiscordId } from "../../lib/discord-id.ts";
 import { normalizeSourceUrl } from "./logo-cache.ts";
-import type { InviteCandidate, MyClubView } from "./management.ts";
+import type { AdminClubsView, InviteCandidate, MyClubView } from "./management.ts";
 import type { ClubRefusal } from "./rules.ts";
 
 type Row = Record<string, unknown>;
@@ -286,6 +286,21 @@ export function toMyClubResponse(view: MyClubView): Record<string, unknown> {
     join_blocks: view.joinBlocks.map((block) => ({
       club_id: block.clubId,
       until: new Date(block.until).toISOString(),
+    })),
+  };
+}
+
+/** GET /api/admin/clubs and the answer of every admin club action (B2). */
+export function toAdminClubsResponse(view: AdminClubsView): Record<string, unknown> {
+  return {
+    mode: view.mode,
+    clubs: view.clubs.map((club) => ({
+      club_id: club.clubId,
+      public_id: club.publicId,
+      name: club.name,
+      tag: club.tag,
+      members: club.members,
+      has_logo: club.hasLogo,
     })),
   };
 }

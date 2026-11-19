@@ -113,7 +113,8 @@ const REFUSAL_STATUS: Readonly<Record<ClubRefusalCode, number>> = {
   LOGO_UNREADABLE: 400,
 };
 
-function sendOutcome<T>(
+/** A club change's outcome as the API answers it (also the Admin Panel's club actions). */
+export function sendOutcome<T>(
   reply: FastifyReply,
   outcome: ClubOutcome<T>,
   toBody: (result: T) => Record<string, unknown>,

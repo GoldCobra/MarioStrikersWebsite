@@ -355,27 +355,44 @@ export function validateClubSettings(raw: unknown, stored?: ClubSettingsValue): 
   return { ok: true, value: { isOpen, regions, clubCodes, firstUniform, secondUniform, stadium, discordUrl } };
 }
 
-/** A new club (C1, F2, F3): a name of letters, digits and spaces, a tag of letters and digits, and its settings. */
-export function validateNewClub(raw: unknown): ClubValidation<NewClubValue> {
+/**
+ * A club's name and tag (C1, F3): a name of letters, digits and spaces, a tag of letters and digits. `stored` is the
+ * club's own name and tag (an admin's rename): one left unchanged may keep the older characters it has (F8).
+ */
+export function validateClubIdentity(
+  raw: unknown,
+  stored?: { readonly name: string; readonly tag: string },
+): ClubValidation<{ readonly name: string; readonly tag: string }> {
   if (!isRecord(raw)) return { ok: false, errors: [clubFieldError("request", "INVALID")] };
   const errors: ClubFieldError[] = [];
 
   const nameText = textOf(raw, "name");
-  const name = nameText === null ? "" : normalizeClubName(nameText);
-  if (nameText === null) errors.push(clubFieldError("name", "INVALID"));
+  let name = nameText === null ? "" : normalizeClubName(nameText);
+  if (stored && name === normalizeClubName(stored.name)) name = stored.name;
+  else if (nameText === null) errors.push(clubFieldError("name", "INVALID"));
   else if (!name) errors.push(clubFieldError("name", "REQUIRED"));
   else if (name.length > CLUB_NAME_MAX_LENGTH) errors.push(clubFieldError("name", "TOO_LONG"));
   else if (!CLUB_NAME_PATTERN.test(name)) errors.push(clubFieldError("name", "INVALID"));
 
   const tag = textOf(raw, "tag");
   if (tag === null) errors.push(clubFieldError("tag", "INVALID"));
-  else if (!tag) errors.push(clubFieldError("tag", "REQUIRED"));
+  else if (tag === stored?.tag) {
+    // Unchanged.
+  } else if (!tag) errors.push(clubFieldError("tag", "REQUIRED"));
   else if (tag.length > CLUB_TAG_MAX_LENGTH) errors.push(clubFieldError("tag", "TOO_LONG"));
   else if (!CLUB_TAG_PATTERN.test(tag)) errors.push(clubFieldError("tag", "INVALID"));
   else if (isBlockedClubTag(tag)) errors.push(clubFieldError("tag", "BLOCKED"));
 
+  if (errors.length || tag === null) return { ok: false, errors };
+  return { ok: true, value: { name, tag } };
+}
+
+/** A new club (C1, F2, F3): its name and tag, and its settings. */
+export function validateNewClub(raw: unknown): ClubValidation<NewClubValue> {
+  if (!isRecord(raw)) return { ok: false, errors: [clubFieldError("request", "INVALID")] };
+  const identity = validateClubIdentity(raw);
   const settings = validateClubSettings(raw);
-  if (!settings.ok) errors.push(...settings.errors);
-  if (errors.length || !settings.ok || tag === null) return { ok: false, errors };
-  return { ok: true, value: { name, tag, settings: settings.value } };
+  const errors = [...(identity.ok ? [] : identity.errors), ...(settings.ok ? [] : settings.errors)];
+  if (!identity.ok || !settings.ok) return { ok: false, errors };
+  return { ok: true, value: { ...identity.value, settings: settings.value } };
 }

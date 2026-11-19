@@ -6,6 +6,9 @@ import {
   NEW_CLUB,
   createEligibility,
   decideAbsence,
+  decideAdminDelete,
+  decideAdminRemoveLogo,
+  decideAdminRename,
   decideAnswer,
   decideConfirmActivity,
   decideCreate,
@@ -568,4 +571,49 @@ test("J5 for an absent captain runs S1; for everyone absent the club is deleted"
   assert.ok(
     decideAbsence({ now: NOW, invitations: [] }, ghost, () => false).some((step) => step.kind === "deleteClub"),
   );
+});
+
+test("B2: an admin renames any club; the members' nicknames follow a new tag; a taken name or tag is refused", () => {
+  const admin = player(42, { discordId: "10042" });
+  const free = { nameTaken: false, tagTaken: false };
+  assert.deepEqual(plan(decideAdminRename(state(admin), 5, { name: "Hammer Bros", tag: "HB" }, free)), [], "unchanged");
+  assert.equal(code(decideAdminRename(state(admin), 9, { name: "X", tag: "X" }, free)), "CLUB_NOT_FOUND");
+  assert.equal(
+    code(decideAdminRename(state(admin), 5, { name: "Taken", tag: "HB" }, { ...free, nameTaken: true })),
+    "NAME_TAKEN",
+  );
+  assert.equal(
+    code(decideAdminRename(state(admin), 5, { name: "Hammer Bros", tag: "TK" }, { ...free, tagTaken: true })),
+    "TAG_TAKEN",
+  );
+
+  const renamed = plan(decideAdminRename(state(admin), 5, { name: "Hammer Brothers", tag: "HB" }, free));
+  assert.deepEqual(kinds(renamed), ["updateClub", "event:club.renamed", "log"]);
+  assert.deepEqual(renamed[0]?.kind === "updateClub" ? renamed[0].set : null, { name: "Hammer Brothers" });
+  assert.deepEqual(eventOf(renamed, "club.renamed")?.payload.nick, [], "the tag stays, so do the nicknames");
+
+  const retagged = plan(decideAdminRename(state(admin), 5, { name: "Hammer Bros", tag: "HBR" }, free));
+  const event = eventOf(retagged, "club.renamed");
+  assert.ok(event);
+  assert.equal(event.clubTag, "HBR");
+  assert.deepEqual(
+    event.payload.nick.map((entry) => entry.old_tag),
+    ["HB", "HB", "HB", "HB", "HB"],
+  );
+  assert.deepEqual(event.payload.dm, [], "no DMs for a rename");
+});
+
+test("B2: an admin removes a club's logo or deletes the club with its exact tag; every member is told", () => {
+  const admin = player(42, { discordId: "10042" });
+  assert.deepEqual(kinds(plan(decideAdminRemoveLogo(state(admin), 5))), ["removeLogo", "updateClub", "log"]);
+  assert.equal(code(decideAdminDelete(state(admin), 5, "hb")), "CONFIRMATION_MISMATCH");
+  const deleted = plan(decideAdminDelete(state(admin), 5, "HB"));
+  const event = eventOf(deleted, "club.deleted");
+  assert.ok(event);
+  assert.equal(event.payload.reason, "deleted by an admin");
+  assert.deepEqual(
+    event.payload.dm.map((entry) => entry.discord_id),
+    ["101", "102", "103", "104", "105"],
+  );
+  assert.ok(kinds(deleted).includes("deleteClub"));
 });

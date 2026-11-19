@@ -337,3 +337,43 @@ test("F6: officers upload a logo, it is shown with its hash and Club.Logo names 
   assert.equal(store.logos.has(5), false);
   assert.ok(store.logs.some((entry) => entry.command === "WebsiteClubLogoRemoved"));
 });
+
+test("B2: an admin renames, removes a logo and deletes while My Club is tested or on, never in mode off", async () => {
+  const { clubs, as, store } = world({ mode: "admins" });
+  const admin = as(11, "admin").identity;
+  const listed = await clubs.adminClubs();
+  assert.equal(listed.mode, "admins");
+  assert.deepEqual(
+    listed.clubs.find((club) => club.clubId === 5),
+    {
+      clubId: 5,
+      publicId: "Ab3dEf9h",
+      name: "Hammer Bros",
+      tag: "HB",
+      members: 3,
+      hasLogo: false,
+    },
+  );
+  // Only its case changes: the club's own name is no rival.
+  const renamed = ok(await clubs.adminRename(admin, 5, { name: "Hammer BROS", tag: "HB" }));
+  assert.equal(renamed.clubs.find((club) => club.clubId === 5)?.name, "Hammer BROS");
+  assert.equal(store.clubs.get(5)?.name, "Hammer BROS");
+  const invalid = await clubs.adminRename(admin, 5, { name: "Hammer!", tag: "HB" });
+  assert.equal(invalid.kind, "invalid");
+  const blocked = await clubs.adminRename(admin, 5, { name: "Hammer BROS", tag: "MOD" });
+  assert.equal(blocked.kind === "invalid" ? blocked.errors[0]?.code : blocked.kind, "BLOCKED");
+  ok(await clubs.adminRemoveLogo(admin, 5));
+  assert.ok(store.logs.some((entry) => entry.command === "WebsiteClubLogoRemoved"));
+  assert.equal(refused(await clubs.adminDelete(admin, 5, "hb")), "CONFIRMATION_MISMATCH");
+  const deleted = ok(await clubs.adminDelete(admin, 5, "HB"));
+  assert.equal(
+    deleted.clubs.some((club) => club.clubId === 5),
+    false,
+  );
+  assert.equal(store.memberClub(1), null);
+  assert.equal(store.events.find((event) => event.type === "club.deleted")?.payload.reason, "deleted by an admin");
+
+  const off = world({ mode: "off" });
+  assert.equal((await off.clubs.adminRename(off.as(11, "admin").identity, 5, { name: "X", tag: "HB" })).kind, "closed");
+  assert.equal((await off.clubs.adminClubs()).mode, "off");
+});

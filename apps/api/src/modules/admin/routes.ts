@@ -1,15 +1,21 @@
-// The hidden admin page (docs/adr/0011): nginx's gate for its files and its API, nothing else. Every refusal
+// The hidden admin page (docs/adr/0011): nginx's gate for its files and its API, and the club moderation of the
+// Admin Panel (club management plan B2, docs/adr/0012). Every refusal
 // looks exactly like a path that does not exist: the API answers its standard 404, and nginx turns a refused
 // gate into the site's not-found page. The API routes sit in one plugin whose first hook is the guard, so a
 // route added there later cannot be reached without it.
 
-import type { FastifyInstance, FastifyRequest } from "fastify";
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { LRUCache } from "lru-cache";
 import { toText } from "@ms/shared/text";
 import type { Config } from "../../config.ts";
 import { NO_STORE } from "../../http/cache-control.ts";
-import { sendNotFound } from "../../http/errors.ts";
-import { sendNoStore, type RouteContext } from "../../http/route-context.ts";
+import { HttpError, badRequest, sendNotFound } from "../../http/errors.ts";
+import { isCrossSiteRequest, sendNoStore, type RouteContext } from "../../http/route-context.ts";
+import { toPositiveIntId } from "../../lib/numbers.ts";
+import type { AdminClubsView, ClubManagement, ClubOutcome } from "../clubs/management.ts";
+import { toAdminClubsResponse } from "../clubs/mappers.ts";
+import { sendOutcome as sendClubOutcome } from "../clubs/routes.ts";
+import { identityFromSession, type DiscordIdentity } from "../profile/mappers.ts";
 import type { AdminAuditEntry } from "./audit.ts";
 import { createAdminGuard, type AdminCheck, type AdminIdentity } from "./guard.ts";
 
@@ -121,10 +127,87 @@ export function registerAdminRoutes(app: FastifyInstance, { config, data }: Rout
           audit: entries?.map(toAuditResponse) ?? null,
         });
       });
+
+      // B2: every club with its backend id, and an admin's actions on one (rename, remove the logo, delete).
+      admin.get("/clubs", adminRateLimit(config, 60), async (_request, reply) => {
+        if (!data.clubs) return sendNotFound(reply);
+        return sendNoStore(reply, toAdminClubsResponse(await data.clubs.adminClubs()));
+      });
+      admin.post(
+        "/clubs/:clubId/rename",
+        adminRateLimit(config, 30),
+        clubAction("club.rename", (clubs, identity, clubId, body) => clubs.adminRename(identity, clubId, body)),
+      );
+      admin.delete(
+        "/clubs/:clubId/logo",
+        adminRateLimit(config, 30),
+        clubAction("club.logo.remove", (clubs, identity, clubId) => clubs.adminRemoveLogo(identity, clubId)),
+      );
+      admin.post(
+        "/clubs/:clubId/delete",
+        adminRateLimit(config, 30),
+        clubAction("club.delete", (clubs, identity, clubId, body) =>
+          clubs.adminDelete(identity, clubId, typeof body.confirm_tag === "string" ? body.confirm_tag : ""),
+        ),
+      );
       done();
     },
     { prefix: ADMIN_API_PREFIX },
   );
+
+  /** An audit line that never fails the request it belongs to. */
+  async function recordAction(
+    request: FastifyRequest,
+    event: { action: string; target: string; outcome: "allowed" | "denied" | "failed"; details?: string },
+  ): Promise<void> {
+    const identity = identities.get(request);
+    if (!audit || !identity) return;
+    await audit
+      .record({ discordUserId: identity.discordUserId, ip: request.ip, requestId: request.id, ...event })
+      .catch((err: unknown) => {
+        request.log.error({ err }, "[admin] Audit record failed");
+      });
+  }
+
+  /**
+   * One club action of the Admin Panel: same-site, the club from the path, the admin's own identity from the
+   * session (the guard has just confirmed the role, uncached), the outcome logged with what was asked.
+   */
+  function clubAction(
+    action: string,
+    run: (
+      clubs: ClubManagement,
+      identity: DiscordIdentity,
+      clubId: number,
+      body: Record<string, unknown>,
+    ) => Promise<ClubOutcome<AdminClubsView>>,
+  ) {
+    return async (request: FastifyRequest, reply: FastifyReply) => {
+      const session = data.login?.sessions.readSession(request.headers.cookie) ?? null;
+      if (!data.clubs || !session || !identities.get(request)) return sendNotFound(reply);
+      if (isCrossSiteRequest(request)) throw new HttpError(403, "FORBIDDEN", "Cross-site request refused.");
+      const clubId = toPositiveIntId((request.params as { clubId?: unknown }).clubId);
+      if (!clubId) throw badRequest("Invalid club id.");
+      const body = request.body && typeof request.body === "object" ? (request.body as Record<string, unknown>) : {};
+      const asked =
+        action === "club.rename" ? `to ${toText(body.name).trim()} [${toText(body.tag).trim()}]` : undefined;
+      let outcome: ClubOutcome<AdminClubsView>;
+      try {
+        outcome = await run(data.clubs, identityFromSession(session), clubId, body);
+      } catch (err) {
+        await recordAction(request, { action, target: `club ${String(clubId)}`, outcome: "failed", details: asked });
+        throw err;
+      }
+      const refusal = outcome.kind === "refused" ? outcome.refusal.code : outcome.kind === "ok" ? "" : outcome.kind;
+      await recordAction(request, {
+        action,
+        target: `club ${String(clubId)}`,
+        outcome: outcome.kind === "ok" ? "allowed" : "denied",
+        details: [asked, refusal].filter(Boolean).join(" · ") || undefined,
+      });
+      return sendClubOutcome(reply, outcome, toAdminClubsResponse);
+    };
+  }
 
   /** Per admin (not per address), after the guard, without rate limit headers. */
   function adminRateLimit(settings: Config, max: number) {
