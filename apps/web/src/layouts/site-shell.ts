@@ -12,7 +12,7 @@ import {
   type NavSecond,
   type TopNavItem,
 } from "@ms/shared/site/navigation";
-import { childMatchesPage, sectionFor, type PageState } from "@ms/shared/site/page-state";
+import { childMatchesPage, isAccountPage, sectionFor, type PageState } from "@ms/shared/site/page-state";
 import { pagePath } from "@ms/shared/site/pages";
 
 // Asset URLs are relative to the page, as the runtime script wrote them; every page URL is one level deep.
@@ -43,10 +43,10 @@ function topNavLink(item: TopNavItem, state: PageState): string {
 
 /**
  * The last button: the Discord login, which nav.ts turns into the account menu (with the member's avatar)
- * once signed in. It is active on the profile page; search engines are kept off its redirect.
+ * once signed in. It is active on the account's pages (My Profile, My Club); search engines are kept off its redirect.
  */
 function loginNavLink(state: PageState): string {
-  const active = state.pageSlug === "profile";
+  const active = isAccountPage(state.pageSlug);
   return [
     `<a class="nav-top-link nav-top-login${active ? " is-active" : ""}" href="${escapeHtml(loginPath())}" data-top-key="login" aria-label="Login" rel="nofollow">`,
     `<img class="nav-top-icon" src="${topNavIcon("login", active, "webp")}" width="334" height="198" alt="Login"`,

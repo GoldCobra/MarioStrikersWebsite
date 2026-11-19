@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { FastifyInstance } from "fastify";
 import type { Config } from "../../config.ts";
-import { cookiePair, createTestApp, setCookies, tamper } from "../../test-support/app.ts";
+import { createFixtureDataSource } from "../../fixtures/data-source.ts";
+import { TEST_NOW, cookiePair, createTestApp, setCookies, tamper } from "../../test-support/app.ts";
 import {
   DISCORD_TEST_ENV,
   DISCORD_TEST_NICK,
@@ -145,6 +146,30 @@ test("login reports unavailable when Discord is not configured", async () => {
   const callbackResponse = await app.inject("/api/auth/discord/callback?code=abc&state=x");
   assert.equal(callbackResponse.headers.location, "/profile?auth=unavailable");
   assert.deepEqual((await app.inject("/api/auth/me")).json(), { authenticated: false, login_available: false });
+});
+
+test("/api/auth/me names My Club to a signed-in member while it is open", async () => {
+  for (const [mode, shown] of [
+    ["on", true],
+    ["off", false],
+  ] as const) {
+    let sessions: SessionManager | undefined;
+    const { app } = await createTestApp({
+      env: DISCORD_TEST_ENV,
+      data: (config: Config) => {
+        sessions = new SessionManager({ ...config.session, now: Date.now });
+        return {
+          login: { sessions, oauth: createDiscordOAuthClient(config.discord, createFakeDiscordFetch({}).fetch) },
+          clubs: createFixtureDataSource({ fixedNow: TEST_NOW, clubMode: mode }).clubs,
+        };
+      },
+    });
+    assert.ok(sessions);
+    const cookie = cookiePair(sessions.createSessionCookie({ id: "123", username: "tester" }));
+    const me = (await app.inject({ url: "/api/auth/me", headers: { cookie } })).json<Record<string, unknown>>();
+    assert.equal(me.my_club, shown ? true : undefined, mode);
+    assert.deepEqual((await app.inject("/api/auth/me")).json(), { authenticated: false, login_available: true });
+  }
 });
 
 test("tampered and malformed session cookies are treated as logged out", async () => {

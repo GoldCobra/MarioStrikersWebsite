@@ -13,7 +13,8 @@ const OAUTH_STATE_COOKIE = "msc_oauth_state=";
 // P7: the season and Wiimmfi responses use snake_case keys like every other response (they had camelCase).
 const SNAKE_CASED_PATHS = new Set(["/api/competitive-season/current", "/api/wiimmfi/msc-charged"]);
 
-// Discord login: /api/auth/me also says whether the login is available (login_available), and a member
+// Discord login: /api/auth/me also says whether the login is available (login_available) and whether My Club
+// is open for the member (my_club, docs/adr/0012), and a member
 // without a player profile gets one at login instead of the "not linked" answer of /api/profile/me.
 const AUTH_ME_PATH = "/api/auth/me";
 const UNLINKED_SAMPLE_ACCOUNT = "900000000000000002";
@@ -80,6 +81,7 @@ export function normalizeContract(record: ContractRecord): ContractRecord {
   if (record.path === AUTH_ME_PATH && body && typeof body === "object") {
     const rest = { ...(body as Record<string, unknown>) };
     delete rest.login_available;
+    delete rest.my_club;
     body = rest;
   }
 

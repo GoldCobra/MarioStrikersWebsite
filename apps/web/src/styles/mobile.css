@@ -473,6 +473,21 @@
     justify-self: end;
   }
 
+  /* My Club: a roster line's actions go to a line of their own under the name. */
+  #club-profile-page .club-popup-roster {
+    grid-auto-rows: auto;
+  }
+
+  #club-profile-page .club-popup-roster-item {
+    height: auto;
+    min-height: 42px;
+    padding-block: 0.3rem;
+  }
+
+  #club-profile-page .club-popup-roster-item > .my-club-line-actions {
+    grid-column: 2 / -1;
+  }
+
   .msbl-club-row {
     display: grid;
     grid-template-columns: 64px minmax(0, 1fr);

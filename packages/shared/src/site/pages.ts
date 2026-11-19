@@ -381,6 +381,13 @@ export const PAGES: readonly PageDefinition[] = [
     breadcrumbName: "MSL Schedule",
   },
   {
+    slug: "my-club",
+    title: "My Club | Mario Strikers Community",
+    description: "Manage your Mario Strikers Striker Club: its members, invitations and settings.",
+    hiddenHeading: "My Club",
+    robots: "noindex, nofollow",
+  },
+  {
     slug: "partners",
     title: "Partners of the Mario Strikers Community",
     description:

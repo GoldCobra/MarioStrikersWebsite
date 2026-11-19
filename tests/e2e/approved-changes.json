@@ -53,6 +53,14 @@
         "states/profile-title-list-1440"
       ],
       "reason": "Owner 2026-11-14 (#90): the MSL SPRING/SUMMER/FALL CHAMPION look turns a little yellower, #e09e00 -> #e8bc00, because HOT FRIDAY #1 CHAMPION takes that orange. The sample player's list holds one such title (MSL 2026 SPRING CHAMPION), so only that line's text changes colour (~1,060 px in each width; CI run 43580631116). The new title is not in the list (it belongs to two real players only); every other line, page and state is unchanged."
+    },
+    {
+      "screenshots": ["pages/my-club-*", "states/my-club-*"],
+      "reason": "Club management WP4 (docs/adr/0012): the new login-only page /my-club, which the reference commit does not have (it answers its not-found page there). Signed out it shows the Login Required panel like /profile; signed in (states) the sample captain's club on the club popup's card, and a member without a club. Every other page is unchanged."
+    },
+    {
+      "screenshots": ["states/account-menu-*"],
+      "reason": "Account menu (club management plan A2): a member's menu gains MY CLUB after MY PROFILE while My Club is open for them (fixtures run in mode on), and ADMIN becomes ADMIN PANEL at the top of an admin's menu. This state signs in the sample member, so the menu reads MY PROFILE, MY CLUB, LOGOUT; the rest of the page is unchanged."
     }
   ]
 }

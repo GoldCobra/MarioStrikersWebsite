@@ -87,7 +87,8 @@ body.popup-open {
 
 #player-profile-popup .popup-header,
 #player-profile-page .popup-header,
-#club-profile-popup .popup-header {
+#club-profile-popup .popup-header,
+#club-profile-page .popup-header {
   background-color: #993c00;
   background-image: url("../assets/players/title.png");
   background-position: left top;

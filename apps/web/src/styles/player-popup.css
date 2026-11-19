@@ -459,24 +459,24 @@ body.player-popup-open {
 /* The signed-in player's profile page (/profile; profile-page.ts) shows this card as a section of the
    page: the same markup and styles (#player-profile-page next to #player-profile-popup), centred and as
    tall as its content, without overlay, close button or a scroll area of its own. */
-#player-profile-page .popup-card {
+:is(#player-profile-page, #club-profile-page) .popup-card {
   width: min(580px, 100%);
   max-height: none;
   margin-inline: auto;
 }
 
-#player-profile-page .player-popup-content {
+:is(#player-profile-page, #club-profile-page) .player-popup-content {
   max-height: none;
 }
 
 /* The popup keeps the mouse wheel inside these boxes (popups.css); on the page that held the wheel over the
    whole profile, even where nothing was left to scroll. Here it reaches the page again. */
-#player-profile-page :is(.player-popup-content, .player-popup-accolades) {
+:is(#player-profile-page, #club-profile-page) :is(.player-popup-content, .player-popup-accolades) {
   overscroll-behavior: auto;
 }
 
 /* The template hides its parts with the hidden attribute, which the popup enforces on .popup-overlay
    (popups.css). */
-#player-profile-page [hidden] {
+:is(#player-profile-page, #club-profile-page) [hidden] {
   display: none !important;
 }

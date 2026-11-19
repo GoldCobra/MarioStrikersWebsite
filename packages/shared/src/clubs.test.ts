@@ -110,6 +110,9 @@ test("valid settings come back in their stored form", () => {
   });
   const minimal = { is_open: false, regions: ["SSA"], club_codes: ["ZZZ9999"] };
   assert.equal(validateClubSettings(minimal).ok, true, "uniforms, stadium and Discord are optional");
+  const short = validateClubSettings({ ...SETTINGS, discord_url: "discord.gg/abc" });
+  assert.equal(short.ok && short.value.discordUrl, "https://discord.gg/abc", "a link without https:// gets it");
+  assert.deepEqual(settingsErrors({ ...SETTINGS, discord_url: "discord.io/abc" }), ["discord_url:INVALID"]);
 });
 
 test("regions and club codes: one to three, from the list, each once", () => {

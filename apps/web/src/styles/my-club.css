@@ -1,0 +1,140 @@
+/* --- My Club (/my-club) ---------------------------------------------- */
+
+/* The member's club on the club popup's card, as a section of the page (my-club/club-card.ts): no close button,
+   so the name uses the title bar's whole width; the roster is as tall as its members instead of scrolling. */
+/* Measured against its sibling My Profile: the title bar as tall as the profile's (the popup title's line; the
+   profile's 19px flag sets it on the smallest screens), and the sections' headings and lines in the field type,
+   like the profile's fields (player-popup.css). */
+#club-profile-page .club-popup-header-title {
+  width: 100%;
+  max-width: 100%;
+  min-height: 19px;
+}
+
+#club-profile-page .club-popup-name {
+  line-height: 1.1;
+  padding-bottom: 0;
+}
+
+#club-profile-page :is(.player-popup-section-title, .player-popup-code-row) {
+  font-size: var(--field-font-size);
+  line-height: var(--field-line-height);
+}
+
+#club-profile-page .club-popup-roster {
+  max-height: none;
+  overflow: visible;
+  grid-auto-rows: auto;
+}
+
+/* A roster line takes the member's actions at its end; a narrow screen wraps them under the name. */
+#club-profile-page .club-popup-roster-item {
+  height: auto;
+  min-height: 34px;
+  grid-template-columns: 18px minmax(0, 1fr) auto auto;
+}
+
+#club-profile-page .my-club-open-club {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.my-club-line-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  margin-left: auto;
+}
+
+/* The buttons of a line: the profile's action button, as tall as a field. */
+.my-club-line-button {
+  min-height: var(--field-control-height);
+  padding: 0 0.55rem;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.my-club-line-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.my-club-upload input {
+  display: none;
+}
+
+.my-club-note {
+  color: var(--profile-muted-color);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.my-club-logo-preview {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.my-club-section-hint {
+  margin-top: var(--field-heading-gap);
+}
+
+.my-club-notice {
+  color: #ffc46b;
+}
+
+.my-club-wrap {
+  white-space: normal;
+}
+
+.my-club-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 0.5rem 0 0;
+}
+
+.my-club-leave {
+  margin-top: 1rem;
+}
+
+/* The settings' lines (my-club/club-edit.ts): regions as badges, a region or club code line with its "−". */
+.club-edit-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0;
+}
+
+.club-edit-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.club-edit-link {
+  color: var(--color-gold);
+}
+
+.profile-edit-text {
+  flex: 1 1 14rem;
+  min-width: 0;
+  max-width: 22rem;
+  padding-inline: 0.5rem;
+}
+
+.profile-edit-text.is-club-code {
+  flex: 0 0 auto;
+  width: calc(7ch + 7 * var(--reporter-letter-spacing) + 1px + 1rem + 2px);
+  font-variant-numeric: tabular-nums;
+}
+
+.my-club-search {
+  max-width: none;
+}
+
+.club-create-actions {
+  margin-top: 1rem;
+  text-align: left;
+}

@@ -110,7 +110,7 @@ the nginx configuration, and `npm run check` fails when it is stale. A unit
 test replays every URL shape recorded against production through
 `resolveRoute()`. Canonical metadata, navigation and sitemap entries must agree
 with public URLs.
-The private `/profile` page is excluded from indexing. `/sitemap.xml` is
+The account's private pages (`/profile`, `/my-club`) are excluded from indexing. `/sitemap.xml` is
 generated from the indexable pages of the registry; its `lastmod` is the date the page's
 content last changed, which `scripts/deploy.py` records from the git history
 before the image build (`src/lib/lastmod.ts`). Unknown URLs get the site's
@@ -173,12 +173,13 @@ Discord OAuth requests `identify` and `guilds.members.read`, checks membership
 in the configured guild, and sets a signed HTTP-only session cookie (with the
 member's server nickname at login). The access token is used only during the
 callback and never stored. The main navigation's last button, LOGIN (after
-PARTNERS, `rel="nofollow"`, active on `/profile`), is static and starts the
+PARTNERS, `rel="nofollow"`, active on the account's pages `/profile` and `/my-club`), is static and starts the
 login; without a configured login it leads to the profile page's explanation.
 Signed in (`/api/auth/me`), `features/nav/nav.ts` turns it into the account
 button: the member's Discord avatar covers its login figure, and a click opens
-MY PROFILE, the links the account carries (`account_links`: ADMIN for an admin,
-nothing for anyone else) and LOGOUT; the menu is built once, with every entry. All six buttons stand 1px apart and shrink only where the
+the links the account carries (`account_links`: ADMIN PANEL for an admin, nothing for
+anyone else), MY PROFILE, MY CLUB (while `my_club` says My Club is open for the member) and LOGOUT; the
+menu is built once, with every entry. All six buttons stand 1px apart and shrink only where the
 row would otherwise reach the logo.
 `/api/profile/me` maps the Discord user to `Player.DiscordID` (unique). A member
 without a player profile gets one at login (`modules/profile/`): one batch locks
@@ -301,6 +302,11 @@ uploaded logos. `npm run ops:club-schema` applies it in steps (`-- --backup`, a 
 run, `-- --apply`, `-- --drop-backups`); `npm run ops:club-cleanup -- --ids=…`
 deletes listed clubs without members (a dry run without `-- --apply`). The game's
 value lists and the name, tag and id rules live in `packages/shared/src/clubs.ts`.
+The page `/my-club` (`apps/web/src/features/my-club/`) shows the member's club on the club
+popup's card (`features/clubs/club-profile-view.ts`, shared with the popup) and edits its settings
+the profile page's way (`club-edit.ts`; the save bar `features/profile/edit-bar.ts` and the
+account panels `account-page.ts` are shared with My Profile); without a club it shows the member's
+invitations, creating a club and the open clubs.
 
 Responses use snake_case keys throughout; code inside the API uses camelCase
 and converts at the route (the season route shows how, since its cached
@@ -359,7 +365,7 @@ All endpoints below use the same origin as the website.
 | GET | `/api/wiimmfi/msc-charged` | Online MSC players |
 | GET | `/api/auth/discord/start?returnTo=/profile` | Begin login |
 | GET | `/api/auth/discord/callback` | Complete login |
-| GET | `/api/auth/me` | Current login state, whether login is available, and an admin's `account_links` |
+| GET | `/api/auth/me` | Current login state, whether login is available, an admin's `account_links`, and `my_club` while My Club is open for the member |
 | POST | `/api/auth/logout` | Clear session |
 | GET | `/api/profile/me` | Authenticated user's linked profile |
 | POST | `/api/profile/me` | Create the authenticated user's profile when the login could not |

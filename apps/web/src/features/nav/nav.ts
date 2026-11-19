@@ -3,6 +3,7 @@
 // ?tabs= and ?submenu= links.
 
 import { escapeHtml } from "@ms/shared/html";
+import { isAccountPage } from "@ms/shared/site/page-state";
 import { initTabsGroup } from "../tabs/tabs-engine.ts";
 
 interface DiscordUser {
@@ -170,7 +171,7 @@ function logout(account: Account, item: Element): void {
   })
     .then((response) => {
       if (!response.ok) throw new Error("Logout failed.");
-      if (pageSlug() === "profile") {
+      if (isAccountPage(pageSlug())) {
         window.location.reload();
         return;
       }
@@ -185,11 +186,17 @@ function logout(account: Account, item: Element): void {
 
 /**
  * Signed in, the login button becomes the account button: the member's avatar covers the login figure,
- * and a click opens the menu (My Profile, the account's own links, Logout). The menu lives in <body>, as
+ * and a click opens the menu: the account's own links (Admin Panel for an admin), My Profile, My Club (while
+ * it is open for the member) and Logout. The menu lives in <body>, as
  * the navigation's transform would hold a fixed menu inside the header, which clips it. It is built once,
  * with every entry, before it can be opened, so no entry appears later.
  */
-function showSignedIn(link: HTMLAnchorElement, user: DiscordUser, links: readonly AccountLink[]): void {
+function showSignedIn(
+  link: HTMLAnchorElement,
+  user: DiscordUser,
+  links: readonly AccountLink[],
+  myClub: boolean,
+): void {
   const name = (user.global_name || user.username || "your account").trim();
   const button = document.createElement("button");
   button.type = "button";
@@ -216,7 +223,6 @@ function showSignedIn(link: HTMLAnchorElement, user: DiscordUser, links: readonl
   menu.setAttribute("role", "menu");
   menu.hidden = true;
   menu.innerHTML = [
-    '<a class="global-account-menu-item" role="menuitem" href="/profile">My Profile</a>',
     ...links.flatMap(({ label, href }) => {
       const path = sameSiteHref(href);
       const text = typeof label === "string" ? label.trim() : "";
@@ -224,6 +230,8 @@ function showSignedIn(link: HTMLAnchorElement, user: DiscordUser, links: readonl
         ? [`<a class="global-account-menu-item" role="menuitem" href="${escapeHtml(path)}">${escapeHtml(text)}</a>`]
         : [];
     }),
+    '<a class="global-account-menu-item" role="menuitem" href="/profile">My Profile</a>',
+    myClub ? '<a class="global-account-menu-item" role="menuitem" href="/my-club">My Club</a>' : "",
     '<button class="global-account-menu-item" role="menuitem" type="button" data-account-action="logout">Logout</button>',
   ].join("");
   link.replaceWith(button);
@@ -295,6 +303,7 @@ function initAccount(link: HTMLAnchorElement | null): void {
         authenticated?: boolean;
         user?: DiscordUser;
         account_links?: unknown;
+        my_club?: unknown;
       } | null>;
     })
     .then((payload) => {
@@ -304,7 +313,7 @@ function initAccount(link: HTMLAnchorElement | null): void {
             (entry: unknown): entry is AccountLink => typeof entry === "object" && entry !== null,
           )
         : [];
-      showSignedIn(link, payload.user ?? {}, links);
+      showSignedIn(link, payload.user ?? {}, links, payload.my_club === true);
     })
     .catch(() => {
       // The login link stays.

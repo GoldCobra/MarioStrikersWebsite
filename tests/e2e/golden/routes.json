@@ -1225,6 +1225,46 @@
     "location": null
   },
   {
+    "path": "/my-club",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/my-club/",
+    "status": 301,
+    "location": "/my-club"
+  },
+  {
+    "path": "/pages/my-club.html",
+    "status": 301,
+    "location": "/my-club"
+  },
+  {
+    "path": "/pages/my-club",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/pages/my-club/",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/my-club.html",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/MY-CLUB",
+    "status": 404,
+    "location": null
+  },
+  {
+    "path": "/my-club?ref=probe",
+    "status": 200,
+    "location": null
+  },
+  {
     "path": "/partners",
     "status": 200,
     "location": null
