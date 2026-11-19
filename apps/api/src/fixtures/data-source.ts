@@ -1109,6 +1109,12 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
           : null,
       );
     },
+    getUploadedClubLogo: (clubId) => {
+      const logo = clubStore.logos.get(clubId);
+      return Promise.resolve(
+        logo ? { contentType: logo.contentType, hash: logo.hash, data: Buffer.from(logo.data) } : null,
+      );
+    },
     getCommunityEvents: () => Promise.resolve(structuredClone(events)),
     getWiimmfiPlayers: () =>
       Promise.resolve([

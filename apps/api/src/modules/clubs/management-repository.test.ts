@@ -67,7 +67,7 @@ const MEMBER_ROW = {
   Country: "DE",
 };
 
-function database(options: { deadlocks?: number; closed?: number } = {}) {
+function database(options: { deadlocks?: number; closed?: number; mode?: string } = {}) {
   let deadlocks = options.deadlocks ?? 0;
   return createFakeDatabase((sql): QueryResult => {
     if (sql === SCOPE_QUERY) {
@@ -77,8 +77,8 @@ function database(options: { deadlocks?: number; closed?: number } = {}) {
       }
       return { recordset: [{ actor_club: 5, invitation_club: null }] };
     }
-    if (sql.startsWith("SET XACT_ABORT ON; SELECT c.ID")) {
-      return { recordsets: [[CLUB_ROW], [MEMBER_ROW], [], [PLAYER_ROW], []] };
+    if (sql.startsWith("SET XACT_ABORT ON; SELECT TOP 1 Mode")) {
+      return { recordsets: [[{ Mode: options.mode ?? "on" }], [CLUB_ROW], [MEMBER_ROW], [], [PLAYER_ROW], []] };
     }
     if (sql === CREATE_CLUB_SQL) return { recordset: [{ id: 400 }] };
     if (sql === INVITE_SQL) return { recordset: [{ id: 77 }] };
@@ -87,9 +87,10 @@ function database(options: { deadlocks?: number; closed?: number } = {}) {
   });
 }
 
-test("the locking read takes club rows, roster, invitations, player state and blocks in this order", () => {
+test("the locking read takes the mode row, club rows, roster, invitations, player state and blocks in this order", () => {
   const sql = buildLockedStateQuery([5, 9]);
   const order = [
+    "FROM dbo.ClubSystemState WITH (HOLDLOCK) WHERE Id = 1",
     "FROM dbo.Club c WITH (UPDLOCK, HOLDLOCK)",
     "FROM dbo.ClubRoster cr WITH (UPDLOCK, HOLDLOCK)",
     "FROM dbo.ClubInvitation i WITH (UPDLOCK, HOLDLOCK)",
@@ -158,6 +159,7 @@ test("a change reads the state under locks, applies the plan and resolves the ne
     assert.equal(state.actor.clubId, 5);
     assert.equal(state.actor.country, "de");
     assert.equal(extras.names.has(clubNameKey("x")), false);
+    assert.equal(extras.mode, "on", "the mode row is read under the change's own lock");
     return { ok: true, plan, result: "done" };
   });
   assert.equal(seen, 1);
@@ -220,6 +222,17 @@ test("the mode is off without a mode row, and rows map to the rules' state", asy
     sql === MODE_QUERY ? { recordset: [{ Mode: "admins", GoLiveAtUtc: null }] } : {},
   );
   assert.equal((await createSqlClubStore(live, clubNameKey).readMode()).mode, "admins");
+  for (const [stored, seen] of [
+    ["admins", "admins"],
+    ["unknown", "off"],
+  ] as const) {
+    let mode = "";
+    await createSqlClubStore(database({ mode: stored }), clubNameKey).change({ actorPlayerId: 1 }, NOW, (_, extras) => {
+      mode = extras.mode;
+      return { ok: true, plan: [], result: null };
+    });
+    assert.equal(mode, seen, `a change sees the stored mode ${stored} as ${seen}`);
+  }
 
   const state = toClubState({ ...CLUB_ROW, Owner: "<@101>name" }, []);
   assert.equal(state.ownerDiscordId, "101");

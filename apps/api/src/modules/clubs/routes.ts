@@ -1,4 +1,5 @@
 import { createReadStream } from "node:fs";
+import { CLUB_LOGO_LIMITS } from "@ms/shared/clubs";
 import crypto from "node:crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { MSBL_CLUBS_KEY } from "../../cache/public-data-keys.ts";
@@ -30,15 +31,31 @@ export function registerClubRoutes(app: FastifyInstance, context: RouteContext):
     return sendPublicData(reply, cached, cached.payload);
   });
 
-  // Logo URLs carry the file hash (?v=), so browsers may keep them forever.
-  app.get<{ Params: { clubId: string } }>("/api/clubs/msbl/:clubId/logo", async (request, reply) => {
-    const logo = await data.getClubLogoFile(request.params.clubId);
-    if (!logo) throw notFound("Club logo not found.");
-    const etag = `"${logo.hash}"`;
-    reply.header("Cache-Control", IMMUTABLE_ASSET).header("ETag", etag);
-    if (request.headers["if-none-match"] === etag) return reply.code(304).send();
-    return reply.type(logo.contentType).send(createReadStream(logo.absolutePath));
-  });
+  // Logo URLs carry the image's hash (?v=), so browsers may keep them forever; a URL naming another version
+  // revalidates instead, so it never keeps a different image. A logo the club uploaded (dbo.ClubLogo) wins over
+  // the cached copy of its older link.
+  app.get<{ Params: { clubId: string }; Querystring: { v?: unknown } }>(
+    "/api/clubs/msbl/:clubId/logo",
+    async (request, reply) => {
+      const notModified = (hash: string): boolean => {
+        const etag = `"${hash}"`;
+        const version = request.query.v;
+        reply.header("Cache-Control", version !== undefined && version !== hash ? "no-cache" : IMMUTABLE_ASSET);
+        reply.header("ETag", etag);
+        return request.headers["if-none-match"] === etag;
+      };
+      const clubId = toPositiveIntId(request.params.clubId);
+      const uploaded = clubId ? await data.getUploadedClubLogo(clubId) : null;
+      if (uploaded) {
+        if (notModified(uploaded.hash)) return reply.code(304).send();
+        return reply.type(uploaded.contentType).send(uploaded.data);
+      }
+      const logo = await data.getClubLogoFile(request.params.clubId);
+      if (!logo) throw notFound("Club logo not found.");
+      if (notModified(logo.hash)) return reply.code(304).send();
+      return reply.type(logo.contentType).send(createReadStream(logo.absolutePath));
+    },
+  );
 
   app.get<{ Params: { clubId: string } }>(
     "/api/clubs/msbl/:clubId/profile",
@@ -89,6 +106,11 @@ const REFUSAL_STATUS: Readonly<Record<ClubRefusalCode, number>> = {
   TAG_TAKEN: 409,
   CONFIRMATION_MISMATCH: 400,
   CLUB_CHANGED: 409,
+  LOGO_TYPE: 415,
+  LOGO_TOO_LARGE: 413,
+  LOGO_DIMENSIONS: 400,
+  LOGO_ANIMATED: 400,
+  LOGO_UNREADABLE: 400,
 };
 
 function sendOutcome<T>(
@@ -290,6 +312,35 @@ function registerMyClubRoutes(app: FastifyInstance, { config, data }: RouteConte
       service.deleteClub(club, typeof body.confirm_tag === "string" ? body.confirm_tag : ""),
     ),
   );
+
+  app.delete(
+    "/api/my-club/logo",
+    change,
+    action((service, club) => service.removeLogo(club), { json: false }),
+  );
+  // F6: the image itself is the body (PNG, JPEG or WebP, at most 2 MB); only this route takes image bodies, and only
+  // it lifts the API's 16 KB body limit.
+  app.register((scope, _options, done) => {
+    scope.addContentTypeParser(
+      [...CLUB_LOGO_LIMITS.types],
+      { parseAs: "buffer", bodyLimit: CLUB_LOGO_LIMITS.maxBytes },
+      (_request, body, parsed) => {
+        parsed(null, body);
+      },
+    );
+    scope.put(
+      "/api/my-club/logo",
+      { ...rateLimit(config, 10), bodyLimit: CLUB_LOGO_LIMITS.maxBytes },
+      async (request, reply) => {
+        if (isCrossSiteRequest(request)) throw new HttpError(403, "FORBIDDEN", "Cross-site request refused.");
+        const found = member(request, reply, false);
+        if (!found) return reply;
+        const body = Buffer.isBuffer(request.body) ? request.body : Buffer.alloc(0);
+        return sendOutcome(reply, await found.service.uploadLogo(found.club, body), view);
+      },
+    );
+    done();
+  });
 
   registerInternalRoute(app, { config, data });
 }

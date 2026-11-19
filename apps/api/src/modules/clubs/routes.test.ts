@@ -42,6 +42,9 @@ test("serves cached club logos with a revalidatable immutable ETag", async () =>
   const revalidated = await app.inject({ url: "/api/clubs/msbl/368/logo", headers: { "if-none-match": '"testhash"' } });
   assert.equal(revalidated.statusCode, 304);
   assert.equal(revalidated.body, "");
+  const otherVersion = await app.inject("/api/clubs/msbl/368/logo?v=oldhash");
+  assert.equal(otherVersion.body, "route-logo");
+  assert.equal(otherVersion.headers["cache-control"], "no-cache", "a URL naming another version is never kept");
 
   for (const url of ["/api/clubs/msbl/999999/logo", "/api/clubs/msbl/abc/logo"]) {
     const missing = await app.inject(url);
@@ -293,4 +296,52 @@ test("the bot's internal route needs the shared secret and otherwise does not ex
     payload: { discord_user_id: "1", answer: "maybe" },
   });
   assert.equal(bad.statusCode, 400);
+});
+
+test("F6: the logo upload takes an image body of up to 2 MB, and the logo route serves an uploaded logo first", async () => {
+  const { app, cookie, calls } = await createMyClubApp(okView);
+  const upload = await app.inject({
+    method: "PUT",
+    url: "/api/my-club/logo",
+    headers: { cookie, "content-type": "image/png" },
+    payload: Buffer.from([0x89, 0x50, 0x4e, 0x47, 1, 2, 3]),
+  });
+  assert.equal(upload.statusCode, 200);
+  assert.equal(calls.at(-1)?.call, "uploadLogo");
+  assert.ok(Buffer.isBuffer(calls.at(-1)?.args[1]));
+  const wrongType = await app.inject({
+    method: "PUT",
+    url: "/api/my-club/logo",
+    headers: { cookie, "content-type": "image/gif" },
+    payload: Buffer.from("GIF89a"),
+  });
+  assert.equal(wrongType.statusCode, 415);
+  const tooLarge = await app.inject({
+    method: "PUT",
+    url: "/api/my-club/logo",
+    headers: { cookie, "content-type": "image/webp" },
+    payload: Buffer.alloc(2 * 1024 * 1024 + 1),
+  });
+  assert.equal(tooLarge.statusCode, 413);
+  const json = await app.inject({
+    method: "POST",
+    url: "/api/my-club/create",
+    headers: { cookie, "content-type": "application/json" },
+    payload: JSON.stringify({ name: "x".repeat(20 * 1024) }),
+  });
+  assert.equal(json.statusCode, 413, "every other route keeps the 16 KB body limit");
+
+  const { app: logoApp } = await createTestApp({
+    data: {
+      getUploadedClubLogo: (clubId) =>
+        Promise.resolve(clubId === 5 ? { contentType: "image/webp", hash: "abc", data: Buffer.from("webp") } : null),
+    },
+  });
+  const served = await logoApp.inject("/api/clubs/msbl/5/logo?v=abc");
+  assert.equal(served.statusCode, 200);
+  assert.equal(served.headers["content-type"], "image/webp");
+  assert.equal(served.headers["cache-control"], "public, max-age=2592000, immutable");
+  assert.equal(served.body, "webp");
+  const revalidated = await logoApp.inject({ url: "/api/clubs/msbl/5/logo", headers: { "if-none-match": '"abc"' } });
+  assert.equal(revalidated.statusCode, 304);
 });
