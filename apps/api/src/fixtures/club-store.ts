@@ -474,6 +474,19 @@ export function createMemoryClubStore(
       Promise.resolve(
         [...roster.entries()].map(([playerId, entry]) => ({ clubId: entry.clubId, member: memberOf(playerId, entry) })),
       ),
+    adminClubs: () =>
+      Promise.resolve(
+        [...clubs.values()]
+          .map((entry) => ({
+            clubId: entry.clubId,
+            publicId: entry.publicId,
+            name: entry.name,
+            tag: entry.tag,
+            members: [...roster.values()].filter((member) => member.clubId === entry.clubId).length,
+            hasLogo: logos.has(entry.clubId) || Boolean(entry.logoUrl),
+          }))
+          .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase())),
+      ),
     raiseMatchActivity: () => Promise.resolve(0),
     cleanUp: () => Promise.resolve(0),
   };

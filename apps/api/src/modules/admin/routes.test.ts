@@ -3,7 +3,9 @@ import test from "node:test";
 import type { FastifyInstance, LightMyRequestResponse } from "fastify";
 import type { Config } from "../../config.ts";
 import { UNKNOWN_MEMBER, type GuildMember } from "../../integrations/discord/members.ts";
-import { cookiePair, createTestApp, setCookies, tamper } from "../../test-support/app.ts";
+import { createFixtureDataSource } from "../../fixtures/data-source.ts";
+import { TEST_NOW, cookiePair, createTestApp, setCookies, tamper } from "../../test-support/app.ts";
+import type { ClubManagement } from "../clubs/management.ts";
 import {
   DISCORD_TEST_ADMIN_ROLE,
   DISCORD_TEST_ENV,
@@ -40,6 +42,7 @@ interface AdminApp {
 async function createAdminApp({
   adminOn = true,
   loginRoles = [DISCORD_TEST_ADMIN_ROLE] as readonly string[],
+  clubs = null as ClubManagement | null,
 } = {}): Promise<AdminApp> {
   let sessions: SessionManager | undefined;
   const member = { value: ADMIN_MEMBER };
@@ -67,8 +70,8 @@ async function createAdminApp({
           oauth: createDiscordOAuthClient(config.discord, createFakeDiscordFetch({ roles: loginRoles }).fetch),
         },
         admin: adminOn ? admin : null,
-        // My Club's menu flag is the clubs module's (auth/routes.test.ts); these tests look at the admin link.
-        clubs: null,
+        // My Club's menu flag is the clubs module's (auth/routes.test.ts); the club tests pass their own.
+        clubs,
         profiles: {
           ensurePlayer: () => Promise.resolve({ playerId: 42, created: false }),
           getEditableProfile: () => Promise.resolve(null),
@@ -174,7 +177,7 @@ test("every refused admin request looks exactly like an unknown path", async () 
     ],
   ];
   for (const [name, headers] of refusals) {
-    for (const url of ["/api/admin/overview", "/API/ADMIN/OVERVIEW/"]) {
+    for (const url of ["/api/admin/overview", "/API/ADMIN/OVERVIEW/", "/api/admin/clubs"]) {
       assert.deepEqual(visible(await app.inject({ url, headers: headers() })), unknown, `${name} GET ${url}`);
       // HEAD: the same status and headers; an HTTP server never sends a HEAD body (inject keeps the unknown
       // path's), so the body is not compared.
@@ -258,4 +261,63 @@ test("the login marks the session of a member who holds an admin role, and only 
     const session = setCookies(callback.headers["set-cookie"]).find((value) => value.startsWith("msc_session="));
     assert.equal(sessions.readSession(cookiePair(session ?? ""))?.adm === true, claimed, roles.join(","));
   }
+});
+
+test("B2: the Admin Panel lists every club with its backend id, and each club action is logged", async () => {
+  const clubs = createFixtureDataSource({ fixedNow: TEST_NOW, clubMode: "admins" }).clubs;
+  const { app, cookie, audit } = await createAdminApp({ clubs });
+  const session = cookie();
+  const list = await app.inject({ url: "/api/admin/clubs", headers: { cookie: session } });
+  assert.equal(list.statusCode, 200);
+  assert.equal(list.headers["cache-control"], "no-store");
+  const body = list.json<{
+    mode: string;
+    clubs: { club_id: number; public_id: string; name: string; tag: string }[];
+  }>();
+  assert.equal(body.mode, "admins");
+  const club = body.clubs.find((entry) => entry.tag === "FIX");
+  assert.ok(club);
+  assert.match(club.public_id, /^[A-HJ-NP-Za-km-z2-9]{8}$/);
+
+  const send = (method: "POST" | "DELETE", path: string, payload?: unknown, origin?: string) =>
+    app.inject({
+      method,
+      url: `/api/admin/clubs/${String(club.club_id)}/${path}`,
+      headers: {
+        cookie: session,
+        ...(payload ? { "content-type": "application/json" } : {}),
+        ...(origin ? { origin } : {}),
+      },
+      ...(payload ? { payload: JSON.stringify(payload) } : {}),
+    });
+  assert.equal(
+    (await send("POST", "rename", { name: "Elsewhere", tag: "FIX" }, "https://evil.example")).statusCode,
+    403,
+  );
+  const renamed = await send("POST", "rename", { name: "Fixture Renamed", tag: "FIX" });
+  assert.equal(renamed.statusCode, 200);
+  assert.ok(renamed.json<{ clubs: { name: string }[] }>().clubs.some((entry) => entry.name === "Fixture Renamed"));
+  assert.equal((await send("POST", "rename", { name: "Fixture Renamed", tag: "MOD" })).statusCode, 400);
+  assert.equal((await send("POST", "delete", { confirm_tag: "fix" })).statusCode, 400);
+  assert.equal((await send("DELETE", "logo")).statusCode, 200);
+  const deleted = await send("POST", "delete", { confirm_tag: "FIX" });
+  assert.equal(deleted.statusCode, 200);
+  assert.equal(
+    deleted.json<{ clubs: { tag: string }[] }>().clubs.some((entry) => entry.tag === "FIX"),
+    false,
+  );
+
+  assert.deepEqual(
+    audit.events
+      .filter((event) => event.action.startsWith("club."))
+      .map(({ action, target, outcome, details }) => [action, target, outcome, details ?? ""]),
+    [
+      ["club.rename", `club ${String(club.club_id)}`, "allowed", "to Fixture Renamed [FIX]"],
+      ["club.rename", `club ${String(club.club_id)}`, "denied", "to Fixture Renamed [MOD] · invalid"],
+      ["club.delete", `club ${String(club.club_id)}`, "denied", "CONFIRMATION_MISMATCH"],
+      ["club.logo.remove", `club ${String(club.club_id)}`, "allowed", ""],
+      ["club.delete", `club ${String(club.club_id)}`, "allowed", ""],
+    ],
+    "the cross-site request never reached the action",
+  );
 });

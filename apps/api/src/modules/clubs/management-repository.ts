@@ -569,6 +569,17 @@ export interface MyClubRow {
   readonly joinBlocks: readonly JoinBlockState[];
 }
 
+/** A club as the Admin Panel lists it (B2): its backend id (F1) and whether it has a logo. */
+export interface AdminClubRow {
+  readonly clubId: number;
+  readonly publicId: string;
+  readonly name: string;
+  readonly tag: string;
+  readonly members: number;
+  /** An uploaded logo or a logo link. */
+  readonly hasLogo: boolean;
+}
+
 export interface CandidateRow {
   readonly playerId: number;
   readonly discordId: string;
@@ -616,6 +627,8 @@ export interface ClubStore {
     ) => readonly PlanStep[],
   ): Promise<number>;
   rosterPresence(): Promise<readonly { readonly clubId: number; readonly member: ClubMember }[]>;
+  /** Every club for the Admin Panel, by name. */
+  adminClubs(): Promise<readonly AdminClubRow[]>;
   /** L2: raises Club.Activity to the newest rated match a current member played since `since`; returns the clubs. */
   raiseMatchActivity(since: number): Promise<number>;
   /** Rows of clubs that no longer exist, and invitations closed long ago; returns the rows removed. */
@@ -672,6 +685,14 @@ export const MATCH_ACTIVITY_SQL = [
 ].join(" ");
 
 /** Rows of clubs that no longer exist (the bot deletes clubs until go-live), and invitations closed 30 days ago. */
+/** B2: every club with its backend id, its members and its logo (uploaded or a link), by name. */
+export const ADMIN_CLUBS_QUERY = [
+  "SELECT c.ID AS club_id, c.PublicId AS public_id, c.ClubName AS name, c.ClanTag AS tag, c.Logo AS logo,",
+  "  l.Hash AS logo_hash, (SELECT COUNT(*) FROM dbo.ClubRoster cr WHERE cr.Club = c.ID) AS members",
+  "FROM dbo.Club c LEFT JOIN dbo.ClubLogo l ON l.ClubId = c.ID",
+  "ORDER BY c.ClubName, c.ID;",
+].join(" ");
+
 export const CLEANUP_SQL = [
   "DELETE i FROM dbo.ClubInvitation i WHERE NOT EXISTS (SELECT 1 FROM dbo.Club c WHERE c.ID = i.ClubId)",
   "  OR (i.Status <> 'open' AND i.ClosedAtUtc < @before);",
@@ -880,6 +901,18 @@ export function createSqlClubStore(
         ),
       );
       return rows.map((row) => ({ clubId: Number(row.Club), member: toMember(row) }));
+    },
+
+    async adminClubs() {
+      const rows = await database.withPool(async (pool) => rowsOf(await pool.request().query(ADMIN_CLUBS_QUERY)));
+      return rows.map((row) => ({
+        clubId: Number(row.club_id),
+        publicId: normalizeText(row.public_id),
+        name: normalizeText(row.name),
+        tag: normalizeText(row.tag),
+        members: Number(row.members) || 0,
+        hasLogo: Boolean(normalizeText(row.logo_hash) || normalizeText(row.logo)),
+      }));
     },
 
     async raiseMatchActivity(since) {

@@ -7,6 +7,7 @@
 import {
   CLUB_LIMITS,
   clubNameKey,
+  validateClubIdentity,
   validateClubSettings,
   validateNewClub,
   type ClubFieldError,
@@ -19,11 +20,21 @@ import { SITE_ORIGIN } from "@ms/shared/site/site";
 import { duplicateKeyName } from "../../lib/sql-errors.ts";
 import { processClubLogo } from "./logo-upload.ts";
 import { uploadedLogoUrl } from "./mappers.ts";
-import type { ChangeExtras, ChangeScope, ClubStore, ClubSystemRow, MyClubRow } from "./management-repository.ts";
+import type {
+  AdminClubRow,
+  ChangeExtras,
+  ChangeScope,
+  ClubStore,
+  ClubSystemRow,
+  MyClubRow,
+} from "./management-repository.ts";
 import {
   DAY_MS,
   createEligibility,
   generateClubPublicId,
+  decideAdminDelete,
+  decideAdminRemoveLogo,
+  decideAdminRename,
   decideAnswer,
   decideConfirmActivity,
   decideCreate,
@@ -187,6 +198,17 @@ export interface ClubManagement {
   /** F6: the uploaded image, checked and encoded anew (logo-upload.ts), becomes the club's logo. */
   uploadLogo(request: ClubRequest, bytes: Buffer): Promise<ClubOutcome<MyClubView>>;
   removeLogo(request: ClubRequest): Promise<ClubOutcome<MyClubView>>;
+  /** B2, the Admin Panel (its route checks the admin and logs every action): every club, and the mode. */
+  adminClubs(): Promise<AdminClubsView>;
+  adminRename(admin: DiscordIdentity, clubId: number, body: unknown): Promise<ClubOutcome<AdminClubsView>>;
+  adminRemoveLogo(admin: DiscordIdentity, clubId: number): Promise<ClubOutcome<AdminClubsView>>;
+  adminDelete(admin: DiscordIdentity, clubId: number, confirmTag: string): Promise<ClubOutcome<AdminClubsView>>;
+}
+
+/** The Admin Panel's clubs; the actions work in mode "admins" and "on". */
+export interface AdminClubsView {
+  readonly mode: ClubSystemRow["mode"];
+  readonly clubs: readonly AdminClubRow[];
 }
 
 export interface ClubManagementOptions {
@@ -409,6 +431,43 @@ export function createClubManagement(options: ClubManagementOptions): ClubManage
       default:
         return null;
     }
+  }
+
+  async function adminClubs(): Promise<AdminClubsView> {
+    const [{ mode: current }, clubs] = await Promise.all([store.readMode(), store.adminClubs()]);
+    return { mode: current, clubs };
+  }
+
+  /**
+   * An admin's action on a club (B2): only while the website manages clubs or is tested (mode "admins" or "on",
+   * read again under the change's lock), as the admin's player. The admin route has checked the admin role live.
+   */
+  async function adminChange<T>(
+    admin: DiscordIdentity,
+    scope: Omit<ChangeScope, "actorPlayerId">,
+    decide: (state: LockedState, extras: ChangeExtras) => Decision<T>,
+  ): Promise<ClubOutcome<AdminClubsView>> {
+    if ((await system()).mode === "off") return { kind: "closed" };
+    const { playerId } = await options.ensurePlayer(admin);
+    const closed = { now: false };
+    let outcome: { readonly decision: Decision<T> };
+    try {
+      outcome = await store.change({ ...scope, actorPlayerId: playerId }, now(), (state, extras) => {
+        if (extras.mode === "off") {
+          closed.now = true;
+          return refuse("NOT_ALLOWED", "Club management is off.");
+        }
+        return decide(state, extras);
+      });
+    } catch (error) {
+      const refusal = refusalOfDuplicate(error);
+      if (refusal) return { kind: "refused", refusal };
+      throw error;
+    }
+    if (closed.now) return { kind: "closed" };
+    if (!outcome.decision.ok) return { kind: "refused", refusal: outcome.decision };
+    if (outcome.decision.plan.length) options.onChange?.();
+    return { kind: "ok", result: await adminClubs() };
   }
 
   return {
@@ -652,6 +711,36 @@ export function createClubManagement(options: ClubManagementOptions): ClubManage
         () => ({}),
         (state) => decideRemoveLogo(state),
       );
+    },
+
+    adminClubs,
+
+    async adminRename(admin, clubId, body) {
+      // Checked against the club's own name and tag, read under the lock (an unchanged one may keep older characters).
+      const found: { errors: readonly ClubFieldError[] | null } = { errors: null };
+      const outcome = await adminChange(admin, { clubId, names: true }, (state, extras) => {
+        const club = state.clubs.get(clubId);
+        if (!club) return refuse("CLUB_NOT_FOUND", "This club does not exist.");
+        const checked = validateClubIdentity(body, { name: club.name, tag: club.tag });
+        if (!checked.ok) {
+          found.errors = checked.errors;
+          return refuse("NOT_ALLOWED", "Some fields are not valid.");
+        }
+        const { name, tag } = checked.value;
+        return decideAdminRename(state, clubId, checked.value, {
+          nameTaken: clubNameKey(name) !== clubNameKey(club.name) && extras.names.has(clubNameKey(name)),
+          tagTaken: clubNameKey(tag) !== clubNameKey(club.tag) && extras.tags.has(clubNameKey(tag)),
+        });
+      });
+      return found.errors ? { kind: "invalid", errors: found.errors } : outcome;
+    },
+
+    async adminRemoveLogo(admin, clubId) {
+      return adminChange(admin, { clubId }, (state) => decideAdminRemoveLogo(state, clubId));
+    },
+
+    async adminDelete(admin, clubId, confirmTag) {
+      return adminChange(admin, { clubId }, (state) => decideAdminDelete(state, clubId, confirmTag));
     },
   };
 }

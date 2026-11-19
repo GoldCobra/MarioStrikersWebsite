@@ -1035,6 +1035,84 @@ export function decideDelete(state: LockedState, confirmTag: string): Decision<{
 }
 
 // ---------------------------------------------------------------------------------------------------
+// B2 the Admin Panel: an admin renames any club (on a request made by hand), removes its logo or deletes it. The
+// admin route checks the admin and logs each action; the admin need not be a member.
+
+function anyClub(state: LockedState, clubId: number): ClubState | ClubRefusal {
+  return state.clubs.get(clubId) ?? refuse("CLUB_NOT_FOUND", "This club does not exist.");
+}
+
+/** The new name and tag are checked by the shared rules (unchanged ones may keep older characters, F8). */
+export function decideAdminRename(
+  state: LockedState,
+  clubId: number,
+  input: { readonly name: string; readonly tag: string },
+  context: { readonly nameTaken: boolean; readonly tagTaken: boolean },
+): Decision<{ readonly name: string; readonly tag: string; readonly oldName: string; readonly oldTag: string }> {
+  const club = anyClub(state, clubId);
+  if ("ok" in club) return club;
+  const renamed = input.name !== club.name;
+  const retagged = input.tag !== club.tag;
+  const result = { name: input.name, tag: input.tag, oldName: club.name, oldTag: club.tag };
+  if (!renamed && !retagged) return done([], result);
+  if (renamed && context.nameTaken) return refuse("NAME_TAKEN", "A club with this name exists already.");
+  if (retagged && context.tagTaken) return refuse("TAG_TAKEN", "A club with this tag exists already.");
+  return done(
+    [
+      {
+        kind: "updateClub",
+        clubId,
+        set: { ...(renamed ? { name: input.name } : {}), ...(retagged ? { tag: input.tag } : {}) },
+      },
+      event(
+        "club.renamed",
+        { clubId, publicId: club.publicId, name: input.name, tag: input.tag },
+        {
+          actor: person(state.actor),
+          // The members' nicknames take the new tag (the old one names what to take off).
+          nick: retagged ? club.members.map((member) => ({ discord_id: member.discordId, old_tag: club.tag })) : [],
+          reason: "renamed by an admin",
+        },
+        { actor: state.actor.playerId },
+      ),
+      log("WebsiteAdminClubRename", {
+        club_id: clubId,
+        public_id: club.publicId,
+        old_name: club.name,
+        old_tag: club.tag,
+        name: input.name,
+        tag: input.tag,
+        by: state.actor.discordId,
+      }),
+    ],
+    result,
+  );
+}
+
+export function decideAdminRemoveLogo(state: LockedState, clubId: number): Decision<{ readonly clubId: number }> {
+  const club = anyClub(state, clubId);
+  if ("ok" in club) return club;
+  return done(removeLogoPlan(club, { by: "admin", admin_discord_id: state.actor.discordId }), { clubId });
+}
+
+/** The club goes completely, as when its captain deletes it; every member gets the DM. */
+export function decideAdminDelete(
+  state: LockedState,
+  clubId: number,
+  confirmTag: string,
+): Decision<{ readonly clubId: number; readonly name: string; readonly tag: string }> {
+  const club = anyClub(state, clubId);
+  if ("ok" in club) return club;
+  if (confirmTag.trim() !== club.tag.trim())
+    return refuse("CONFIRMATION_MISMATCH", "Type the club's tag exactly to confirm.");
+  return done(deletionPlan(state, club, "deleted by an admin", { actor: state.actor, by: "admin" }), {
+    clubId,
+    name: club.name,
+    tag: club.tag,
+  });
+}
+
+// ---------------------------------------------------------------------------------------------------
 // The lifecycle job
 
 /**
