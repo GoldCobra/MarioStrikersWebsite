@@ -9,10 +9,10 @@
 // Also the backup tables around the migration (--backup, --drop-backups) and E1's one-off deletion of clubs
 // without members (npm run ops:club-cleanup): exactly the listed ids, each only while it still has no member.
 
-import { randomInt } from "node:crypto";
 import { CLUB_PUBLIC_ID_ALPHABET, CLUB_PUBLIC_ID_LENGTH } from "@ms/shared/clubs";
 import type { Database, Queryable } from "../../db/database.ts";
 import { mssql } from "../../db/database.ts";
+import { generateClubPublicId } from "./rules.ts";
 
 type Row = Record<string, unknown>;
 
@@ -36,16 +36,7 @@ async function tableExists(db: Queryable, name: string): Promise<boolean> {
 }
 
 // ---------------------------------------------------------------------------------------------------
-// Club ids
-
-/** A new club id: eight random characters of the alphabet, drawn with node:crypto. */
-export function generateClubPublicId(random: (max: number) => number = randomInt): string {
-  let id = "";
-  for (let index = 0; index < CLUB_PUBLIC_ID_LENGTH; index += 1) {
-    id += CLUB_PUBLIC_ID_ALPHABET.charAt(random(CLUB_PUBLIC_ID_ALPHABET.length));
-  }
-  return id;
-}
+// Club ids (the website draws its own with rules.ts generateClubPublicId)
 
 /**
  * The default of dbo.Club.PublicId: eight characters of the alphabet, each from its own NEWID(), so clubs the bot

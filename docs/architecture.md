@@ -268,9 +268,26 @@ or revokes a player's test unlocks. A new title of a known kind is one row in
 `dbo.PlayerTitle` (or a line in `catalog.ts` plus `ops:player-titles`).
 
 **Club management** ([ADR 0012](adr/0012-club-management-on-the-website.md),
-`modules/clubs/`; being built). Clubs are going to be managed on the website only;
+`modules/clubs/`; being built). Clubs are managed on the website only ("My Club");
 Robotic Nightmare performs the effects (DMs, nickname tags, #club-transfers posts)
-from the outbox `dbo.ClubEvent`. `schema.ts` holds the additive schema: `dbo.Club`
+from the outbox `dbo.ClubEvent`. `rules.ts` holds every rule once, as pure decisions:
+a change reads the clubs it touches under locks (`management-repository.ts`; club rows
+first, then roster, invitations, player state, rejoin blocks; a deadlock repeats it
+once), the decision answers with a plan (the writes and the bot's events, `events.ts`)
+or a refusal, and the store applies the plan in the same transaction.
+`management.ts` is the service behind `/api/my-club`: the member from the session, the
+mode of `dbo.ClubSystemState` (`off`, `admins` = confirmed admins only, `on`; cached
+30 s), the member's server membership asked live on every change (refused when Discord
+cannot be asked), the request checked by `packages/shared/src/clubs.ts`. The server's
+member list (`integrations/discord/guild-members.ts`, read with the bot token every ten
+minutes) answers who is on the server for the invite list, succession and the absence
+rule. `/internal/clubs/invitations/:id/answer` takes the bot's Accept/Decline buttons
+with the shared `CLUB_INTERNAL_SECRET` (404 otherwise; nginx never proxies `/internal/`).
+`lifecycle.ts` runs every `CLUB_LIFECYCLE_INTERVAL_MS` (default 5 minutes; `dev:live`
+sets 0): invitations expire, the new-club counter marks clubs alone 30 days after
+creation inactive and deletes them 14 days later, and from go-live members off the
+server are removed after 14 days and club activity follows the members' rated matches.
+The public list shows a club the counter marked inactive as inactive. `schema.ts` holds the additive schema: `dbo.Club`
 gains `PublicId` (the backend club id) and the timestamps of the new-club counter,
 `dbo.ClubRoster` the join date and the absence stamp, and new tables hold the mode
 (`dbo.ClubSystemState`), invitations, per-player state, rejoin blocks, the outbox and
@@ -343,6 +360,19 @@ All endpoints below use the same origin as the website.
 | GET | `/api/profile/me/editable` | The editor's profile: Discord names, title, country, friend codes, the member's titles, countries |
 | GET | `/api/profile/me/stats` | MY PROFILE's statistics per game (MSBL, MSC, SMS) of the signed-in player; `null` for a value not available |
 | PUT | `/api/profile/me/editable` | Save the editor's title, country and friend codes (JSON, with `version`) |
+| GET | `/api/my-club` | My Club: the signed-in member's club (role, permissions, roster, settings, its open invitations), the member's invitations, whether they may create a club |
+| POST | `/api/my-club/create` | Create a club (JSON: name, tag and the settings) |
+| PUT | `/api/my-club/settings` | Save the club's settings (JSON, with `settings_version` as `version`) |
+| POST | `/api/my-club/join` | Join an open club (JSON: `club_id`) |
+| POST | `/api/my-club/leave` | Leave the club |
+| POST | `/api/my-club/members/:playerId/remove` | Remove a member |
+| PUT | `/api/my-club/members/:playerId/officer` | Promote or demote (JSON: `officer`) |
+| GET | `/api/my-club/invite-candidates?q=&page=` | Players the club can invite: a profile, no club, on the server |
+| POST | `/api/my-club/invitations` | Invite a player (JSON: `player_id`) |
+| DELETE | `/api/my-club/invitations/:invitationId` | Revoke an invitation |
+| POST | `/api/my-club/invitations/:invitationId/accept` | Accept an invitation (also `.../decline`) |
+| POST | `/api/my-club/activity` | Confirm the club's activity |
+| POST | `/api/my-club/delete` | Delete the club (JSON: `confirm_tag`, the exact tag) |
 | GET | `/api/admin/overview` | Admin only (404 otherwise): the admin, the access window, the latest admin activity |
 | GET | `/api/health` | Service health |
 

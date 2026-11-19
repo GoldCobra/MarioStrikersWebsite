@@ -10,18 +10,23 @@ import {
   leaderboardCacheKey,
 } from "./cache/public-data-keys.ts";
 import { PublicDataCache, type PublicDataSource } from "./cache/public-data-cache.ts";
+import { clubNameKey } from "@ms/shared/clubs";
 import type { Config } from "./config.ts";
 import { adminConfigProblems, isAdminConfigured, isDiscordLoginConfigured } from "./config.ts";
 import { Database } from "./db/database.ts";
+import { GuildMemberList } from "./integrations/discord/guild-members.ts";
 import { DiscordMemberDirectory } from "./integrations/discord/members.ts";
 import { DiscordUserDirectory } from "./integrations/discord/users.ts";
 import type { Logger } from "./lib/logger.ts";
 import { createSqlAdminAuditStore } from "./modules/admin/audit-repository.ts";
-import type { AdminAccess } from "./modules/admin/guard.ts";
+import { AdminGuard, type AdminAccess } from "./modules/admin/guard.ts";
 import { createDiscordOAuthClient, type DiscordOAuthClient } from "./modules/auth/discord-oauth.ts";
 import { SessionManager } from "./modules/auth/session.ts";
+import { createClubLifecycle } from "./modules/clubs/lifecycle.ts";
 import { ClubLogoCache, type LogoFile } from "./modules/clubs/logo-cache.ts";
-import type { ClubProfile } from "./modules/clubs/mappers.ts";
+import { createSqlClubStore } from "./modules/clubs/management-repository.ts";
+import { createClubManagement, type ClubManagement } from "./modules/clubs/management.ts";
+import { clubLogoSource, type ClubProfile } from "./modules/clubs/mappers.ts";
 import { getMsblClubProfile, getMsblClubs } from "./modules/clubs/service.ts";
 import { CommunityEventsCache, fetchCommunityEvents, type EventsPayload } from "./modules/events/service.ts";
 import { getLeaderboardRows, type LeaderboardQuery, type LeaderboardRow } from "./modules/leaderboards/service.ts";
@@ -61,6 +66,8 @@ export interface DataSource {
   readonly login: { readonly sessions: SessionManager; readonly oauth: DiscordOAuthClient } | null;
   /** Absent unless the admin page is switched on and configured (and the login is); then nobody is an admin. */
   readonly admin: AdminAccess | null;
+  /** My Club (docs/adr/0012); absent when Discord login is not configured. */
+  readonly clubs: ClubManagement | null;
   start(): void;
   stop(): Promise<void>;
 }
@@ -168,6 +175,66 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
       }
     : null;
 
+  // The signed-in player's own profile; the editor shows the member's current server names (asked again after a
+  // minute). A new country or friend code shows in the player list at once, not after the next refresh.
+  const profiles = createProfileService({
+    store: createSqlProfileStore(database, titleCatalog),
+    members: new DiscordMemberDirectory({
+      ...discordRest,
+      guildId: config.discord.guildId,
+      cacheTtlMs: 60_000,
+      failureCacheTtlMs: 15_000,
+    }),
+    onChange: () => {
+      publicData.refresh(PLAYERS_LIST_KEY).catch((err: unknown) => {
+        log.warn({ err }, "[profile] Player list refresh after a profile change failed");
+      });
+    },
+  });
+
+  // My Club (docs/adr/0012): the club list and the player list show a club change at once.
+  const refreshClubLists = (): void => {
+    for (const key of [MSBL_CLUBS_KEY, PLAYERS_LIST_KEY]) {
+      publicData.refresh(key).catch((err: unknown) => {
+        log.warn({ err, key }, "[clubs] List refresh after a club change failed");
+      });
+    }
+  };
+  const clubStore = createSqlClubStore(database, clubNameKey);
+  // The server's member list (invite list, absence, succession); the website's bot token can list members.
+  const memberList = new GuildMemberList({ ...discordRest, guildId: config.discord.guildId, maxAgeMs: 10 * 60 * 1000 });
+  const adminGuard = admin && login ? new AdminGuard(admin, login.sessions, Date.now) : null;
+  const clubs = login
+    ? createClubManagement({
+        store: clubStore,
+        members: new DiscordMemberDirectory({
+          ...discordRest,
+          guildId: config.discord.guildId,
+          cacheTtlMs: 60_000,
+          failureCacheTtlMs: 15_000,
+        }),
+        memberList,
+        ensurePlayer: (identity) => profiles.ensurePlayer(identity),
+        isAdmin: async (cookie) => (adminGuard ? (await adminGuard.check(cookie)).ok : false),
+        adminRoleIds: config.admin.roleIds,
+        logoUrl: async (club) =>
+          club.logoHash
+            ? `/api/clubs/msbl/${String(club.clubId)}/logo?v=${club.logoHash}`
+            : logos.ensureClubLogo({
+                club_id: club.clubId,
+                logo_source: clubLogoSource(club.tag, club.name, club.logoUrl),
+              }),
+        onChange: refreshClubLists,
+      })
+    : null;
+  const clubLifecycle = createClubLifecycle({
+    store: clubStore,
+    memberList,
+    log,
+    intervalMs: config.clubs.lifecycleIntervalMs,
+    onChange: refreshClubLists,
+  });
+
   return {
     source: "mssql",
     now: Date.now,
@@ -178,35 +245,23 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     getPlayerProfileByDiscordId: (discordId) =>
       getPlayerProfileByDiscordId(database, log, discordId, () => titleCatalog.get()),
     getProfileStatsByDiscordId: (discordId) => getProfileStatsByDiscordId(database, discordId),
-    profiles: createProfileService({
-      store: createSqlProfileStore(database, titleCatalog),
-      // The editor shows the member's current server names; they are asked again after a minute.
-      members: new DiscordMemberDirectory({
-        ...discordRest,
-        guildId: config.discord.guildId,
-        cacheTtlMs: 60_000,
-        failureCacheTtlMs: 15_000,
-      }),
-      // A new country or friend code shows in the player list at once, not after the next refresh.
-      onChange: () => {
-        publicData.refresh(PLAYERS_LIST_KEY).catch((err: unknown) => {
-          log.warn({ err }, "[profile] Player list refresh after a profile change failed");
-        });
-      },
-    }),
+    profiles,
     getClubProfile: (clubId) => getMsblClubProfile(database, { logoCache: logos, users }, clubId),
     getClubLogoFile: (clubIdRaw) => logos.getLogoFile(clubIdRaw),
     getCommunityEvents: () => events.get(),
     getWiimmfiPlayers: () => wiimmfi.getPlayers(),
     login,
     admin,
+    clubs,
     start() {
       database.startKeepalive();
       publicData.start();
       events.start();
       titleSync.start();
+      clubLifecycle.start();
     },
     async stop() {
+      clubLifecycle.stop();
       titleSync.stop();
       await publicData.stop();
       await events.stop();

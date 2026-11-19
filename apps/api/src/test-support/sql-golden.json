@@ -62,7 +62,7 @@
     "name": "clubs list",
     "queries": [
       {
-        "sql": "SELECT   c.ID AS club_id,   c.ClanTag AS tag,   c.ClubName AS name,   c.JoinConditions AS join_conditions,   c.IsOpen AS is_open,   c.Region AS region,   c.Region2 AS region2,   c.Region3 AS region3,   c.ClubCode AS club_code,   c.ClubCode2 AS club_code2,   c.ClubCode3 AS club_code3,   c.Logo AS logo,   c.Activity AS activity,   COUNT(cr.Player) AS member_count FROM Club c LEFT JOIN ClubRoster cr ON cr.Club = c.ID GROUP BY c.ID, c.ClanTag, c.ClubName, c.JoinConditions, c.IsOpen, c.Region, c.Region2, c.Region3, c.ClubCode, c.ClubCode2, c.ClubCode3, c.Logo, c.Activity HAVING COUNT(cr.Player) > 0 ORDER BY COUNT(cr.Player) DESC, LTRIM(RTRIM(ISNULL(c.ClubName, ''))) ASC, LTRIM(RTRIM(ISNULL(c.ClanTag, ''))) ASC",
+        "sql": "SELECT   c.ID AS club_id,   c.ClanTag AS tag,   c.ClubName AS name,   c.JoinConditions AS join_conditions,   c.IsOpen AS is_open,   c.Region AS region,   c.Region2 AS region2,   c.Region3 AS region3,   c.ClubCode AS club_code,   c.ClubCode2 AS club_code2,   c.ClubCode3 AS club_code3,   c.Logo AS logo,   c.Activity AS activity,   c.InactiveSinceUtc AS inactive_since,   COUNT(cr.Player) AS member_count FROM Club c LEFT JOIN ClubRoster cr ON cr.Club = c.ID GROUP BY c.ID, c.ClanTag, c.ClubName, c.JoinConditions, c.IsOpen, c.Region, c.Region2, c.Region3, c.ClubCode, c.ClubCode2, c.ClubCode3, c.Logo, c.Activity, c.InactiveSinceUtc HAVING COUNT(cr.Player) > 0 ORDER BY COUNT(cr.Player) DESC, LTRIM(RTRIM(ISNULL(c.ClubName, ''))) ASC, LTRIM(RTRIM(ISNULL(c.ClanTag, ''))) ASC",
         "inputs": {},
         "types": {},
         "multiple": false

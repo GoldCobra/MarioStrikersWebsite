@@ -58,6 +58,14 @@ export interface AdminConfig {
   readonly sessionMaxAgeMs: number;
 }
 
+/** Club management (docs/adr/0012). */
+export interface ClubConfig {
+  /** The shared secret of the bot's internal route for its invitation buttons; "" switches the route off. */
+  readonly internalSecret: string;
+  /** Time between two runs of the club lifecycle job; 0 switches it off. */
+  readonly lifecycleIntervalMs: number;
+}
+
 export type LogLevel = "fatal" | "error" | "warn" | "info" | "debug" | "trace" | "silent";
 
 export interface Config {
@@ -88,6 +96,7 @@ export interface Config {
   };
   /** Time between two runs of the player title sync; 0 switches it off. */
   readonly titleSyncIntervalMs: number;
+  readonly clubs: ClubConfig;
   readonly discord: DiscordConfig;
   readonly session: SessionConfig;
   readonly admin: AdminConfig;
@@ -177,6 +186,10 @@ export function loadConfig(env: Env, options: LoadConfigOptions = {}): Config {
       failureRetryMs: readInt(env, "CLUB_LOGO_FAILURE_RETRY_MS", 6 * 60 * 60 * 1000),
     },
     titleSyncIntervalMs: readInt(env, "TITLE_SYNC_INTERVAL_MS", 24 * 60 * 60 * 1000),
+    clubs: {
+      internalSecret: readString(env, "CLUB_INTERNAL_SECRET"),
+      lifecycleIntervalMs: readInt(env, "CLUB_LIFECYCLE_INTERVAL_MS", 5 * 60 * 1000),
+    },
     discord: {
       clientId: readString(env, "DISCORD_CLIENT_ID"),
       clientSecret: readString(env, "DISCORD_CLIENT_SECRET"),
@@ -228,6 +241,10 @@ export function loadConfig(env: Env, options: LoadConfigOptions = {}): Config {
     const secretLength = config.session.secret.length;
     if (secretLength > 0 && secretLength < MIN_SESSION_SECRET_LENGTH) {
       throw new Error(`SESSION_SECRET must be at least ${MIN_SESSION_SECRET_LENGTH} characters.`);
+    }
+    const clubSecretLength = config.clubs.internalSecret.length;
+    if (clubSecretLength > 0 && clubSecretLength < MIN_SESSION_SECRET_LENGTH) {
+      throw new Error(`CLUB_INTERNAL_SECRET must be at least ${MIN_SESSION_SECRET_LENGTH} characters.`);
     }
   }
   return config;

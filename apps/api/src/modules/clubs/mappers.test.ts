@@ -55,6 +55,13 @@ test("Club.Activity older than 90 days is inactive", () => {
   assert.equal(row.is_active, false);
 });
 
+test("a new club the counter marked inactive is inactive even with a recent activity date", () => {
+  const recent = createClubRow(new Date("2026-04-01T12:00:00.000Z"));
+  const row = toMsblClubDTO({ ...recent, inactive_since: new Date("2026-04-02T12:00:00.000Z") }, { now: NOW });
+  assert.equal(row?.is_active, false);
+  assert.equal(row.activity, "2026-04-01T12:00:00.000Z");
+});
+
 test("clubs without tag and name are left out, excluded logos are dropped", () => {
   assert.equal(toMsblClubDTO({ tag: "", name: " " }), null);
   const excluded = toMsblClubDTO({ ...createClubRow(null), tag: "STRK", name: "I Be Strikin" });

@@ -67,6 +67,14 @@ test("members without a nickname or global name have empty ones; malformed roles
   assert.deepEqual(toGuildMember(true, 200, { roles: "123" }).roles, []);
 });
 
+test("the join date is read when Discord sends it (club creation needs it)", () => {
+  assert.equal(
+    toGuildMember(true, 200, { joined_at: "2026-01-02T03:04:05.000+00:00" }).joinedAt,
+    Date.parse("2026-01-02T03:04:05.000Z"),
+  );
+  assert.equal("joinedAt" in toGuildMember(true, 200, { joined_at: "nope" }), false);
+});
+
 test("404 means the account is not on the server; other failures are unknown", async () => {
   assert.equal((await directory(() => json({ code: 10007 }, 404)).members.getMember(MEMBER)).membership, "not_member");
   assert.deepEqual(

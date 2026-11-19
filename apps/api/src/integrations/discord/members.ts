@@ -18,6 +18,8 @@ export interface GuildMember {
   readonly globalName: string;
   /** The member's role ids on the server; none for anyone who is not a member. */
   readonly roles: readonly string[];
+  /** When the member (last) joined the server, in ms; only when Discord sent it (club creation needs it). */
+  readonly joinedAt?: number;
 }
 
 export interface GuildMemberLookup {
@@ -46,14 +48,17 @@ export function toGuildMember(ok: boolean, status: number, payload: unknown): Gu
     const member = (payload ?? {}) as {
       nick?: unknown;
       roles?: unknown;
+      joined_at?: unknown;
       user?: { username?: unknown; global_name?: unknown };
     };
+    const joinedAt = typeof member.joined_at === "string" ? Date.parse(member.joined_at) : Number.NaN;
     return {
       membership: "member",
       nick: normalizeText(member.nick),
       username: normalizeText(member.user?.username),
       globalName: normalizeText(member.user?.global_name),
       roles: toRoleIds(member.roles),
+      ...(Number.isFinite(joinedAt) ? { joinedAt } : {}),
     };
   }
   // 404 is Unknown Member (or Unknown User): not on the server.
