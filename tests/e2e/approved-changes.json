@@ -61,6 +61,10 @@
     {
       "screenshots": ["states/account-menu-*"],
       "reason": "Account menu (club management plan A2): a member's menu gains MY CLUB after MY PROFILE while My Club is open for them (fixtures run in mode on), and ADMIN becomes ADMIN PANEL at the top of an admin's menu. This state signs in the sample member, so the menu reads MY PROFILE, MY CLUB, LOGOUT; the rest of the page is unchanged."
+    },
+    {
+      "screenshots": ["states/club-popup-*"],
+      "reason": "Owner 2026-11-19 (club management, plan 4.7): the club popup names the club's captain CAPTAIN instead of OWNER, as My Club does; the badge grows by the two letters. The rest of the popup and every page are unchanged."
     }
   ]
 }
