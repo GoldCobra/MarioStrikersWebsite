@@ -39,6 +39,7 @@ export function createClubView(context: MyClubContext, initial: MyClubState & { 
   let query = "";
   let page = 1;
   let searchTimer: number | undefined;
+  let candidatesAsked = 0;
 
   card.content.insertAdjacentHTML(
     "beforeend",
@@ -138,7 +139,7 @@ export function createClubView(context: MyClubContext, initial: MyClubState & { 
       ? "Active"
       : `Inactive (no activity in the last ${String(CLUB_LIMITS.activityDays)} days)`;
     const confirm = club.permissions.confirm_activity
-      ? `<span class="my-club-line-actions">${lineButton("activity", "Confirm Activity", busy ? 'aria-disabled="true"' : "")}</span>`
+      ? `<span class="my-club-line-actions">${lineButton("activity", "Confirm Activity")}</span>`
       : "";
     part("activity").innerHTML = sectionHtml(
       "activity",
@@ -291,11 +292,14 @@ export function createClubView(context: MyClubContext, initial: MyClubState & { 
 
   async function loadCandidates(): Promise<void> {
     if (!club.permissions.invite) return;
+    // Only the newest request is shown: an older search or page that answers late is dropped.
+    const ticket = ++candidatesAsked;
     const params = new URLSearchParams({ q: query, page: String(page) });
     const response = await clubRequest<InviteCandidates>(
       "GET",
       `${MY_CLUB_URL}/invite-candidates?${params.toString()}`,
     );
+    if (ticket !== candidatesAsked) return;
     candidates = response.body ?? { total: 0, page: 1, candidates: [] };
     const mount = card.content.querySelector<HTMLElement>('[data-my-club="candidates"]');
     if (mount) mount.innerHTML = candidatesHtml();

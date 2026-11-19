@@ -528,6 +528,9 @@ export function createClubEditor(config: ClubEditorOptions): ClubEditor {
     switch (result.kind) {
       case "done":
         if (!creating) {
+          // The answer's settings are what is saved now (setSaved ran with them), in their stored form: a link
+          // typed as "discord.gg/…" comes back with https://, so the draft starts over from them.
+          draft = createDraft(saved);
           openFields.clear();
           errors = new Map();
           render();
