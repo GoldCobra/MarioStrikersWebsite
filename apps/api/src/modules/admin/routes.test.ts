@@ -67,6 +67,8 @@ async function createAdminApp({
           oauth: createDiscordOAuthClient(config.discord, createFakeDiscordFetch({ roles: loginRoles }).fetch),
         },
         admin: adminOn ? admin : null,
+        // My Club's menu flag is the clubs module's (auth/routes.test.ts); these tests look at the admin link.
+        clubs: null,
         profiles: {
           ensurePlayer: () => Promise.resolve({ playerId: 42, created: false }),
           getEditableProfile: () => Promise.resolve(null),
@@ -228,7 +230,7 @@ test("only a confirmed admin's account carries the admin link", async () => {
     (await app.inject({ url: "/api/auth/me", headers: sessionCookie ? { cookie: sessionCookie } : {} })).json<
       Record<string, unknown>
     >();
-  assert.deepEqual((await me(cookie())).account_links, [{ label: "Admin", href: PAGE }]);
+  assert.deepEqual((await me(cookie())).account_links, [{ label: "Admin Panel", href: PAGE }]);
   const plain = await me(cookie(false));
   assert.deepEqual(Object.keys(plain), ["authenticated", "user", "expires_at", "login_available"]);
   assert.deepEqual(await me(), { authenticated: false, login_available: true });

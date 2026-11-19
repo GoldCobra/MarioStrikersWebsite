@@ -139,7 +139,7 @@ jobs:
           module = re.search(rb'src="(modules/[^"]+\.js)"', html).group(1).decode()
           assert get(PAGE + module, admin)[0].status == 200
           me = json.loads(get('/api/auth/me', admin)[1])
-          assert me['account_links'] == [{'label': 'Admin', 'href': PAGE}], me
+          assert me['account_links'] == [{'label': 'Admin Panel', 'href': PAGE}], me
           assert json.loads(get('/api/admin/overview', admin)[1])['admin']['username'] == 'sample_admin'
 
           member = login('sample')

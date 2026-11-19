@@ -332,9 +332,9 @@
 }
 
 :is(#player-profile-popup, #player-profile-page),
-#club-profile-popup,
+:is(#club-profile-popup, #club-profile-page),
 :is(#player-profile-popup, #player-profile-page) *,
-#club-profile-popup * {
+:is(#club-profile-popup, #club-profile-page) * {
   text-shadow: none !important;
   filter: none !important;
   box-shadow: none !important;

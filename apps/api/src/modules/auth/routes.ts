@@ -65,12 +65,16 @@ export function registerAuthRoutes(app: FastifyInstance, { config, data }: Route
   );
 
   app.get("/api/auth/me", async (request, reply) => {
+    const session = sessions?.readSession(request.headers.cookie) ?? null;
     const adminCheck = adminGuard ? await adminGuard.check(request.headers.cookie) : null;
+    // My Club's menu entry while it is open for this member (mode "on", or "admins" and a confirmed admin).
+    const myClub = session && data.clubs ? await data.clubs.isOpen(request.headers.cookie).catch(() => false) : false;
     return sendNoStore(reply, {
-      ...SessionManager.toAuthMeResponse(sessions?.readSession(request.headers.cookie) ?? null),
+      ...SessionManager.toAuthMeResponse(session),
       login_available: data.login !== null,
       // Only a confirmed admin gets the link; the menu renders whatever links the account carries.
-      ...(adminGuard && adminCheck?.ok ? { account_links: [{ label: "Admin", href: adminGuard.pagePath }] } : {}),
+      ...(adminGuard && adminCheck?.ok ? { account_links: [{ label: "Admin Panel", href: adminGuard.pagePath }] } : {}),
+      ...(myClub ? { my_club: true } : {}),
     });
   });
 

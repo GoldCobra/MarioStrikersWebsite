@@ -54,11 +54,18 @@ function stateFromMap(pageSlug: string): PageState | null {
   return { pageSlug, topKey: entry.topKey, section, secondItem: secondItem ?? null, leafItem: leafItem ?? null };
 }
 
+/** The account's own pages (signed in only): the login button marks them, and logging out reloads them. */
+export const ACCOUNT_PAGE_SLUGS: readonly string[] = ["profile", "my-club"];
+
+export function isAccountPage(pageSlug: string): boolean {
+  return ACCOUNT_PAGE_SLUGS.includes(pageSlug);
+}
+
 export function resolvePageState(pageSlug: string): PageState {
   const empty = { pageSlug, section: null, secondItem: null, leafItem: null };
-  // The not-found and the admin page belong to no section, so no navigation entry is marked; neither does
-  // the profile page, which the login button (the account) marks instead.
-  if (pageSlug === NOT_FOUND_PAGE.slug || pageSlug === ADMIN_PAGE.slug || pageSlug === "profile") {
+  // The not-found and the admin page belong to no section, so no navigation entry is marked; neither do the
+  // account's pages (My Profile, My Club), which the login button (the account) marks instead.
+  if (pageSlug === NOT_FOUND_PAGE.slug || pageSlug === ADMIN_PAGE.slug || isAccountPage(pageSlug)) {
     return { ...empty, topKey: "" };
   }
   if (pageSlug === "index") return { ...empty, topKey: "home" };

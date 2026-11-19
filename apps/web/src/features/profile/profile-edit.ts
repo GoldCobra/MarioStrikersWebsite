@@ -36,7 +36,8 @@ import {
   type SavedProfile,
   type StoredDraft,
 } from "./profile-edit-state.ts";
-import { setToastLift, showToast } from "./profile-toasts.ts";
+import { createEditBar } from "./edit-bar.ts";
+import { showToast } from "./profile-toasts.ts";
 
 const API_URL = "/api/profile/me/editable";
 const DRAFT_KEY = "ms-profile-edit-draft";
@@ -172,7 +173,6 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
   let confirming = false;
   /** How often the lines were drawn; a click outside a field draws them only if nothing else did. */
   let renders = 0;
-  let slotBelowView = false;
 
   const blocked = (): boolean => profile.discord.membership === "not_member";
   const dirty = (): boolean => changedFields(draft, base).size > 0;
@@ -417,96 +417,18 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
   }
 
   // -------------------------------------------------------------------------------------------------
-  // Save bar: at the end of the card; while there are unsaved changes and the end is out of sight, it
-  // floats at the bottom of the screen (the page's layout keeps position: sticky from working here).
+  // Save bar (edit-bar.ts, shared with My Club).
 
-  let slot: HTMLElement | null = null;
-  let bar: HTMLElement | null = null;
-
-  const barButton = (action: string): HTMLButtonElement | null =>
-    bar?.querySelector<HTMLButtonElement>(`[data-edit-action="${action}"]`) ?? null;
-
-  function ensureBar(): void {
-    if (slot?.isConnected) return;
-    const card = root.querySelector<HTMLElement>(".popup-card");
-    if (!card) return;
-    slot = document.createElement("div");
-    slot.className = "profile-edit-bar-slot";
-    // The buttons stay the same elements in every state, so the focus stays on them.
-    slot.innerHTML = [
-      '<div class="profile-edit-bar" role="group" aria-label="Profile changes">',
-      '<p class="profile-edit-bar-text"></p>',
-      '<button class="profile-action-button" type="button" data-edit-action="discard">Discard</button>',
-      '<button class="profile-action-button is-primary" type="button" data-edit-action="save">Save</button>',
-      '<button class="profile-action-button" type="button" data-edit-action="keep" hidden>Keep editing</button>',
-      '<button class="profile-action-button is-danger" type="button" data-edit-action="discard-confirm" hidden>Yes, discard</button>',
-      "</div>",
-    ].join("");
-    card.append(slot);
-    bar = slot.querySelector<HTMLElement>(".profile-edit-bar");
-    if ("IntersectionObserver" in window) {
-      new IntersectionObserver(
-        (entries) => {
-          const entry = entries[entries.length - 1];
-          if (!entry) return;
-          slotBelowView = entry.boundingClientRect.bottom > (entry.rootBounds?.bottom ?? window.innerHeight) + 0.5;
-          placeBar();
-        },
-        { threshold: [0, 1] },
-      ).observe(slot);
-    }
-  }
-
-  function placeBar(): void {
-    if (!slot || !bar) return;
-    const floating = !blocked() && dirty() && slotBelowView;
-    bar.classList.toggle("is-floating", floating);
-    if (floating) {
-      // As wide as the card, frame included.
-      const box = (root.querySelector(".popup-card") ?? slot).getBoundingClientRect();
-      bar.style.left = `${String(box.left)}px`;
-      bar.style.width = `${String(box.width)}px`;
-      setToastLift(bar.getBoundingClientRect().height);
-    } else {
-      bar.style.removeProperty("left");
-      bar.style.removeProperty("width");
-      setToastLift(0);
-    }
-  }
+  const bar = createEditBar(root, {
+    label: "Profile changes",
+    unsaved: MESSAGES.unsaved,
+    saving: MESSAGES.saving,
+    confirmDiscard: MESSAGES.confirmDiscard,
+  });
+  const barButton = (action: string): HTMLButtonElement | null => bar.button(action);
 
   function renderBar(): void {
-    ensureBar();
-    if (!slot || !bar) return;
-    slot.hidden = blocked();
-    const changed = dirty();
-    const text = bar.querySelector<HTMLElement>(".profile-edit-bar-text");
-    if (text)
-      text.textContent = saving
-        ? MESSAGES.saving
-        : confirming
-          ? MESSAGES.confirmDiscard
-          : changed
-            ? MESSAGES.unsaved
-            : "";
-    for (const [action, shown] of [
-      ["discard", !confirming],
-      ["save", !confirming],
-      ["keep", confirming],
-      ["discard-confirm", confirming],
-    ] as const) {
-      const button = barButton(action);
-      if (button) button.hidden = !shown;
-    }
-    // Without changes both are off; while saving they stay focusable (aria-disabled) but do nothing.
-    for (const action of ["discard", "save"]) {
-      const button = barButton(action);
-      if (!button) continue;
-      button.disabled = !changed && !saving;
-      if (saving) button.setAttribute("aria-disabled", "true");
-      else button.removeAttribute("aria-disabled");
-    }
-    bar.classList.toggle("is-dirty", changed);
-    placeBar();
+    bar.render({ hidden: blocked(), dirty: dirty(), saving, confirming });
   }
 
   // -------------------------------------------------------------------------------------------------
@@ -926,7 +848,7 @@ export function createProfileEditor({ root, profile: initial, reload }: ProfileE
     if (!dirty() || blocked()) return;
     event.preventDefault();
   });
-  window.addEventListener("resize", placeBar);
+  window.addEventListener("resize", bar.place);
 
   // Changes kept when the login expired come back after the next login (same Discord account only).
   let restored = false;

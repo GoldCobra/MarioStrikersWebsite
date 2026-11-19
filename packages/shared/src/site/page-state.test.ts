@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { breadcrumbItems, pageLabel, resolvePageState } from "./page-state.ts";
+import { breadcrumbItems, isAccountPage, pageLabel, resolvePageState } from "./page-state.ts";
 import { PAGES } from "./pages.ts";
 
 function path(slug: string): string[] {
@@ -18,11 +18,12 @@ test("pages resolve to their place in the navigation", () => {
   assert.deepEqual(path("players-profiles"), ["players", "-", "-"]);
   // Pages outside every section fall back to home, as the runtime script did.
   assert.deepEqual(path("about-us"), ["home", "-", "-"]);
-  // The not-found page marks no navigation entry; the profile page is marked by the login button.
+  // The not-found page marks no navigation entry; the account's pages are marked by the login button.
   assert.deepEqual(path("404"), ["", "-", "-"]);
   assert.deepEqual(path("profile"), ["", "-", "-"]);
+  assert.deepEqual(path("my-club"), ["", "-", "-"]);
   for (const page of PAGES) {
-    if (page.slug !== "profile") assert.notEqual(resolvePageState(page.slug).topKey, "", page.slug);
+    if (!isAccountPage(page.slug)) assert.notEqual(resolvePageState(page.slug).topKey, "", page.slug);
   }
 });
 

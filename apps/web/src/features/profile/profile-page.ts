@@ -6,34 +6,22 @@
 
 import { toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
-import { loginPath } from "@ms/shared/site/navigation";
 import { templateView, type TemplateView } from "../../lib/popup.ts";
 import { renderPlayerProfile } from "../players/player-profile-view.ts";
 import type { PlayerProfile } from "../players/profile-data.ts";
 import template from "../players/player-profile-popup.html?raw";
+import {
+  DISCORD_LINK,
+  RETRY_BUTTON,
+  loginRequiredHtml as accountLoginHtml,
+  removeAuthQuery,
+  signedIn,
+  stateActions as actions,
+  statePanel,
+} from "./account-page.ts";
 import { createProfileEditor } from "./profile-edit.ts";
 import type { EditableProfile } from "./profile-edit-state.ts";
 import { renderProfileStats, type ProfileStatsResponse } from "./profile-stats.ts";
-
-const DISCORD_LINK =
-  '<a class="profile-action-button" href="https://discord.gg/de2YaWg" target="_blank" rel="noopener noreferrer">Open Discord</a>';
-const LOGIN_LINK = `<a class="profile-action-button" href="${loginPath()}">Login with Discord</a>`;
-const RETRY_BUTTON =
-  '<button class="profile-action-button" type="button" data-profile-action="retry">Try again</button>';
-
-function actions(...buttons: string[]): string {
-  return `<p class="profile-state-actions">${buttons.join(" ")}</p>`;
-}
-
-function statePanel(title: string, message: string, actionHtml = ""): string {
-  return [
-    '<section class="profile-state-panel">',
-    `<h2 class="profile-state-title">${escapeHtml(title)}</h2>`,
-    `<p class="profile-state-message">${escapeHtml(message)}</p>`,
-    actionHtml,
-    "</section>",
-  ].join("");
-}
 
 interface ProfileCard {
   readonly root: HTMLElement;
@@ -122,26 +110,8 @@ function renderDiscordName(card: ProfileCard, discord: EditableProfile["discord"
   top.append(name);
 }
 
-/** The result of the login flow, which returns with ?auth=<result>. */
-function authResult(): string {
-  return new URLSearchParams(window.location.search).get("auth") ?? "";
-}
-
 function loginRequiredHtml(): string {
-  switch (authResult()) {
-    case "not_member":
-      return statePanel(
-        "Discord Server Required",
-        "Only members of the Mario Strikers Discord server can log in. Join the server, then log in again.",
-        actions(DISCORD_LINK, LOGIN_LINK),
-      );
-    case "failed":
-      return statePanel("Login Failed", "The Discord login did not complete. Please try again.", actions(LOGIN_LINK));
-    case "unavailable":
-      return statePanel("Login Unavailable", "Login with Discord is not available right now. Please try again later.");
-    default:
-      return statePanel("Login Required", "Login with Discord to open your player profile.", actions(LOGIN_LINK));
-  }
+  return accountLoginHtml("/profile", "Login with Discord to open your player profile.");
 }
 
 function authErrorHtml(payload: { code?: unknown } | null, status: number): string {
@@ -165,17 +135,6 @@ function authErrorHtml(payload: { code?: unknown } | null, status: number): stri
     "The profile could not be loaded right now. Please try again later.",
     actions(RETRY_BUTTON),
   );
-}
-
-/** The login flow returns with ?auth=<result>; the address bar drops it (and an old ?edit=1) once the profile shows. */
-function removeProfileQuery(): void {
-  if (!window.location.search) return;
-  const params = new URLSearchParams(window.location.search);
-  if (!params.has("auth") && !params.has("edit")) return;
-  params.delete("auth");
-  params.delete("edit");
-  const query = params.toString();
-  window.history.replaceState(null, "", window.location.pathname + (query ? `?${query}` : "") + window.location.hash);
 }
 
 interface ProfileResponse {
@@ -234,23 +193,6 @@ async function fetchEditable(): Promise<EditableProfile | null> {
   }
 }
 
-/**
- * Whether the visitor is signed in (null when that is unknown). Asked first, so a visitor who is not
- * signed in gets no refused profile requests (each one is an error in the browser's console).
- */
-async function signedIn(): Promise<boolean | null> {
-  try {
-    const response = await fetch("/api/auth/me", {
-      credentials: "same-origin",
-      headers: { Accept: "application/json" },
-    });
-    const body = (await response.json().catch(() => null)) as { authenticated?: unknown } | null;
-    return response.ok ? body?.authenticated === true : null;
-  } catch {
-    return null;
-  }
-}
-
 /** Shows the profile, its statistics and its editing, all at once (loaded alongside, so nothing moves). */
 async function loadProfile(mount: HTMLElement): Promise<void> {
   mount.innerHTML = '<p class="profile-loading loading-note">Loading...</p>';
@@ -271,7 +213,8 @@ async function loadProfile(mount: HTMLElement): Promise<void> {
     renderCard(card, result.payload?.profile ?? {});
     renderProfileStats(card.stats, stats);
     mount.replaceChildren(card.root);
-    removeProfileQuery();
+    // The address bar drops ?auth= (and an old ?edit=1) once the profile shows.
+    removeAuthQuery(["edit"]);
     if (!editable) {
       card.root
         .querySelector(".player-popup-content > .profile-top-line")

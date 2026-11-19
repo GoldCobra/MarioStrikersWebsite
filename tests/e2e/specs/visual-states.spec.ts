@@ -168,6 +168,9 @@ const STATES: VisualState[] = [
   },
   { name: "profile-linked", path: "/profile", login: "linked", fullPage: true },
   { name: "profile-unlinked", path: "/profile", login: "unlinked", fullPage: true },
+  // My Club (docs/adr/0012): the sample captain's club, and a member without a club.
+  { name: "my-club-linked", path: "/my-club", login: "linked", fullPage: true },
+  { name: "my-club-unlinked", path: "/my-club", login: "unlinked", fullPage: true },
   {
     // An MSC code open for changing, its platform changed: marked unsaved, SAVE and DISCARD on.
     name: "profile-edit",

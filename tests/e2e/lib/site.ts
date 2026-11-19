@@ -39,6 +39,7 @@ export const PAGE_SLUGS = [
   "msl-leaderboards",
   "msl-league-rules",
   "msl-schedule",
+  "my-club",
   "partners",
   "player-card",
   "players",

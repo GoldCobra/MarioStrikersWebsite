@@ -80,6 +80,24 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await page.goto("/profile");
     await settle(page, { eagerImages: true });
   },
+  // My Club (docs/adr/0012): the sample captain's club with a settings line open, and the club-less member's
+  // form for a new club (nothing is sent, so the shared fixture store keeps its data).
+  "my club": async (page) => {
+    await watchViolations(page);
+    await preparePage(page);
+    await login(page, "linked");
+    await page.goto("/my-club");
+    await settle(page, { eagerImages: true });
+    await page.locator("[data-edit-open='stadium']").click();
+    await page.locator("select[data-field='stadium']").selectOption({ index: 1 });
+    await expect(page.locator(".profile-edit-bar-text")).toHaveText("Unsaved changes");
+    await page.context().clearCookies();
+    await login(page, "unlinked");
+    await page.goto("/my-club");
+    await settle(page, { eagerImages: true });
+    await page.locator("[data-club-action='create']").click();
+    await expect(page.locator("input[data-field='name']")).toBeVisible();
+  },
   // The hidden admin page (docs/adr/0011): only the admin's menu offers it, built with the menu (never
   // added later); everyone else gets the ordinary not-found page at its address.
   "admin menu entry and admin page": async (page) => {
@@ -93,7 +111,7 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await page.goto("/");
     await settle(page, { eagerImages: true });
     await page.locator("button.nav-top-login.is-signed-in").click();
-    await expect(page.locator(".global-account-menu-item")).toHaveText(["My Profile", "Logout"]);
+    await expect(page.locator(".global-account-menu-item")).toHaveText(["My Profile", "My Club", "Logout"]);
     const refused = await page.request.get(adminPage);
     expect(refused.status()).toBe(404);
     expect(await refused.text()).toBe(missing);
@@ -103,9 +121,14 @@ const FLOWS: Record<string, (page: Page) => Promise<void>> = {
     await page.goto("/");
     await settle(page, { eagerImages: true });
     // The entry is in the menu before it is ever opened.
-    await expect(page.locator(".global-account-menu-item")).toHaveText(["My Profile", "Admin", "Logout"]);
+    await expect(page.locator(".global-account-menu-item")).toHaveText([
+      "Admin Panel",
+      "My Profile",
+      "My Club",
+      "Logout",
+    ]);
     await page.locator("button.nav-top-login.is-signed-in").click();
-    await page.locator(".global-account-menu-item", { hasText: "Admin" }).click();
+    await page.locator(".global-account-menu-item", { hasText: "Admin Panel" }).click();
     await page.waitForURL(`**${adminPage}`);
     await settle(page, { eagerImages: true });
     await expect(page.locator("#admin-root")).toHaveAttribute("aria-busy", "false");

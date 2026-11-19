@@ -19,6 +19,7 @@ import landing from "./landing.css?raw";
 import leaderboards from "./leaderboards.css?raw";
 import mobile from "./mobile.css?raw";
 import msl from "./msl.css?raw";
+import myClub from "./my-club.css?raw";
 import navigation from "./navigation.css?raw";
 import partners from "./partners.css?raw";
 import playerPopup from "./player-popup.css?raw";
@@ -58,6 +59,7 @@ export const GLOBAL_CSS = [
   playerPopup,
   ratingCards,
   clubPopup,
+  myClub,
   tabPlaceholder,
   tablet,
   typography,

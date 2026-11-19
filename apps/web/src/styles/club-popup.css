@@ -18,12 +18,12 @@
   overflow: visible;
 }
 
-#club-profile-popup .popup-title {
+:is(#club-profile-popup, #club-profile-page) .popup-title {
   font-family: "ITC Grizzly", sans-serif;
   max-width: none;
 }
 
-#club-profile-popup .club-popup-name {
+:is(#club-profile-popup, #club-profile-page) .club-popup-name {
   flex: 0 1 auto;
   min-width: 0;
   white-space: nowrap;
@@ -36,7 +36,7 @@
   color: var(--color-gold);
 }
 
-#club-profile-popup :is(
+:is(#club-profile-popup, #club-profile-page) :is(
   .club-popup-status,
   .player-popup-section-title,
   .club-popup-line,
@@ -306,7 +306,7 @@
   pointer-events: none;
 }
 
-#club-profile-popup .club-popup-bg-logo {
+:is(#club-profile-popup, #club-profile-page) .club-popup-bg-logo {
   filter: saturate(0.4) !important;
 }
 

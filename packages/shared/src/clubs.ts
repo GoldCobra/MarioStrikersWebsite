@@ -332,11 +332,14 @@ export function validateClubSettings(raw: unknown, stored?: ClubSettingsValue): 
     else stadium = known;
   }
 
-  const discordUrl = textOf(raw, "discord_url");
+  let discordUrl = textOf(raw, "discord_url");
   if (discordUrl === null) errors.push(clubFieldError("discord_url", "INVALID"));
   else if (discordUrl && discordUrl !== stored?.discordUrl) {
-    if (discordUrl.length > CLUB_DISCORD_URL_MAX_LENGTH) errors.push(clubFieldError("discord_url", "TOO_LONG"));
-    else if (!isDiscordInviteUrl(discordUrl)) errors.push(clubFieldError("discord_url", "INVALID"));
+    // "discord.gg/…", as the message suggests, is stored as https://discord.gg/….
+    const url = /^[a-z][a-z0-9+.-]*:\/\//i.test(discordUrl) ? discordUrl : `https://${discordUrl}`;
+    if (url.length > CLUB_DISCORD_URL_MAX_LENGTH) errors.push(clubFieldError("discord_url", "TOO_LONG"));
+    else if (!isDiscordInviteUrl(url)) errors.push(clubFieldError("discord_url", "INVALID"));
+    else discordUrl = url;
   }
 
   if (

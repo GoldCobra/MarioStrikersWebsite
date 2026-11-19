@@ -384,14 +384,14 @@
 /* All text in MLSBY (the "Reporter" face); the name next to the flag stays in ITC Grizzly and the rating
    cards keep their fonts, like in the popup and on the Discord card. Fields and buttons take the card's
    font instead of the browser's own. */
-#player-profile-page {
+:is(#player-profile-page, #club-profile-page) {
   --profile-muted-color: #d7d8de;
   font-family: var(--reporter-font-stack);
   font-weight: var(--reporter-font-weight);
   letter-spacing: var(--reporter-letter-spacing);
 }
 
-#player-profile-page :is(button, input, select, textarea) {
+:is(#player-profile-page, #club-profile-page) :is(button, input, select, textarea) {
   font-family: inherit;
   font-weight: inherit;
   letter-spacing: inherit;
@@ -436,7 +436,7 @@
 
 /* The first line under the header: the club on the left, the Discord username on the right; a long club
    name pushes the username onto a line of its own, still on the right. */
-#player-profile-page .profile-top-line {
+:is(#player-profile-page, #club-profile-page) .profile-top-line {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -446,7 +446,7 @@
 
 /* "Member of <CLUB> [<TAG>]" in the popup's text, the club in the buttons' gold and in capitals (only
    shown that way, saved as it is); without a club the line stays, empty but one line tall. */
-#player-profile-page .profile-club-line {
+:is(#player-profile-page, #club-profile-page) .profile-club-line {
   flex: 1 1 auto;
   min-height: 1.22em;
   margin: 0;
@@ -511,7 +511,7 @@
 }
 
 /* "+" at the right end of the MSC section's title, centred on its line. */
-#player-profile-page .player-popup-section:has(> .profile-section-actions) {
+:is(#player-profile-page, #club-profile-page) .player-popup-section:has(> .profile-section-actions) {
   position: relative;
 }
 
@@ -549,12 +549,12 @@
 }
 
 /* Unsaved: a quiet amber edge on the left of the line, and a dot after the list's title. */
-#player-profile-page :is(.player-popup-code-row, .profile-edit-row).is-unsaved {
+:is(#player-profile-page, #club-profile-page) :is(.player-popup-code-row, .profile-edit-row).is-unsaved {
   border-left: 3px solid var(--color-amber);
   padding-left: calc(0.55rem - 3px);
 }
 
-#player-profile-page .player-popup-section-title.is-unsaved::after {
+:is(#player-profile-page, #club-profile-page) .player-popup-section-title.is-unsaved::after {
   content: " •";
   color: var(--color-amber);
 }
@@ -582,7 +582,8 @@
 /* The native fields of a line (an MSC code's region and platform, the digits) in the line's type, framed like
    the dropdown (dropdown.css). */
 .profile-edit-select,
-.profile-edit-digits {
+.profile-edit-digits,
+.profile-edit-text {
   min-height: var(--field-control-height);
   padding: 0 0.35rem;
   border: 1px solid rgba(255, 255, 255, 0.35);
@@ -596,17 +597,18 @@
 /* Except on iPhones and iPads: Safari zooms into a text field or select under 16px when it gets the focus. */
 @supports (-webkit-touch-callout: none) {
   .profile-edit-select,
-  .profile-edit-digits {
+  .profile-edit-digits,
+  .profile-edit-text {
     font-size: 16px;
   }
 }
 
-:is(.profile-edit-select, .profile-edit-digits):focus-visible {
+:is(.profile-edit-select, .profile-edit-digits, .profile-edit-text):focus-visible {
   outline: 2px solid var(--color-gold);
   outline-offset: 0;
 }
 
-:is(.profile-edit-select, .profile-edit-digits)[aria-invalid="true"] {
+:is(.profile-edit-select, .profile-edit-digits, .profile-edit-text)[aria-invalid="true"] {
   border-color: #ff8a8a;
 }
 
