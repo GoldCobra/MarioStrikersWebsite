@@ -6,7 +6,16 @@ import { escapeHtml } from "@ms/shared/html";
 import { toText } from "@ms/shared/text";
 import type { Club } from "../clubs/club-data.ts";
 import { regionBadgeHtml } from "../clubs/club-profile-view.ts";
-import { createClubCard, dateText, dateTimeText, lineButton, rowHtml, sectionHtml } from "./club-card.ts";
+import {
+  createClubCard,
+  dateText,
+  dateTimeText,
+  lineButton,
+  lineTextHtml,
+  noteHtml,
+  rowHtml,
+  sectionHtml,
+} from "./club-card.ts";
 import { createClubEditor, type SubmitResult } from "./club-edit.ts";
 import { MY_CLUB_URL, clubRequest, type MyClubState } from "./my-club-data.ts";
 import type { MyClubContext, MyClubView } from "./my-club-page.ts";
@@ -59,7 +68,10 @@ export function createNoClubView(context: MyClubContext, initial: MyClubState): 
       .map((invitation) =>
         rowHtml(
           [
-            `<span class="player-popup-code-value">${escapeHtml(`${invitation.club_name} [${invitation.club_tag}] · invited by ${invitation.invited_by} · until ${dateText(invitation.expires_at)}`)}</span>`,
+            lineTextHtml(
+              `${invitation.club_name} [${invitation.club_tag}]`,
+              `Invited by ${invitation.invited_by} · open until ${dateText(invitation.expires_at)}`,
+            ),
             '<span class="my-club-line-actions">',
             lineButton("accept", "Accept", `data-invitation="${String(invitation.id)}"`, "primary"),
             lineButton("decline", "Decline", `data-invitation="${String(invitation.id)}"`),
@@ -114,10 +126,10 @@ export function createNoClubView(context: MyClubContext, initial: MyClubState): 
     }
     const inner = state.create.allowed
       ? rowHtml(
-          `<span class="player-popup-code-value">Start a club of your own.</span><span class="my-club-line-actions">${lineButton("create", "Create a Club", "", "primary")}</span>`,
+          `${lineTextHtml("Start a club of your own.")}<span class="my-club-line-actions">${lineButton("create", "Create a Club", "", "primary")}</span>`,
         )
       : rowHtml(
-          `<span class="player-popup-code-value my-club-wrap">${escapeHtml(state.create.reason?.error ?? "You cannot create a club right now.")}</span>`,
+          lineTextHtml(state.create.reason?.error ?? "You cannot create a club right now."),
           " profile-code-missing",
         );
     mount.innerHTML = sectionHtml("create", "Create a Club", `<div class="player-popup-code-list">${inner}</div>`);
@@ -150,15 +162,17 @@ export function createNoClubView(context: MyClubContext, initial: MyClubState): 
         const members = Number.isInteger(count) && count > 0 ? `${String(count)} member${count === 1 ? "" : "s"}` : "";
         const regions = Array.isArray(club.regions) ? (club.regions as unknown[]).map((region) => toText(region)) : [];
         const action = until
-          ? `<span class="my-club-note">Rejoin from ${escapeHtml(dateText(until))}</span>`
+          ? noteHtml("Rejoin from", dateText(until))
           : lineButton("join", "Join", `data-club="${String(id)}"${cooldown ? " disabled" : ""}`);
         return [
           '<li class="club-popup-roster-item my-club-open-club">',
           '<span class="club-popup-roster-player">',
           `<span class="club-popup-roster-name">${escapeHtml(`${toText(club.name)} [${toText(club.tag)}]`)}</span>`,
+          // Under the name: its regions and its size.
+          `<span class="my-club-open-club-detail"><span class="club-edit-badges">${regions.map(regionBadgeHtml).join("")}</span>`,
           members ? `<span class="club-popup-roster-discord-name">${escapeHtml(members)}</span>` : "",
           "</span>",
-          `<span class="club-edit-badges">${regions.map(regionBadgeHtml).join("")}</span>`,
+          "</span>",
           `<span class="my-club-line-actions">${action}</span>`,
           "</li>",
         ].join("");
@@ -168,7 +182,7 @@ export function createNoClubView(context: MyClubContext, initial: MyClubState): 
       "open-clubs",
       "Open Clubs",
       rows
-        ? `${note}<ul class="club-popup-roster my-club-roster">${rows}</ul>`
+        ? `${note}<ul class="club-popup-roster my-club-roster is-clubs">${rows}</ul>`
         : `${note}<div class="player-popup-code-list">${rowHtml('<span class="player-popup-code-value">No club is open to anyone right now.</span>', " profile-code-missing")}</div>`,
     );
   }

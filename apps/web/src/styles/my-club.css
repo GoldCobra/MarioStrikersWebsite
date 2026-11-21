@@ -21,33 +21,50 @@
   line-height: var(--field-line-height);
 }
 
-#club-profile-page .club-popup-roster {
-  max-height: none;
-  overflow: visible;
-  grid-auto-rows: auto;
+/* A line is never wider than the card: the list's one column may shrink below its lines' longest text. */
+#club-profile-page .player-popup-code-list {
+  grid-template-columns: minmax(0, 1fr);
 }
 
-/* A roster line takes the member's actions at its end; a narrow screen wraps them under the name. */
-#club-profile-page .club-popup-roster-item {
-  height: auto;
-  min-height: 34px;
-  grid-template-columns: 18px minmax(0, 1fr) auto auto;
+/* A line that says something and offers buttons (an invitation, the activity): its text wraps, the buttons keep
+   their size and move under the text when both do not fit (my-club/club-card.ts lineTextHtml). */
+#club-profile-page .player-popup-code-row:has(> .my-club-line-actions) {
+  flex-wrap: wrap;
+  row-gap: 0.35rem;
 }
 
-#club-profile-page .my-club-open-club {
-  grid-template-columns: minmax(0, 1fr) auto auto;
+.my-club-line-text {
+  flex: 1 1 12rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding-block: 0.15rem;
+}
+
+.my-club-line-primary {
+  overflow-wrap: anywhere;
+}
+
+.my-club-line-detail {
+  overflow-wrap: anywhere;
+  color: var(--profile-muted-color);
+  font-size: 13px;
+  line-height: 1.25;
 }
 
 .my-club-line-actions {
   display: inline-flex;
+  flex: 0 0 auto;
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: 0.3rem;
+  max-width: 100%;
   margin-left: auto;
 }
 
-/* The buttons of a line: the profile's action button, as tall as a field. */
+/* The buttons of a line: the profile's action button, as tall as a field; on My Club the label stays on one line. */
 .my-club-line-button {
   min-height: var(--field-control-height);
   padding: 0 0.55rem;
@@ -55,18 +72,107 @@
   line-height: 1;
 }
 
+#club-profile-page .my-club-line-button {
+  white-space: nowrap;
+}
+
 .my-club-line-button:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/* The rosters (members, players to invite, open clubs): one column grid for the whole list, so the badges and the
+   buttons of every line stand exactly under each other. A line's rows: the name, then the Discord name; the flag
+   stands in front of the name's first line, the badge and the buttons in the middle of both rows, and a line
+   taller than its rows centres them. */
+#club-profile-page .club-popup-roster {
+  max-height: none;
+  overflow: visible;
+  grid-auto-rows: auto;
+  grid-template-columns: 18px minmax(0, 1fr) auto auto;
+}
+
+#club-profile-page .club-popup-roster.is-clubs {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+#club-profile-page .club-popup-roster-item {
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-content: center;
+  row-gap: 0.05rem;
+  height: auto;
+  min-height: 40px;
+  padding-block: 0.2rem;
+}
+
+#club-profile-page .club-popup-roster-player {
+  display: contents;
+}
+
+#club-profile-page .club-popup-roster-flag {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+  margin-top: calc((var(--reporter-font-size-sm) * var(--reporter-line-height) - 12px) / 2);
+}
+
+#club-profile-page .club-popup-roster-player > * {
+  grid-column: 2;
+  grid-row: 2;
+  max-width: 100%;
+}
+
+#club-profile-page .club-popup-roster.is-clubs .club-popup-roster-player > * {
+  grid-column: 1;
+}
+
+/* A name wraps instead of being cut (a Discord username, one word, is cut at the column's end). */
+#club-profile-page .club-popup-roster-player > .club-popup-roster-name {
+  grid-row: 1;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#club-profile-page :is(.club-popup-role-badge, .club-popup-roster-item > .my-club-line-actions) {
+  grid-row: 1 / span 2;
+}
+
+#club-profile-page .club-popup-role-badge {
+  grid-column: 3;
+}
+
+#club-profile-page .club-popup-roster-item > .my-club-line-actions {
+  grid-column: 4;
+}
+
+/* An open club's button stays at the end of its line on every screen. */
+#club-profile-page .club-popup-roster.is-clubs .club-popup-roster-item > .my-club-line-actions {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  margin-top: 0;
+}
+
+.my-club-open-club-detail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem 0.35rem;
 }
 
 .my-club-upload input {
   display: none;
 }
 
+/* A note in place of a line's button (my-club/club-card.ts noteHtml): its label above its date, at the line's end. */
 .my-club-note {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
   color: var(--profile-muted-color);
   font-size: 13px;
+  line-height: 1.2;
+  text-align: right;
   white-space: nowrap;
 }
 
@@ -84,10 +190,6 @@
   color: #ffc46b;
 }
 
-.my-club-wrap {
-  white-space: normal;
-}
-
 .my-club-pager {
   display: flex;
   align-items: center;
@@ -100,7 +202,27 @@
   margin-top: 1rem;
 }
 
-/* The settings' lines (my-club/club-edit.ts): regions as badges, a region or club code line with its "−". */
+/* A line of buttons under a section (leave, delete, create): what does not fit wraps, with the lines' gap between
+   them. The delete confirmation's two buttons stay together and go under the tag's field when both do not fit. */
+#club-profile-page .profile-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+#club-profile-page .my-club-confirm-tag {
+  flex: 0 1 14rem;
+}
+
+.my-club-confirm-buttons {
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+/* The settings' lines (my-club/club-edit.ts): regions as badges, a region or club code line with its "−". The pencil
+   stays at the end of its line on every screen; club codes wrap between codes rather than being cut, while the
+   Discord link stays on one line and is cut (its address is the link's own). */
 .club-edit-badges {
   display: inline-flex;
   flex-wrap: wrap;
@@ -113,8 +235,27 @@
   gap: 0.2rem;
 }
 
+#club-profile-page .club-edit-section .player-popup-code-row {
+  flex-wrap: nowrap;
+}
+
+#club-profile-page .club-edit-section .player-popup-code-value {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#club-profile-page .club-edit-section .club-edit-link {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
 .club-edit-link {
   color: var(--color-gold);
+}
+
+.club-edit-status .msbl-club-status-icon {
+  width: 13px;
+  margin-right: 0.35rem;
 }
 
 .profile-edit-text {

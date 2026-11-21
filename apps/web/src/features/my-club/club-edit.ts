@@ -285,7 +285,8 @@ export function createClubEditor(config: ClubEditorOptions): ClubEditor {
       }
       case "codes": {
         const codes = draft.codes.map((code) => code.trim()).filter(Boolean);
-        return viewRow(field, value(codes.length ? codes.join(" | ") : "No club code saved"), !codes.length);
+        // A line may break between codes, never inside one or before its "|".
+        return viewRow(field, value(codes.length ? codes.join("\u00a0| ") : "No club code saved"), !codes.length);
       }
       case "uniforms": {
         const icons = uniformIconHtml("first", draft.firstUniform) + uniformIconHtml("second", draft.secondUniform);
