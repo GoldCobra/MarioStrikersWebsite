@@ -7,7 +7,7 @@ import { escapeHtml } from "@ms/shared/html";
 import { CLUB_LIMITS, CLUB_LOGO_LIMITS } from "@ms/shared/clubs";
 import { renderClubLogo, renderClubName, rosterItemHtml } from "../clubs/club-profile-view.ts";
 import { showToast } from "../profile/profile-toasts.ts";
-import { createClubCard, dateText, lineButton, rowHtml, sectionHtml } from "./club-card.ts";
+import { createClubCard, dateText, lineButton, lineTextHtml, noteHtml, rowHtml, sectionHtml } from "./club-card.ts";
 import { createClubEditor, type ClubEditor, type SubmitResult } from "./club-edit.ts";
 import {
   MY_CLUB_URL,
@@ -137,14 +137,14 @@ export function createClubView(context: MyClubContext, initial: MyClubState & { 
     const last = club.activity ? `Last activity ${dateText(club.activity)}` : "No activity confirmed yet";
     const status = club.is_active
       ? "Active"
-      : `Inactive (no activity in the last ${String(CLUB_LIMITS.activityDays)} days)`;
+      : `Inactive: no activity in the last ${String(CLUB_LIMITS.activityDays)} days`;
     const confirm = club.permissions.confirm_activity
       ? `<span class="my-club-line-actions">${lineButton("activity", "Confirm Activity")}</span>`
       : "";
     part("activity").innerHTML = sectionHtml(
       "activity",
       "Activity",
-      `<div class="player-popup-code-list">${rowHtml(`<span class="player-popup-code-value">${escapeHtml(`${last} · ${status}`)}</span>${confirm}`, club.is_active ? "" : " profile-code-missing")}</div>`,
+      `<div class="player-popup-code-list">${rowHtml(`${lineTextHtml(last, status)}${confirm}`, club.is_active ? "" : " profile-code-missing")}</div>`,
     );
   }
 
@@ -192,7 +192,7 @@ export function createClubView(context: MyClubContext, initial: MyClubState & { 
       .map((candidate) => {
         const until = candidate.invitable_from;
         const action = until
-          ? `<span class="my-club-note">Again from ${escapeHtml(dateText(until))}</span>`
+          ? noteHtml("Again from", dateText(until))
           : lineButton("invite", "Invite", `data-player="${String(candidate.player_id)}"`);
         return rosterItemHtml(
           { name: candidate.name, country: candidate.country, discord_name: candidate.discord_name },
@@ -216,7 +216,7 @@ export function createClubView(context: MyClubContext, initial: MyClubState & { 
     const open = club.invitations
       .map((invitation) =>
         rowHtml(
-          `<span class="player-popup-code-value">${escapeHtml(`${invitation.name} · invited by ${invitation.invited_by} · until ${dateText(invitation.expires_at)}`)}</span><span class="my-club-line-actions">${lineButton("revoke", "Revoke", `data-invitation="${String(invitation.id)}"`)}</span>`,
+          `${lineTextHtml(invitation.name, `Invited by ${invitation.invited_by} · open until ${dateText(invitation.expires_at)}`)}<span class="my-club-line-actions">${lineButton("revoke", "Revoke", `data-invitation="${String(invitation.id)}"`)}</span>`,
         ),
       )
       .join("");
@@ -253,7 +253,7 @@ export function createClubView(context: MyClubContext, initial: MyClubState & { 
     if (confirming?.kind === "delete") {
       part("leave").innerHTML = [
         `<p class="profile-edit-notice my-club-notice">Deleting removes the club for good: every member becomes club-less, and its name and tag are free again. Type the tag <strong>${escapeHtml(club.tag)}</strong> to confirm.</p>`,
-        `<p class="profile-state-actions"><input class="profile-edit-text my-club-confirm-tag" type="text" data-club-action="confirm-tag" aria-label="The club's tag" autocomplete="off" spellcheck="false"> ${lineButton("delete-confirm", "Delete Club", "disabled", "danger")} ${lineButton("keep", "Keep Club")}</p>`,
+        `<p class="profile-state-actions"><input class="profile-edit-text my-club-confirm-tag" type="text" data-club-action="confirm-tag" aria-label="The club's tag" autocomplete="off" spellcheck="false"> <span class="my-club-confirm-buttons">${lineButton("delete-confirm", "Delete Club", "disabled", "danger")} ${lineButton("keep", "Keep Club")}</span></p>`,
       ].join("");
       return;
     }
