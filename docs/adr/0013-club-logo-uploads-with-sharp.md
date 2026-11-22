@@ -29,6 +29,9 @@ on Alpine (musl).
   ratio kept, never enlarged) and encoded as WebP with the site's own image
   settings: quality 98, the alpha channel lossless, every piece of metadata
   dropped.
+- Logos still given as a link (`logo-cache.ts`) get the same rendition
+  (`logo-image.ts`) when they are downloaded; a file cached before that is
+  re-encoded from itself, as its link may long have expired.
 - The result goes into `dbo.ClubLogo` with its SHA-256 (ADR 0012). The public
   logo route serves an uploaded logo before a link logo, under a URL with the
   hash (`?v=`) and immutable caching (a URL naming another version

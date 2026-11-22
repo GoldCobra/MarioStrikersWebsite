@@ -1,22 +1,21 @@
-// Club logos are user-supplied URLs (often expiring Discord attachment links). The API downloads each
-// once, stores it on the cache volume and serves it itself; a failed download keeps the last good file
-// and is retried only after failureRetryMs.
+// Club logos given as a link (often expiring Discord attachment links): the API downloads each once, re-encodes it
+// into the site's logo rendition (logo-image.ts, a 512 px WebP), stores that on the cache volume and serves it
+// itself. A failed download keeps the last good file and is retried only after failureRetryMs.
 
-import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { toText } from "@ms/shared/text";
 import type { Logger } from "../../lib/logger.ts";
 import { toPositiveIntOr } from "../../lib/numbers.ts";
 import { safeDownload, type DownloadResult } from "../../lib/safe-download.ts";
+import { renderLogo } from "./logo-image.ts";
 
 const MANIFEST_VERSION = 1;
-const ALLOWED_CONTENT_TYPES = new Map([
-  ["image/png", ".png"],
-  ["image/jpeg", ".jpg"],
-  ["image/webp", ".webp"],
-  ["image/gif", ".gif"],
-]);
+/** Raised when logo-image.ts's output changes: a file cached earlier is then re-encoded from itself. */
+const RENDITION = 1;
+/** Linked images may be larger than uploads may be (2048 px per side); nothing beyond this is decoded. */
+const MAX_INPUT_PIXELS = 8192 * 8192;
+const ALLOWED_CONTENT_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
 const DISCORD_ATTACHMENT_HOSTS = new Set(["cdn.discordapp.com", "media.discordapp.net"]);
 // Discord signs attachment URLs with these expiring parameters; they do not identify the file.
 const DISCORD_AUTH_QUERY_PARAMS = new Set(["ex", "is", "hm"]);
@@ -28,6 +27,7 @@ interface ManifestEntry {
   fileName?: string;
   contentType?: string;
   byteLength?: number;
+  rendition?: number;
   cachedAt?: string;
   failedSourceUrl?: string;
   failedSourceIdentity?: string;
@@ -90,10 +90,6 @@ function getDiscordAttachmentIdentity(parsed: URL): string {
 export function getSourceIdentity(sourceUrl: string): string {
   const parsed = new URL(sourceUrl);
   return getDiscordAttachmentIdentity(parsed) || parsed.href;
-}
-
-function hashText(value: string): string {
-  return crypto.createHash("sha256").update(value).digest("hex").slice(0, 16);
 }
 
 export class ClubLogoCache {
@@ -163,59 +159,70 @@ export class ClubLogoCache {
 
     const manifest = await this.loadManifest();
     const sourceIdentity = getSourceIdentity(sourceUrl);
-    const hash = hashText(sourceIdentity);
     const current = manifest.clubs[String(clubId)];
-    if (current?.sourceIdentity === sourceIdentity && current.hash && (await this.fileExists(current.fileName))) {
+    const cachedFile =
+      current?.sourceIdentity === sourceIdentity && current.fileName && (await this.fileExists(current.fileName))
+        ? path.join(this.cacheDir, current.fileName)
+        : "";
+    if (cachedFile && current?.hash && current.rendition === RENDITION)
       return this.buildPublicUrl(clubId, current.hash);
-    }
     if (this.isRecentFailure(current, sourceIdentity, sourceUrl)) return this.getExistingPublicUrl(clubId);
 
     try {
-      const downloaded = await this.download(sourceUrl, {
-        maxBytes: this.options.maxBytes,
-        timeoutMs: this.options.fetchTimeoutMs,
-      });
-      const extension = ALLOWED_CONTENT_TYPES.get(downloaded.contentType);
-      if (!extension) throw new Error(`Unsupported logo content type: ${downloaded.contentType || "unknown"}.`);
-      if (downloaded.buffer.length > this.options.maxBytes)
-        throw new Error("Logo is larger than the configured maximum.");
-      const fileName = `${clubId}-${hash}${extension}`;
-      await fs.mkdir(this.cacheDir, { recursive: true });
-      await fs.writeFile(path.join(this.cacheDir, fileName), downloaded.buffer);
-      manifest.clubs[String(clubId)] = {
-        sourceUrl,
-        sourceIdentity,
-        hash,
-        fileName,
-        contentType: downloaded.contentType,
-        byteLength: downloaded.buffer.length,
-        cachedAt: new Date().toISOString(),
-      };
-      await this.saveManifest();
-      await this.removeOldClubFiles(clubId, fileName);
-      return this.buildPublicUrl(clubId, hash);
+      // A file cached before the current rendition is re-encoded from itself: its link may long have expired.
+      const bytes = cachedFile ? await fs.readFile(cachedFile) : await this.downloadLogo(sourceUrl);
+      return await this.store(clubId, sourceUrl, sourceIdentity, bytes);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.options.log.warn({ clubId, reason: message }, "[club-logo-cache] Failed to cache logo");
-      await this.recordFailure(clubId, sourceUrl, sourceIdentity, hash, message);
+      await this.recordFailure(clubId, sourceUrl, sourceIdentity, message);
       return this.getExistingPublicUrl(clubId);
     }
   }
 
+  private async downloadLogo(sourceUrl: string): Promise<Buffer> {
+    const { maxBytes, fetchTimeoutMs } = this.options;
+    const downloaded = await this.download(sourceUrl, { maxBytes, timeoutMs: fetchTimeoutMs });
+    if (!ALLOWED_CONTENT_TYPES.has(downloaded.contentType)) {
+      throw new Error(`Unsupported logo content type: ${downloaded.contentType || "unknown"}.`);
+    }
+    if (downloaded.buffer.length > maxBytes) throw new Error("Logo is larger than the configured maximum.");
+    return downloaded.buffer;
+  }
+
+  /** Encodes the rendition of `bytes`, stores it as the club's logo and returns its public URL (its hash in ?v=). */
+  private async store(clubId: number, sourceUrl: string, sourceIdentity: string, bytes: Buffer): Promise<string> {
+    const logo = await renderLogo(bytes, MAX_INPUT_PIXELS);
+    const hash = logo.hash.slice(0, 16);
+    const fileName = `${clubId}-${hash}.webp`;
+    await fs.mkdir(this.cacheDir, { recursive: true });
+    await fs.writeFile(path.join(this.cacheDir, fileName), logo.data);
+    const manifest = await this.loadManifest();
+    manifest.clubs[String(clubId)] = {
+      sourceUrl,
+      sourceIdentity,
+      hash,
+      fileName,
+      contentType: logo.contentType,
+      byteLength: logo.data.length,
+      rendition: RENDITION,
+      cachedAt: new Date().toISOString(),
+    };
+    await this.saveManifest();
+    await this.removeOldClubFiles(clubId, fileName);
+    return this.buildPublicUrl(clubId, hash);
+  }
+
+  /** Notes the failed source; the club's last good file (if any) stays its logo. */
   private async recordFailure(
     clubId: number,
     sourceUrl: string,
     sourceIdentity: string,
-    hash: string,
     message: string,
   ): Promise<void> {
     const manifest = await this.loadManifest();
-    const current = manifest.clubs[String(clubId)] ?? {};
     manifest.clubs[String(clubId)] = {
-      ...current,
-      sourceUrl: current.fileName ? current.sourceUrl : sourceUrl,
-      sourceIdentity: current.fileName ? current.sourceIdentity : sourceIdentity,
-      hash: current.fileName ? current.hash : hash,
+      ...manifest.clubs[String(clubId)],
       failedSourceUrl: sourceUrl,
       failedSourceIdentity: sourceIdentity,
       failedAt: new Date().toISOString(),

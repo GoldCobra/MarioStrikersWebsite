@@ -287,12 +287,14 @@ membership asked live on every change (refused when Discord cannot be asked), th
 request checked by `packages/shared/src/clubs.ts`. An uploaded logo
 ([ADR 0013](adr/0013-club-logo-uploads-with-sharp.md), `logo-upload.ts`) is checked
 (type from its bytes, 2 MB, 256–2048 px, no animation), decoded and re-encoded with
-sharp as a 512 px WebP without metadata, and stored in `dbo.ClubLogo`; the logo route
+sharp as a 512 px WebP without metadata (`logo-image.ts`; a link logo gets the same
+rendition when `logo-cache.ts` downloads it), and stored in `dbo.ClubLogo`; the logo route
 serves it before a link logo (`uploaded-logos.ts` knows which clubs have one, read once
 a minute and after every change), and `Club.Logo` gets its public URL. The server's
-member list (`integrations/discord/guild-members.ts`, read with the bot token every ten
-minutes) answers who is on the server for the invite list, succession and the absence
-rule. `/internal/clubs/invitations/:id/answer` takes the bot's Accept/Decline buttons
+member list (`integrations/discord/guild-members.ts`, read with the bot token at start
+and every five minutes in the background, so no request waits for Discord) answers who
+is on the server for the invite list, succession and the absence rule, and gives club
+rosters and the profile editor the members' current names. `/internal/clubs/invitations/:id/answer` takes the bot's Accept/Decline buttons
 with the shared `CLUB_INTERNAL_SECRET` (404 otherwise; nginx never proxies `/internal/`).
 `lifecycle.ts` runs every `CLUB_LIFECYCLE_INTERVAL_MS` (default 5 minutes; `dev:live`
 sets 0): invitations expire, the new-club counter marks clubs alone 30 days after

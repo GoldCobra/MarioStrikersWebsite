@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import test from "node:test";
+import type { SnapshotMember } from "../../integrations/discord/guild-members.ts";
 import { UNKNOWN_MEMBER, type GuildMember } from "../../integrations/discord/members.ts";
 import type { DiscordIdentity } from "./mappers.ts";
 import {
@@ -10,6 +11,7 @@ import {
   planChanges,
   profileVersion,
   type CodeKey,
+  type ProfileServiceOptions,
   type ProfileStore,
   type StoredFriendCode,
   type StoredProfile,
@@ -69,15 +71,24 @@ interface Harness {
   store: ProfileStore & { saved: StoredProfile; writes: number; audits: string[] };
   service: ReturnType<typeof createProfileService>;
   changes: number;
+  /** Live member lookups (the member list answers without one). */
+  lookups: number;
 }
 
 function harness({
   profile = PROFILE,
   taken = [] as CodeKey[],
   member = { membership: "member", nick: "[CE] Cobra", username: "goldcobra", globalName: "GoldCobra", roles: [] },
+  memberList,
   failApply,
-}: { profile?: StoredProfile; taken?: CodeKey[]; member?: GuildMember; failApply?: Error } = {}): Harness {
-  const state = { changes: 0 };
+}: {
+  profile?: StoredProfile;
+  taken?: CodeKey[];
+  member?: GuildMember;
+  memberList?: ProfileServiceOptions["memberList"];
+  failApply?: Error;
+} = {}): Harness {
+  const state = { changes: 0, lookups: 0 };
   const store = {
     saved: profile,
     writes: 0,
@@ -111,7 +122,13 @@ function harness({
   };
   const service = createProfileService({
     store,
-    members: { getMember: () => Promise.resolve(member) },
+    memberList,
+    members: {
+      getMember: () => {
+        state.lookups += 1;
+        return Promise.resolve(member);
+      },
+    },
     onChange: () => {
       state.changes += 1;
     },
@@ -121,6 +138,9 @@ function harness({
     service,
     get changes() {
       return state.changes;
+    },
+    get lookups() {
+      return state.lookups;
     },
   };
 }
@@ -181,6 +201,31 @@ test("names fall back to the login when Discord cannot be asked; a non-member is
   assert.equal(noNick.discord.serverName, "goldcobra");
   const left = await editable(harness({ member: { ...UNKNOWN_MEMBER, membership: "not_member" } }));
   assert.equal(left.discord.membership, "not_member");
+});
+
+test("the names come from the server's member list; only a member it lacks is asked live", async () => {
+  const listed: SnapshotMember = {
+    id: IDENTITY.id,
+    username: "goldcobra",
+    globalName: "GoldCobra",
+    nick: "[CE] Listed",
+    roles: [],
+    joinedAt: null,
+  };
+  const members = new Map([[IDENTITY.id, listed]]);
+  const withList = harness({ memberList: { get: () => Promise.resolve({ members, takenAt: 0 }) } });
+  const fromList = await editable(withList);
+  assert.equal(fromList.discord.serverName, "[CE] Listed");
+  assert.equal(fromList.discord.membership, "member");
+  assert.equal(withList.lookups, 0);
+
+  const notListed = harness({ memberList: { get: () => Promise.resolve({ members: new Map(), takenAt: 0 }) } });
+  assert.equal((await editable(notListed)).discord.serverName, "[CE] Cobra");
+  assert.equal(notListed.lookups, 1);
+
+  const unreadable = harness({ memberList: { get: () => Promise.reject(new Error("Discord is down")) } });
+  assert.equal((await editable(unreadable)).discord.serverName, "[CE] Cobra");
+  assert.equal(unreadable.lookups, 1);
 });
 
 test("a country that is no longer offered stays selectable while the profile has it", () => {
