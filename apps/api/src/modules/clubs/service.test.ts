@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import type { SnapshotMember } from "../../integrations/discord/guild-members.ts";
 import { createFakeDatabase } from "../../test-support/fake-database.ts";
 import { attachClubLogos, getMsblClubProfile, type LogoResolver } from "./service.ts";
 
-const noNames = { resolveRosterNames: <T>(rows: T[]): Promise<T[]> => Promise.resolve(rows) };
+const noMembers = { get: () => Promise.resolve(null) };
 const emptyLogos: LogoResolver = { ensureClubLogo: () => Promise.resolve("") };
 
 function clubRow(overrides: Record<string, unknown>): Record<string, unknown> {
@@ -47,7 +48,7 @@ test("club profile does not synthesize stale owner rows outside ClubRoster", asy
     throw new Error(`Unexpected query: ${sql}`);
   });
 
-  const profile = await getMsblClubProfile(database, { logoCache: emptyLogos, users: noNames }, 32);
+  const profile = await getMsblClubProfile(database, { logoCache: emptyLogos, memberList: noMembers }, 32);
 
   assert.equal(profile?.roster.length, 1);
   assert.equal(profile.roster[0]?.name, "DelphinusVyse");
@@ -79,7 +80,7 @@ test("invite-only club profiles keep stored club codes hidden", async () => {
       : { recordset: [] },
   );
 
-  const profile = await getMsblClubProfile(database, { logoCache: emptyLogos, users: noNames }, 12);
+  const profile = await getMsblClubProfile(database, { logoCache: emptyLogos, memberList: noMembers }, 12);
 
   assert.equal(profile?.club.club_code, "");
   assert.deepEqual(profile.club.club_codes, []);
@@ -98,7 +99,7 @@ test("the owner is the roster member whose Discord id matches Club.Owner", async
           ],
         },
   );
-  const profile = await getMsblClubProfile(database, { logoCache: emptyLogos, users: noNames }, 32);
+  const profile = await getMsblClubProfile(database, { logoCache: emptyLogos, memberList: noMembers }, 32);
   assert.equal(profile?.club.owner_name, "Owner");
   assert.equal(profile.club.owner_discord_id, "111111111111111111");
   assert.deepEqual(
@@ -110,9 +111,39 @@ test("the owner is the roster member whose Discord id matches Club.Owner", async
   );
 });
 
+test("Discord names the database lacks come from the server's member list, without asking Discord", async () => {
+  const database = createFakeDatabase((sql) =>
+    sql.includes("FROM Club c")
+      ? { recordset: [clubRow({ owner_raw: "111111111111111111" })] }
+      : {
+          recordset: [
+            { player_id: 1, name: "Member", discord_id: "222222222222222222", is_officer: 0 },
+            { player_id: 2, name: "Left", discord_id: "333333333333333333", is_officer: 0 },
+            { player_id: 3, name: "Owner", discord_id: "<@111111111111111111>stored_name", is_officer: 1 },
+          ],
+        },
+  );
+  const listed = (id: string, username: string): [string, SnapshotMember] => [
+    id,
+    { id, username, globalName: "", nick: "", roles: [], joinedAt: null },
+  ];
+  const members = new Map([listed("222222222222222222", "member_user"), listed("111111111111111111", "owner_user")]);
+  const memberList = { get: () => Promise.resolve({ members, takenAt: 0 }) };
+  const profile = await getMsblClubProfile(database, { logoCache: emptyLogos, memberList }, 32);
+  assert.deepEqual(
+    profile?.roster.map((row) => [row.name, row.discord_name]),
+    [
+      ["Owner", "stored_name"],
+      ["Left", ""],
+      ["Member", "member_user"],
+    ],
+    "a stored name stays; a member who left the server has none",
+  );
+});
+
 test("a missing club is null", async () => {
   const database = createFakeDatabase(() => ({ recordset: [] }));
-  assert.equal(await getMsblClubProfile(database, { logoCache: emptyLogos, users: noNames }, 999), null);
+  assert.equal(await getMsblClubProfile(database, { logoCache: emptyLogos, memberList: noMembers }, 999), null);
 });
 
 test("attachClubLogos leaves empty SQL logos empty and removes internal source values", async () => {

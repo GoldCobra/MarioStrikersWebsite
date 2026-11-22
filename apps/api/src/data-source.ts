@@ -16,7 +16,6 @@ import { adminConfigProblems, isAdminConfigured, isDiscordLoginConfigured } from
 import { Database } from "./db/database.ts";
 import { GuildMemberList } from "./integrations/discord/guild-members.ts";
 import { DiscordMemberDirectory } from "./integrations/discord/members.ts";
-import { DiscordUserDirectory } from "./integrations/discord/users.ts";
 import type { Logger } from "./lib/logger.ts";
 import { createSqlAdminAuditStore } from "./modules/admin/audit-repository.ts";
 import { AdminGuard, type AdminAccess } from "./modules/admin/guard.ts";
@@ -86,13 +85,9 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     botToken: config.discord.botToken,
     fetchTimeoutMs: config.discord.memberFetchTimeoutMs,
   };
-  const users = new DiscordUserDirectory({
-    ...discordRest,
-    guildId: config.discord.guildId,
-    cacheTtlMs: config.discord.memberCacheTtlMs,
-    failureCacheTtlMs: config.discord.memberFailureCacheTtlMs,
-    parallelism: config.discord.memberFetchParallelism,
-  });
+  // The server's member list, read at start and every five minutes in the background: club rosters, the profile
+  // editor's names and My Club (invite list, absence, succession) read it without waiting for Discord.
+  const memberList = new GuildMemberList({ ...discordRest, guildId: config.discord.guildId, maxAgeMs: 5 * 60 * 1000 });
   const logos = new ClubLogoCache({
     cacheDir: config.clubLogos.cachePath,
     maxBytes: config.clubLogos.maxBytes,
@@ -181,10 +176,11 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
       }
     : null;
 
-  // The signed-in player's own profile; the editor shows the member's current server names (asked again after a
-  // minute). A new country or friend code shows in the player list at once, not after the next refresh.
+  // The signed-in player's own profile; the editor shows the member's current server names from the member list
+  // (live only for a member it lacks). A new country or friend code shows in the player list at once.
   const profiles = createProfileService({
     store: createSqlProfileStore(database, titleCatalog),
+    memberList,
     members: new DiscordMemberDirectory({
       ...discordRest,
       guildId: config.discord.guildId,
@@ -215,8 +211,6 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     }
   };
   const clubStore = createSqlClubStore(database, clubNameKey);
-  // The server's member list (invite list, absence, succession); the website's bot token can list members.
-  const memberList = new GuildMemberList({ ...discordRest, guildId: config.discord.guildId, maxAgeMs: 10 * 60 * 1000 });
   const adminGuard = admin && login ? new AdminGuard(admin, login.sessions, Date.now) : null;
   const clubs = login
     ? createClubManagement({
@@ -258,7 +252,7 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
       getPlayerProfileByDiscordId(database, log, discordId, () => titleCatalog.get()),
     getProfileStatsByDiscordId: (discordId) => getProfileStatsByDiscordId(database, discordId),
     profiles,
-    getClubProfile: (clubId) => getMsblClubProfile(database, { logoCache: logos, users }, clubId),
+    getClubProfile: (clubId) => getMsblClubProfile(database, { logoCache: logos, memberList }, clubId),
     getClubLogoFile: (clubIdRaw) => logos.getLogoFile(clubIdRaw),
     getUploadedClubLogo: (clubId) => uploadedLogos.get(clubId),
     getCommunityEvents: () => events.get(),
@@ -268,6 +262,7 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     clubs,
     start() {
       database.startKeepalive();
+      memberList.start();
       publicData.start();
       events.start();
       titleSync.start();
@@ -276,6 +271,7 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     async stop() {
       clubLifecycle.stop();
       titleSync.stop();
+      memberList.stop();
       await publicData.stop();
       await events.stop();
       await database.close();

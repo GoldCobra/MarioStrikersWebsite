@@ -18,7 +18,8 @@ import {
 } from "@ms/shared/friend-codes";
 import { normalizeText } from "@ms/shared/text";
 import { HttpError } from "../../http/errors.ts";
-import type { GuildMemberLookup, Membership } from "../../integrations/discord/members.ts";
+import type { GuildMemberSnapshot } from "../../integrations/discord/guild-members.ts";
+import type { GuildMember, GuildMemberLookup, Membership } from "../../integrations/discord/members.ts";
 import { normalizeDiscordId } from "../../lib/discord-id.ts";
 import { isUniqueViolation } from "../../lib/sql-errors.ts";
 import type { TitleOption } from "../titles/availability.ts";
@@ -147,6 +148,9 @@ export interface ProfileService {
 
 export interface ProfileServiceOptions {
   readonly store: ProfileStore;
+  /** The server's member list (guild-members.ts): the editor's names without waiting for Discord. */
+  readonly memberList?: { get(): Promise<GuildMemberSnapshot | null> };
+  /** Asked live for a member the list does not hold yet (e.g. one who joined minutes ago). */
   readonly members: GuildMemberLookup;
   /** Runs after a save changed something, e.g. to refresh the cached player list. */
   readonly onChange?: () => void;
@@ -320,9 +324,24 @@ function audit(identity: DiscordIdentity, current: StoredProfile, plan: ChangePl
 
 // ---------------------------------------------------------------------------------------------------
 
-export function createProfileService({ store, members, onChange }: ProfileServiceOptions): ProfileService {
+export function createProfileService({ store, memberList, members, onChange }: ProfileServiceOptions): ProfileService {
+  /** The member's current server names: from the member list, live from Discord only when it lacks them. */
+  async function currentMember(discordId: string): Promise<GuildMember> {
+    const listed = (await memberList?.get().catch(() => null))?.members.get(discordId);
+    if (listed) {
+      return {
+        membership: "member",
+        nick: listed.nick,
+        username: listed.username,
+        globalName: listed.globalName,
+        roles: [],
+      };
+    }
+    return members.getMember(discordId);
+  }
+
   async function discordNames(identity: DiscordIdentity): Promise<DiscordNames> {
-    const member = await members.getMember(identity.id);
+    const member = await currentMember(identity.id);
     const live = member.membership === "member";
     const username = (live ? member.username : "") || identity.username;
     const globalName = live ? member.globalName : identity.globalName;

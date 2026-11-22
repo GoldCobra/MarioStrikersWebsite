@@ -2,6 +2,7 @@
 
 import { normalizeText } from "@ms/shared/text";
 import type { Database } from "../../db/database.ts";
+import type { GuildMemberSnapshot } from "../../integrations/discord/guild-members.ts";
 import { DEFAULT_ACTIVITY_WINDOW_DAYS, toActivityIso } from "../../lib/dates.ts";
 import { mapLimit } from "../../lib/concurrency.ts";
 import { normalizeDiscordId } from "../../lib/discord-id.ts";
@@ -21,8 +22,19 @@ export interface LogoResolver {
   ensureClubLogo(club: { club_id?: unknown; logo_source?: unknown }): Promise<string>;
 }
 
-export interface RosterNameResolver {
-  resolveRosterNames<T extends { discord_id: string; discord_name: string }>(rows: T[]): Promise<T[]>;
+/** Fills the Discord names the database lacks from the server's member list; a member who left keeps none. */
+async function attachDiscordNames(
+  rows: RosterRow[],
+  memberList: { get(): Promise<GuildMemberSnapshot | null> },
+): Promise<void> {
+  if (rows.every((row) => normalizeText(row.discord_name))) return;
+  const snapshot = await memberList.get().catch(() => null);
+  if (!snapshot) return;
+  for (const row of rows) {
+    if (normalizeText(row.discord_name)) continue;
+    const username = snapshot.members.get(normalizeDiscordId(row.discord_id))?.username;
+    if (username) row.discord_name = username;
+  }
 }
 
 /** Replaces each club's internal logo source with the URL of its cached logo. */
@@ -55,52 +67,58 @@ function rowDiscordId(row: Pick<RosterRow, "discord_id">): string {
 /** A club profile by id (already validated); null when the club does not exist. */
 export async function getMsblClubProfile(
   database: Pick<Database, "withPool">,
-  dependencies: { logoCache: LogoResolver | null; users: RosterNameResolver },
+  dependencies: {
+    logoCache: LogoResolver | null;
+    /** The server's member list (integrations/discord/guild-members.ts): in memory, never waited for once read. */
+    memberList: { get(): Promise<GuildMemberSnapshot | null> };
+  },
   clubId: number,
 ): Promise<ClubProfile | null> {
-  return database.withPool(async (pool) => {
+  const found = await database.withPool(async (pool) => {
     const clubRow = await fetchClub(pool, clubId);
-    if (!clubRow) return null;
-
-    const ownerDiscordId = normalizeDiscordId(normalizeText(clubRow.owner_raw));
-    const rosterRows = (await fetchRoster(pool, clubId)).map((row) => buildRosterRow(row, ownerDiscordId));
-    await dependencies.users.resolveRosterNames(rosterRows);
-    rosterRows.sort(compareRosterRows);
-
-    const owner = rosterRows.find((row) => row.is_owner);
-    const [club] = await attachClubLogos([toMsblClubDTO(clubRow) ?? emptyClub()], dependencies.logoCache);
-    if (!club) return null;
-    return {
-      club: {
-        club_id: club.club_id,
-        name: club.name,
-        tag: club.tag,
-        join_conditions: resolveOpenStatus(clubRow.is_open),
-        region: club.region,
-        club_code: club.club_code,
-        regions: compactTextList([club.region, clubRow.region2, clubRow.region3]),
-        club_codes: club.is_open ? compactTextList([club.club_code, clubRow.club_code2, clubRow.club_code3]) : [],
-        first_uniform: normalizeText(clubRow.color1),
-        second_uniform: normalizeText(clubRow.color2),
-        stadium: normalizeText(clubRow.stadium),
-        discord_server: normalizeText(clubRow.discord_server),
-        created_at: toActivityIso(clubRow.created_at),
-        logo: club.logo,
-        owner_name: normalizeText(owner?.name),
-        owner_discord_id: owner ? rowDiscordId(owner) : "",
-      },
-      roster: rosterRows.map((row) => ({
-        player_id: row.player_id,
-        name: row.name,
-        country: row.country,
-        discord_id: rowDiscordId(row),
-        discord_name: row.discord_name,
-        is_owner: row.is_owner,
-        is_officer: row.is_officer,
-        role: row.role,
-      })),
-    };
+    return clubRow ? { clubRow, rosterRows: await fetchRoster(pool, clubId) } : null;
   });
+  if (!found) return null;
+  const { clubRow } = found;
+
+  const ownerDiscordId = normalizeDiscordId(normalizeText(clubRow.owner_raw));
+  const rosterRows = found.rosterRows.map((row) => buildRosterRow(row, ownerDiscordId));
+  await attachDiscordNames(rosterRows, dependencies.memberList);
+  rosterRows.sort(compareRosterRows);
+
+  const owner = rosterRows.find((row) => row.is_owner);
+  const [club] = await attachClubLogos([toMsblClubDTO(clubRow) ?? emptyClub()], dependencies.logoCache);
+  if (!club) return null;
+  return {
+    club: {
+      club_id: club.club_id,
+      name: club.name,
+      tag: club.tag,
+      join_conditions: resolveOpenStatus(clubRow.is_open),
+      region: club.region,
+      club_code: club.club_code,
+      regions: compactTextList([club.region, clubRow.region2, clubRow.region3]),
+      club_codes: club.is_open ? compactTextList([club.club_code, clubRow.club_code2, clubRow.club_code3]) : [],
+      first_uniform: normalizeText(clubRow.color1),
+      second_uniform: normalizeText(clubRow.color2),
+      stadium: normalizeText(clubRow.stadium),
+      discord_server: normalizeText(clubRow.discord_server),
+      created_at: toActivityIso(clubRow.created_at),
+      logo: club.logo,
+      owner_name: normalizeText(owner?.name),
+      owner_discord_id: owner ? rowDiscordId(owner) : "",
+    },
+    roster: rosterRows.map((row) => ({
+      player_id: row.player_id,
+      name: row.name,
+      country: row.country,
+      discord_id: rowDiscordId(row),
+      discord_name: row.discord_name,
+      is_owner: row.is_owner,
+      is_officer: row.is_officer,
+      role: row.role,
+    })),
+  };
 }
 
 // A club row without tag and name still has a profile; its list DTO would be null.

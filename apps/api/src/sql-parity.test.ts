@@ -23,7 +23,7 @@ const golden = JSON.parse(
 const EMPTY_PROFILE = [[{ player_id: 7, name: "Someone" }], [], [{}], [], [], [], [], [], []];
 const LIMITS = { defaultLimit: 100, maxLimit: 500 };
 const noLogos = null;
-const noNames = { resolveRosterNames: <T>(rows: T[]): Promise<T[]> => Promise.resolve(rows) };
+const noMembers = { get: () => Promise.resolve(null) };
 const whrLines = [{ line: "<:rookie:1>`Alpha 1500`" }, { line: "<:legend:1>`Beta 1600`" }];
 const whrHandler: QueryHandler = (sql) =>
   sql.includes("GetRatingsForDiscord") ? { recordset: whrLines } : { recordset: [] };
@@ -71,7 +71,7 @@ const SCENARIOS: Record<
       sql.includes("FROM Club c")
         ? { recordset: [{ club_id: 5, tag: "TAG", name: "Club", is_open: 1, owner_raw: "" }] }
         : { recordset: [] },
-    run: (db) => getMsblClubProfile(db, { logoCache: noLogos, users: noNames }, 5),
+    run: (db) => getMsblClubProfile(db, { logoCache: noLogos, memberList: noMembers }, 5),
   },
   "leaderboard msc elo1v1": {
     handler: () => ({ recordset: [] }),

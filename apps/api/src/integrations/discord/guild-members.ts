@@ -1,8 +1,9 @@
 // The whole member list of the Discord server, read with the bot token ("List Guild Members", 1,000 per page) and
-// kept in memory: who is on the server now, since when, with which names and roles. Club management needs it for
-// players other than the signed-in one (the invite list, the absence rule and succession); the signed-in member is
-// always looked up live (members.ts). A read that fails, or comes back much shorter than the last complete list,
-// keeps the last list, so a Discord hiccup never makes everyone look absent.
+// kept in memory: who is on the server now, since when, with which names and roles. Club rosters, the profile
+// editor's names and club management (the invite list, the absence rule, succession) read it; a club change still
+// asks Discord live for the acting member (members.ts). The list is read at start and again in the background every
+// maxAgeMs, so no page waits for Discord once it exists. A read that fails, or comes back much shorter than the
+// last complete list, keeps the last list, so a Discord hiccup never makes everyone look absent.
 
 import { normalizeText } from "@ms/shared/text";
 import { toRoleIds } from "./members.ts";
@@ -27,7 +28,7 @@ export interface GuildMemberSnapshot {
 
 export interface GuildMemberListOptions extends DiscordRestOptions {
   readonly guildId: string;
-  /** A list older than this is read again when it is asked for. */
+  /** The list is read again in the background this often (and when it is asked for and older). */
   readonly maxAgeMs: number;
   /** After a failed read, the next attempt waits this long (default one minute). */
   readonly retryAfterMs?: number;
@@ -66,6 +67,7 @@ export class GuildMemberList {
   private snapshot: GuildMemberSnapshot | null = null;
   private pending: Promise<GuildMemberSnapshot | null> | null = null;
   private failedAt = Number.NEGATIVE_INFINITY;
+  private timer: NodeJS.Timeout | null = null;
 
   constructor(options: GuildMemberListOptions) {
     this.options = options;
@@ -75,19 +77,44 @@ export class GuildMemberList {
     return (this.options.now ?? Date.now)();
   }
 
+  private retryWaiting(): boolean {
+    return this.now() - this.failedAt < (this.options.retryAfterMs ?? 60_000);
+  }
+
   /**
-   * The newest complete list: read again when it is older than maxAgeMs (one read at a time). When reading fails,
-   * the last list is returned as it is (check takenAt), or null when none was ever read.
+   * The newest complete list, at once: an older one is returned while a new one is read in the background. Only
+   * before the first list exists is the read waited for. Null when no list could be read yet (check takenAt).
    */
   async get(): Promise<GuildMemberSnapshot | null> {
     const { snapshot } = this;
-    const fresh = snapshot && this.now() - snapshot.takenAt < this.options.maxAgeMs;
-    const waiting = this.now() - this.failedAt < (this.options.retryAfterMs ?? 60_000);
-    if (fresh || waiting || !this.options.botToken || !this.options.guildId) return snapshot;
+    if (snapshot) {
+      if (this.now() - snapshot.takenAt >= this.options.maxAgeMs && !this.retryWaiting()) void this.refresh();
+      return snapshot;
+    }
+    if (this.retryWaiting()) return null;
+    return (await this.refresh()) ?? this.snapshot;
+  }
+
+  /** Reads the list now (one read at a time); resolves to the new list, or null when the read failed. */
+  refresh(): Promise<GuildMemberSnapshot | null> {
+    if (!this.options.botToken || !this.options.guildId) return Promise.resolve(null);
     this.pending ??= this.read().finally(() => {
       this.pending = null;
     });
-    return (await this.pending) ?? this.snapshot;
+    return this.pending;
+  }
+
+  /** Reads the list now and again every maxAgeMs. */
+  start(): void {
+    if (this.timer || !this.options.botToken || !this.options.guildId) return;
+    void this.refresh();
+    this.timer = setInterval(() => void this.refresh(), this.options.maxAgeMs);
+    this.timer.unref();
+  }
+
+  stop(): void {
+    if (this.timer) clearInterval(this.timer);
+    this.timer = null;
   }
 
   private async read(): Promise<GuildMemberSnapshot | null> {

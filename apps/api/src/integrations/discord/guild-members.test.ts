@@ -35,8 +35,8 @@ function memberList(count: () => number, failing: () => boolean = () => false) {
   return { list, requests, clock };
 }
 
-test("the member list is read page by page and kept until it is old", async () => {
-  const { list, requests, clock } = memberList(() => 2500);
+test("the first list is read page by page and waited for", async () => {
+  const { list, requests } = memberList(() => 2500);
   const first = await list.get();
   assert.equal(first?.members.size, 2500);
   assert.deepEqual(requests, [
@@ -52,37 +52,56 @@ test("the member list is read page by page and kept until it is old", async () =
     roles: [],
     joinedAt: Date.parse("2026-01-01T00:00:00.000Z"),
   });
+});
+
+test("an old list is returned at once while the new one is read in the background", async () => {
+  const { list, requests, clock } = memberList(() => 2500);
+  const first = await list.get();
   clock.now += 5 * 60_000;
   assert.equal(await list.get(), first, "a young list is not read again");
+  assert.equal(requests.length, 3);
+
   clock.now += 6 * 60_000;
-  const second = await list.get();
-  assert.notEqual(second, first);
+  assert.equal(await list.get(), first, "an old list comes back without waiting for Discord");
+  const second = await list.refresh();
+  assert.notEqual(second, first, "the background read brought the new list");
+  assert.equal(await list.get(), second);
   assert.equal(requests.length, 6);
 });
 
 test("a failed or much shorter read keeps the last complete list", async () => {
   let count = 3000;
   let failing = false;
-  const { list, clock } = memberList(
+  const { list } = memberList(
     () => count,
     () => failing,
   );
   const first = await list.get();
   assert.equal(first?.members.size, 3000);
 
-  clock.now += 11 * 60_000;
   failing = true;
+  assert.equal(await list.refresh(), null);
   assert.equal(await list.get(), first, "Discord failed: the last list stays");
 
-  clock.now += 2 * 60_000;
   failing = false;
   count = 1200;
+  assert.equal(await list.refresh(), null);
   assert.equal(await list.get(), first, "60 % fewer members in minutes: not trusted");
 
-  clock.now += 2 * 60_000;
   count = 2950;
-  const shorter = await list.get();
+  const shorter = await list.refresh();
   assert.equal(shorter?.members.size, 2950, "a few members left: the new list counts");
+  assert.equal(await list.get(), shorter);
+});
+
+test("start reads the list right away; without one, get waits only for that read", async () => {
+  const { list, requests } = memberList(() => 10);
+  list.start();
+  list.start();
+  const snapshot = await list.get();
+  assert.equal(snapshot?.members.size, 10);
+  assert.equal(requests.length, 1, "start and get share the first read");
+  list.stop();
 });
 
 test("parallel callers share one read, and nothing is read without a token", async () => {

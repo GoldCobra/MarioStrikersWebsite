@@ -31,10 +31,7 @@ export interface DiscordConfig {
   readonly botToken: string;
   readonly eventsCategoryId: string;
   readonly eventsRefreshIntervalMs: number;
-  readonly memberCacheTtlMs: number;
-  readonly memberFailureCacheTtlMs: number;
   readonly memberFetchTimeoutMs: number;
-  readonly memberFetchParallelism: number;
 }
 
 export interface SessionConfig {
@@ -199,10 +196,7 @@ export function loadConfig(env: Env, options: LoadConfigOptions = {}): Config {
       botToken: readString(env, "DISCORD_BOT_TOKEN") || readString(env, "BOT_TOKEN"),
       eventsCategoryId: readString(env, "DISCORD_EVENTS_CATEGORY_ID"),
       eventsRefreshIntervalMs: readInt(env, "DISCORD_EVENTS_REFRESH_INTERVAL_MS", 60 * 60 * 1000),
-      memberCacheTtlMs: readInt(env, "DISCORD_MEMBER_CACHE_TTL_MS", 60 * 60 * 1000),
-      memberFailureCacheTtlMs: readInt(env, "DISCORD_MEMBER_FAILURE_CACHE_TTL_MS", 60 * 1000),
       memberFetchTimeoutMs: readInt(env, "DISCORD_MEMBER_FETCH_TIMEOUT_MS", 5000),
-      memberFetchParallelism: readInt(env, "DISCORD_MEMBER_FETCH_PARALLELISM", 4),
     },
     session: {
       secret: readString(env, "SESSION_SECRET"),
