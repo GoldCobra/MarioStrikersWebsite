@@ -13,7 +13,7 @@ import { PublicDataCache, type PublicDataSource } from "./cache/public-data-cach
 import { clubNameKey } from "@ms/shared/clubs";
 import type { Config } from "./config.ts";
 import { adminConfigProblems, isAdminConfigured, isDiscordLoginConfigured } from "./config.ts";
-import { Database } from "./db/database.ts";
+import { createDatabase } from "./db/database.ts";
 import { GuildMemberList } from "./integrations/discord/guild-members.ts";
 import { DiscordMemberDirectory } from "./integrations/discord/members.ts";
 import type { Logger } from "./lib/logger.ts";
@@ -78,7 +78,7 @@ export interface DataSource {
 }
 
 export function createLiveDataSource(config: Config, log: Logger): DataSource {
-  const database = new Database(config.mssql, log);
+  const database = createDatabase(config.mssql, log);
   const limits = { defaultLimit: config.leaderboardDefaultLimit, maxLimit: config.leaderboardMaxLimit };
   const discordRest = {
     apiBase: config.discord.apiBase,
@@ -142,7 +142,6 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     ttlMs: config.publicDataCache.ttlMs,
     refreshIntervalMs: config.publicDataCache.refreshIntervalMs,
     parallelism: config.publicDataCache.parallelism,
-    snapshotPath: config.publicDataCache.snapshotPath,
     log,
   });
 
@@ -196,8 +195,8 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
 
   const uploadedLogos = createUploadedLogos(
     {
-      hashes: () => database.withPool(fetchUploadedLogoHashes),
-      logo: (clubId) => database.withPool((pool) => fetchUploadedLogo(pool, clubId)),
+      hashes: () => fetchUploadedLogoHashes(database),
+      logo: (clubId) => fetchUploadedLogo(database, clubId),
     },
     { log },
   );
@@ -244,12 +243,12 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
   return {
     source: "mssql",
     now: Date.now,
-    healthCheck: () => database.healthCheck(),
+    healthCheck: () => database.ping(),
     publicData,
     getLeaderboardRows: (query) => getLeaderboardRows(database, query, limits),
-    getPlayerProfile: (playerId) => getPlayerProfile(database, log, playerId, () => titleCatalog.get()),
+    getPlayerProfile: (playerId) => getPlayerProfile(database, playerId, () => titleCatalog.get()),
     getPlayerProfileByDiscordId: (discordId) =>
-      getPlayerProfileByDiscordId(database, log, discordId, () => titleCatalog.get()),
+      getPlayerProfileByDiscordId(database, discordId, () => titleCatalog.get()),
     getProfileStatsByDiscordId: (discordId) => getProfileStatsByDiscordId(database, discordId),
     profiles,
     getClubProfile: (clubId) => getMsblClubProfile(database, { logoCache: logos, memberList }, clubId),
@@ -261,7 +260,6 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     admin,
     clubs,
     start() {
-      database.startKeepalive();
       memberList.start();
       publicData.start();
       events.start();
@@ -272,7 +270,7 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
       clubLifecycle.stop();
       titleSync.stop();
       memberList.stop();
-      await publicData.stop();
+      publicData.stop();
       await events.stop();
       await database.close();
     },

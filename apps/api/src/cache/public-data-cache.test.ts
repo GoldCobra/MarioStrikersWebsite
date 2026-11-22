@@ -1,7 +1,4 @@
 import assert from "node:assert/strict";
-import fs from "node:fs/promises";
-import os from "node:os";
-import path from "node:path";
 import { test } from "node:test";
 import { silentLogger, type Logger } from "../lib/logger.ts";
 import { PublicDataCache, type PublicDataCacheOptions } from "./public-data-cache.ts";
@@ -12,8 +9,6 @@ function createCache(options: Partial<PublicDataCacheOptions>): PublicDataCache 
     ttlMs: 60000,
     refreshIntervalMs: 0,
     parallelism: 1,
-    snapshotPath: "",
-    loadSnapshot: false,
     log: silentLogger,
     ...options,
   });
@@ -86,43 +81,6 @@ test("shares one loader promise for parallel cold misses", async () => {
     ],
   );
   assert.equal(calls, 1);
-});
-
-test("loads and saves a persistent snapshot", async () => {
-  const snapshotPath = path.join(
-    await fs.mkdtemp(path.join(os.tmpdir(), "public-data-cache-")),
-    "public-data-cache.json",
-  );
-  const first = createCache({ snapshotPath, loaders: { alpha: () => Promise.resolve({ value: "snapshot" }) } });
-  await first.get("alpha");
-  await first.saveSnapshot();
-  const second = createCache({
-    snapshotPath,
-    loadSnapshot: true,
-    loaders: { alpha: () => Promise.resolve({ value: "should-not-load" }) },
-  });
-  const loaded = await second.get("alpha");
-  assert.equal(loaded.cacheStatus, "hit");
-  assert.deepEqual(loaded.payload, { value: "snapshot" });
-});
-
-test("snapshots of another version or unknown keys are ignored", async () => {
-  const snapshotPath = path.join(await fs.mkdtemp(path.join(os.tmpdir(), "public-data-cache-")), "snapshot.json");
-  const saved = { generatedAt: new Date().toISOString(), payload: { value: "saved" } };
-  await fs.writeFile(snapshotPath, JSON.stringify({ version: 4, entries: { alpha: saved } }));
-  const oldVersion = createCache({
-    snapshotPath,
-    loadSnapshot: true,
-    loaders: { alpha: () => Promise.resolve("loaded") },
-  });
-  assert.equal((await oldVersion.get("alpha")).cacheStatus, "miss");
-  await fs.writeFile(snapshotPath, JSON.stringify({ version: 5, entries: { beta: saved } }));
-  const unknownKey = createCache({
-    snapshotPath,
-    loadSnapshot: true,
-    loaders: { alpha: () => Promise.resolve("loaded") },
-  });
-  assert.equal(unknownKey.entries.size, 0);
 });
 
 test("logs slow refreshes and warmup duration", async () => {

@@ -28,8 +28,8 @@ TOURNAMENT WINNER are no group: both can be selected.)
 existing data (tournaments, season rewards, legacy ranks) and one definition of
 which titles a player can select. The API awards new titles once a day; the
 last run is the newest `WebsiteTitleSync` row in `dbo.CommandLog`, so restarts
-do not reset the day. `npm run ops:player-titles` creates the tables and seeds
-the title list; `npm run ops:title-sync` awards on demand, the frozen legacy
+do not reset the day. `npm run ops:player-titles` created the tables and seeded
+the title list (now it adds titles new in `catalog.ts`); `npm run ops:title-sync` awards on demand, the frozen legacy
 ranks included. Unclear data (team and doubles wins, side brackets, a legacy
 rank without the matches it needed) awards nothing and is reported instead.
 

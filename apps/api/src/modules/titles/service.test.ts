@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { silentLogger, type Logger } from "../../lib/logger.ts";
-import { createFakeDatabase, type QueryHandler } from "../../test-support/fake-database.ts";
+import { createFakeDatabase, type StatementHandler } from "../../test-support/fake-database.ts";
 import { seededCatalog } from "./catalog.ts";
 import { createTitleSyncSchedule, isSyncDue, runTitleSync } from "./service.ts";
 
@@ -29,15 +29,14 @@ function catalogRow(title: ReturnType<typeof seededCatalog>[number]): Record<str
   };
 }
 
-function handler(lastRun: Date | null): QueryHandler {
-  return (sql, inputs) => {
-    if (sql.includes("TOP 1 TimeOfCommand")) return { recordset: lastRun ? [{ TimeOfCommand: lastRun }] : [] };
-    if (sql.includes("INSERT INTO dbo.PlayerTitleUnlock")) {
-      return { recordset: [{ inserted: Object.keys(inputs).filter((name) => name.startsWith("player")).length }] };
-    }
-    if (sql.includes("FROM dbo.Tournament")) {
+function handler(lastRun: Date | null): StatementHandler {
+  return ({ text, values }) => {
+    if (text.includes("TOP 1 TimeOfCommand")) return lastRun ? [{ TimeOfCommand: lastRun }] : [];
+    // Every planned grant is inserted: GrantedBy comes once, then four values per grant.
+    if (text.includes("INSERT INTO dbo.PlayerTitleUnlock")) return [{ inserted: (values.length - 1) / 4 }];
+    if (text.includes("FROM dbo.Tournament")) {
       return {
-        recordsets: [
+        sets: [
           seededCatalog().map(catalogRow),
           [],
           [{ ID: 9 }],
@@ -56,7 +55,7 @@ function handler(lastRun: Date | null): QueryHandler {
         ],
       };
     }
-    return { recordset: [] };
+    return undefined;
   };
 }
 
@@ -78,8 +77,8 @@ test("without apply the run only reports; with apply it writes and logs", async 
   const written = await runTitleSync(applied, { apply: true, legacy: false, grantedBy: "ops:title-sync" });
   assert.equal(written.granted, 1);
   assert.deepEqual(applied.transactions, ["begin", "commit"]);
-  const log = applied.queries.find((query) => query.sql.includes("CommandLog"));
-  assert.deepEqual(JSON.parse(String(log?.inputs.log)), {
+  const log = applied.statements.find((statement) => statement.text.includes("INSERT INTO dbo.CommandLog"));
+  assert.deepEqual(JSON.parse(String(log?.values[1])), {
     granted_by: "ops:title-sync",
     granted: 1,
     titles: { "msl-2023-world-champion-msc": 1 },
@@ -105,7 +104,7 @@ test("the daily check runs the sync only when it is due and never throws", async
     intervalMs: DAY_MS,
     now: () => NOW,
   }).check();
-  assert.equal(quiet.queries.length, 1, "only the last run was read");
+  assert.equal(quiet.statements.length, 1, "only the last run was read");
 
   const due = createFakeDatabase(handler(new Date(NOW - 2 * DAY_MS)));
   await createTitleSyncSchedule({
@@ -138,5 +137,5 @@ test("an interval of 0 switches the schedule off", () => {
   });
   schedule.start();
   schedule.stop();
-  assert.equal(database.queries.length, 0);
+  assert.equal(database.statements.length, 0);
 });

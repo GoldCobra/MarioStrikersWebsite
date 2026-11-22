@@ -32,15 +32,15 @@ function clubRow(overrides: Record<string, unknown>): Record<string, unknown> {
 }
 
 test("club profile does not synthesize stale owner rows outside ClubRoster", async () => {
-  const database = createFakeDatabase((sql) => {
-    if (sql.includes("FROM Club c")) {
+  const database = createFakeDatabase(({ text: sql }) => {
+    if (sql.includes("FROM dbo.Club c")) {
       return {
-        recordset: [clubRow({ color1: "Red", color2: "Blue", stadium: "Lava Castle", owner_raw: "84806729719615488" })],
+        rows: [clubRow({ color1: "Red", color2: "Blue", stadium: "Lava Castle", owner_raw: "84806729719615488" })],
       };
     }
-    if (sql.includes("FROM ClubRoster cr")) {
+    if (sql.includes("FROM dbo.ClubRoster cr")) {
       return {
-        recordset: [
+        rows: [
           { player_id: 398, name: "DelphinusVyse", country: "", discord_id: "136351840534003713", is_officer: false },
         ],
       };
@@ -61,10 +61,10 @@ test("club profile does not synthesize stale owner rows outside ClubRoster", asy
 });
 
 test("invite-only club profiles keep stored club codes hidden", async () => {
-  const database = createFakeDatabase((sql) =>
-    sql.includes("FROM Club c")
+  const database = createFakeDatabase(({ text: sql }) =>
+    sql.includes("FROM dbo.Club c")
       ? {
-          recordset: [
+          rows: [
             clubRow({
               club_id: 12,
               tag: "KFC",
@@ -77,7 +77,7 @@ test("invite-only club profiles keep stored club codes hidden", async () => {
             }),
           ],
         }
-      : { recordset: [] },
+      : { rows: [] },
   );
 
   const profile = await getMsblClubProfile(database, { logoCache: emptyLogos, memberList: noMembers }, 12);
@@ -89,11 +89,11 @@ test("invite-only club profiles keep stored club codes hidden", async () => {
 });
 
 test("the owner is the roster member whose Discord id matches Club.Owner", async () => {
-  const database = createFakeDatabase((sql) =>
-    sql.includes("FROM Club c")
-      ? { recordset: [clubRow({ owner_raw: "<@111111111111111111>" })] }
+  const database = createFakeDatabase(({ text: sql }) =>
+    sql.includes("FROM dbo.Club c")
+      ? { rows: [clubRow({ owner_raw: "<@111111111111111111>" })] }
       : {
-          recordset: [
+          rows: [
             { player_id: 1, name: "Member", discord_id: "222222222222222222", is_officer: 0 },
             { player_id: 2, name: "Owner", discord_id: "<@111111111111111111>owner_name", is_officer: 1 },
           ],
@@ -112,11 +112,11 @@ test("the owner is the roster member whose Discord id matches Club.Owner", async
 });
 
 test("Discord names the database lacks come from the server's member list, without asking Discord", async () => {
-  const database = createFakeDatabase((sql) =>
-    sql.includes("FROM Club c")
-      ? { recordset: [clubRow({ owner_raw: "111111111111111111" })] }
+  const database = createFakeDatabase(({ text: sql }) =>
+    sql.includes("FROM dbo.Club c")
+      ? { rows: [clubRow({ owner_raw: "111111111111111111" })] }
       : {
-          recordset: [
+          rows: [
             { player_id: 1, name: "Member", discord_id: "222222222222222222", is_officer: 0 },
             { player_id: 2, name: "Left", discord_id: "333333333333333333", is_officer: 0 },
             { player_id: 3, name: "Owner", discord_id: "<@111111111111111111>stored_name", is_officer: 1 },
@@ -142,7 +142,7 @@ test("Discord names the database lacks come from the server's member list, witho
 });
 
 test("a missing club is null", async () => {
-  const database = createFakeDatabase(() => ({ recordset: [] }));
+  const database = createFakeDatabase();
   assert.equal(await getMsblClubProfile(database, { logoCache: emptyLogos, memberList: noMembers }, 999), null);
 });
 

@@ -23,6 +23,7 @@ snake_case keys; code inside the API uses camelCase.
 
 - No build artifacts to deploy or keep in sync; the image runs `src/main.ts`.
 - The SQL stayed byte-identical during the move (checked by SQL text
-  snapshots), so the data returned did not change.
+  snapshots), so the data returned did not change. [ADR 0014](0014-data-access-on-the-local-database.md)
+  later replaced that SQL layer.
 - Only erasable TypeScript syntax may be used (no enums, parameter properties
   or namespaces), which `erasableSyntaxOnly` enforces.

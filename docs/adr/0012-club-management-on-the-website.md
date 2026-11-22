@@ -43,7 +43,7 @@ joining, leaving, succession and the life of new clubs; `/club info` and
   lock held to the end, so a switch waits for running changes. One update
   closes the bot's write commands and opens the website without the two ever
   being open together.
-- **Additive schema** (`modules/clubs/schema.ts`, `npm run ops:club-schema`):
+- **Additive schema** (applied 2026-11-19 by `ops:club-schema`, removed after it ran):
   new columns and tables only. The legacy procedures stay as they are; they
   write with column lists, so new columns with defaults or NULL break none of
   them. `dbo.Club` gets no trigger (a legacy procedure reads `@@IDENTITY`, the

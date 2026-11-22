@@ -36,7 +36,7 @@ whether a role was taken away since.
 - **The menu** renders whatever links `/api/auth/me` carries (`account_links`);
   only a confirmed admin's answer has one. The public bundle holds no admin
   text, path or code.
-- **Audit**: `dbo.WebsiteAdminAudit` (`npm run ops:admin-audit`) records the
+- **Audit**: `dbo.WebsiteAdminAudit` (created once by `ops:admin-audit`, since removed) records the
   page's opening once per session and day and, later, every admin action, with
   the address, kept 180 days; never a token, cookie or the page's path.
 

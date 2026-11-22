@@ -1,6 +1,44 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { mapSeasonRow, toBoolean } from "./service.ts";
+import { createFakeDatabase } from "../../test-support/fake-database.ts";
+import { getCompetitiveSeasonStatus, mapSeasonRow, toBoolean } from "./service.ts";
+
+test("the season status reads the server's clock and the candidate season in one statement", async () => {
+  const database = createFakeDatabase(({ text }) => {
+    assert.match(text, /FROM rocci121_toby\.CompetitiveSeason/);
+    return [
+      {
+        ServerNowUtc: new Date("2026-11-22T12:00:00.000Z"),
+        Id: 4,
+        SeasonNumber: 4,
+        DisplayName: "Chill 2026",
+        StartDateUtc: new Date("2026-11-01T08:00:00.000Z"),
+        EndDateUtc: new Date("2027-02-01T08:00:00.000Z"),
+        IsActive: true,
+        IsCompleted: false,
+        LifecycleStatus: "active",
+      },
+    ];
+  });
+
+  const status = await getCompetitiveSeasonStatus(database);
+
+  assert.equal(database.statements.length, 1);
+  assert.deepEqual(database.statements[0]?.values, []);
+  assert.deepEqual(status, {
+    serverNowUtc: "2026-11-22T12:00:00.000Z",
+    season: {
+      id: 4,
+      seasonNumber: 4,
+      displayName: "Chill 2026",
+      startDateUtc: "2026-11-01T08:00:00.000Z",
+      endDateUtc: "2027-02-01T08:00:00.000Z",
+      isActive: true,
+      isCompleted: false,
+      lifecycleStatus: "active",
+    },
+  });
+});
 
 test("toBoolean treats 1/true/'1' as true and everything else as false", () => {
   assert.equal(toBoolean(1), true);

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createFakeDatabase } from "../../test-support/fake-database.ts";
-import { buildProfileStatsQuery, getProfileStatsByDiscordId } from "./stats-repository.ts";
+import { getProfileStatsByDiscordId } from "./stats-repository.ts";
 import { PROFILE_STATS_SETS, buildProfileStats, toProfileStatsResponse, winPercent, type GameStats } from "./stats.ts";
 
 type Row = Record<string, unknown>;
@@ -15,6 +15,19 @@ function sets(parts: Partial<Record<keyof typeof PROFILE_STATS_SETS, Row[]>>): R
 }
 
 const SEASON = [{ Id: 3, DisplayName: "Dusk Season 2026" }];
+const DISCORD_ID = "195905866527014912";
+
+/** A database where only DISCORD_ID is linked (to player 223) and the statistics batch answers `answer`. */
+function linkedDatabase(answer: Row[][]) {
+  return createFakeDatabase(({ text, values }) => {
+    if (text.includes("DiscordID")) {
+      return values[0] === DISCORD_ID ? [{ player_id: 223, discord_id: DISCORD_ID, name: "GoldCobra" }] : [];
+    }
+    return { sets: answer };
+  });
+}
+
+const isStatsBatch = (statement: { text: string }): boolean => statement.text.includes("@cutoff");
 const game = (stats: ReturnType<typeof buildProfileStats>, code: string): GameStats => {
   const found = stats.games.find((entry) => entry.game === code);
   assert.ok(found, code);
@@ -194,10 +207,16 @@ test("win rate: W / (W + L) × 100 rounded half up to one decimal", () => {
   assert.equal(winPercent(0, 0), null);
 });
 
-test("one batch for one player: the active season, 1v1, every rank source, the legacy rule's counts", () => {
-  const sql = buildProfileStatsQuery();
-  assert.equal(sql.match(/@playerId/g)?.length, 12);
-  assert.doesNotMatch(sql, /@(?!playerId\b|cutoff\b)\w+/, "no other parameter");
+test("one batch for one player: the active season, 1v1, every rank source, the legacy rule's counts", async () => {
+  const database = linkedDatabase(sets({}));
+  await getProfileStatsByDiscordId(database, DISCORD_ID);
+  const batch = database.statements.find(isStatsBatch);
+  assert.ok(batch);
+  assert.deepEqual(batch.values, [223], "the player id is the only parameter");
+  const sql = batch.text;
+  assert.match(sql, /^\s*DECLARE @playerId INT = @p0;/);
+  assert.equal(sql.match(/@playerId/g)?.length, 13, "declared once, then in all 12 filters");
+  assert.doesNotMatch(sql, /@(?!playerId\b|cutoff\b|p0\b)\w+/, "no other parameter");
   assert.match(sql, /s\.IsActive = 1 AND s\.LifecycleStatus = 'active'/);
   assert.equal(sql.match(/ModeCode = '1v1'/g)?.length, 6);
   for (const source of ["r.RankNumber", "r.PeakRankNumber", "c.RankAfter", "n.PeakRankNumber", "n.FinalRankNumber"]) {
@@ -209,25 +228,19 @@ test("one batch for one player: the active season, 1v1, every rank source, the l
 });
 
 test("the player comes from the Discord account; an unlinked account reads nothing", async () => {
-  const database = createFakeDatabase((sql, inputs) => {
-    if (sql.includes("DiscordID")) {
-      return {
-        recordset:
-          inputs.discordId === "195905866527014912"
-            ? [{ player_id: 223, discord_id: "195905866527014912", name: "GoldCobra" }]
-            : [],
-      };
-    }
-    return {
-      recordsets: sets({ season: SEASON, playerStats: [{ GameType: 3, Whr: null, MatchWins: 3, MatchLosses: 1 }] }),
-    };
-  });
-  const stats = await getProfileStatsByDiscordId(database, "195905866527014912");
+  const database = linkedDatabase(
+    sets({ season: SEASON, playerStats: [{ GameType: 3, Whr: null, MatchWins: 3, MatchLosses: 1 }] }),
+  );
+  const stats = await getProfileStatsByDiscordId(database, DISCORD_ID);
   assert.equal(stats?.games[0]?.totalMatches, 4);
-  const batch = database.queries.find((query) => query.sql === buildProfileStatsQuery());
-  assert.equal(batch?.inputs.playerId, 223);
+  assert.deepEqual(
+    database.statements[0]?.values,
+    [DISCORD_ID, `<@${DISCORD_ID}>`, `<@!${DISCORD_ID}>`, `<@${DISCORD_ID}>%`, `<@!${DISCORD_ID}>%`],
+    "the stored id in every legacy form",
+  );
+  assert.deepEqual(database.statements.find(isStatsBatch)?.values, [223]);
   assert.equal(await getProfileStatsByDiscordId(database, "1"), null);
-  assert.equal(database.queries.filter((query) => query.sql === buildProfileStatsQuery()).length, 1);
+  assert.equal(database.statements.filter(isStatsBatch).length, 1);
 });
 
 test("the response is snake_case and keeps null for '-'", () => {

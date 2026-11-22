@@ -20,7 +20,7 @@ export async function createTestApp({ env = {}, data = {} }: TestAppOptions = {}
   config: Config;
   data: DataSource;
 }> {
-  const config = loadConfig({ NODE_ENV: "test", ...env }, { isolated: true });
+  const config = loadConfig({ NODE_ENV: "test", ...env });
   const overrides = typeof data === "function" ? data(config) : data;
   const source: DataSource = { ...createFixtureDataSource({ fixedNow: TEST_NOW }), ...overrides };
   const app = await buildApp({ config, data: source });

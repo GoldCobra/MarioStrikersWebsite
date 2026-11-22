@@ -1,15 +1,13 @@
-// SQL of the signed-in player's own profile. A new profile is created in one batch that first locks the
-// Discord id's key range (UPDLOCK, HOLDLOCK), so parallel logins wait for each other and reuse the row
-// the first one created; the unique index IX_Player_DiscordID stays the last guard against a second row.
-// A save reads the profile under update locks, decides and writes in one transaction. Like the bot's
-// procedures, every creation and every save is written to dbo.CommandLog. The selected title, the
-// player's unlocked titles and their temporary test unlocks are read with the profile; the title catalog
-// comes from its cache.
+// The profile editor's store (ProfileStore of service.ts): SQL of the signed-in player's own profile. A new profile
+// is created in one batch that first locks the Discord id's key range (UPDLOCK, HOLDLOCK), so parallel logins wait
+// for each other and reuse the row the first one created; the unique index IX_Player_DiscordID stays the last guard
+// against a second row. A save reads the profile under update locks, decides and writes in one transaction. Like the
+// bot's procedures, every creation and every save is written to dbo.CommandLog. The selected title, the player's
+// unlocked titles and their temporary test unlocks are read with the profile; the title catalog comes from its cache.
 
 import { normalizeText } from "@ms/shared/text";
-import type { Database, Queryable } from "../../db/database.ts";
-import { mssql } from "../../db/database.ts";
-import { toPositiveIntId } from "../../lib/numbers.ts";
+import type { Database, Queries, Row } from "../../db/database.ts";
+import { sql, t, type Statement } from "../../db/sql.ts";
 import { isUniqueViolation } from "../../lib/sql-errors.ts";
 import { availableTitles, selectedTitle, toTitleOption, type CatalogTitle } from "../titles/availability.ts";
 import type { TitleCatalog } from "../titles/repository.ts";
@@ -23,194 +21,196 @@ import type {
   StoredProfile,
 } from "./service.ts";
 
-type Row = Record<string, unknown>;
-
 /** dbo.Enumeration rarely changes; the countries are read once an hour. */
 const COUNTRIES_TTL_MS = 60 * 60 * 1000;
 
-export function buildEnsurePlayerQuery(): string {
-  return [
-    "SET XACT_ABORT ON;",
-    "SET NOCOUNT ON;",
-    "BEGIN TRANSACTION;",
-    "DECLARE @playerId INT = NULL;",
-    "DECLARE @created BIT = 0;",
-    "SELECT TOP 1 @playerId = ID FROM dbo.Player WITH (UPDLOCK, HOLDLOCK) WHERE DiscordID = @discordId ORDER BY ID;",
-    "IF @playerId IS NULL",
-    "BEGIN",
-    "  INSERT INTO dbo.Player (Name, DiscordID) VALUES (@name, @discordId);",
-    "  SET @playerId = CONVERT(INT, SCOPE_IDENTITY());",
-    "  SET @created = 1;",
-    "  INSERT INTO dbo.CommandLog (Command, Parameters) VALUES (N'WebsiteCreatePlayer', @logParameters);",
-    "END;",
-    "COMMIT TRANSACTION;",
-    "SELECT @playerId AS player_id, @created AS created;",
-  ].join(" ");
+/** The creation batch's answer: the Discord id's player and whether this batch created it. */
+interface EnsuredPlayerRecord {
+  player_id: number | null;
+  created: boolean;
 }
 
-export const FIND_PLAYER_QUERY =
-  "SELECT TOP 1 ID AS player_id FROM dbo.Player WHERE DiscordID = @discordId ORDER BY ID;";
-
-export const COUNTRIES_QUERY = "SELECT Code, Description FROM dbo.Enumeration WHERE Type = N'country';";
-
-/** Result set positions of buildProfileQuery() (the taken codes of a save follow them). */
-export const PROFILE_SETS = { player: 0, codes: 1, title: 2, unlocks: 3, testUnlocks: 4, taken: 5 } as const;
-
-/** The profile; with `lock`, under update locks held until the transaction ends. */
-export function buildProfileQuery(lock: boolean): string {
-  const hint = lock ? " WITH (UPDLOCK, HOLDLOCK)" : "";
-  return [
-    lock ? "SET XACT_ABORT ON;" : "",
-    `SELECT p.Country AS country FROM dbo.Player p${hint} WHERE p.ID = @playerId;`,
-    "SELECT fc.GameType, fc.Region, fc.LineSeq, fc.Label, fc.Code",
-    `FROM dbo.FriendCodes fc${hint}`,
-    "WHERE fc.Player = @playerId",
-    "ORDER BY fc.GameType, fc.Region, fc.LineSeq;",
-    `SELECT a.TitleId FROM dbo.PlayerActiveTitle a${hint} WHERE a.PlayerId = @playerId;`,
-    "SELECT u.TitleId FROM dbo.PlayerTitleUnlock u WHERE u.PlayerId = @playerId;",
-    "SELECT x.TitleId FROM dbo.PlayerTitleTestUnlock x WHERE x.PlayerId = @playerId;",
-  ]
-    .filter(Boolean)
-    .join(" ");
+interface PlayerIdRecord {
+  player_id: number;
 }
 
-/** Which of these codes other players have in the same game (parameters @takenGame<n>, @takenCode<n>). */
-export function buildTakenCodesQuery(count: number): string {
-  if (!count) return "";
-  const pairs = Array.from(
-    { length: count },
-    (_, index) => `(fc.GameType = @takenGame${index} AND fc.Code = @takenCode${index})`,
-  );
-  return `SELECT fc.GameType, fc.Code FROM dbo.FriendCodes fc WHERE fc.Player <> @playerId AND (${pairs.join(" OR ")});`;
+interface CountryRecord {
+  Code: string;
+  Description: string | null;
 }
 
-/** The writes of a plan as one batch; adds its parameters to `request`. */
-export function buildApplyQuery(plan: ChangePlan, request: mssql.Request): string {
-  const statements: string[] = ["SET XACT_ABORT ON;"];
-  const key = (prefix: string, index: number, row: StoredFriendCode): string => {
-    request.input(`${prefix}Game${index}`, mssql.Int, row.gameType);
-    request.input(`${prefix}Region${index}`, mssql.NVarChar(4), row.region);
-    request.input(`${prefix}Seq${index}`, mssql.Int, row.lineSeq);
-    return `Player = @playerId AND GameType = @${prefix}Game${index} AND Region = @${prefix}Region${index} AND LineSeq = @${prefix}Seq${index}`;
+// The profile batch's rows extend Row: its result sets arrive as Row[][] and are read as ProfileSets.
+
+interface PlayerRecord extends Row {
+  country: string | null;
+}
+
+interface FriendCodeRecord extends Row {
+  GameType: number;
+  Region: string;
+  LineSeq: number;
+  Label: string;
+  Code: string;
+}
+
+interface TitleIdRecord extends Row {
+  TitleId: number;
+}
+
+interface TakenCodeRecord extends Row {
+  GameType: number;
+  Code: string;
+}
+
+/** The profile batch's result sets in its order; the taken codes only when a save asks for some. */
+type ProfileSets = [
+  players: PlayerRecord[],
+  codes: FriendCodeRecord[],
+  activeTitles: TitleIdRecord[],
+  unlocks: TitleIdRecord[],
+  testUnlocks: TitleIdRecord[],
+  taken?: TakenCodeRecord[],
+];
+
+/** The Discord id's player; one with this name is created (and logged) when there is none. */
+async function ensurePlayerOnce(db: Queries, discordId: string, name: string): Promise<EnsuredPlayer> {
+  const logParameters = JSON.stringify({ discord_id: discordId, name, source: "website login" });
+  const record = await db.row<EnsuredPlayerRecord>(sql`
+    BEGIN TRANSACTION;
+    DECLARE @discordId NVARCHAR(25) = ${t.nvarchar(discordId, 25)};
+    DECLARE @playerId INT = NULL;
+    DECLARE @created BIT = 0;
+    SELECT TOP 1 @playerId = ID FROM dbo.Player WITH (UPDLOCK, HOLDLOCK) WHERE DiscordID = @discordId ORDER BY ID;
+    IF @playerId IS NULL
+    BEGIN
+      INSERT INTO dbo.Player (Name, DiscordID) VALUES (${t.nvarchar(name, 100)}, @discordId);
+      SET @playerId = CONVERT(INT, SCOPE_IDENTITY());
+      SET @created = 1;
+      INSERT INTO dbo.CommandLog (Command, Parameters)
+      VALUES (N'WebsiteCreatePlayer', ${t.nvarchar(logParameters, 4000)});
+    END;
+    COMMIT TRANSACTION;
+    SELECT @playerId AS player_id, @created AS created;
+  `);
+  if (!record?.player_id) throw new Error("Player profile could not be created.");
+  return { playerId: record.player_id, created: record.created };
+}
+
+async function fetchPlayerId(db: Queries, discordId: string): Promise<number | null> {
+  const record = await db.row<PlayerIdRecord>(sql`
+    SELECT TOP 1 ID AS player_id FROM dbo.Player WHERE DiscordID = ${t.nvarchar(discordId, 25)} ORDER BY ID;
+  `);
+  return record?.player_id ?? null;
+}
+
+/** dbo.Enumeration's countries, the code in lower case; a row without a code is left out. */
+async function fetchCountries(db: Queries): Promise<CountryOption[]> {
+  const rows = await db.rows<CountryRecord>(sql`
+    SELECT Code, Description FROM dbo.Enumeration WHERE Type = N'country';
+  `);
+  return rows
+    .map((row) => ({ code: normalizeText(row.Code).toLowerCase(), name: normalizeText(row.Description) }))
+    .filter((row) => row.code !== "");
+}
+
+/**
+ * The profile batch. With `lock` (a save), the player, the codes and the selected title stay under update locks
+ * until the transaction ends, so nothing changes them between the decision and the writes. With `taken`, it also
+ * reads which of these codes other players have in the same game.
+ */
+function profileStatement(playerId: number, lock: boolean, taken: readonly CodeKey[]): Statement {
+  const hint = lock ? sql` WITH (UPDLOCK, HOLDLOCK)` : sql``;
+  const pairs = taken.map((key) => sql`(fc.GameType = ${key.gameType} AND fc.Code = ${t.nvarchar(key.code, 17)})`);
+  const takenCodes = pairs.length
+    ? sql`
+      SELECT fc.GameType, fc.Code
+      FROM dbo.FriendCodes fc
+      WHERE fc.Player <> @playerId AND (${sql.join(pairs, " OR ")});`
+    : sql``;
+  return sql`
+    DECLARE @playerId INT = ${playerId};
+    SELECT p.Country AS country FROM dbo.Player p${hint} WHERE p.ID = @playerId;
+    SELECT fc.GameType, fc.Region, fc.LineSeq, fc.Label, fc.Code
+    FROM dbo.FriendCodes fc${hint}
+    WHERE fc.Player = @playerId
+    ORDER BY fc.GameType, fc.Region, fc.LineSeq;
+    SELECT a.TitleId FROM dbo.PlayerActiveTitle a${hint} WHERE a.PlayerId = @playerId;
+    SELECT u.TitleId FROM dbo.PlayerTitleUnlock u WHERE u.PlayerId = @playerId;
+    SELECT x.TitleId FROM dbo.PlayerTitleTestUnlock x WHERE x.PlayerId = @playerId;
+    ${takenCodes}
+  `;
+}
+
+async function fetchProfile(
+  db: Queries,
+  playerId: number,
+  catalog: readonly CatalogTitle[],
+  options: { readonly lock: boolean; readonly taken?: readonly CodeKey[] },
+): Promise<{ profile: StoredProfile; taken: CodeKey[] }> {
+  const [players, codes, activeTitles, unlocks, testUnlocks, taken = []] = (await db.sets(
+    profileStatement(playerId, options.lock, options.taken ?? []),
+  )) as ProfileSets;
+  const [player] = players;
+  if (!player) throw new Error(`Player ${playerId} not found.`);
+  const unlocked = unlocks.map((row) => row.TitleId);
+  const holder = { playerId, testUnlockedIds: testUnlocks.map((row) => row.TitleId) };
+  const selected = selectedTitle(catalog, unlocked, activeTitles[0]?.TitleId ?? null, holder);
+  return {
+    profile: {
+      playerId,
+      country: player.country?.trim() ?? "",
+      codes: codes.map((row) => ({
+        gameType: row.GameType,
+        region: normalizeText(row.Region),
+        lineSeq: row.LineSeq,
+        label: normalizeText(row.Label),
+        code: normalizeText(row.Code),
+      })),
+      title: selected?.code ?? "",
+      titles: availableTitles(catalog, unlocked, holder).map(toTitleOption),
+    },
+    taken: taken.map((row) => ({ gameType: row.GameType, code: normalizeText(row.Code) })),
   };
+}
+
+/** The writes of a plan as one batch, in the plan's order (kept rows ascending, so no key collides), then the log. */
+function planStatement(playerId: number, plan: ChangePlan, audit: string): Statement {
+  // A friend code's key: the player's line in one game and region.
+  const key = (row: StoredFriendCode): Statement =>
+    sql`Player = @playerId AND GameType = ${row.gameType} AND Region = ${t.nvarchar(row.region, 4)}
+      AND LineSeq = ${row.lineSeq}`;
+  const statements = [sql`DECLARE @playerId INT = ${playerId};`];
   if (plan.country !== null) {
-    request.input("country", mssql.NVarChar(25), plan.country);
-    statements.push("UPDATE dbo.Player SET Country = @country WHERE ID = @playerId;");
+    statements.push(sql`UPDATE dbo.Player SET Country = ${t.nvarchar(plan.country, 25)} WHERE ID = @playerId;`);
   }
-  plan.deletes.forEach((row, index) => {
-    statements.push(`DELETE FROM dbo.FriendCodes WHERE ${key("del", index, row)};`);
-  });
-  plan.updates.forEach((update, index) => {
-    request.input(`updLabel${index}`, mssql.NVarChar(50), update.label);
-    request.input(`updNewSeq${index}`, mssql.Int, update.lineSeq);
+  for (const row of plan.deletes) {
+    statements.push(sql`DELETE FROM dbo.FriendCodes WHERE ${key(row)};`);
+  }
+  for (const { row, label, lineSeq } of plan.updates) {
     statements.push(
-      `UPDATE dbo.FriendCodes SET Label = @updLabel${index}, LineSeq = @updNewSeq${index} WHERE ${key("upd", index, update.row)};`,
+      sql`UPDATE dbo.FriendCodes SET Label = ${t.nvarchar(label, 50)}, LineSeq = ${lineSeq} WHERE ${key(row)};`,
     );
-  });
-  plan.inserts.forEach((row, index) => {
-    request.input(`insGame${index}`, mssql.Int, row.gameType);
-    request.input(`insSeq${index}`, mssql.Int, row.lineSeq);
-    request.input(`insRegion${index}`, mssql.NVarChar(4), row.region);
-    request.input(`insLabel${index}`, mssql.NVarChar(50), row.label);
-    request.input(`insCode${index}`, mssql.NVarChar(17), row.code);
-    statements.push(
-      "INSERT INTO dbo.FriendCodes (Player, GameType, LineSeq, Region, Label, Code)" +
-        ` VALUES (@playerId, @insGame${index}, @insSeq${index}, @insRegion${index}, @insLabel${index}, @insCode${index});`,
-    );
-  });
+  }
+  for (const row of plan.inserts) {
+    statements.push(sql`INSERT INTO dbo.FriendCodes (Player, GameType, LineSeq, Region, Label, Code)
+      VALUES (@playerId, ${row.gameType}, ${row.lineSeq}, ${t.nvarchar(row.region, 4)}, ${t.nvarchar(row.label, 50)},
+        ${t.nvarchar(row.code, 17)});`);
+  }
+  // A title of "" only removes the selected one.
   if (plan.title !== null) {
-    statements.push("DELETE FROM dbo.PlayerActiveTitle WHERE PlayerId = @playerId;");
+    statements.push(sql`DELETE FROM dbo.PlayerActiveTitle WHERE PlayerId = @playerId;`);
     if (plan.title) {
-      request.input("titleCode", mssql.VarChar(64), plan.title);
-      statements.push(
-        "INSERT INTO dbo.PlayerActiveTitle (PlayerId, TitleId) SELECT @playerId, t.Id FROM dbo.PlayerTitle t WHERE t.Code = @titleCode;",
-      );
+      statements.push(sql`INSERT INTO dbo.PlayerActiveTitle (PlayerId, TitleId)
+        SELECT @playerId, t.Id FROM dbo.PlayerTitle t WHERE t.Code = ${t.varchar(plan.title, 64)};`);
     }
   }
-  statements.push("INSERT INTO dbo.CommandLog (Command, Parameters) VALUES (N'WebsiteProfileSave', @audit);");
-  return statements.join(" ");
+  statements.push(
+    sql`INSERT INTO dbo.CommandLog (Command, Parameters) VALUES (N'WebsiteProfileSave', ${t.nvarchar(audit, 4000)});`,
+  );
+  return sql.join(statements, "\n");
 }
 
-function recordsets(result: { recordsets?: unknown }): Row[][] {
-  return Array.isArray(result.recordsets) ? (result.recordsets as Row[][]) : [];
-}
-
-function toStoredProfile(playerId: number, sets: Row[][], catalog: readonly CatalogTitle[]): StoredProfile {
-  const player = sets[PROFILE_SETS.player]?.[0];
-  if (!player) throw new Error(`Player ${playerId} not found.`);
-  const unlocked = (sets[PROFILE_SETS.unlocks] ?? []).map((row) => Number(row.TitleId));
-  const holder = {
-    playerId,
-    testUnlockedIds: (sets[PROFILE_SETS.testUnlocks] ?? []).map((row) => Number(row.TitleId)),
-  };
-  const selected = selectedTitle(catalog, unlocked, toPositiveIntId(sets[PROFILE_SETS.title]?.[0]?.TitleId), holder);
-  return {
-    playerId,
-    country: typeof player.country === "string" ? player.country.trim() : "",
-    codes: (sets[PROFILE_SETS.codes] ?? []).map((row) => ({
-      gameType: Number(row.GameType),
-      region: normalizeText(row.Region),
-      lineSeq: Number(row.LineSeq),
-      label: normalizeText(row.Label),
-      code: normalizeText(row.Code),
-    })),
-    title: selected?.code ?? "",
-    titles: availableTitles(catalog, unlocked, holder).map(toTitleOption),
-  };
-}
-
-async function ensurePlayerOnce(
-  database: Pick<Database, "withPool">,
-  discordId: string,
-  name: string,
-): Promise<EnsuredPlayer> {
-  const rows = await database.withPool(async (pool) => {
-    const request = pool.request();
-    request.input("discordId", mssql.NVarChar(25), discordId);
-    request.input("name", mssql.NVarChar(100), name);
-    request.input(
-      "logParameters",
-      mssql.NVarChar(4000),
-      JSON.stringify({ discord_id: discordId, name, source: "website login" }),
-    );
-    const result = await request.query(buildEnsurePlayerQuery());
-    return Array.isArray(result.recordset) ? (result.recordset as Row[]) : [];
-  });
-  const playerId = Number(rows[0]?.player_id);
-  if (!Number.isInteger(playerId) || playerId <= 0) throw new Error("Player profile could not be created.");
-  return { playerId, created: rows[0]?.created === true || Number(rows[0]?.created) === 1 };
-}
-
-async function queryProfile(
-  queryable: Queryable,
-  playerId: number,
-  lock: boolean,
-  catalog: readonly CatalogTitle[],
-  taken: readonly CodeKey[] = [],
-) {
-  const request = queryable.request();
-  request.multiple = true;
-  request.input("playerId", mssql.Int, playerId);
-  taken.forEach((key, index) => {
-    request.input(`takenGame${index}`, mssql.Int, key.gameType);
-    request.input(`takenCode${index}`, mssql.NVarChar(17), key.code);
-  });
-  const sets = recordsets(await request.query(buildProfileQuery(lock) + " " + buildTakenCodesQuery(taken.length)));
-  return {
-    profile: toStoredProfile(playerId, sets, catalog),
-    taken: taken.length
-      ? (sets[PROFILE_SETS.taken] ?? []).map((row) => ({
-          gameType: Number(row.GameType),
-          code: normalizeText(row.Code),
-        }))
-      : [],
-  };
-}
-
-export function createSqlProfileStore(
-  database: Pick<Database, "withPool" | "withTransaction">,
-  titles: Pick<TitleCatalog, "get">,
-): ProfileStore {
+export function createSqlProfileStore(database: Database, titles: Pick<TitleCatalog, "get">): ProfileStore {
   let countries: { readonly at: number; readonly rows: Promise<readonly CountryOption[]> } | null = null;
 
   return {
@@ -224,53 +224,31 @@ export function createSqlProfileStore(
       }
     },
 
-    async findPlayerId(discordId) {
-      const rows = await database.withPool(async (pool) => {
-        const request = pool.request();
-        request.input("discordId", mssql.NVarChar(25), discordId);
-        const result = await request.query(FIND_PLAYER_QUERY);
-        return Array.isArray(result.recordset) ? (result.recordset as Row[]) : [];
-      });
-      const playerId = Number(rows[0]?.player_id);
-      return Number.isInteger(playerId) && playerId > 0 ? playerId : null;
+    findPlayerId(discordId) {
+      return fetchPlayerId(database, discordId);
     },
 
     async readProfile(playerId) {
       const catalog = await titles.get();
-      return database.withPool(async (pool) => (await queryProfile(pool, playerId, false, catalog)).profile);
+      return (await fetchProfile(database, playerId, catalog, { lock: false })).profile;
     },
 
     countries() {
       if (countries && Date.now() - countries.at < COUNTRIES_TTL_MS) return countries.rows;
-      const rows = database
-        .withPool(async (pool) => {
-          const result = await pool.request().query(COUNTRIES_QUERY);
-          return (Array.isArray(result.recordset) ? (result.recordset as Row[]) : [])
-            .map((row) => ({
-              code: normalizeText(row.Code).toLowerCase(),
-              name: normalizeText(row.Description),
-            }))
-            .filter((row) => row.code !== "");
-        })
-        .catch((error: unknown) => {
-          countries = null;
-          throw error;
-        });
+      const rows = fetchCountries(database).catch((error: unknown) => {
+        countries = null;
+        throw error;
+      });
       countries = { at: Date.now(), rows };
       return rows;
     },
 
     async saveProfile(playerId, codes, decide) {
       const catalog = await titles.get();
-      return database.withTransaction(async (transaction) => {
-        const { profile, taken } = await queryProfile(transaction, playerId, true, catalog, codes);
+      return database.transaction(async (tx) => {
+        const { profile, taken } = await fetchProfile(tx, playerId, catalog, { lock: true, taken: codes });
         const decision = decide(profile, taken);
-        if (decision.plan) {
-          const request = transaction.request();
-          request.input("playerId", mssql.Int, playerId);
-          request.input("audit", mssql.NVarChar(4000), decision.audit);
-          await request.query(buildApplyQuery(decision.plan, request));
-        }
+        if (decision.plan) await tx.execute(planStatement(playerId, decision.plan, decision.audit));
         return decision.result;
       });
     },

@@ -140,26 +140,19 @@ Base images are pinned by digest (Dockerfiles, `docker-compose.prod.yml`);
 Dependabot proposes updates. Caddy and FlareSolverr are pinned to the versions
 that run, so their next restart does not upgrade them unnoticed.
 
-The database TLS settings (`MSSQL_TRUST_SERVER_CERTIFICATE`,
-`MSSQL_TLS_MIN_VERSION` in `backend/.env`) are chosen with
-`docker exec msc-website-backend node apps/api/src/ops/probe-tls.ts`, which tries
-them from strictest to laxest against the real database. The backend reads
-`.env` when its container is created, so redeploy the current release after a
-change. Keep this procedure, the CI job names and
+The backend reaches the SQL Server container as `mssql` on port 1433 (the
+`mssql` Docker network) over TLS 1.2 or newer, trusting the container's
+self-signed certificate; these are the defaults of the `MSSQL_*` settings.
+The backend reads `.env` when its container is created, so redeploy the
+current release after a change. Keep this procedure,
+the CI job names and
 the [GitHub rulesets](github-maintenance.md) aligned.
 
 ## Admin page
 
 The hidden admin page ([ADR 0011](adr/0011-hidden-admin-page.md)) ships with every
-release but stays off until `backend/.env` switches it on. Once, before the
-first switch-on, create its audit table (a dry run first):
-
-```sh
-docker exec msc-website-backend node apps/api/src/ops/apply-admin-audit.ts
-docker exec msc-website-backend node apps/api/src/ops/apply-admin-audit.ts --apply
-```
-
-Then back up `backend/.env` and set `ADMIN_ENABLED=true`, `ADMIN_ROLE_IDS` (the
+release but stays off until `backend/.env` switches it on (its audit table
+`dbo.WebsiteAdminAudit` exists). Back up `backend/.env` and set `ADMIN_ENABLED=true`, `ADMIN_ROLE_IDS` (the
 admin role ids of the server) and `ADMIN_PATH_TOKEN` (generated on the server,
 never shown or committed:
 `node -e "console.log(crypto.randomBytes(24).toString('base64url'))"`), and

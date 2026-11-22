@@ -40,7 +40,7 @@ title on his own profile without earning it.
   level of a group, also another player's fixed title) and change no earned
   title, stats, accolades or season rewards. `npm run ops:title-test-unlocks`
   grants all or revokes them; revoking removes only the test rows.
-- `npm run ops:title-games` brought this into the existing rows: `--schema`
+- A one-off command (`ops:title-games`, removed after it ran) brought this into the existing rows: `--schema`
   first (column and table, before the release), then the data step in one
   transaction with backups, exact row counts, a check that every old unlock has
   its game variant (except wins that only added up across games) and that no

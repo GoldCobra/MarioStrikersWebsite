@@ -34,9 +34,8 @@ test("defaults keep the previous API's behavior outside production", () => {
   assert.equal(config.trustProxyHops, 0);
   assert.equal(config.session.cookieSecure, false);
   assert.equal(config.mssql.trustServerCertificate, true);
-  assert.equal(config.mssql.tlsMinVersion, "TLSv1");
-  assert.equal(config.publicDataCache.snapshotPath, path.resolve("/srv/api", ".cache/public-data-cache.json"));
-  assert.equal(loadConfig({}, { isolated: true }).publicDataCache.snapshotPath, "");
+  assert.equal(config.mssql.port, 1433);
+  assert.equal(config.mssql.tlsMinVersion, "TLSv1.2");
   assert.equal(isDiscordLoginConfigured(config), false);
 });
 

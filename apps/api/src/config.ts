@@ -17,7 +17,7 @@ export interface MssqlConfig {
   readonly poolIdleTimeoutMs: number;
   readonly connectionTimeoutMs: number;
   readonly requestTimeoutMs: number;
-  /** The SQL Server on the VPS presents its own self-signed certificate; tighten only after probing it. */
+  /** The SQL Server container presents its own self-signed certificate. */
   readonly trustServerCertificate: boolean;
   readonly tlsMinVersion: "TLSv1" | "TLSv1.1" | "TLSv1.2" | "TLSv1.3";
 }
@@ -82,8 +82,6 @@ export interface Config {
     readonly ttlMs: number;
     readonly refreshIntervalMs: number;
     readonly parallelism: number;
-    /** "" disables snapshots (tests and fixtures). */
-    readonly snapshotPath: string;
   };
   readonly clubLogos: {
     readonly cachePath: string;
@@ -143,15 +141,13 @@ function readLogLevel(env: Env, fallback: LogLevel): LogLevel {
 }
 
 function readTlsVersion(env: Env): MssqlConfig["tlsMinVersion"] {
-  const value = readString(env, "MSSQL_TLS_MIN_VERSION", "TLSv1");
+  const value = readString(env, "MSSQL_TLS_MIN_VERSION", "TLSv1.2");
   if (value === "TLSv1" || value === "TLSv1.1" || value === "TLSv1.2" || value === "TLSv1.3") return value;
   throw new Error(`MSSQL_TLS_MIN_VERSION must be TLSv1, TLSv1.1, TLSv1.2 or TLSv1.3, not ${value}.`);
 }
 
 export interface LoadConfigOptions {
   readonly cwd?: string;
-  /** Fixture and test runs never write cache snapshots. */
-  readonly isolated?: boolean;
 }
 
 export function loadConfig(env: Env, options: LoadConfigOptions = {}): Config {
@@ -172,9 +168,6 @@ export function loadConfig(env: Env, options: LoadConfigOptions = {}): Config {
       ttlMs: readInt(env, "PUBLIC_DATA_CACHE_TTL_MS", 60_000),
       refreshIntervalMs: readInt(env, "PUBLIC_DATA_CACHE_REFRESH_INTERVAL_MS", 60_000),
       parallelism: readInt(env, "PUBLIC_DATA_CACHE_PARALLELISM", 2),
-      snapshotPath: options.isolated
-        ? ""
-        : readString(env, "PUBLIC_DATA_CACHE_SNAPSHOT_PATH", resolve(cwd, ".cache/public-data-cache.json")),
     },
     clubLogos: {
       cachePath: readString(env, "CLUB_LOGO_CACHE_PATH", resolve(cwd, ".cache/club-logos")),
@@ -217,14 +210,14 @@ export function loadConfig(env: Env, options: LoadConfigOptions = {}): Config {
     },
     mssql: {
       host: readString(env, "MSSQL_HOST"),
-      port: readInt(env, "MSSQL_PORT", 443),
+      port: readInt(env, "MSSQL_PORT", 1433),
       database: readString(env, "MSSQL_DATABASE"),
       user: readString(env, "MSSQL_USER"),
       password: readString(env, "MSSQL_PASSWORD"),
       poolMin: readInt(env, "MSSQL_POOL_MIN", 1),
       poolMax: readInt(env, "MSSQL_POOL_MAX", 10),
       poolIdleTimeoutMs: readInt(env, "MSSQL_POOL_IDLE_TIMEOUT_MS", 300_000),
-      connectionTimeoutMs: readInt(env, "MSSQL_CONNECTION_TIMEOUT_MS", 15_000),
+      connectionTimeoutMs: readInt(env, "MSSQL_CONNECTION_TIMEOUT_MS", 5_000),
       requestTimeoutMs: readInt(env, "MSSQL_REQUEST_TIMEOUT_MS", 15_000),
       trustServerCertificate: readBool(env, "MSSQL_TRUST_SERVER_CERTIFICATE", true),
       tlsMinVersion: readTlsVersion(env),

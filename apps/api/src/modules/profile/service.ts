@@ -267,7 +267,7 @@ export function planChanges(
   return { country: countryChange, title: titleChange, deletes, updates, inserts };
 }
 
-/** The profile a plan leaves behind: what the database holds after the writes of buildApplyQuery. */
+/** The profile a plan leaves behind: what the database holds after the store has written the plan (repository.ts). */
 export function applyPlan(current: StoredProfile, plan: ChangePlan): StoredProfile {
   const same = (a: StoredFriendCode, b: StoredFriendCode): boolean =>
     a.gameType === b.gameType && a.region === b.region && a.lineSeq === b.lineSeq;

@@ -1,7 +1,7 @@
 // MSBL Striker Clubs: the club list with cached logos, and club profiles with their roster.
 
 import { normalizeText } from "@ms/shared/text";
-import type { Database } from "../../db/database.ts";
+import type { Queries } from "../../db/database.ts";
 import type { GuildMemberSnapshot } from "../../integrations/discord/guild-members.ts";
 import { DEFAULT_ACTIVITY_WINDOW_DAYS, toActivityIso } from "../../lib/dates.ts";
 import { mapLimit } from "../../lib/concurrency.ts";
@@ -47,13 +47,13 @@ export async function attachClubLogos(rows: ClubListItem[], logoCache: LogoResol
 }
 
 export async function getMsblClubs(
-  database: Pick<Database, "withPool">,
+  db: Queries,
   logoCache: LogoResolver | null,
   options: { now?: Date; activityWindowDays?: number } = {},
 ): Promise<ClubListItem[]> {
   const now = options.now ?? new Date();
   const activityWindowDays = options.activityWindowDays ?? DEFAULT_ACTIVITY_WINDOW_DAYS;
-  const rows = await database.withPool((pool) => fetchClubs(pool));
+  const rows = await fetchClubs(db);
   const clubs = rows
     .map((row) => toMsblClubDTO(row, { now, activityWindowDays }))
     .filter((club): club is ClubListItem => club !== null);
@@ -66,7 +66,7 @@ function rowDiscordId(row: Pick<RosterRow, "discord_id">): string {
 
 /** A club profile by id (already validated); null when the club does not exist. */
 export async function getMsblClubProfile(
-  database: Pick<Database, "withPool">,
+  db: Queries,
   dependencies: {
     logoCache: LogoResolver | null;
     /** The server's member list (integrations/discord/guild-members.ts): in memory, never waited for once read. */
@@ -74,15 +74,11 @@ export async function getMsblClubProfile(
   },
   clubId: number,
 ): Promise<ClubProfile | null> {
-  const found = await database.withPool(async (pool) => {
-    const clubRow = await fetchClub(pool, clubId);
-    return clubRow ? { clubRow, rosterRows: await fetchRoster(pool, clubId) } : null;
-  });
-  if (!found) return null;
-  const { clubRow } = found;
+  const [clubRow, roster] = await Promise.all([fetchClub(db, clubId), fetchRoster(db, clubId)]);
+  if (!clubRow) return null;
 
   const ownerDiscordId = normalizeDiscordId(normalizeText(clubRow.owner_raw));
-  const rosterRows = found.rosterRows.map((row) => buildRosterRow(row, ownerDiscordId));
+  const rosterRows = roster.map((row) => buildRosterRow(row, ownerDiscordId));
   await attachDiscordNames(rosterRows, dependencies.memberList);
   rosterRows.sort(compareRosterRows);
 

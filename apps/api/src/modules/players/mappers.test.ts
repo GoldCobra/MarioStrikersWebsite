@@ -19,14 +19,30 @@ import {
 import {
   SEASON_AWARD_DISPLAY_ORDER,
   SEASON_AWARD_GAME_ORDER,
-  buildPlayerProfileBatchQuery,
-  buildPlayersListQuery,
-  buildSeasonAwardsQuery,
-  buildSeasonRewardLevelQuery,
+  fetchPlayerProfileRecordsets,
+  fetchPlayersList,
 } from "./repository.ts";
 import { seededCatalog } from "../titles/catalog.ts";
+import { createFakeDatabase, type RecordedStatement } from "../../test-support/fake-database.ts";
 
 const NOW = new Date("2026-05-29T12:00:00.000Z");
+
+/** The profile batch of player 223 as the database receives it, in one round trip. */
+async function readProfileBatch(): Promise<RecordedStatement> {
+  const database = createFakeDatabase();
+  await fetchPlayerProfileRecordsets(database, 223);
+  assert.equal(database.statements.length, 1, "one round trip");
+  const [batch] = database.statements;
+  assert.ok(batch);
+  return batch;
+}
+
+/** The statement of a batch that contains `marker` (no literal in these batches holds a semicolon). */
+function statementWith(batch: string, marker: string): string {
+  const statement = batch.split(";").find((part) => part.includes(marker));
+  assert.ok(statement, marker);
+  return statement;
+}
 
 function createPlayerRow(activity: Date | null) {
   return {
@@ -513,8 +529,8 @@ test("season reward level falls back to unranked and maps earned tiers", () => {
   });
 });
 
-test("season reward level query reads highest earned progress from the active season", () => {
-  const sql = buildSeasonRewardLevelQuery();
+test("season reward level query reads highest earned progress from the active season", async () => {
+  const sql = statementWith((await readProfileBatch()).text, "AS RewardLevelOrder");
 
   assert.match(sql, /CompetitiveSeasonRewardProgress/);
   assert.match(sql, /MAX\(ISNULL\(progress\.HighestEarnedTierOrder, 0\)\)/);
@@ -523,18 +539,23 @@ test("season reward level query reads highest earned progress from the active se
   assert.match(sql, /season\.LifecycleStatus = 'active'/);
 });
 
-test("profile batch query reads all profile data in one multi-recordset batch", () => {
-  const sql = buildPlayerProfileBatchQuery();
+test("profile batch query reads all profile data in one multi-recordset batch", async () => {
+  const { text: sql, values } = await readProfileBatch();
 
-  assert.match(sql, /SELECT TOP 1\s+p\.ID AS player_id/s);
-  assert.match(sql, /FROM FriendCodes fc/);
+  assert.deepEqual(values, [223], "the player id is the only parameter");
   assert.match(
     sql,
-    /FROM CompetitivePlayerRating rating INNER JOIN CompetitiveSeason season ON season\.Id = rating\.SeasonId/,
+    /^\s*DECLARE @playerId INT = @p0;\s+DECLARE @playerIdText NVARCHAR\(20\) = CONVERT\(NVARCHAR\(20\), @playerId\);/,
+  );
+  assert.match(sql, /SELECT TOP 1\s+p\.ID AS player_id/s);
+  assert.match(sql, /FROM dbo\.FriendCodes fc/);
+  assert.match(
+    sql,
+    /FROM rocci121_toby\.CompetitivePlayerRating rating\s+INNER JOIN rocci121_toby\.CompetitiveSeason season ON season\.Id = rating\.SeasonId/,
   );
   assert.match(
     sql,
-    /LEFT JOIN CompetitiveRankThreshold threshold ON threshold\.RankNumber = rating\.RankNumber AND threshold\.IsActive = 1/,
+    /LEFT JOIN rocci121_toby\.CompetitiveRankThreshold threshold ON threshold\.RankNumber = rating\.RankNumber AND threshold\.IsActive = 1/,
   );
   assert.match(sql, /AND player\.HideStats = 0/);
   assert.doesNotMatch(sql, /CompetitiveLeaderboard/);
@@ -543,17 +564,17 @@ test("profile batch query reads all profile data in one multi-recordset batch", 
   assert.match(sql, /SUM\(rating\.MatchWins \+ rating\.MatchLosses\) AS TotalMatches/);
   assert.match(
     sql,
-    /GROUP BY rating\.GameId, rating\.ModeCode; SELECT active\.TitleId AS title_id FROM dbo\.PlayerActiveTitle active WHERE active\.PlayerId = @playerId; SELECT unlock\.TitleId AS title_id FROM dbo\.PlayerTitleUnlock unlock WHERE unlock\.PlayerId = @playerId; SELECT test\.TitleId AS title_id FROM dbo\.PlayerTitleTestUnlock test WHERE test\.PlayerId = @playerId;$/,
+    /GROUP BY rating\.GameId, rating\.ModeCode;\s+SELECT active\.TitleId AS title_id FROM dbo\.PlayerActiveTitle active WHERE active\.PlayerId = @playerId;\s+SELECT unlock\.TitleId AS title_id FROM dbo\.PlayerTitleUnlock unlock WHERE unlock\.PlayerId = @playerId;\s+SELECT test\.TitleId AS title_id FROM dbo\.PlayerTitleTestUnlock test WHERE test\.PlayerId = @playerId;\s*$/,
   );
   assert.match(sql, /CompetitiveSeasonRewardProgress/);
   assert.match(sql, /progress\.GameId/);
   assert.match(sql, /progress\.ModeCode/);
   assert.match(sql, /progress\.CurrentTargetTierOrder/);
   assert.match(sql, /progress\.CurrentTargetWins/);
-  assert.match(sql, /FROM Tournament t/);
+  assert.match(sql, /FROM dbo\.Tournament t/);
   assert.match(sql, /CROSS APPLY \(VALUES/);
-  assert.match(sql, /LEFT JOIN PlayerStats ps ON ps\.Player = p\.ID AND ps\.GameType IN \(1, 2, 3\)/);
-  assert.match(sql, /@playerIdText/);
+  assert.match(sql, /LEFT JOIN dbo\.PlayerStats ps ON ps\.Player = p\.ID AND ps\.GameType IN \(1, 2, 3\)/);
+  assert.match(sql, /LIKE '%,' \+ @playerIdText \+ ',%'/);
   assert.doesNotMatch(sql, /ProfileZest/);
   assert.doesNotMatch(sql, /RankImage/);
   assert.doesNotMatch(sql, /LEFT JOIN Enumeration .*Rank/i);
@@ -869,14 +890,17 @@ test("only first place counts as a tournament winner", () => {
   );
 });
 
-test("players list only includes rows with visible profile content", () => {
-  const sql = buildPlayersListQuery();
+test("players list only includes rows with visible profile content", async () => {
+  const database = createFakeDatabase();
+  await fetchPlayersList(database);
+  assert.equal(database.statements.length, 1);
+  const sql = database.statements[0]?.text ?? "";
 
   assert.match(sql, /FriendCodes/);
   assert.match(sql, /CompetitiveLeaderboard/);
   assert.match(sql, /Tournament/);
   assert.match(sql, /IdStartGG/);
-  assert.doesNotMatch(sql, /FROM PlayerStats ps/);
+  assert.doesNotMatch(sql, /PlayerStats/);
 });
 
 test("buildSeasonAwards maps award rows and keeps the SQL ordering", () => {
@@ -932,8 +956,8 @@ test("buildSeasonAwards tolerates a missing or non-array recordset", () => {
   assert.deepEqual(buildSeasonAwards("nope"), []);
 });
 
-test("buildSeasonAwardsQuery selects award rows for the requested player", () => {
-  const sql = buildSeasonAwardsQuery();
+test("season awards query selects award rows for the requested player", async () => {
+  const sql = statementWith((await readProfileBatch()).text, "CompetitiveSeasonAwardResultPlayer");
 
   assert.match(sql, /CompetitiveSeasonAwardResult/);
   assert.match(sql, /CompetitiveSeasonAwardResultPlayer/);
@@ -943,8 +967,8 @@ test("buildSeasonAwardsQuery selects award rows for the requested player", () =>
   assert.match(sql, /ORDER BY season\.StartDateUtc DESC/);
 });
 
-test("buildSeasonAwardsQuery orders awards by prestige, not by award code", () => {
-  const sql = buildSeasonAwardsQuery();
+test("season awards query orders awards by prestige, not by award code", async () => {
+  const sql = statementWith((await readProfileBatch()).text, "CompetitiveSeasonAwardResultPlayer");
 
   // The old ordering sorted alphabetically by AwardCode, which put CLUTCH_PLAYER
   // above TOP_10. Ordering must come from SEASON_AWARD_DISPLAY_ORDER instead.
@@ -957,8 +981,8 @@ test("buildSeasonAwardsQuery orders awards by prestige, not by award code", () =
   assert.match(sql, /CASE result\.GameId WHEN 3 THEN 0 WHEN 1 THEN 1 WHEN 2 THEN 2 ELSE 3 END ASC/);
   assert.match(sql, /result\.ModeCode ASC/);
 
-  // TOP_10 keeps its 1..10 run.
-  assert.match(sql, /result\.RankPosition ASC;$/);
+  // TOP_10 keeps its 1..10 run: the rank is the statement's last sort key.
+  assert.match(sql, /result\.RankPosition ASC$/);
 
   // GameId must never be sorted numerically again - that yields MSC, SMS, MSBL.
   assert.doesNotMatch(sql, /result\.GameId ASC/);

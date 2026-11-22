@@ -1,7 +1,8 @@
 // The competitive season shown on the home page countdown: the active one, else the next to start.
 
 import { normalizeText } from "@ms/shared/text";
-import type { Database } from "../../db/database.ts";
+import type { Queries, Row } from "../../db/database.ts";
+import { sql } from "../../db/sql.ts";
 
 export interface Season {
   id: number;
@@ -19,52 +20,66 @@ export interface SeasonStatus {
   season: Season | null;
 }
 
-const SEASON_STATUS_QUERY = `
-DECLARE @now datetime2 = SYSUTCDATETIME();
+/** The server's clock and the candidate season, whose columns are null when no season qualifies. */
+interface SeasonStatusRecord extends Row {
+  ServerNowUtc: Date;
+  Id: number | null;
+  SeasonNumber: number | null;
+  DisplayName: string | null;
+  StartDateUtc: Date | null;
+  EndDateUtc: Date | null;
+  IsActive: boolean | null;
+  IsCompleted: boolean | null;
+  LifecycleStatus: string | null;
+}
 
-WITH Candidate AS (
-  SELECT TOP (1)
-    Id,
-    SeasonNumber,
-    DisplayName,
-    StartDateUtc,
-    EndDateUtc,
-    IsActive,
-    IsCompleted,
-    LifecycleStatus
-  FROM CompetitiveSeason
-  WHERE IsCompleted = 0
-    AND (
-      IsActive = 1
-      OR (@now >= StartDateUtc AND @now < EndDateUtc)
-      OR StartDateUtc > @now
-    )
-  ORDER BY
-    CASE
-      WHEN IsActive = 1 THEN 0
-      WHEN @now >= StartDateUtc AND @now < EndDateUtc THEN 1
-      WHEN StartDateUtc > @now THEN 2
-      ELSE 3
-    END ASC,
-    CASE
-      WHEN StartDateUtc > @now THEN StartDateUtc
-      ELSE EndDateUtc
-    END ASC,
-    StartDateUtc ASC,
-    Id ASC
-)
-SELECT
-  @now AS ServerNowUtc,
-  Candidate.Id,
-  Candidate.SeasonNumber,
-  Candidate.DisplayName,
-  Candidate.StartDateUtc,
-  Candidate.EndDateUtc,
-  Candidate.IsActive,
-  Candidate.IsCompleted,
-  Candidate.LifecycleStatus
-FROM (SELECT 1 AS OneRow) AS Seed
-LEFT JOIN Candidate ON 1 = 1;
+// The seed row keeps the server's clock in the result when no season qualifies.
+const SEASON_STATUS_QUERY = sql`
+  DECLARE @now datetime2 = SYSUTCDATETIME();
+
+  WITH Candidate AS (
+    SELECT TOP (1)
+      Id,
+      SeasonNumber,
+      DisplayName,
+      StartDateUtc,
+      EndDateUtc,
+      IsActive,
+      IsCompleted,
+      LifecycleStatus
+    FROM rocci121_toby.CompetitiveSeason
+    WHERE IsCompleted = 0
+      AND (
+        IsActive = 1
+        OR (@now >= StartDateUtc AND @now < EndDateUtc)
+        OR StartDateUtc > @now
+      )
+    ORDER BY
+      CASE
+        WHEN IsActive = 1 THEN 0
+        WHEN @now >= StartDateUtc AND @now < EndDateUtc THEN 1
+        WHEN StartDateUtc > @now THEN 2
+        ELSE 3
+      END ASC,
+      CASE
+        WHEN StartDateUtc > @now THEN StartDateUtc
+        ELSE EndDateUtc
+      END ASC,
+      StartDateUtc ASC,
+      Id ASC
+  )
+  SELECT
+    @now AS ServerNowUtc,
+    Candidate.Id,
+    Candidate.SeasonNumber,
+    Candidate.DisplayName,
+    Candidate.StartDateUtc,
+    Candidate.EndDateUtc,
+    Candidate.IsActive,
+    Candidate.IsCompleted,
+    Candidate.LifecycleStatus
+  FROM (SELECT 1 AS OneRow) AS Seed
+  LEFT JOIN Candidate ON 1 = 1;
 `;
 
 function toIsoStringOrNull(value: unknown): string | null {
@@ -91,9 +106,7 @@ export function mapSeasonRow(row: Record<string, unknown> | null | undefined): S
   };
 }
 
-export async function getCompetitiveSeasonStatus(database: Pick<Database, "withPool">): Promise<SeasonStatus> {
-  const result = await database.withPool((pool) => pool.request().query(SEASON_STATUS_QUERY));
-  const rows: unknown[] = Array.isArray(result.recordset) ? result.recordset : [];
-  const row = (rows[0] as Record<string, unknown> | undefined) ?? {};
-  return { serverNowUtc: toIsoStringOrNull(row.ServerNowUtc) ?? new Date().toISOString(), season: mapSeasonRow(row) };
+export async function getCompetitiveSeasonStatus(db: Queries): Promise<SeasonStatus> {
+  const row = await db.row<SeasonStatusRecord>(SEASON_STATUS_QUERY);
+  return { serverNowUtc: toIsoStringOrNull(row?.ServerNowUtc) ?? new Date().toISOString(), season: mapSeasonRow(row) };
 }

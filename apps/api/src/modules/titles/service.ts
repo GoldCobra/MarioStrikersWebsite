@@ -36,10 +36,7 @@ export function countByTitle(grants: readonly TitleGrant[]): Record<string, numb
   return counts;
 }
 
-export async function runTitleSync(
-  database: Pick<Database, "withPool" | "withTransaction">,
-  options: TitleSyncOptions,
-): Promise<TitleSyncReport> {
+export async function runTitleSync(database: Database, options: TitleSyncOptions): Promise<TitleSyncReport> {
   const plan = planTitleAwards(await readTitleSources(database, { legacy: options.legacy }));
   const byTitle = countByTitle(plan.grants);
   const newTitles = plan.newTitles.map((title) => title.name);
@@ -63,7 +60,7 @@ export function isSyncDue(lastRun: Date | null, now: number, intervalMs: number)
 }
 
 export interface TitleSyncScheduleOptions {
-  readonly database: Pick<Database, "withPool" | "withTransaction">;
+  readonly database: Database;
   readonly log: Logger;
   /** Dropped when a run created titles, so new season titles show at once. */
   readonly catalog: Pick<TitleCatalog, "invalidate">;
