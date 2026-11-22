@@ -161,11 +161,18 @@ directly, without a build step. In live mode, MSSQL supplies rankings, players, 
 and competitive-season data. Discord supplies authentication, member names and
 community events. Wiimmfi availability is retrieved through FlareSolverr.
 
-Public leaderboard, player-list, club-list and season responses use a refresh
-cache that persists snapshots under `.cache/` in the API's working directory
-(`apps/api/.cache/` locally, `/app/.cache` in the container). Club logos are cached
-there too. These are runtime caches, not source data; production stores them
-on a named Docker volume. Account/profile responses use `no-store`. Season
+All SQL goes through one core ([ADR 0014](adr/0014-data-access-on-the-local-database.md)):
+statements are tagged templates whose values are parameters (`db/sql.ts`), run by
+one pool to the SQL Server container next to the API (`db/database.ts`: rows, a
+batch's result sets, transactions with an optional retry after a deadlock, every
+statement slower than 500 ms logged). Each module keeps its SQL in `repository.ts`.
+
+Public leaderboard, player-list, club-list and season responses come from a
+cache in memory that is refreshed in the background (`cache/public-data-cache.ts`)
+and read again at start. Club logos given as a link are cached under
+`.cache/club-logos` in the API's working directory (`apps/api/.cache/` locally,
+`/app/.cache` in the container, a named Docker volume in production); they are
+runtime data, not source data. Account/profile responses use `no-store`. Season
 responses also use `no-store`: season data remains cached internally, but
 `server_now_utc` is generated at response time for countdown synchronization.
 
@@ -219,7 +226,7 @@ Discord failure included, is no. `/api/admin/*` routes sit in one plugin whose
 first hook is the guard and answer a refusal with the standard 404 (`sendNotFound`,
 no rate limit headers); `/internal/admin-gate` answers nginx (204/401) and is not
 reachable from outside. The audit log is `dbo.WebsiteAdminAudit`
-(`audit-repository.ts`, `npm run ops:admin-audit`). Off unless `ADMIN_ENABLED` and
+(`audit-repository.ts`). Off unless `ADMIN_ENABLED` and
 complete (`.env.example`). The Admin Panel moderates clubs (club management B2): it lists every
 club with its backend id, and renames one (name and/or tag, the shared rules, unique), removes its
 logo or deletes it, through the club service (`management.ts` `admin*`, rules in `rules.ts`) while
@@ -263,12 +270,9 @@ records, RECHARGED DEV in #bfff72) to their owners (player and Discord id), and 
 highest legacy rank held when the
 competitive ranks began (no game). Unclear data awards nothing and is reported. The
 API runs the rules once a day (`TITLE_SYNC_INTERVAL_MS`; the last run is logged in
-`dbo.CommandLog`); `npm run ops:player-titles` creates the tables and adds missing
-titles of `catalog.ts`, `npm run ops:title-sync` awards on demand (a dry run
-without `-- --apply`); `npm run ops:title-order` and `npm run ops:title-games`
-brought the changes of 2026-10-02 into existing rows (backups
-`dbo.*_Backup_20261002` and `_20261002b`), `ops:title-order` also the developer
-titles' place of 2026-10-20 (`_20261020`); `npm run ops:title-test-unlocks` grants
+`dbo.CommandLog`); `npm run ops:player-titles` adds the titles of `catalog.ts` the
+database lacks, `npm run ops:title-sync` awards on demand (a dry run without
+`-- --apply`); `npm run ops:title-test-unlocks` grants
 or revokes a player's test unlocks. A new title of a known kind is one row in
 `dbo.PlayerTitle` (or a line in `catalog.ts` plus `ops:player-titles`).
 
@@ -277,8 +281,8 @@ or revokes a player's test unlocks. A new title of a known kind is one row in
 Robotic Nightmare performs the effects (DMs, nickname tags, #club-transfers posts)
 from the outbox `dbo.ClubEvent`. `rules.ts` holds every rule once, as pure decisions:
 a change reads the clubs it touches under locks (`management-repository.ts`; club rows
-first, then roster, invitations, player state, rejoin blocks; a deadlock repeats it
-once), the decision answers with a plan (the writes and the bot's events, `events.ts`)
+first, then roster, invitations, player state, rejoin blocks; a deadlock runs it
+again, at most twice), the decision answers with a plan (the writes and the bot's events, `events.ts`)
 or a refusal, and the store applies the plan in the same transaction.
 `management.ts` is the service behind `/api/my-club`: the member from the session, the
 mode of `dbo.ClubSystemState` (`off`, `admins` = confirmed admins only, `on`; cached
@@ -300,13 +304,11 @@ with the shared `CLUB_INTERNAL_SECRET` (404 otherwise; nginx never proxies `/int
 sets 0): invitations expire, the new-club counter marks clubs alone 30 days after
 creation inactive and deletes them 14 days later, and from go-live members off the
 server are removed after 14 days and club activity follows the members' rated matches.
-The public list shows a club the counter marked inactive as inactive. `schema.ts` holds the additive schema: `dbo.Club`
-gains `PublicId` (the backend club id) and the timestamps of the new-club counter,
-`dbo.ClubRoster` the join date and the absence stamp, and new tables hold the mode
-(`dbo.ClubSystemState`), invitations, per-player state, rejoin blocks, the outbox and
-uploaded logos. `npm run ops:club-schema` applies it in steps (`-- --backup`, a dry
-run, `-- --apply`, `-- --drop-backups`); `npm run ops:club-cleanup -- --ids=…`
-deletes listed clubs without members (a dry run without `-- --apply`). The game's
+The public list shows a club the counter marked inactive as inactive. The schema
+(added 2026-11-19): `dbo.Club` has `PublicId` (the backend club id) and the
+timestamps of the new-club counter, `dbo.ClubRoster` the join date and the absence
+stamp, and own tables hold the mode (`dbo.ClubSystemState`), invitations, per-player
+state, rejoin blocks, the outbox (`dbo.ClubEvent`) and uploaded logos. The game's
 value lists and the name, tag and id rules live in `packages/shared/src/clubs.ts`.
 The page `/my-club` (`apps/web/src/features/my-club/`) shows the member's club on the club
 popup's card (`features/clubs/club-profile-view.ts`, shared with the popup) and edits its settings
@@ -316,7 +318,7 @@ invitations, creating a club and the open clubs.
 
 Responses use snake_case keys throughout; code inside the API uses camelCase
 and converts at the route (the season route shows how, since its cached
-snapshot keeps the service's shape).
+data keeps the service's shape).
 
 Local development uses synthetic fixtures through the same public route
 shapes; see [development](development.md) for simulated versus live behavior.
@@ -333,10 +335,10 @@ Everything lives under `apps/api/src/`:
 | `data-source.ts` | The `DataSource` interface the routes read from, and its live implementation |
 | `fixtures/` | The invented `DataSource` of local development and tests |
 | `modules/<domain>/` | `routes.ts`, `service.ts`, `repository.ts` (SQL), `mappers.ts` and their tests |
-| `cache/`, `db/`, `http/`, `integrations/`, `lib/` | Public data cache, MSSQL pool, reply helpers and errors, Discord REST, small utilities |
-| `ops/` | One-off maintenance commands (`npm run ops:*` in `apps/api`) |
+| `cache/`, `db/`, `http/`, `integrations/`, `lib/` | Public data cache, SQL statements and the database (ADR 0014), reply helpers and errors, Discord REST, small utilities |
+| `ops/` | Maintenance commands (`npm run ops:*` in `apps/api`): `check-db`, `player-titles`, `title-sync`, `title-test-unlocks` |
 
-A new endpoint goes into the module of its domain: SQL in `repository.ts`,
+A new endpoint goes into the module of its domain: SQL in `repository.ts` (`sql` templates),
 shaping in `service.ts`/`mappers.ts`, the HTTP contract in `routes.ts`, which
 `app.ts` registers. Data the routes need is added to `DataSource` and to both
 implementations, so fixtures keep covering it.

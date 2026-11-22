@@ -19,7 +19,7 @@ if (!DEV_HOSTS.has(host)) throw new Error("Invalid DEV_HOST.");
 const port = process.env.PORT === undefined ? 8788 : Number(process.env.PORT);
 if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error("Invalid PORT.");
 
-const config = loadConfig({ ...process.env, PORT: String(port) }, { isolated: true });
+const config = loadConfig({ ...process.env, PORT: String(port) });
 const log = createLogger(config);
 try {
   const started = await startServer({

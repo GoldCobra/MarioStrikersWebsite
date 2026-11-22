@@ -1,14 +1,14 @@
 // SQL of club management (docs/adr/0012): the state a change touches, read under locks, the plan of a decision
 // (rules.ts) applied in the same transaction, and what My Club and the lifecycle job read. Locks are taken in one
-// order — club rows, roster, invitations, player state, rejoin blocks — and every change starts with the club rows,
-// so two changes of one club wait for each other instead of racing; a deadlock retries the change once. The
-// indexes (one club per player, unique name, tag and club id, one open invitation per club and player) stay the
-// last guard.
+// order — the mode row, club rows, roster, invitations, player state, rejoin blocks — before anything is written, so
+// two changes of one club wait for each other instead of racing; a deadlock, or a scope that moved between the two
+// reads, repeats the change (twice at most). The indexes (one club per player, unique name, tag and club id, one
+// open invitation per club and player) stay the last guard.
 
 import { normalizeText } from "@ms/shared/text";
 import type { ClubSettingsValue } from "@ms/shared/clubs";
-import type { Database, Queryable } from "../../db/database.ts";
-import { mssql } from "../../db/database.ts";
+import type { Database, Queries, Row } from "../../db/database.ts";
+import { sql, t, type Statement } from "../../db/sql.ts";
 import { normalizeDiscordId } from "../../lib/discord-id.ts";
 import { isDeadlock } from "../../lib/sql-errors.ts";
 import {
@@ -24,19 +24,126 @@ import {
   type PlanStep,
   type PlayerState,
 } from "./rules.ts";
-import { CLUB_ATTACHMENT_DELETES } from "./schema.ts";
 
-type Row = Record<string, unknown>;
+/** The rows attached to a club, deleted with it (C2); the club row itself goes last. */
+const CLUB_ATTACHMENT_DELETES: readonly { readonly table: string; readonly column: string }[] = [
+  { table: "_PlayerLobby", column: "Club" },
+  { table: "ClubInvitation", column: "ClubId" },
+  { table: "ClubJoinBlock", column: "ClubId" },
+  { table: "ClubLogo", column: "ClubId" },
+];
 
 // ---------------------------------------------------------------------------------------------------
-// Rows
+// Rows: NOT NULL where the schema says so (the newer club tables' columns are taken as nullable), legacy values
+// normalized by the mappers below. The records of a batch's result sets extend Row, the type sets() returns.
 
-function recordsets(result: { recordsets?: unknown }): Row[][] {
-  return Array.isArray(result.recordsets) ? (result.recordsets as Row[][]) : [];
+/** dbo.Club as CLUB_COLUMNS reads it, for toClubState. */
+export interface ClubStateRecord extends Row {
+  ID: number;
+  PublicId: string;
+  ClubName: string;
+  ClanTag: string;
+  Owner: string;
+  IsOpen: boolean;
+  Region: string | null;
+  Region2: string | null;
+  Region3: string | null;
+  ClubCode: string | null;
+  ClubCode2: string | null;
+  ClubCode3: string | null;
+  Color1: string;
+  Color2: string;
+  Stadium: string | null;
+  DiscordServer: string | null;
+  Logo: string | null;
+  Activity: Date | null;
+  CreatedAtUtc: Date | null;
+  EstablishedAtUtc: Date | null;
+  StreakSinceUtc: Date | null;
+  InactiveSinceUtc: Date | null;
+  InactiveWarnedAtUtc: Date | null;
+  DeletionWarnedAtUtc: Date | null;
 }
 
-function rowsOf(result: { recordset?: unknown }): Row[] {
-  return Array.isArray(result.recordset) ? (result.recordset as Row[]) : [];
+export type SettingsRecord = Pick<
+  ClubStateRecord,
+  | "IsOpen"
+  | "Region"
+  | "Region2"
+  | "Region3"
+  | "ClubCode"
+  | "ClubCode2"
+  | "ClubCode3"
+  | "Color1"
+  | "Color2"
+  | "Stadium"
+  | "DiscordServer"
+>;
+
+/** A roster row with its player (MEMBER_COLUMNS). */
+export interface MemberRecord extends Row {
+  Player: number;
+  Club: number;
+  IsOfficer: boolean;
+  JoinedAtUtc: Date | null;
+  AbsentSinceUtc: Date | null;
+  AbsenceExempt: boolean;
+  DiscordID: string;
+  Name: string;
+  Country: string | null;
+}
+
+/** An invitation (INVITATION_COLUMNS). */
+export interface InvitationRecord extends Row {
+  Id: number;
+  ClubId: number | null;
+  PlayerId: number | null;
+  InvitedByPlayerId: number | null;
+  Status: string | null;
+  CreatedAtUtc: Date | null;
+  ExpiresAtUtc: Date | null;
+}
+
+/** A player with their dbo.ClubPlayerState (LEFT JOIN), for a PlayerState. */
+export interface PlayerStateRecord extends Row {
+  ID: number;
+  DiscordID: string;
+  Name: string;
+  Country: string | null;
+  LastClubCreatedAtUtc: Date | null;
+  LastClubExitAtUtc: Date | null;
+}
+
+export interface JoinBlockRecord extends Row {
+  ClubId: number | null;
+  PlayerId: number | null;
+  BlockedUntilUtc: Date | null;
+}
+
+export interface ModeRecord {
+  Mode: string | null;
+  GoLiveAtUtc: Date | null;
+}
+
+/** The clubs of the actor and of the invitation; NULL when there is none. */
+export interface ScopeRecord {
+  actor_club: number | null;
+  invitation_club: number | null;
+}
+
+/** CONVERT(INT, SCOPE_IDENTITY()) after an insert. */
+export interface IdRecord {
+  id: number | null;
+}
+
+export interface AdminClubRecord {
+  club_id: number;
+  public_id: string;
+  name: string;
+  tag: string;
+  logo: string | null;
+  logo_hash: string | null;
+  members: number;
 }
 
 function ms(value: unknown): number | null {
@@ -48,17 +155,19 @@ function ms(value: unknown): number | null {
 const flag = (value: unknown): boolean => value === true || value === 1;
 const compact = (values: readonly unknown[]): string[] => values.map(normalizeText).filter(Boolean);
 
-export const CLUB_COLUMNS_SQL = [
-  "c.ID, c.PublicId, c.ClubName, c.ClanTag, c.Owner, c.IsOpen, c.Region, c.Region2, c.Region3,",
-  "c.ClubCode, c.ClubCode2, c.ClubCode3, c.Color1, c.Color2, c.Stadium, c.DiscordServer, c.Logo, c.Activity,",
-  "c.CreatedAtUtc, c.EstablishedAtUtc, c.StreakSinceUtc, c.InactiveSinceUtc, c.InactiveWarnedAtUtc,",
-  "c.DeletionWarnedAtUtc",
-].join(" ");
+const CLUB_COLUMNS = sql`
+  c.ID, c.PublicId, c.ClubName, c.ClanTag, c.Owner, c.IsOpen, c.Region, c.Region2, c.Region3, c.ClubCode,
+  c.ClubCode2, c.ClubCode3, c.Color1, c.Color2, c.Stadium, c.DiscordServer, c.Logo, c.Activity, c.CreatedAtUtc,
+  c.EstablishedAtUtc, c.StreakSinceUtc, c.InactiveSinceUtc, c.InactiveWarnedAtUtc, c.DeletionWarnedAtUtc`;
 
-const MEMBER_COLUMNS_SQL =
-  "cr.Player, cr.Club, cr.IsOfficer, cr.JoinedAtUtc, cr.AbsentSinceUtc, cr.AbsenceExempt, p.DiscordID, p.Name, p.Country";
+const MEMBER_COLUMNS = sql`
+  cr.Player, cr.Club, cr.IsOfficer, cr.JoinedAtUtc, cr.AbsentSinceUtc, cr.AbsenceExempt, p.DiscordID, p.Name,
+  p.Country`;
 
-export function toSettings(row: Row): ClubSettingsValue {
+const INVITATION_COLUMNS = sql`
+  i.Id, i.ClubId, i.PlayerId, i.InvitedByPlayerId, i.Status, i.CreatedAtUtc, i.ExpiresAtUtc`;
+
+export function toSettings(row: SettingsRecord): ClubSettingsValue {
   return {
     isOpen: flag(row.IsOpen),
     regions: compact([row.Region, row.Region2, row.Region3]),
@@ -70,9 +179,9 @@ export function toSettings(row: Row): ClubSettingsValue {
   };
 }
 
-export function toMember(row: Row): ClubMember {
+export function toMember(row: MemberRecord): ClubMember {
   return {
-    playerId: Number(row.Player),
+    playerId: row.Player,
     discordId: normalizeDiscordId(row.DiscordID) || normalizeText(row.DiscordID),
     name: normalizeText(row.Name) || "Unknown",
     country: normalizeText(row.Country).toLowerCase(),
@@ -83,9 +192,9 @@ export function toMember(row: Row): ClubMember {
   };
 }
 
-export function toClubState(row: Row, members: readonly ClubMember[]): ClubState {
+export function toClubState(row: ClubStateRecord, members: readonly ClubMember[]): ClubState {
   return {
-    clubId: Number(row.ID),
+    clubId: row.ID,
     publicId: normalizeText(row.PublicId),
     name: normalizeText(row.ClubName),
     tag: normalizeText(row.ClanTag),
@@ -102,9 +211,9 @@ export function toClubState(row: Row, members: readonly ClubMember[]): ClubState
   };
 }
 
-function toInvitation(row: Row): InvitationState {
+function toInvitation(row: InvitationRecord): InvitationState {
   return {
-    id: Number(row.Id),
+    id: row.Id,
     clubId: Number(row.ClubId),
     playerId: Number(row.PlayerId),
     invitedByPlayerId: Number(row.InvitedByPlayerId),
@@ -142,84 +251,89 @@ export interface ChangeExtras {
 
 class StaleScope extends Error {}
 
-const idList = (ids: readonly number[]): string =>
-  ids.length ? ids.map((id) => String(Math.trunc(id))).join(", ") : "-1";
-
-export const SCOPE_QUERY = [
-  "SELECT (SELECT TOP 1 Club FROM dbo.ClubRoster WHERE Player = @actor) AS actor_club,",
-  "  (SELECT TOP 1 ClubId FROM dbo.ClubInvitation WHERE Id = @invitation) AS invitation_club;",
-].join(" ");
+/** Ids as an IN list; for none, -1 stands in (it matches no row, and `IN ()` is no SQL). */
+const idList = (ids: readonly number[]): Statement => sql.list((ids.length ? ids : [-1]).map((id) => t.int(id)));
 
 /** The locking read: the mode row, clubs, roster, invitations, player states and rejoin blocks, in this order. */
-export function buildLockedStateQuery(clubIds: readonly number[]): string {
+export function buildLockedStateQuery(scope: ChangeScope, clubIds: readonly number[], now: number): Statement {
   const clubs = idList(clubIds);
-  return [
-    "SET XACT_ABORT ON;",
-    "SELECT TOP 1 Mode FROM dbo.ClubSystemState WITH (HOLDLOCK) WHERE Id = 1;",
-    `SELECT ${CLUB_COLUMNS_SQL} FROM dbo.Club c WITH (UPDLOCK, HOLDLOCK) WHERE c.ID IN (${clubs}) ORDER BY c.ID;`,
-    `SELECT ${MEMBER_COLUMNS_SQL} FROM dbo.ClubRoster cr WITH (UPDLOCK, HOLDLOCK)`,
-    `INNER JOIN dbo.Player p ON p.ID = cr.Player WHERE cr.Club IN (${clubs}) OR cr.Player IN (@actor, @target);`,
-    "SELECT i.Id, i.ClubId, i.PlayerId, i.InvitedByPlayerId, i.Status, i.CreatedAtUtc, i.ExpiresAtUtc",
-    "FROM dbo.ClubInvitation i WITH (UPDLOCK, HOLDLOCK)",
-    `WHERE (i.ClubId IN (${clubs}) AND (i.Status = 'open' OR i.CreatedAtUtc >= @since))`,
-    "  OR (i.PlayerId IN (@actor, @target) AND i.Status = 'open');",
-    "SELECT p.ID, p.DiscordID, p.Name, p.Country, s.LastClubCreatedAtUtc, s.LastClubExitAtUtc",
-    "FROM dbo.Player p LEFT JOIN dbo.ClubPlayerState s WITH (UPDLOCK, HOLDLOCK) ON s.PlayerId = p.ID",
-    "WHERE p.ID IN (@actor, @target);",
-    "SELECT b.ClubId, b.PlayerId, b.BlockedUntilUtc FROM dbo.ClubJoinBlock b WITH (UPDLOCK, HOLDLOCK)",
-    "WHERE b.PlayerId IN (@actor, @target);",
-  ].join(" ");
+  return sql`
+    DECLARE @actor INT = ${t.int(scope.actorPlayerId)};
+    DECLARE @target INT = ${t.int(scope.targetPlayerId ?? -1)};
+    SELECT TOP 1 Mode FROM dbo.ClubSystemState WITH (HOLDLOCK) WHERE Id = 1;
+    SELECT ${CLUB_COLUMNS}
+    FROM dbo.Club c WITH (UPDLOCK, HOLDLOCK)
+    WHERE c.ID IN (${clubs})
+    ORDER BY c.ID;
+    SELECT ${MEMBER_COLUMNS}
+    FROM dbo.ClubRoster cr WITH (UPDLOCK, HOLDLOCK)
+    INNER JOIN dbo.Player p ON p.ID = cr.Player
+    WHERE cr.Club IN (${clubs}) OR cr.Player IN (@actor, @target);
+    SELECT ${INVITATION_COLUMNS}
+    FROM dbo.ClubInvitation i WITH (UPDLOCK, HOLDLOCK)
+    WHERE (i.ClubId IN (${clubs}) AND (i.Status = 'open' OR i.CreatedAtUtc >= ${t.dateTime2(now - 14 * DAY_MS, 0)}))
+      OR (i.PlayerId IN (@actor, @target) AND i.Status = 'open');
+    SELECT p.ID, p.DiscordID, p.Name, p.Country, s.LastClubCreatedAtUtc, s.LastClubExitAtUtc
+    FROM dbo.Player p
+    LEFT JOIN dbo.ClubPlayerState s WITH (UPDLOCK, HOLDLOCK) ON s.PlayerId = p.ID
+    WHERE p.ID IN (@actor, @target);
+    SELECT b.ClubId, b.PlayerId, b.BlockedUntilUtc
+    FROM dbo.ClubJoinBlock b WITH (UPDLOCK, HOLDLOCK)
+    WHERE b.PlayerId IN (@actor, @target);
+  `;
 }
 
-export const NAMES_QUERY = "SELECT ClubName, ClanTag FROM dbo.Club;";
-
 async function readLockedState(
-  tx: Queryable,
+  tx: Queries,
   scope: ChangeScope,
   now: number,
   keyOf: (value: string) => string,
 ): Promise<{ state: LockedState; extras: ChangeExtras }> {
-  const target = scope.targetPlayerId ?? -1;
-  const lookup = tx.request();
-  lookup.input("actor", mssql.Int, scope.actorPlayerId);
-  lookup.input("invitation", mssql.Int, scope.invitationId ?? -1);
-  const resolved = rowsOf(await lookup.query(SCOPE_QUERY))[0] ?? {};
+  // Unlocked: which clubs the locking read takes.
+  const resolved = await tx.row<ScopeRecord>(sql`
+    SELECT
+      (SELECT TOP 1 Club FROM dbo.ClubRoster WHERE Player = ${t.int(scope.actorPlayerId)}) AS actor_club,
+      (SELECT TOP 1 ClubId FROM dbo.ClubInvitation WHERE Id = ${t.int(scope.invitationId ?? -1)}) AS invitation_club;
+  `);
   const clubIds = [
     ...new Set(
-      [resolved.actor_club, resolved.invitation_club, scope.clubId]
+      [resolved?.actor_club, resolved?.invitation_club, scope.clubId]
         .map((value) => Number(value))
         .filter((value) => Number.isInteger(value) && value > 0),
     ),
   ].sort((a, b) => a - b);
 
-  const request = tx.request();
-  request.multiple = true;
-  request.input("actor", mssql.Int, scope.actorPlayerId);
-  request.input("target", mssql.Int, target);
-  request.input("since", mssql.DateTime2(0), new Date(now - 14 * DAY_MS));
-  const [modeRows = [], clubRows = [], memberRows = [], invitationRows = [], playerRows = [], blockRows = []] =
-    recordsets(await request.query(buildLockedStateQuery(clubIds)));
+  const [modeRows, clubRows, memberRows, invitationRows, playerRows, blockRows] = (await tx.sets(
+    buildLockedStateQuery(scope, clubIds, now),
+  )) as [
+    Pick<ModeRecord, "Mode">[],
+    ClubStateRecord[],
+    MemberRecord[],
+    InvitationRecord[],
+    PlayerStateRecord[],
+    JoinBlockRecord[],
+  ];
   const storedMode = normalizeText(modeRows[0]?.Mode);
   const mode: ClubSystemRow["mode"] = storedMode === "admins" || storedMode === "on" ? storedMode : "off";
 
   const members = memberRows.map((row) => ({ row, member: toMember(row) }));
   const clubs = new Map<number, ClubState>();
   for (const row of clubRows) {
-    const clubId = Number(row.ID);
+    const clubId = row.ID;
     clubs.set(
       clubId,
       toClubState(
         row,
-        members.filter((entry) => Number(entry.row.Club) === clubId).map((entry) => entry.member),
+        members.filter((entry) => entry.row.Club === clubId).map((entry) => entry.member),
       ),
     );
   }
   const clubOf = (playerId: number): number | null => {
     const entry = members.find((candidate) => candidate.member.playerId === playerId);
-    return entry ? Number(entry.row.Club) : null;
+    return entry ? entry.row.Club : null;
   };
   const player = (playerId: number): PlayerState | null => {
-    const row = playerRows.find((candidate) => Number(candidate.ID) === playerId);
+    const row = playerRows.find((candidate) => candidate.ID === playerId);
     if (!row) return null;
     return {
       playerId,
@@ -238,7 +352,9 @@ async function readLockedState(
 
   let extras: ChangeExtras = { names: new Set(), tags: new Set(), mode };
   if (scope.names) {
-    const rows = rowsOf(await tx.request().query(NAMES_QUERY));
+    const rows = await tx.rows<Pick<ClubStateRecord, "ClubName" | "ClanTag">>(
+      sql`SELECT ClubName, ClanTag FROM dbo.Club;`,
+    );
     extras = {
       names: new Set(rows.map((row) => keyOf(normalizeText(row.ClubName)))),
       tags: new Set(rows.map((row) => keyOf(normalizeText(row.ClanTag)))),
@@ -271,134 +387,58 @@ export interface Created {
   readonly invitationId?: number;
 }
 
-const date = (value: number | null | undefined): Date | null =>
-  value === null || value === undefined ? null : new Date(value);
-
-function settingsInputs(request: mssql.Request, settings: ClubSettingsValue): void {
+/** The settings as dbo.Club's columns, each value in its column's type. */
+function settingsColumns(settings: ClubSettingsValue) {
   const [region1 = "", region2 = null, region3 = null] = settings.regions;
   const [code1 = null, code2 = null, code3 = null] = settings.clubCodes;
-  request.input("isOpen", mssql.Bit, settings.isOpen);
-  request.input("region1", mssql.NVarChar(10), region1);
-  request.input("region2", mssql.NVarChar(10), region2);
-  request.input("region3", mssql.NVarChar(10), region3);
-  request.input("code1", mssql.NVarChar(10), code1);
-  request.input("code2", mssql.NVarChar(7), code2);
-  request.input("code3", mssql.NVarChar(7), code3);
-  request.input("color1", mssql.NVarChar(10), settings.firstUniform);
-  request.input("color2", mssql.NVarChar(10), settings.secondUniform);
-  request.input("stadium", mssql.NVarChar(50), settings.stadium || null);
-  request.input("discord", mssql.NVarChar(100), settings.discordUrl || null);
+  return {
+    IsOpen: t.bit(settings.isOpen),
+    Region: t.nvarchar(region1, 10),
+    Region2: t.nvarchar(region2, 10),
+    Region3: t.nvarchar(region3, 10),
+    ClubCode: t.nvarchar(code1, 10),
+    ClubCode2: t.nvarchar(code2, 7),
+    ClubCode3: t.nvarchar(code3, 7),
+    Color1: t.nvarchar(settings.firstUniform, 10),
+    Color2: t.nvarchar(settings.secondUniform, 10),
+    Stadium: t.nvarchar(settings.stadium || null, 50),
+    DiscordServer: t.nvarchar(settings.discordUrl || null, 100),
+  };
 }
 
-const SETTINGS_ASSIGNMENTS = [
-  "IsOpen = @isOpen",
-  "Region = @region1",
-  "Region2 = @region2",
-  "Region3 = @region3",
-  "ClubCode = @code1",
-  "ClubCode2 = @code2",
-  "ClubCode3 = @code3",
-  "Color1 = @color1",
-  "Color2 = @color2",
-  "Stadium = @stadium",
-  "DiscordServer = @discord",
-];
-
-/** The SET list of an update; adds its parameters to `request`. */
-export function buildClubUpdate(set: ClubUpdate, request: mssql.Request): string[] {
-  const assignments: string[] = [];
+/** The SET list of a club update: exactly the columns `set` names; null when it names none. */
+export function buildClubUpdate(set: ClubUpdate): Statement | null {
+  const assignments: Statement[] = [];
   const time = (column: string, key: keyof ClubUpdate, value: number | null | undefined): void => {
-    if (!(key in set)) return;
-    request.input(key, mssql.DateTime2(0), date(value));
-    assignments.push(`${column} = @${key}`);
+    if (key in set) assignments.push(sql`${sql.raw(column)} = ${t.dateTime2(value ?? null, 0)}`);
   };
-  if (set.name !== undefined) {
-    request.input("name", mssql.NVarChar(50), set.name);
-    assignments.push("ClubName = @name");
-  }
-  if (set.tag !== undefined) {
-    request.input("tag", mssql.NVarChar(5), set.tag);
-    assignments.push("ClanTag = @tag");
-  }
-  if (set.ownerDiscordId !== undefined) {
-    request.input("owner", mssql.NVarChar(25), set.ownerDiscordId);
-    assignments.push("Owner = @owner");
-  }
+  if (set.name !== undefined) assignments.push(sql`ClubName = ${t.nvarchar(set.name, 50)}`);
+  if (set.tag !== undefined) assignments.push(sql`ClanTag = ${t.nvarchar(set.tag, 5)}`);
+  if (set.ownerDiscordId !== undefined) assignments.push(sql`Owner = ${t.nvarchar(set.ownerDiscordId, 25)}`);
   if (set.settings) {
-    settingsInputs(request, set.settings);
-    assignments.push(...SETTINGS_ASSIGNMENTS);
+    for (const [column, value] of Object.entries(settingsColumns(set.settings))) {
+      assignments.push(sql`${sql.raw(column)} = ${value}`);
+    }
   }
-  if ("logo" in set) {
-    request.input("logo", mssql.NVarChar(4000), set.logo ?? null);
-    assignments.push("Logo = @logo");
-  }
+  if ("logo" in set) assignments.push(sql`Logo = ${t.nvarchar(set.logo ?? null, 4000)}`);
   time("Activity", "activity", set.activity);
   time("EstablishedAtUtc", "establishedAt", set.establishedAt);
   time("StreakSinceUtc", "streakSince", set.streakSince);
   time("InactiveSinceUtc", "inactiveSince", set.inactiveSince);
   time("InactiveWarnedAtUtc", "inactiveWarnedAt", set.inactiveWarnedAt);
   time("DeletionWarnedAtUtc", "deletionWarnedAt", set.deletionWarnedAt);
-  return assignments;
+  return assignments.length ? sql.join(assignments) : null;
 }
 
-export const CREATE_CLUB_SQL = [
-  "INSERT INTO dbo.Club (PublicId, ClubName, ClanTag, Owner, IsOpen, Region, Region2, Region3, ClubCode, ClubCode2,",
-  "  ClubCode3, Color1, Color2, Stadium, DiscordServer, Activity, CreatedAtUtc, EstablishedAtUtc)",
-  "VALUES (@publicId, @name, @tag, @owner, @isOpen, @region1, @region2, @region3, @code1, @code2, @code3, @color1,",
-  "  @color2, @stadium, @discord, @activity, @createdAt, NULL);",
-  "SELECT CONVERT(INT, SCOPE_IDENTITY()) AS id;",
-].join(" ");
+/** Deletes the rows attached to the club the batch's @club names. */
+const DELETE_CLUB_ATTACHMENTS = sql.join(
+  CLUB_ATTACHMENT_DELETES.map(
+    ({ table, column }) => sql`DELETE FROM dbo.${sql.raw(table)} WHERE ${sql.raw(column)} = @club;`,
+  ),
+  " ",
+);
 
-export const ADD_MEMBER_SQL = [
-  "INSERT INTO dbo.ClubRoster (Player, Club, IsOfficer, Rank, JoinedAtUtc)",
-  "SELECT @player, @club, @officer, ISNULL(MAX(Rank), -1) + 1, @now FROM dbo.ClubRoster WHERE Club = @club;",
-].join(" ");
-
-export const INVITE_SQL = [
-  "INSERT INTO dbo.ClubInvitation (ClubId, PlayerId, InvitedByPlayerId, Status, CreatedAtUtc, ExpiresAtUtc)",
-  "VALUES (@club, @player, @by, 'open', @now, @expires);",
-  "SELECT CONVERT(INT, SCOPE_IDENTITY()) AS id;",
-].join(" ");
-
-export const PLAYER_STATE_SQL = [
-  "UPDATE dbo.ClubPlayerState SET LastClubCreatedAtUtc = ISNULL(@created, LastClubCreatedAtUtc),",
-  "  LastClubExitAtUtc = ISNULL(@exit, LastClubExitAtUtc) WHERE PlayerId = @player;",
-  "IF @@ROWCOUNT = 0",
-  "  INSERT INTO dbo.ClubPlayerState (PlayerId, LastClubCreatedAtUtc, LastClubExitAtUtc) VALUES (@player, @created, @exit);",
-].join(" ");
-
-export const JOIN_BLOCK_SQL = [
-  "UPDATE dbo.ClubJoinBlock SET BlockedUntilUtc = @until WHERE ClubId = @club AND PlayerId = @player;",
-  "IF @@ROWCOUNT = 0 INSERT INTO dbo.ClubJoinBlock (ClubId, PlayerId, BlockedUntilUtc) VALUES (@club, @player, @until);",
-].join(" ");
-
-export const EVENT_SQL = [
-  "INSERT INTO dbo.ClubEvent (Type, ClubId, ClubPublicId, ClubName, ClubTag, ActorPlayerId, TargetPlayerId, Payload,",
-  "  CreatedAtUtc) VALUES (@type, @club, @publicId, @name, @tag, @actor, @target, @payload, @now);",
-].join(" ");
-
-export const LOG_SQL = "INSERT INTO dbo.CommandLog (Command, Parameters) VALUES (@command, @parameters);";
-
-export const SET_LOGO_SQL = [
-  "UPDATE dbo.ClubLogo SET ContentType = @type, Hash = @hash, Width = @width, Height = @height, Data = @data,",
-  "  UpdatedAtUtc = @now WHERE ClubId = @club;",
-  "IF @@ROWCOUNT = 0",
-  "  INSERT INTO dbo.ClubLogo (ClubId, ContentType, Hash, Width, Height, Data, UpdatedAtUtc)",
-  "  VALUES (@club, @type, @hash, @width, @height, @data, @now);",
-].join(" ");
-
-/** Deletes a club with everything attached to it: lobby rows, invitations, rejoin blocks, logo, members. */
-export const DELETE_CLUB_SQL = [
-  ...CLUB_ATTACHMENT_DELETES.map(({ table, column }) => `DELETE FROM dbo.${table} WHERE ${column} = @club;`),
-  "DELETE FROM dbo.ClubRoster WHERE Club = @club;",
-  "DELETE FROM dbo.Club WHERE ID = @club;",
-].join(" ");
-
-function affected(result: { readonly rowsAffected?: readonly number[] }): number[] {
-  return result.rowsAffected ? [...result.rowsAffected] : [];
-}
-
-async function applyPlan(tx: Queryable, plan: readonly PlanStep[], now: number): Promise<Created> {
+async function applyPlan(tx: Queries, plan: readonly PlanStep[], now: number): Promise<Created> {
   let clubId: number | undefined;
   let invitationId: number | undefined;
   const club = (ref: number | { readonly ref: string }): number => {
@@ -406,95 +446,112 @@ async function applyPlan(tx: Queryable, plan: readonly PlanStep[], now: number):
     if (clubId === undefined) throw new Error("The plan refers to a club it has not created.");
     return clubId;
   };
+  const at = t.dateTime2(now, 0);
   for (const step of plan) {
-    const request = tx.request();
-    request.input("now", mssql.DateTime2(0), new Date(now));
     switch (step.kind) {
       case "createClub": {
         const row = step.club;
-        request.input("publicId", mssql.Char(8), row.publicId);
-        request.input("name", mssql.NVarChar(50), row.name);
-        request.input("tag", mssql.NVarChar(5), row.tag);
-        request.input("owner", mssql.NVarChar(25), row.ownerDiscordId);
-        settingsInputs(request, row.settings);
-        request.input("activity", mssql.DateTime2(0), new Date(row.activity));
-        request.input("createdAt", mssql.DateTime2(0), new Date(row.createdAt));
-        clubId = Number(rowsOf(await request.query(CREATE_CLUB_SQL))[0]?.id);
+        const settings = settingsColumns(row.settings);
+        const created = await tx.row<IdRecord>(sql`
+          INSERT INTO dbo.Club (PublicId, ClubName, ClanTag, Owner, IsOpen, Region, Region2, Region3, ClubCode,
+            ClubCode2, ClubCode3, Color1, Color2, Stadium, DiscordServer, Activity, CreatedAtUtc, EstablishedAtUtc)
+          VALUES (${t.char(row.publicId, 8)}, ${t.nvarchar(row.name, 50)}, ${t.nvarchar(row.tag, 5)},
+            ${t.nvarchar(row.ownerDiscordId, 25)}, ${settings.IsOpen}, ${settings.Region}, ${settings.Region2},
+            ${settings.Region3}, ${settings.ClubCode}, ${settings.ClubCode2}, ${settings.ClubCode3}, ${settings.Color1},
+            ${settings.Color2}, ${settings.Stadium}, ${settings.DiscordServer}, ${t.dateTime2(row.activity, 0)},
+            ${t.dateTime2(row.createdAt, 0)}, NULL);
+          SELECT CONVERT(INT, SCOPE_IDENTITY()) AS id;
+        `);
+        clubId = Number(created?.id);
         if (!Number.isInteger(clubId) || clubId <= 0) throw new Error("The new club got no id.");
         break;
       }
       case "updateClub": {
-        const assignments = buildClubUpdate(step.set, request);
-        if (!assignments.length) break;
-        request.input("club", mssql.Int, step.clubId);
-        await request.query(`UPDATE dbo.Club SET ${assignments.join(", ")} WHERE ID = @club;`);
+        const assignments = buildClubUpdate(step.set);
+        if (!assignments) break;
+        await tx.execute(sql`UPDATE dbo.Club SET ${assignments} WHERE ID = ${t.int(step.clubId)};`);
         break;
       }
       case "deleteClub":
-        request.input("club", mssql.Int, step.clubId);
-        await request.query(DELETE_CLUB_SQL);
+        // Lobby rows, invitations, rejoin blocks, logo, members, the club.
+        await tx.execute(sql`
+          DECLARE @club INT = ${t.int(step.clubId)};
+          ${DELETE_CLUB_ATTACHMENTS}
+          DELETE FROM dbo.ClubRoster WHERE Club = @club;
+          DELETE FROM dbo.Club WHERE ID = @club;
+        `);
         break;
       case "addMember":
-        request.input("player", mssql.Int, step.playerId);
-        request.input("club", mssql.Int, club(step.clubId));
-        request.input("officer", mssql.Bit, step.isOfficer);
-        await request.query(ADD_MEMBER_SQL);
+        await tx.execute(sql`
+          DECLARE @club INT = ${t.int(club(step.clubId))};
+          INSERT INTO dbo.ClubRoster (Player, Club, IsOfficer, Rank, JoinedAtUtc)
+          SELECT ${t.int(step.playerId)}, @club, ${t.bit(step.isOfficer)}, ISNULL(MAX(Rank), -1) + 1, ${at}
+          FROM dbo.ClubRoster
+          WHERE Club = @club;
+        `);
         break;
       case "updateMember": {
-        const assignments: string[] = [];
-        if (step.set.isOfficer !== undefined) {
-          request.input("officer", mssql.Bit, step.set.isOfficer);
-          assignments.push("IsOfficer = @officer");
-        }
+        const assignments: Statement[] = [];
+        if (step.set.isOfficer !== undefined) assignments.push(sql`IsOfficer = ${t.bit(step.set.isOfficer)}`);
         if ("absentSince" in step.set) {
-          request.input("absent", mssql.DateTime2(0), date(step.set.absentSince));
-          assignments.push("AbsentSinceUtc = @absent");
+          assignments.push(sql`AbsentSinceUtc = ${t.dateTime2(step.set.absentSince ?? null, 0)}`);
         }
         if (step.set.absenceExempt !== undefined) {
-          request.input("exempt", mssql.Bit, step.set.absenceExempt);
-          assignments.push("AbsenceExempt = @exempt");
+          assignments.push(sql`AbsenceExempt = ${t.bit(step.set.absenceExempt)}`);
         }
         if (!assignments.length) break;
-        request.input("player", mssql.Int, step.playerId);
-        await request.query(`UPDATE dbo.ClubRoster SET ${assignments.join(", ")} WHERE Player = @player;`);
+        await tx.execute(
+          sql`UPDATE dbo.ClubRoster SET ${sql.join(assignments)} WHERE Player = ${t.int(step.playerId)};`,
+        );
         break;
       }
       case "removeMember":
-        request.input("player", mssql.Int, step.playerId);
-        await request.query("DELETE FROM dbo.ClubRoster WHERE Player = @player;");
+        await tx.execute(sql`DELETE FROM dbo.ClubRoster WHERE Player = ${t.int(step.playerId)};`);
         break;
       case "setPlayerState":
-        request.input("player", mssql.Int, step.playerId);
-        request.input("created", mssql.DateTime2(0), date(step.set.lastClubCreatedAt));
-        request.input("exit", mssql.DateTime2(0), date(step.set.lastClubExitAt));
-        await request.query(PLAYER_STATE_SQL);
+        await tx.execute(sql`
+          DECLARE @player INT = ${t.int(step.playerId)};
+          DECLARE @created DATETIME2(0) = ${t.dateTime2(step.set.lastClubCreatedAt ?? null, 0)};
+          DECLARE @exit DATETIME2(0) = ${t.dateTime2(step.set.lastClubExitAt ?? null, 0)};
+          UPDATE dbo.ClubPlayerState SET LastClubCreatedAtUtc = ISNULL(@created, LastClubCreatedAtUtc),
+            LastClubExitAtUtc = ISNULL(@exit, LastClubExitAtUtc)
+          WHERE PlayerId = @player;
+          IF @@ROWCOUNT = 0
+            INSERT INTO dbo.ClubPlayerState (PlayerId, LastClubCreatedAtUtc, LastClubExitAtUtc)
+            VALUES (@player, @created, @exit);
+        `);
         break;
       case "setJoinBlock":
-        request.input("club", mssql.Int, step.clubId);
-        request.input("player", mssql.Int, step.playerId);
-        request.input("until", mssql.DateTime2(0), new Date(step.until));
-        await request.query(JOIN_BLOCK_SQL);
+        await tx.execute(sql`
+          DECLARE @club INT = ${t.int(step.clubId)};
+          DECLARE @player INT = ${t.int(step.playerId)};
+          DECLARE @until DATETIME2(0) = ${t.dateTime2(step.until, 0)};
+          UPDATE dbo.ClubJoinBlock SET BlockedUntilUtc = @until WHERE ClubId = @club AND PlayerId = @player;
+          IF @@ROWCOUNT = 0
+            INSERT INTO dbo.ClubJoinBlock (ClubId, PlayerId, BlockedUntilUtc) VALUES (@club, @player, @until);
+        `);
         break;
       case "liftJoinBlock":
-        request.input("club", mssql.Int, step.clubId);
-        request.input("player", mssql.Int, step.playerId);
-        await request.query("DELETE FROM dbo.ClubJoinBlock WHERE ClubId = @club AND PlayerId = @player;");
+        await tx.execute(sql`
+          DELETE FROM dbo.ClubJoinBlock WHERE ClubId = ${t.int(step.clubId)} AND PlayerId = ${t.int(step.playerId)};
+        `);
         break;
-      case "invite":
-        request.input("club", mssql.Int, step.clubId);
-        request.input("player", mssql.Int, step.playerId);
-        request.input("by", mssql.Int, step.invitedByPlayerId);
-        request.input("expires", mssql.DateTime2(0), new Date(step.expiresAt));
-        invitationId = Number(rowsOf(await request.query(INVITE_SQL))[0]?.id);
+      case "invite": {
+        const created = await tx.row<IdRecord>(sql`
+          INSERT INTO dbo.ClubInvitation (ClubId, PlayerId, InvitedByPlayerId, Status, CreatedAtUtc, ExpiresAtUtc)
+          VALUES (${t.int(step.clubId)}, ${t.int(step.playerId)}, ${t.int(step.invitedByPlayerId)}, 'open', ${at},
+            ${t.dateTime2(step.expiresAt, 0)});
+          SELECT CONVERT(INT, SCOPE_IDENTITY()) AS id;
+        `);
+        invitationId = Number(created?.id);
         if (!Number.isInteger(invitationId) || invitationId <= 0) throw new Error("The new invitation got no id.");
         break;
+      }
       case "closeInvitations": {
-        request.input("status", mssql.VarChar(10), step.status);
-        const result = await request.query(
-          "UPDATE dbo.ClubInvitation SET Status = @status, ClosedAtUtc = @now " +
-            `WHERE Status = 'open' AND Id IN (${idList(step.ids)});`,
-        );
-        const [closed = 0] = affected(result);
+        const [closed = 0] = await tx.execute(sql`
+          UPDATE dbo.ClubInvitation SET Status = ${t.varchar(step.status, 10)}, ClosedAtUtc = ${at}
+          WHERE Status = 'open' AND Id IN (${idList(step.ids)});
+        `);
         if (closed !== step.ids.length)
           throw new Error(`Expected ${step.ids.length} open invitations, closed ${closed}.`);
         break;
@@ -510,34 +567,41 @@ async function applyPlan(tx: Queryable, plan: readonly PlanStep[], now: number):
               ? { ...event.payload.invitation, id: invitationId ?? null }
               : event.payload.invitation,
         };
-        request.input("type", mssql.VarChar(40), event.type);
-        request.input("club", mssql.Int, eventClubId);
-        request.input("publicId", mssql.Char(8), event.clubPublicId || null);
-        request.input("name", mssql.NVarChar(50), event.clubName || null);
-        request.input("tag", mssql.NVarChar(5), event.clubTag || null);
-        request.input("actor", mssql.Int, event.actorPlayerId);
-        request.input("target", mssql.Int, event.targetPlayerId);
-        request.input("payload", mssql.NVarChar(mssql.MAX), JSON.stringify(payload));
-        await request.query(EVENT_SQL);
+        await tx.execute(sql`
+          INSERT INTO dbo.ClubEvent (Type, ClubId, ClubPublicId, ClubName, ClubTag, ActorPlayerId, TargetPlayerId,
+            Payload, CreatedAtUtc)
+          VALUES (${t.varchar(event.type, 40)}, ${t.int(eventClubId)}, ${t.char(event.clubPublicId || null, 8)},
+            ${t.nvarchar(event.clubName || null, 50)}, ${t.nvarchar(event.clubTag || null, 5)},
+            ${t.int(event.actorPlayerId)}, ${t.int(event.targetPlayerId)}, ${t.nvarcharMax(JSON.stringify(payload))},
+            ${at});
+        `);
         break;
       }
       case "setLogo":
-        request.input("club", mssql.Int, step.clubId);
-        request.input("type", mssql.VarChar(20), step.logo.contentType);
-        request.input("hash", mssql.Char(64), step.logo.hash);
-        request.input("width", mssql.Int, step.logo.width);
-        request.input("height", mssql.Int, step.logo.height);
-        request.input("data", mssql.VarBinary(mssql.MAX), Buffer.from(step.logo.data));
-        await request.query(SET_LOGO_SQL);
+        await tx.execute(sql`
+          DECLARE @club INT = ${t.int(step.clubId)};
+          DECLARE @type VARCHAR(20) = ${t.varchar(step.logo.contentType, 20)};
+          DECLARE @hash CHAR(64) = ${t.char(step.logo.hash, 64)};
+          DECLARE @width INT = ${t.int(step.logo.width)};
+          DECLARE @height INT = ${t.int(step.logo.height)};
+          DECLARE @data VARBINARY(MAX) = ${t.varBinary(Buffer.from(step.logo.data))};
+          DECLARE @now DATETIME2(0) = ${at};
+          UPDATE dbo.ClubLogo SET ContentType = @type, Hash = @hash, Width = @width, Height = @height, Data = @data,
+            UpdatedAtUtc = @now
+          WHERE ClubId = @club;
+          IF @@ROWCOUNT = 0
+            INSERT INTO dbo.ClubLogo (ClubId, ContentType, Hash, Width, Height, Data, UpdatedAtUtc)
+            VALUES (@club, @type, @hash, @width, @height, @data, @now);
+        `);
         break;
       case "removeLogo":
-        request.input("club", mssql.Int, step.clubId);
-        await request.query("DELETE FROM dbo.ClubLogo WHERE ClubId = @club;");
+        await tx.execute(sql`DELETE FROM dbo.ClubLogo WHERE ClubId = ${t.int(step.clubId)};`);
         break;
       case "log":
-        request.input("command", mssql.NVarChar(100), step.command);
-        request.input("parameters", mssql.NVarChar(4000), JSON.stringify(step.parameters).slice(0, 4000));
-        await request.query(LOG_SQL);
+        await tx.execute(sql`
+          INSERT INTO dbo.CommandLog (Command, Parameters)
+          VALUES (${t.nvarchar(step.command, 100)}, ${t.nvarchar(JSON.stringify(step.parameters).slice(0, 4000), 4000)});
+        `);
         break;
     }
   }
@@ -595,7 +659,7 @@ export interface ClubStore {
   playerIdOf(discordId: string): Promise<number | null>;
   /**
    * One transaction: locks and reads what the change touches, lets `decide` answer, applies its plan. A deadlock or
-   * a scope that moved meanwhile repeats it once.
+   * a scope that moved meanwhile repeats it, twice at most.
    */
   change<T>(
     scope: ChangeScope,
@@ -635,76 +699,8 @@ export interface ClubStore {
   cleanUp(now: number): Promise<number>;
 }
 
-export const MODE_QUERY = "SELECT TOP 1 Mode, GoLiveAtUtc FROM dbo.ClubSystemState WHERE Id = 1;";
-
-export const MY_CLUB_QUERY = [
-  "DECLARE @club INT = (SELECT TOP 1 Club FROM dbo.ClubRoster WHERE Player = @player);",
-  "SELECT p.ID, p.DiscordID, p.Name, p.Country, s.LastClubCreatedAtUtc, s.LastClubExitAtUtc, @club AS Club",
-  "FROM dbo.Player p LEFT JOIN dbo.ClubPlayerState s ON s.PlayerId = p.ID WHERE p.ID = @player;",
-  `SELECT ${CLUB_COLUMNS_SQL}, l.Hash AS LogoHash FROM dbo.Club c LEFT JOIN dbo.ClubLogo l ON l.ClubId = c.ID`,
-  "WHERE c.ID = @club;",
-  `SELECT ${MEMBER_COLUMNS_SQL} FROM dbo.ClubRoster cr INNER JOIN dbo.Player p ON p.ID = cr.Player WHERE cr.Club = @club;`,
-  "SELECT i.Id, i.ClubId, i.PlayerId, i.InvitedByPlayerId, i.Status, i.CreatedAtUtc, i.ExpiresAtUtc,",
-  "  p.Name AS PlayerName, b.Name AS InvitedByName",
-  "FROM dbo.ClubInvitation i LEFT JOIN dbo.Player p ON p.ID = i.PlayerId LEFT JOIN dbo.Player b ON b.ID = i.InvitedByPlayerId",
-  "WHERE i.ClubId = @club AND i.Status = 'open' ORDER BY i.CreatedAtUtc;",
-  "SELECT i.Id, i.ClubId, i.PlayerId, i.InvitedByPlayerId, i.Status, i.CreatedAtUtc, i.ExpiresAtUtc,",
-  "  c.ClubName, c.ClanTag, b.Name AS InvitedByName",
-  "FROM dbo.ClubInvitation i INNER JOIN dbo.Club c ON c.ID = i.ClubId LEFT JOIN dbo.Player b ON b.ID = i.InvitedByPlayerId",
-  "WHERE i.PlayerId = @player AND i.Status = 'open' AND i.ExpiresAtUtc > @now ORDER BY i.CreatedAtUtc;",
-  "SELECT b.ClubId, b.PlayerId, b.BlockedUntilUtc FROM dbo.ClubJoinBlock b WHERE b.PlayerId = @player AND b.BlockedUntilUtc > @now;",
-].join(" ");
-
-export const CANDIDATES_QUERY = [
-  "SELECT p.ID, p.DiscordID, p.Name, p.Country FROM dbo.Player p",
-  "WHERE NOT EXISTS (SELECT 1 FROM dbo.ClubRoster cr WHERE cr.Player = p.ID);",
-  "SELECT i.Id, i.ClubId, i.PlayerId, i.InvitedByPlayerId, i.Status, i.CreatedAtUtc, i.ExpiresAtUtc",
-  "FROM dbo.ClubInvitation i WHERE i.ClubId = @club AND (i.Status = 'open' OR i.CreatedAtUtc >= @since);",
-].join(" ");
-
-export const EXPIRED_INVITATIONS_QUERY = [
-  "SELECT i.Id, i.ClubId, i.PlayerId, i.InvitedByPlayerId, i.Status, i.CreatedAtUtc, i.ExpiresAtUtc",
-  "FROM dbo.ClubInvitation i WITH (UPDLOCK, HOLDLOCK) WHERE i.Status = 'open' AND i.ExpiresAtUtc <= @now;",
-].join(" ");
-
-/**
- * L2: the newest completed rated match of each club's current members, counted from `@since` and, for a member who
- * joined later, from the join. Club.Activity only ever moves forward.
- */
-export const MATCH_ACTIVITY_SQL = [
-  ";WITH latest AS (",
-  "  SELECT cr.Club, MAX(m.CompletedAtUtc) AS LastMatch",
-  "  FROM dbo.ClubRoster cr",
-  "  INNER JOIN rocci121_toby.RatedMatchParticipant mp ON mp.PlayerId = cr.Player",
-  "  INNER JOIN rocci121_toby.RatedMatch m ON m.Id = mp.RatedMatchId",
-  "  WHERE m.Status = 'completed' AND m.CompletedAtUtc >= @since",
-  "    AND (cr.JoinedAtUtc IS NULL OR m.CompletedAtUtc >= cr.JoinedAtUtc)",
-  "  GROUP BY cr.Club)",
-  "UPDATE c SET Activity = CONVERT(DATETIME2(0), l.LastMatch) FROM dbo.Club c INNER JOIN latest l ON l.Club = c.ID",
-  "WHERE c.Activity IS NULL OR c.Activity < CONVERT(DATETIME2(0), l.LastMatch);",
-].join(" ");
-
-/** Rows of clubs that no longer exist (the bot deletes clubs until go-live), and invitations closed 30 days ago. */
-/** B2: every club with its backend id, its members and its logo (uploaded or a link), by name. */
-export const ADMIN_CLUBS_QUERY = [
-  "SELECT c.ID AS club_id, c.PublicId AS public_id, c.ClubName AS name, c.ClanTag AS tag, c.Logo AS logo,",
-  "  l.Hash AS logo_hash, (SELECT COUNT(*) FROM dbo.ClubRoster cr WHERE cr.Club = c.ID) AS members",
-  "FROM dbo.Club c LEFT JOIN dbo.ClubLogo l ON l.ClubId = c.ID",
-  "ORDER BY c.ClubName, c.ID;",
-].join(" ");
-
-export const CLEANUP_SQL = [
-  "DELETE i FROM dbo.ClubInvitation i WHERE NOT EXISTS (SELECT 1 FROM dbo.Club c WHERE c.ID = i.ClubId)",
-  "  OR (i.Status <> 'open' AND i.ClosedAtUtc < @before);",
-  "DELETE b FROM dbo.ClubJoinBlock b WHERE b.BlockedUntilUtc < @now OR NOT EXISTS (SELECT 1 FROM dbo.Club c WHERE c.ID = b.ClubId);",
-  "DELETE l FROM dbo.ClubLogo l WHERE NOT EXISTS (SELECT 1 FROM dbo.Club c WHERE c.ID = l.ClubId);",
-  "DELETE FROM dbo.ClubEvent WHERE ProcessedAtUtc < @before;",
-].join(" ");
-
-export function createSqlClubStore(
-  database: Pick<Database, "withPool" | "withTransaction">,
-  keyOf: (value: string) => string,
-): ClubStore {
+export function createSqlClubStore(database: Database, keyOf: (value: string) => string): ClubStore {
+  // The store repeats a change itself, not with the core's `retries`: a scope that moved meanwhile repeats it too.
   async function attempt<T>(work: () => Promise<T>): Promise<T> {
     for (let round = 0; ; round += 1) {
       try {
@@ -719,7 +715,9 @@ export function createSqlClubStore(
   return {
     async readMode() {
       try {
-        const row = await database.withPool(async (pool) => rowsOf(await pool.request().query(MODE_QUERY))[0]);
+        const row = await database.row<ModeRecord>(
+          sql`SELECT TOP 1 Mode, GoLiveAtUtc FROM dbo.ClubSystemState WHERE Id = 1;`,
+        );
         const mode = normalizeText(row?.Mode);
         return { mode: mode === "admins" || mode === "on" ? mode : "off", goLiveAt: ms(row?.GoLiveAtUtc) };
       } catch {
@@ -729,29 +727,23 @@ export function createSqlClubStore(
     },
 
     async discordIdOf(playerId) {
-      const row = await database.withPool(async (pool) => {
-        const request = pool.request();
-        request.input("player", mssql.Int, playerId);
-        return rowsOf(await request.query("SELECT TOP 1 DiscordID FROM dbo.Player WHERE ID = @player;"))[0];
-      });
+      const row = await database.row<Pick<PlayerStateRecord, "DiscordID">>(
+        sql`SELECT TOP 1 DiscordID FROM dbo.Player WHERE ID = ${t.int(playerId)};`,
+      );
       return normalizeDiscordId(row?.DiscordID);
     },
 
     async playerIdOf(discordId) {
-      const row = await database.withPool(async (pool) => {
-        const request = pool.request();
-        request.input("discordId", mssql.NVarChar(25), discordId);
-        return rowsOf(
-          await request.query("SELECT TOP 1 ID FROM dbo.Player WHERE DiscordID = @discordId ORDER BY ID;"),
-        )[0];
-      });
+      const row = await database.row<Pick<PlayerStateRecord, "ID">>(
+        sql`SELECT TOP 1 ID FROM dbo.Player WHERE DiscordID = ${t.nvarchar(discordId, 25)} ORDER BY ID;`,
+      );
       const playerId = Number(row?.ID);
       return Number.isInteger(playerId) && playerId > 0 ? playerId : null;
     },
 
     change(scope, now, decide) {
       return attempt(() =>
-        database.withTransaction(async (tx) => {
+        database.transaction(async (tx) => {
           const { state, extras } = await readLockedState(tx, scope, now, keyOf);
           const decision = decide(state, extras);
           const created = decision.ok ? await applyPlan(tx, decision.plan, now) : {};
@@ -762,22 +754,18 @@ export function createSqlClubStore(
 
     changeClub(clubId, now, decide) {
       return attempt(() =>
-        database.withTransaction(async (tx) => {
-          const request = tx.request();
-          request.multiple = true;
-          request.input("club", mssql.Int, clubId);
-          const [clubRows = [], memberRows = [], invitationRows = []] = recordsets(
-            await request.query(
-              [
-                "SET XACT_ABORT ON;",
-                `SELECT ${CLUB_COLUMNS_SQL} FROM dbo.Club c WITH (UPDLOCK, HOLDLOCK) WHERE c.ID = @club;`,
-                `SELECT ${MEMBER_COLUMNS_SQL} FROM dbo.ClubRoster cr WITH (UPDLOCK, HOLDLOCK)`,
-                "INNER JOIN dbo.Player p ON p.ID = cr.Player WHERE cr.Club = @club;",
-                "SELECT i.Id, i.ClubId, i.PlayerId, i.InvitedByPlayerId, i.Status, i.CreatedAtUtc, i.ExpiresAtUtc",
-                "FROM dbo.ClubInvitation i WITH (UPDLOCK, HOLDLOCK) WHERE i.ClubId = @club AND i.Status = 'open';",
-              ].join(" "),
-            ),
-          );
+        database.transaction(async (tx) => {
+          const [clubRows, memberRows, invitationRows] = (await tx.sets(sql`
+            DECLARE @club INT = ${t.int(clubId)};
+            SELECT ${CLUB_COLUMNS} FROM dbo.Club c WITH (UPDLOCK, HOLDLOCK) WHERE c.ID = @club;
+            SELECT ${MEMBER_COLUMNS}
+            FROM dbo.ClubRoster cr WITH (UPDLOCK, HOLDLOCK)
+            INNER JOIN dbo.Player p ON p.ID = cr.Player
+            WHERE cr.Club = @club;
+            SELECT ${INVITATION_COLUMNS}
+            FROM dbo.ClubInvitation i WITH (UPDLOCK, HOLDLOCK)
+            WHERE i.ClubId = @club AND i.Status = 'open';
+          `)) as [ClubStateRecord[], MemberRecord[], InvitationRecord[]];
           const row = clubRows[0];
           if (!row) return false;
           const steps = decide(
@@ -792,99 +780,132 @@ export function createSqlClubStore(
     },
 
     async readMyClub(playerId, now) {
-      return database.withPool(async (pool) => {
-        const request = pool.request();
-        request.multiple = true;
-        request.input("player", mssql.Int, playerId);
-        request.input("now", mssql.DateTime2(0), new Date(now));
-        const [
-          playerRows = [],
-          clubRows = [],
-          memberRows = [],
-          clubInvitationRows = [],
-          invitationRows = [],
-          blockRows = [],
-        ] = recordsets(await request.query(MY_CLUB_QUERY));
-        const playerRow = playerRows[0];
-        const clubRow = clubRows[0];
-        const club = clubRow
+      const batch = sql`
+        DECLARE @player INT = ${t.int(playerId)};
+        DECLARE @now DATETIME2(0) = ${t.dateTime2(now, 0)};
+        DECLARE @club INT = (SELECT TOP 1 Club FROM dbo.ClubRoster WHERE Player = @player);
+        SELECT p.ID, p.DiscordID, p.Name, p.Country, s.LastClubCreatedAtUtc, s.LastClubExitAtUtc, @club AS Club
+        FROM dbo.Player p
+        LEFT JOIN dbo.ClubPlayerState s ON s.PlayerId = p.ID
+        WHERE p.ID = @player;
+        SELECT ${CLUB_COLUMNS}, l.Hash AS LogoHash
+        FROM dbo.Club c
+        LEFT JOIN dbo.ClubLogo l ON l.ClubId = c.ID
+        WHERE c.ID = @club;
+        SELECT ${MEMBER_COLUMNS}
+        FROM dbo.ClubRoster cr
+        INNER JOIN dbo.Player p ON p.ID = cr.Player
+        WHERE cr.Club = @club;
+        SELECT ${INVITATION_COLUMNS}, p.Name AS PlayerName, b.Name AS InvitedByName
+        FROM dbo.ClubInvitation i
+        LEFT JOIN dbo.Player p ON p.ID = i.PlayerId
+        LEFT JOIN dbo.Player b ON b.ID = i.InvitedByPlayerId
+        WHERE i.ClubId = @club AND i.Status = 'open'
+        ORDER BY i.CreatedAtUtc;
+        SELECT ${INVITATION_COLUMNS}, c.ClubName, c.ClanTag, b.Name AS InvitedByName
+        FROM dbo.ClubInvitation i
+        INNER JOIN dbo.Club c ON c.ID = i.ClubId
+        LEFT JOIN dbo.Player b ON b.ID = i.InvitedByPlayerId
+        WHERE i.PlayerId = @player AND i.Status = 'open' AND i.ExpiresAtUtc > @now
+        ORDER BY i.CreatedAtUtc;
+        SELECT b.ClubId, b.PlayerId, b.BlockedUntilUtc
+        FROM dbo.ClubJoinBlock b
+        WHERE b.PlayerId = @player AND b.BlockedUntilUtc > @now;
+      `;
+      const [playerRows, clubRows, memberRows, clubInvitationRows, invitationRows, blockRows] = (await database.sets(
+        batch,
+      )) as [
+        (PlayerStateRecord & { Club: number | null })[],
+        (ClubStateRecord & { LogoHash: string | null })[],
+        MemberRecord[],
+        (InvitationRecord & { PlayerName: string | null; InvitedByName: string | null })[],
+        (InvitationRecord & { ClubName: string; ClanTag: string; InvitedByName: string | null })[],
+        JoinBlockRecord[],
+      ];
+      const playerRow = playerRows[0];
+      const clubRow = clubRows[0];
+      const club = clubRow
+        ? {
+            ...toClubState(clubRow, memberRows.map(toMember)),
+            logoUrl: normalizeText(clubRow.Logo),
+            logoHash: normalizeText(clubRow.LogoHash),
+          }
+        : null;
+      return {
+        player: playerRow
           ? {
-              ...toClubState(clubRow, memberRows.map(toMember)),
-              logoUrl: normalizeText(clubRow.Logo),
-              logoHash: normalizeText(clubRow.LogoHash),
+              playerId,
+              discordId: normalizeDiscordId(playerRow.DiscordID) || normalizeText(playerRow.DiscordID),
+              name: normalizeText(playerRow.Name),
+              country: normalizeText(playerRow.Country).toLowerCase(),
+              clubId: club?.clubId ?? null,
+              lastClubCreatedAt: ms(playerRow.LastClubCreatedAtUtc),
+              lastClubExitAt: ms(playerRow.LastClubExitAtUtc),
             }
-          : null;
-        return {
-          player: playerRow
-            ? {
-                playerId,
-                discordId: normalizeDiscordId(playerRow.DiscordID) || normalizeText(playerRow.DiscordID),
-                name: normalizeText(playerRow.Name),
-                country: normalizeText(playerRow.Country).toLowerCase(),
-                clubId: club?.clubId ?? null,
-                lastClubCreatedAt: ms(playerRow.LastClubCreatedAtUtc),
-                lastClubExitAt: ms(playerRow.LastClubExitAtUtc),
-              }
-            : null,
-          club,
-          clubInvitations: clubInvitationRows.map((row) => ({
-            ...toInvitation(row),
-            playerName: normalizeText(row.PlayerName),
-            invitedByName: normalizeText(row.InvitedByName),
-          })),
-          invitations: invitationRows.map((row) => ({
-            ...toInvitation(row),
-            clubName: normalizeText(row.ClubName),
-            clubTag: normalizeText(row.ClanTag),
-            invitedByName: normalizeText(row.InvitedByName),
-          })),
-          joinBlocks: blockRows.map((row) => ({
-            clubId: Number(row.ClubId),
-            playerId: Number(row.PlayerId),
-            until: ms(row.BlockedUntilUtc) ?? 0,
-          })),
-        };
-      });
+          : null,
+        club,
+        clubInvitations: clubInvitationRows.map((row) => ({
+          ...toInvitation(row),
+          playerName: normalizeText(row.PlayerName),
+          invitedByName: normalizeText(row.InvitedByName),
+        })),
+        invitations: invitationRows.map((row) => ({
+          ...toInvitation(row),
+          clubName: normalizeText(row.ClubName),
+          clubTag: normalizeText(row.ClanTag),
+          invitedByName: normalizeText(row.InvitedByName),
+        })),
+        joinBlocks: blockRows.map((row) => ({
+          clubId: Number(row.ClubId),
+          playerId: Number(row.PlayerId),
+          until: ms(row.BlockedUntilUtc) ?? 0,
+        })),
+      };
     },
 
     async inviteCandidates(clubId, now) {
-      return database.withPool(async (pool) => {
-        const request = pool.request();
-        request.multiple = true;
-        request.input("club", mssql.Int, clubId);
-        request.input("since", mssql.DateTime2(0), new Date(now - 14 * DAY_MS));
-        const [playerRows = [], invitationRows = []] = recordsets(await request.query(CANDIDATES_QUERY));
-        return {
-          players: playerRows.map((row) => ({
-            playerId: Number(row.ID),
-            discordId: normalizeDiscordId(row.DiscordID) || normalizeText(row.DiscordID),
-            name: normalizeText(row.Name),
-            country: normalizeText(row.Country).toLowerCase(),
-          })),
-          invitations: invitationRows.map(toInvitation),
-        };
-      });
+      const [playerRows, invitationRows] = (await database.sets(sql`
+        SELECT p.ID, p.DiscordID, p.Name, p.Country
+        FROM dbo.Player p
+        WHERE NOT EXISTS (SELECT 1 FROM dbo.ClubRoster cr WHERE cr.Player = p.ID);
+        SELECT ${INVITATION_COLUMNS}
+        FROM dbo.ClubInvitation i
+        WHERE i.ClubId = ${t.int(clubId)}
+          AND (i.Status = 'open' OR i.CreatedAtUtc >= ${t.dateTime2(now - 14 * DAY_MS, 0)});
+      `)) as [Pick<PlayerStateRecord, "ID" | "DiscordID" | "Name" | "Country">[], InvitationRecord[]];
+      return {
+        players: playerRows.map((row) => ({
+          playerId: row.ID,
+          discordId: normalizeDiscordId(row.DiscordID) || normalizeText(row.DiscordID),
+          name: normalizeText(row.Name),
+          country: normalizeText(row.Country).toLowerCase(),
+        })),
+        invitations: invitationRows.map(toInvitation),
+      };
     },
 
     async newClubIds() {
-      const rows = await database.withPool(async (pool) =>
-        rowsOf(await pool.request().query("SELECT ID FROM dbo.Club WHERE EstablishedAtUtc IS NULL;")),
+      const rows = await database.rows<Pick<ClubStateRecord, "ID">>(
+        sql`SELECT ID FROM dbo.Club WHERE EstablishedAtUtc IS NULL;`,
       );
-      return rows.map((row) => Number(row.ID));
+      return rows.map((row) => row.ID);
     },
 
     expireInvitations(now, decide) {
       return attempt(() =>
-        database.withTransaction(async (tx) => {
-          const request = tx.request();
-          request.input("now", mssql.DateTime2(0), new Date(now));
-          const invitations = rowsOf(await request.query(EXPIRED_INVITATIONS_QUERY)).map(toInvitation);
+        database.transaction(async (tx) => {
+          const rows = await tx.rows<InvitationRecord>(sql`
+            SELECT ${INVITATION_COLUMNS}
+            FROM dbo.ClubInvitation i WITH (UPDLOCK, HOLDLOCK)
+            WHERE i.Status = 'open' AND i.ExpiresAtUtc <= ${t.dateTime2(now, 0)};
+          `);
+          const invitations = rows.map(toInvitation);
           if (!invitations.length) return 0;
           const clubIds = [...new Set(invitations.map((invitation) => invitation.clubId))];
-          const clubRows = rowsOf(
-            await tx.request().query(`SELECT ${CLUB_COLUMNS_SQL} FROM dbo.Club c WHERE c.ID IN (${idList(clubIds)});`),
+          const clubRows = await tx.rows<ClubStateRecord>(
+            sql`SELECT ${CLUB_COLUMNS} FROM dbo.Club c WHERE c.ID IN (${idList(clubIds)});`,
           );
-          const clubs = new Map(clubRows.map((row) => [Number(row.ID), toClubState(row, [])]));
+          const clubs = new Map(clubRows.map((row) => [row.ID, toClubState(row, [])]));
           const steps = decide(invitations, (id) => clubs.get(id));
           await applyPlan(tx, steps, now);
           return invitations.length;
@@ -893,44 +914,64 @@ export function createSqlClubStore(
     },
 
     async rosterPresence() {
-      const rows = await database.withPool(async (pool) =>
-        rowsOf(
-          await pool
-            .request()
-            .query(`SELECT ${MEMBER_COLUMNS_SQL} FROM dbo.ClubRoster cr INNER JOIN dbo.Player p ON p.ID = cr.Player;`),
-        ),
+      const rows = await database.rows<MemberRecord>(
+        sql`SELECT ${MEMBER_COLUMNS} FROM dbo.ClubRoster cr INNER JOIN dbo.Player p ON p.ID = cr.Player;`,
       );
-      return rows.map((row) => ({ clubId: Number(row.Club), member: toMember(row) }));
+      return rows.map((row) => ({ clubId: row.Club, member: toMember(row) }));
     },
 
     async adminClubs() {
-      const rows = await database.withPool(async (pool) => rowsOf(await pool.request().query(ADMIN_CLUBS_QUERY)));
+      // B2: every club with its backend id, its members and its logo (uploaded or a link), by name.
+      const rows = await database.rows<AdminClubRecord>(sql`
+        SELECT c.ID AS club_id, c.PublicId AS public_id, c.ClubName AS name, c.ClanTag AS tag, c.Logo AS logo,
+          l.Hash AS logo_hash, (SELECT COUNT(*) FROM dbo.ClubRoster cr WHERE cr.Club = c.ID) AS members
+        FROM dbo.Club c
+        LEFT JOIN dbo.ClubLogo l ON l.ClubId = c.ID
+        ORDER BY c.ClubName, c.ID;
+      `);
       return rows.map((row) => ({
-        clubId: Number(row.club_id),
+        clubId: row.club_id,
         publicId: normalizeText(row.public_id),
         name: normalizeText(row.name),
         tag: normalizeText(row.tag),
-        members: Number(row.members) || 0,
+        members: row.members,
         hasLogo: Boolean(normalizeText(row.logo_hash) || normalizeText(row.logo)),
       }));
     },
 
     async raiseMatchActivity(since) {
-      return database.withPool(async (pool) => {
-        const request = pool.request();
-        request.input("since", mssql.DateTime2(3), new Date(since));
-        const [changed = 0] = affected(await request.query(MATCH_ACTIVITY_SQL));
-        return changed;
-      });
+      // The newest completed rated match of each club's current members, counted from `since` and, for a member
+      // who joined later, from the join. Club.Activity only ever moves forward.
+      const [changed = 0] = await database.execute(sql`
+        ;WITH latest AS (
+          SELECT cr.Club, MAX(m.CompletedAtUtc) AS LastMatch
+          FROM dbo.ClubRoster cr
+          INNER JOIN rocci121_toby.RatedMatchParticipant mp ON mp.PlayerId = cr.Player
+          INNER JOIN rocci121_toby.RatedMatch m ON m.Id = mp.RatedMatchId
+          WHERE m.Status = 'completed' AND m.CompletedAtUtc >= ${t.dateTime2(since, 3)}
+            AND (cr.JoinedAtUtc IS NULL OR m.CompletedAtUtc >= cr.JoinedAtUtc)
+          GROUP BY cr.Club)
+        UPDATE c SET Activity = CONVERT(DATETIME2(0), l.LastMatch)
+        FROM dbo.Club c
+        INNER JOIN latest l ON l.Club = c.ID
+        WHERE c.Activity IS NULL OR c.Activity < CONVERT(DATETIME2(0), l.LastMatch);
+      `);
+      return changed;
     },
 
     async cleanUp(now) {
-      return database.withPool(async (pool) => {
-        const request = pool.request();
-        request.input("now", mssql.DateTime2(0), new Date(now));
-        request.input("before", mssql.DateTime2(0), new Date(now - 30 * DAY_MS));
-        return affected(await request.query(CLEANUP_SQL)).reduce((total, count) => total + count, 0);
-      });
+      // Rows of clubs that no longer exist (the bot deletes clubs until go-live), and invitations closed 30 days ago.
+      const removed = await database.execute(sql`
+        DECLARE @before DATETIME2(0) = ${t.dateTime2(now - 30 * DAY_MS, 0)};
+        DELETE i FROM dbo.ClubInvitation i
+        WHERE NOT EXISTS (SELECT 1 FROM dbo.Club c WHERE c.ID = i.ClubId)
+          OR (i.Status <> 'open' AND i.ClosedAtUtc < @before);
+        DELETE b FROM dbo.ClubJoinBlock b
+        WHERE b.BlockedUntilUtc < ${t.dateTime2(now, 0)} OR NOT EXISTS (SELECT 1 FROM dbo.Club c WHERE c.ID = b.ClubId);
+        DELETE l FROM dbo.ClubLogo l WHERE NOT EXISTS (SELECT 1 FROM dbo.Club c WHERE c.ID = l.ClubId);
+        DELETE FROM dbo.ClubEvent WHERE ProcessedAtUtc < @before;
+      `);
+      return removed.reduce((total, count) => total + count, 0);
     },
   };
 }

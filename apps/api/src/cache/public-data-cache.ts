@@ -1,14 +1,9 @@
 // Shared datasets (leaderboards, player and club lists, the season) are refreshed in the background
 // and served from memory: fresh within ttlMs, stale while one refresh per key runs, loaded on a cold
-// miss. A JSON snapshot on the cache volume keeps them available right after a restart.
+// miss. Everything is read again at start; the database next to the API answers in milliseconds.
 
-import fs from "node:fs";
-import path from "node:path";
 import { mapLimit } from "../lib/concurrency.ts";
 import type { Logger } from "../lib/logger.ts";
-
-/** Bump when the snapshot layout changes; older snapshots are then ignored. */
-const SNAPSHOT_VERSION = 5;
 
 export type CacheStatus = "hit" | "stale" | "miss" | "fixture";
 export type Loader = () => Promise<unknown>;
@@ -34,21 +29,8 @@ export interface PublicDataCacheOptions {
   readonly ttlMs: number;
   readonly refreshIntervalMs: number;
   readonly parallelism: number;
-  /** "" disables snapshots. */
-  readonly snapshotPath: string;
   readonly log: Logger;
   readonly slowRefreshThresholdMs?: number;
-  readonly loadSnapshot?: boolean;
-}
-
-function normalizeGeneratedAt(value: unknown): number {
-  if (value instanceof Date) return Number.isFinite(value.getTime()) ? value.getTime() : 0;
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string" && value.trim()) {
-    const time = new Date(value).getTime();
-    return Number.isFinite(time) ? time : 0;
-  }
-  return 0;
 }
 
 function positive(value: number, fallback: number): number {
@@ -63,10 +45,8 @@ export class PublicDataCache implements PublicDataSource {
   private readonly refreshIntervalMs: number;
   private readonly parallelism: number;
   private readonly slowRefreshThresholdMs: number;
-  private readonly snapshotPath: string;
   private readonly log: Logger;
   private intervalHandle: NodeJS.Timeout | null = null;
-  private snapshotTimer: NodeJS.Timeout | null = null;
 
   constructor(options: PublicDataCacheOptions) {
     this.loaders = new Map(Object.entries(options.loaders));
@@ -74,9 +54,7 @@ export class PublicDataCache implements PublicDataSource {
     this.refreshIntervalMs = positive(options.refreshIntervalMs, 60_000);
     this.parallelism = positive(options.parallelism, 2);
     this.slowRefreshThresholdMs = positive(options.slowRefreshThresholdMs ?? 1500, 1500);
-    this.snapshotPath = options.snapshotPath.trim();
     this.log = options.log;
-    if (this.snapshotPath && options.loadSnapshot !== false) this.loadSnapshotSync();
   }
 
   getKeys(): string[] {
@@ -114,7 +92,6 @@ export class PublicDataCache implements PublicDataSource {
         }
         const entry = { payload, generatedAtMs: Date.now() };
         this.entries.set(key, entry);
-        this.scheduleSnapshotSave();
         return entry;
       })
       .finally(() => {
@@ -153,64 +130,8 @@ export class PublicDataCache implements PublicDataSource {
     }
   }
 
-  async stop(): Promise<void> {
-    if (this.intervalHandle) {
-      clearInterval(this.intervalHandle);
-      this.intervalHandle = null;
-    }
-    if (this.snapshotTimer) {
-      clearTimeout(this.snapshotTimer);
-      this.snapshotTimer = null;
-    }
-    await this.saveSnapshot();
-  }
-
-  private loadSnapshotSync(): void {
-    try {
-      if (!fs.existsSync(this.snapshotPath)) return;
-      const snapshot = JSON.parse(fs.readFileSync(this.snapshotPath, "utf8")) as {
-        version?: number;
-        entries?: Record<string, { generatedAt?: unknown; payload?: unknown }>;
-      } | null;
-      if (snapshot?.version !== SNAPSHOT_VERSION || !snapshot.entries) return;
-      for (const [key, saved] of Object.entries(snapshot.entries)) {
-        const generatedAtMs = normalizeGeneratedAt(saved.generatedAt);
-        if (!this.loaders.has(key) || !generatedAtMs || saved.payload === undefined) continue;
-        this.entries.set(key, { payload: saved.payload, generatedAtMs });
-      }
-      this.log.info(
-        { entries: this.entries.size },
-        `[public-data-cache] Loaded snapshot entries: ${this.entries.size}.`,
-      );
-    } catch (err) {
-      this.log.warn({ err }, "[public-data-cache] Snapshot load failed");
-    }
-  }
-
-  private scheduleSnapshotSave(): void {
-    if (!this.snapshotPath || this.snapshotTimer) return;
-    this.snapshotTimer = setTimeout(() => {
-      this.snapshotTimer = null;
-      this.saveSnapshot().catch((err: unknown) => {
-        this.log.warn({ err }, "[public-data-cache] Snapshot save failed");
-      });
-    }, 250);
-    this.snapshotTimer.unref();
-  }
-
-  async saveSnapshot(): Promise<void> {
-    if (!this.snapshotPath) return;
-    const entries: Record<string, { generatedAt: string; payload: unknown }> = {};
-    for (const key of this.getKeys()) {
-      const entry = this.entries.get(key);
-      if (entry?.payload !== undefined) {
-        entries[key] = { generatedAt: new Date(entry.generatedAtMs).toISOString(), payload: entry.payload };
-      }
-    }
-    const body = JSON.stringify({ version: SNAPSHOT_VERSION, savedAt: new Date().toISOString(), entries });
-    const tempPath = `${this.snapshotPath}.tmp`;
-    await fs.promises.mkdir(path.dirname(this.snapshotPath), { recursive: true });
-    await fs.promises.writeFile(tempPath, body, "utf8");
-    await fs.promises.rename(tempPath, this.snapshotPath);
+  stop(): void {
+    if (this.intervalHandle) clearInterval(this.intervalHandle);
+    this.intervalHandle = null;
   }
 }

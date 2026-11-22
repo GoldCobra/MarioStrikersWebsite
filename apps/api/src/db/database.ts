@@ -1,153 +1,198 @@
-// The shared MSSQL connection pool. It reconnects lazily after connection errors and can run a
-// keepalive query so the external database does not drop idle connections.
+// The database (docs/adr/0014): one mssql pool to the SQL Server next to the API. Statements come from sql.ts, each
+// one is timed (a slow one is logged), and a transaction can run again after a deadlock. Every connection runs with
+// XACT_ABORT ON, so an error inside a transaction always rolls all of it back. mssql lends connections out again as
+// they are, so no statement may change a session setting (NOCOUNT, LOCK_TIMEOUT, …): it would stay on the
+// connection for everyone after it (a test checks the sources).
 
 import mssql from "mssql";
 import { assertMssqlConfigured, type MssqlConfig } from "../config.ts";
 import type { Logger } from "../lib/logger.ts";
+import { isDeadlock } from "../lib/sql-errors.ts";
+import { render, sql, type Statement } from "./sql.ts";
 
-const DEFAULT_KEEPALIVE_INTERVAL_MS = 25_000;
-const CONNECTION_LOST = /Failed to connect|Connection is closed|ESOCKET|ETIMEOUT|EAI_AGAIN/i;
-
-export type Pool = mssql.ConnectionPool;
-export { mssql };
-
-/** What a query runs on: the pool, or one transaction on it. */
-export interface Queryable {
-  request(): mssql.Request;
-}
+export type Row = Record<string, unknown>;
 
 /**
- * Runs `work` with the database's Player.Activity triggers paused: an admin rewrite (a title
- * selection moved or cleared by an ops tool) is no activity of the player. `transaction` has to be
- * one transaction, so that `work` runs on the connection the flag is set on. The flag is cleared in
- * a finally: sp_set_session_context survives a rollback, and the connection goes back to the pool.
+ * Running statements, on the pool or in one transaction. In a transaction they run one after another: they share its
+ * connection, so they are awaited in turn, never together.
  */
-export async function withoutActivityStamp<T>(transaction: Queryable, work: () => Promise<T>): Promise<T> {
-  await transaction.request().query("EXEC sys.sp_set_session_context @key = N'SkipPlayerActivity', @value = 1;");
-  try {
-    return await work();
-  } finally {
-    await transaction.request().query("EXEC sys.sp_set_session_context @key = N'SkipPlayerActivity', @value = NULL;");
-  }
+export interface Queries {
+  /** The rows of the first result set. */
+  rows<T = Row>(statement: Statement): Promise<T[]>;
+  /** The first row of the first result set; undefined without one. */
+  row<T = Row>(statement: Statement): Promise<T | undefined>;
+  /** Every result set of a batch, in order. */
+  sets(statement: Statement): Promise<Row[][]>;
+  /** Runs the statement or batch; the rows each statement changed. */
+  execute(statement: Statement): Promise<number[]>;
 }
 
-export function createConnectionConfig(settings: MssqlConfig): mssql.config {
+export interface TransactionOptions {
+  /** How often the whole transaction runs again after a deadlock or a lock timeout (default: never). */
+  readonly retries?: number;
+  /**
+   * dbo.Player's activity triggers paused (SESSION_CONTEXT SkipPlayerActivity): an admin rewrite is no activity of
+   * the player. Such a transaction gets a connection of its own that is closed afterwards, so the flag never reaches
+   * another statement, not even after the server rolled the transaction back.
+   */
+  readonly skipPlayerActivity?: boolean;
+}
+
+export interface Database extends Queries {
+  /** Runs `work` in one transaction: committed when it returns, rolled back when it throws. */
+  transaction<T>(work: (tx: Queries) => Promise<T>, options?: TransactionOptions): Promise<T>;
+  /** One round trip to the server (the health check). */
+  ping(): Promise<void>;
+  close(): Promise<void>;
+}
+
+export interface DatabaseOptions {
+  /** A statement slower than this is logged as a warning (default 500 ms). */
+  readonly slowMs?: number;
+}
+
+const SKIP_PLAYER_ACTIVITY = sql`EXEC sys.sp_set_session_context @key = N'SkipPlayerActivity', @value = 1;`;
+
+export function createConnectionConfig(settings: MssqlConfig, pool?: { min: number; max: number }): mssql.config {
   assertMssqlConfigured(settings);
   return {
+    server: settings.host,
+    port: settings.port,
+    database: settings.database,
     user: settings.user,
     password: settings.password,
-    server: settings.host,
-    database: settings.database,
-    port: settings.port,
     connectionTimeout: settings.connectionTimeoutMs,
     requestTimeout: settings.requestTimeoutMs,
     pool: {
-      min: settings.poolMin,
-      max: settings.poolMax,
+      min: pool?.min ?? settings.poolMin,
+      max: pool?.max ?? settings.poolMax,
       idleTimeoutMillis: settings.poolIdleTimeoutMs,
     },
+    // A lent-out connection is checked by its socket, not with a SELECT 1 round trip before every statement.
+    validateConnection: "socket",
     options: {
       encrypt: true,
       trustServerCertificate: settings.trustServerCertificate,
       cryptoCredentialsDetails: { minVersion: settings.tlsMinVersion },
+      abortTransactionOnError: true,
     },
   };
 }
 
-export class Database {
-  private poolPromise: Promise<Pool> | null = null;
-  private keepaliveHandle: NodeJS.Timeout | null = null;
-  private readonly settings: MssqlConfig;
-  private readonly log: Logger;
+/** The statement's first line or so, for logs. */
+function summarize(text: string): string {
+  const flat = text.replace(/\s+/g, " ").trim();
+  return flat.length > 160 ? `${flat.slice(0, 157)}...` : flat;
+}
 
-  constructor(settings: MssqlConfig, log: Logger) {
-    this.settings = settings;
-    this.log = log;
-  }
+type Source = mssql.ConnectionPool | mssql.Transaction;
 
-  private getPool(): Promise<Pool> {
-    this.poolPromise ??= mssql
-      .connect(createConnectionConfig(this.settings))
+/** What mssql answers; a statement without a result set (an UPDATE) has no recordset, whatever its types say. */
+interface Result {
+  readonly recordset?: Row[];
+  readonly recordsets: Row[][];
+  readonly rowsAffected: number[];
+}
+
+export function createDatabase(settings: MssqlConfig, log: Logger, options: DatabaseOptions = {}): Database {
+  const slowMs = options.slowMs ?? 500;
+  let poolPromise: Promise<mssql.ConnectionPool> | null = null;
+
+  const connect = (pool?: { min: number; max: number }): Promise<mssql.ConnectionPool> =>
+    new mssql.ConnectionPool(createConnectionConfig(settings, pool)).connect();
+
+  function sharedPool(): Promise<mssql.ConnectionPool> {
+    poolPromise ??= connect()
       .then((pool) => {
         pool.on("error", (err: unknown) => {
-          this.log.error({ err }, "[mssql] Pool error");
-          this.poolPromise = null;
+          log.error({ err }, "[db] Pool error");
         });
         return pool;
       })
       .catch((error: unknown) => {
-        this.poolPromise = null;
+        // The next statement tries again (the server may still be starting).
+        poolPromise = null;
         throw error;
       });
-    return this.poolPromise;
+    return poolPromise;
   }
 
-  /** Runs `run` with the pool and the time spent waiting for it (for slow-query logs). */
-  async measurePool<T>(run: (pool: Pool, poolMs: number) => Promise<T>): Promise<T> {
+  async function run(source: Source, statement: Statement): Promise<Result> {
+    const { text, parameters } = render(statement);
+    const request = source.request();
+    for (const parameter of parameters) request.input(parameter.name, parameter.type, parameter.value);
+    const startedAt = performance.now();
     try {
-      const startedAt = Date.now();
-      const pool = await this.getPool();
-      return await run(pool, Date.now() - startedAt);
+      return await request.query<Row>(text);
+    } finally {
+      const ms = performance.now() - startedAt;
+      if (ms >= slowMs) log.warn({ ms: Math.round(ms), statement: summarize(text) }, "[db] Slow statement");
+    }
+  }
+
+  function queriesOn(source: () => Promise<Source>): Queries {
+    return {
+      rows: async <T>(statement: Statement) => ((await run(await source(), statement)).recordset ?? []) as T[],
+      row: async <T>(statement: Statement) => (await run(await source(), statement)).recordset?.[0] as T | undefined,
+      sets: async (statement) => (await run(await source(), statement)).recordsets,
+      execute: async (statement) => [...(await run(await source(), statement)).rowsAffected],
+    };
+  }
+
+  async function inTransaction<T>(pool: mssql.ConnectionPool, work: (tx: Queries) => Promise<T>, first?: Statement) {
+    const transaction = new mssql.Transaction(pool);
+    await transaction.begin();
+    try {
+      const tx = queriesOn(() => Promise.resolve(transaction));
+      if (first) await tx.execute(first);
+      const result = await work(tx);
+      await transaction.commit();
+      return result;
     } catch (error) {
-      if (error instanceof Error && CONNECTION_LOST.test(error.message)) this.poolPromise = null;
+      // After XACT_ABORT the server has rolled back already; mssql then refuses the rollback, which changes nothing.
+      await transaction.rollback().catch(() => undefined);
       throw error;
     }
   }
 
-  withPool<T>(run: (pool: Pool) => Promise<T>): Promise<T> {
-    return this.measurePool((pool) => run(pool));
-  }
-
-  /** Runs `run` in one transaction: committed when it returns, rolled back when it throws. */
-  withTransaction<T>(run: (transaction: Queryable) => Promise<T>): Promise<T> {
-    return this.withPool(async (pool) => {
-      const transaction = new mssql.Transaction(pool);
-      await transaction.begin();
-      try {
-        const result = await run(transaction);
-        await transaction.commit();
-        return result;
-      } catch (error) {
-        // With XACT_ABORT the server may have rolled back already.
-        await transaction.rollback().catch(() => undefined);
-        throw error;
-      }
-    });
-  }
-
-  async healthCheck(): Promise<void> {
-    await this.withPool((pool) => pool.request().query("SELECT 1 AS ok;"));
-  }
-
-  startKeepalive(options: { intervalMs?: number; run?: () => Promise<void> } = {}): NodeJS.Timeout {
-    if (this.keepaliveHandle) return this.keepaliveHandle;
-    const run = options.run ?? (() => this.healthCheck());
-    const tick = (): void => {
-      run().catch((err: unknown) => {
-        this.log.warn({ err }, "[mssql] Keepalive failed");
-      });
-    };
-    tick();
-    this.keepaliveHandle = setInterval(tick, options.intervalMs ?? DEFAULT_KEEPALIVE_INTERVAL_MS);
-    this.keepaliveHandle.unref();
-    return this.keepaliveHandle;
-  }
-
-  stopKeepalive(): void {
-    if (!this.keepaliveHandle) return;
-    clearInterval(this.keepaliveHandle);
-    this.keepaliveHandle = null;
-  }
-
-  async close(): Promise<void> {
-    this.stopKeepalive();
-    const pending = this.poolPromise;
-    this.poolPromise = null;
-    if (!pending) return;
+  async function once<T>(work: (tx: Queries) => Promise<T>, options: TransactionOptions): Promise<T> {
+    if (!options.skipPlayerActivity) return inTransaction(await sharedPool(), work);
+    const own = await connect({ min: 0, max: 1 });
     try {
-      await (await pending).close();
-    } catch {
-      // The initial connect may never have succeeded.
+      return await inTransaction(own, work, SKIP_PLAYER_ACTIVITY);
+    } finally {
+      await own.close().catch(() => undefined);
     }
   }
+
+  return {
+    ...queriesOn(sharedPool),
+
+    async transaction(work, options = {}) {
+      const attempts = 1 + Math.max(0, options.retries ?? 0);
+      for (let attempt = 1; ; attempt += 1) {
+        try {
+          return await once(work, options);
+        } catch (error) {
+          if (attempt >= attempts || !isDeadlock(error)) throw error;
+          log.warn({ attempt }, "[db] Deadlock, the transaction runs again");
+        }
+      }
+    },
+
+    async ping() {
+      await run(await sharedPool(), sql`SELECT 1 AS ok;`);
+    },
+
+    async close() {
+      const pending = poolPromise;
+      poolPromise = null;
+      if (!pending) return;
+      try {
+        await (await pending).close();
+      } catch {
+        // The first connect may never have succeeded.
+      }
+    },
+  };
 }

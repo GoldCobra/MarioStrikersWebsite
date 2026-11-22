@@ -79,7 +79,7 @@ export interface TitleDefinition extends TitleRule {
 }
 
 // The developer titles follow the WFC titles (owner, 2026-10-20): the special category moved from 1 to 0, so
-// the categories after them keep their SortOrder (ops:title-order).
+// the categories after them keep their SortOrder; the database holds this order since that day.
 export const TITLE_CATEGORIES: readonly TitleCategoryDefinition[] = [
   {
     code: TITLE_CATEGORY.special,

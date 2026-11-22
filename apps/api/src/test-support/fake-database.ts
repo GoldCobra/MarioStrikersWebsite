@@ -1,66 +1,63 @@
-// A stand-in for the MSSQL pool: records every query with its parameters and answers from a handler.
-// Transactions are recorded as "begin", "commit" and "rollback" in their own list.
+// A stand-in for the database (db/database.ts): records every statement with its text and parameter values and
+// answers from a handler. Transactions are recorded as "begin", "commit" and "rollback" in their own list.
 
-import type { Database, Pool } from "../db/database.ts";
+import type { Database, Queries, Row, TransactionOptions } from "../db/database.ts";
+import { render, type Statement } from "../db/sql.ts";
 
-export interface RecordedQuery {
-  readonly sql: string;
-  readonly inputs: Readonly<Record<string, unknown>>;
-  readonly types: Readonly<Record<string, unknown>>;
-  readonly multiple: boolean;
+export interface RecordedStatement {
+  readonly text: string;
+  /** The parameter values in order (@p0, @p1, …). */
+  readonly values: readonly unknown[];
 }
 
-export interface QueryResult {
-  recordset?: unknown[];
-  recordsets?: unknown[][];
-  rowsAffected?: number[];
+/** What a statement answers: rows (first result set), result sets of a batch, or changed rows. */
+export interface FakeResult {
+  readonly rows?: readonly object[];
+  readonly sets?: readonly (readonly object[])[];
+  readonly affected?: readonly number[];
 }
 
-export type QueryHandler = (
-  sql: string,
-  inputs: Readonly<Record<string, unknown>>,
-) => QueryResult | Promise<QueryResult>;
+export type StatementHandler = (
+  statement: RecordedStatement,
+) => FakeResult | readonly object[] | undefined | Promise<FakeResult | readonly object[] | undefined>;
 
-export interface FakeDatabase extends Pick<Database, "withPool" | "measurePool" | "withTransaction"> {
-  readonly queries: RecordedQuery[];
+export interface FakeDatabase extends Database {
+  readonly statements: RecordedStatement[];
   readonly transactions: string[];
 }
 
-export function createFakeDatabase(handler: QueryHandler): FakeDatabase {
-  const queries: RecordedQuery[] = [];
+export function createFakeDatabase(handler: StatementHandler = () => undefined): FakeDatabase {
+  const statements: RecordedStatement[] = [];
   const transactions: string[] = [];
-  const pool = {
-    request() {
-      const inputs: Record<string, unknown> = {};
-      const types: Record<string, unknown> = {};
-      const request = {
-        multiple: false,
-        input(name: string, type: unknown, value?: unknown) {
-          // mssql accepts input(name, value) as well as input(name, type, value).
-          if (arguments.length === 2) inputs[name] = type;
-          else {
-            inputs[name] = value;
-            types[name] = type;
-          }
-          return request;
-        },
-        async query(sql: string) {
-          queries.push({ sql, inputs: { ...inputs }, types: { ...types }, multiple: request.multiple });
-          return handler(sql, inputs);
-        },
-      };
-      return request;
+
+  async function answer(statement: Statement): Promise<FakeResult> {
+    const { text, parameters } = render(statement);
+    const recorded = { text, values: parameters.map((parameter) => parameter.value) };
+    statements.push(recorded);
+    const result = await handler(recorded);
+    return Array.isArray(result) ? { rows: result as readonly object[] } : ((result as FakeResult | undefined) ?? {});
+  }
+
+  const firstSet = (result: FakeResult): Row[] => [...(result.rows ?? result.sets?.[0] ?? [])] as Row[];
+
+  const queries: Queries = {
+    rows: async <T>(statement: Statement) => firstSet(await answer(statement)) as T[],
+    row: async <T>(statement: Statement) => firstSet(await answer(statement))[0] as T | undefined,
+    sets: async (statement) => {
+      const result = await answer(statement);
+      return result.sets ? result.sets.map((set) => [...set] as Row[]) : [firstSet(result)];
     },
-  } as unknown as Pool;
+    execute: async (statement) => [...((await answer(statement)).affected ?? [])],
+  };
+
   return {
-    queries,
+    ...queries,
+    statements,
     transactions,
-    withPool: (run) => run(pool),
-    measurePool: (run) => run(pool, 0),
-    withTransaction: async (run) => {
-      transactions.push("begin");
+    async transaction<T>(work: (tx: Queries) => Promise<T>, options: TransactionOptions = {}) {
+      transactions.push(options.skipPlayerActivity ? "begin (activity paused)" : "begin");
       try {
-        const result = await run(pool);
+        const result = await work(queries);
         transactions.push("commit");
         return result;
       } catch (error) {
@@ -68,5 +65,7 @@ export function createFakeDatabase(handler: QueryHandler): FakeDatabase {
         throw error;
       }
     },
+    ping: () => Promise.resolve(),
+    close: () => Promise.resolve(),
   };
 }

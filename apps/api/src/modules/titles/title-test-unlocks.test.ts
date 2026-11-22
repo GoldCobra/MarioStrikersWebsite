@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createFakeDatabase, type QueryHandler } from "../../test-support/fake-database.ts";
+import { createFakeDatabase, type FakeDatabase } from "../../test-support/fake-database.ts";
 import { GIANT, GOLDCOBRA, TITLE_CATEGORIES, seededCatalog } from "./catalog.ts";
 import { TEST_UNLOCK_LOG_COMMAND, runTestUnlocks, testableTitles } from "./title-test-unlocks.ts";
 
@@ -11,21 +11,22 @@ interface State {
   regular: number[];
   tests: number[];
   selected: number | null;
-  log: string[];
+  /** The parameter values of every dbo.CommandLog row: command, then parameters. */
+  log: unknown[][];
   touchedRegular: boolean;
-  /** SkipPlayerActivity as the session would have it, and its value at every cleared selection. */
-  activityPaused: boolean;
+  /** For every cleared selection: whether its transaction had the activity triggers paused. */
   clearsWhilePaused: boolean[];
 }
 
-function handlerFor(state: State, playerExists = true): QueryHandler {
+/** A database that answers from `state` and changes it as the statements would. */
+function databaseFor(state: State, playerExists = true): FakeDatabase {
   const categories = new Map(TITLE_CATEGORIES.map((category) => [category.code, category]));
-  return (sql, inputs) => {
-    if (sql.includes("FROM dbo.PlayerTitleTestUnlock x WITH (UPDLOCK, HOLDLOCK)")) {
+  const database = createFakeDatabase(({ text, values }) => {
+    if (text.includes("FROM dbo.PlayerTitleTestUnlock x WITH (UPDLOCK, HOLDLOCK)")) {
       const titleId = (titleIdValue: number) => ({ TitleId: titleIdValue });
       return {
-        recordsets: [
-          playerExists ? [{ ID: inputs.playerId }] : [],
+        sets: [
+          playerExists ? [{ ID: values[0] }] : [],
           state.regular.map(titleId),
           state.tests.map(titleId),
           state.selected === null ? [] : [titleId(state.selected)],
@@ -52,33 +53,31 @@ function handlerFor(state: State, playerExists = true): QueryHandler {
         ],
       };
     }
-    if (sql.startsWith("EXEC sys.sp_set_session_context @key = N'SkipPlayerActivity'")) {
-      state.activityPaused = sql.includes("@value = 1;");
-      return {};
-    }
-    if (sql.startsWith("INSERT INTO dbo.PlayerTitleTestUnlock")) {
-      const titleId = Number(inputs.titleId);
-      if (state.tests.includes(titleId)) return { rowsAffected: [0] };
+    if (text.includes("INSERT INTO dbo.PlayerTitleTestUnlock")) {
+      // Values: PlayerId, TitleId, GrantedBy, Note, then PlayerId and TitleId of the NOT EXISTS.
+      const titleId = Number(values[1]);
+      if (state.tests.includes(titleId)) return { affected: [0] };
       state.tests.push(titleId);
-      return { rowsAffected: [1] };
+      return { affected: [1] };
     }
-    if (sql.startsWith("DELETE FROM dbo.PlayerTitleTestUnlock")) {
+    if (text.includes("DELETE FROM dbo.PlayerTitleTestUnlock")) {
       const removed = state.tests.length;
       state.tests = [];
-      return { rowsAffected: [removed] };
+      return { affected: [removed] };
     }
-    if (sql.startsWith("DELETE FROM dbo.PlayerActiveTitle")) {
+    if (text.includes("DELETE FROM dbo.PlayerActiveTitle")) {
       state.selected = null;
-      state.clearsWhilePaused.push(state.activityPaused);
-      return { rowsAffected: [1] };
+      state.clearsWhilePaused.push(database.transactions.at(-1) === "begin (activity paused)");
+      return { affected: [1] };
     }
-    if (sql.startsWith("INSERT INTO dbo.CommandLog")) {
-      state.log.push(sql + " " + String(inputs.log));
-      return { rowsAffected: [1] };
+    if (text.includes("INSERT INTO dbo.CommandLog")) {
+      state.log.push([...values]);
+      return { affected: [1] };
     }
-    if (/PlayerTitleUnlock\b/.test(sql)) state.touchedRegular = true;
-    throw new Error(`Unexpected SQL: ${sql.slice(0, 80)}`);
-  };
+    if (/PlayerTitleUnlock\b/.test(text)) state.touchedRegular = true;
+    throw new Error(`Unexpected SQL: ${text.trim().slice(0, 80)}`);
+  });
+  return database;
 }
 
 const goldCobra = (): State => ({
@@ -87,7 +86,6 @@ const goldCobra = (): State => ({
   selected: id("three-ghosts"),
   log: [],
   touchedRegular: false,
-  activityPaused: false,
   clearsWhilePaused: [],
 });
 
@@ -103,7 +101,7 @@ test("test unlocks cover every selectable title the player has not earned, nothi
 
 test("grant-all reports first, then writes only test unlocks, once", async () => {
   const state = goldCobra();
-  const dry = await runTestUnlocks(createFakeDatabase(handlerFor(state)), {
+  const dry = await runTestUnlocks(databaseFor(state), {
     playerId: GOLDCOBRA.player_id,
     mode: "grant-all",
     apply: false,
@@ -114,7 +112,7 @@ test("grant-all reports first, then writes only test unlocks, once", async () =>
   assert.ok(dry.titles.includes("wfc-5012-daily-points-world-record"));
   assert.ok(!dry.titles.includes("wfc-66-0-daily-world-record"), "earned titles need no test unlock");
 
-  const database = createFakeDatabase(handlerFor(state));
+  const database = databaseFor(state);
   const applied = await runTestUnlocks(database, {
     playerId: GOLDCOBRA.player_id,
     mode: "grant-all",
@@ -125,10 +123,10 @@ test("grant-all reports first, then writes only test unlocks, once", async () =>
   assert.equal(state.tests.length, dry.titles.length);
   assert.equal(state.touchedRegular, false);
   assert.deepEqual(database.transactions, ["begin", "commit"]);
-  assert.match(state.log[0] ?? "", new RegExp(`N'${TEST_UNLOCK_LOG_COMMAND}'`));
+  assert.equal(state.log[0]?.[0], TEST_UNLOCK_LOG_COMMAND);
   assert.deepEqual(state.regular.length, 3, "regular unlocks unchanged");
 
-  const again = await runTestUnlocks(createFakeDatabase(handlerFor(state)), {
+  const again = await runTestUnlocks(databaseFor(state), {
     playerId: GOLDCOBRA.player_id,
     mode: "grant-all",
     apply: true,
@@ -142,7 +140,8 @@ test("revoke removes only the test unlocks, and a selection only a test unlock a
   const state = goldCobra();
   state.tests = [id("wfc-5012-daily-points-world-record"), id("legacy-legend")];
   state.selected = id("wfc-5012-daily-points-world-record");
-  const report = await runTestUnlocks(createFakeDatabase(handlerFor(state)), {
+  const database = databaseFor(state);
+  const report = await runTestUnlocks(database, {
     playerId: GOLDCOBRA.player_id,
     mode: "revoke",
     apply: true,
@@ -154,15 +153,16 @@ test("revoke removes only the test unlocks, and a selection only a test unlock a
   assert.equal(state.selected, null);
   assert.equal(state.regular.length, 3, "earned and fixed titles stay");
   assert.equal(state.touchedRegular, false);
-  // An admin tool clearing the selection is no activity of the player, and the pause ends with it.
+  // An admin tool clearing the selection is no activity of the player, and the pause ends with its transaction.
   assert.deepEqual(state.clearsWhilePaused, [true]);
-  assert.equal(state.activityPaused, false);
+  assert.deepEqual(database.transactions, ["begin (activity paused)", "commit"]);
+  assert.equal(state.log[0]?.[0], TEST_UNLOCK_LOG_COMMAND);
 
   // A selection of an earned title stays.
   const keeps = goldCobra();
   keeps.tests = [id("legacy-legend")];
   keeps.selected = id("wfc-66-0-daily-world-record");
-  const kept = await runTestUnlocks(createFakeDatabase(handlerFor(keeps)), {
+  const kept = await runTestUnlocks(databaseFor(keeps), {
     playerId: GOLDCOBRA.player_id,
     mode: "revoke",
     apply: true,
@@ -175,7 +175,7 @@ test("revoke removes only the test unlocks, and a selection only a test unlock a
 test("an unknown player or no player id changes nothing", async () => {
   const state = goldCobra();
   await assert.rejects(
-    runTestUnlocks(createFakeDatabase(handlerFor(state, false)), {
+    runTestUnlocks(databaseFor(state, false), {
       playerId: GIANT.player_id,
       mode: "grant-all",
       apply: true,
@@ -184,7 +184,7 @@ test("an unknown player or no player id changes nothing", async () => {
     /Player 17 does not exist/,
   );
   await assert.rejects(
-    runTestUnlocks(createFakeDatabase(handlerFor(state)), {
+    runTestUnlocks(databaseFor(state), {
       playerId: Number.NaN,
       mode: "revoke",
       apply: true,

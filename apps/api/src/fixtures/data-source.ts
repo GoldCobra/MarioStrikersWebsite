@@ -501,7 +501,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
       .filter((entry) => entry.played)
       .slice(0, 26)
       .map((entry, index) => {
-        // A few WHR names have no matching Player row in the live data; mirror that.
+        // A few rows without a player id keep the ladder's unlinked rows (no profile link) covered.
         const unmatched = index % 9 === 8;
         return {
           player_id: unmatched ? null : entry.player.player_id,

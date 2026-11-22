@@ -122,10 +122,13 @@ test("oversized and malformed request bodies are client errors", async () => {
 });
 
 test("production refuses the fixture data source", async () => {
-  const config = loadConfig(
-    { NODE_ENV: "production", MSSQL_HOST: "db", MSSQL_DATABASE: "d", MSSQL_USER: "u", MSSQL_PASSWORD: "p" },
-    { isolated: true },
-  );
+  const config = loadConfig({
+    NODE_ENV: "production",
+    MSSQL_HOST: "db",
+    MSSQL_DATABASE: "d",
+    MSSQL_USER: "u",
+    MSSQL_PASSWORD: "p",
+  });
   await assert.rejects(buildApp({ config, data: createFixtureDataSource() }), /cannot run in production/);
 });
 

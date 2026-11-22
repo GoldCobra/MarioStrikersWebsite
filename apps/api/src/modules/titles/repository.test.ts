@@ -1,17 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import type { mssql } from "../../db/database.ts";
-import { createFakeDatabase } from "../../test-support/fake-database.ts";
+import { createFakeDatabase, type RecordedStatement } from "../../test-support/fake-database.ts";
 import { TITLE_CATALOG, TITLE_CATEGORIES } from "./catalog.ts";
 import {
-  CATALOG_QUERY,
-  GAME_COLUMN_SQL,
-  LAST_SYNC_QUERY,
-  SCHEMA_SQL,
-  buildGrantQuery,
-  buildSeedCategoriesQuery,
-  buildSeedTitlesQuery,
   createTitleCatalog,
+  fetchTitleCodes,
+  insertMissingCategories,
+  insertMissingTitles,
   readLastSyncRun,
   readTitleSources,
   toLegacyRankRows,
@@ -19,108 +14,89 @@ import {
 } from "./repository.ts";
 import type { TitleAwardPlan } from "./rules.ts";
 
-function recordingRequest(): { request: mssql.Request; inputs: Record<string, unknown> } {
-  const inputs: Record<string, unknown> = {};
-  const request = {
-    input(name: string, _type: unknown, value: unknown) {
-      inputs[name] = value;
-      return request;
-    },
-  } as unknown as mssql.Request;
-  return { request, inputs };
+/** A statement's text on one line, so that it can be matched across its line breaks. */
+const flat = (text: string | undefined): string => (text ?? "").replace(/\s+/g, " ").trim();
+
+/** The parameter values of the recorded INSERTs into `table`, `width` per row, in order. */
+function insertedValues(statements: readonly RecordedStatement[], table: string, width: number): unknown[][] {
+  const values = statements
+    .filter((statement) => statement.text.includes(`INSERT INTO ${table} (`))
+    .flatMap((statement) => statement.values);
+  return Array.from({ length: values.length / width }, (_, index) => values.slice(index * width, (index + 1) * width));
 }
 
-test("the schema creates each title table only when it is missing", () => {
-  for (const table of [
-    "PlayerTitleCategory",
-    "PlayerTitle",
-    "PlayerTitleUnlock",
-    "PlayerActiveTitle",
-    "PlayerTitleTestUnlock",
-  ]) {
+test("the seed adds only missing categories and titles, every value a parameter", async () => {
+  // Every row counts as missing: SELECT @@ROWCOUNT answers with the rows of its INSERT.
+  const database = createFakeDatabase(({ text, values }) => {
+    if (text.includes("INSERT INTO dbo.PlayerTitleCategory (")) return [{ inserted: values.length / 5 }];
+    if (text.includes("INSERT INTO dbo.PlayerTitle (")) return [{ inserted: values.length / 11 }];
+    return [{ Code: "og-player" }, { Code: "npc" }];
+  });
+  assert.equal(await insertMissingCategories(database, TITLE_CATEGORIES), TITLE_CATEGORIES.length);
+  assert.equal(await insertMissingTitles(database, TITLE_CATALOG), TITLE_CATALOG.length);
+
+  const [categorySql, ...titleSqls] = database.statements;
+  assert.match(
+    flat(categorySql?.text),
+    /WHERE NOT EXISTS \(SELECT 1 FROM dbo\.PlayerTitleCategory c WHERE c\.Code = v\.Code\); SELECT @@ROWCOUNT AS inserted;$/,
+  );
+  assert.deepEqual(insertedValues(database.statements, "dbo.PlayerTitleCategory", 5)[6], [
+    "free",
+    "Free Titles",
+    "Everyone",
+    true,
+    6,
+  ]);
+
+  assert.ok(titleSqls.length);
+  for (const statement of titleSqls) {
+    const text = flat(statement.text);
     assert.match(
-      SCHEMA_SQL,
-      new RegExp(`IF OBJECT_ID\\(N'dbo\\.${table}', N'U'\\) IS NULL CREATE TABLE dbo\\.${table} \\(`),
+      text,
+      /WHERE NOT EXISTS \(SELECT 1 FROM dbo\.PlayerTitle t WHERE t\.Code = v\.Code\); SELECT @@ROWCOUNT AS inserted;$/,
     );
+    assert.doesNotMatch(text, /CAN'T|KRITTER|"FOOTBALL"/);
+    // 11 parameters per title stay far below SQL Server's 2100 per request.
+    assert.ok(statement.values.length < 2100);
   }
-  assert.doesNotMatch(SCHEMA_SQL, /\b(?:DROP|ALTER|TRUNCATE|DELETE)\b/i);
-  // FULL CAPS is checked byte by byte: the database's collation ignores case.
-  assert.match(SCHEMA_SQL, /CHECK \(Name = UPPER\(Name\) COLLATE Latin1_General_100_BIN2/);
-  assert.match(SCHEMA_SQL, /CONSTRAINT UQ_PlayerTitleUnlock_Player_Title UNIQUE \(PlayerId, TitleId\)/);
-  assert.match(SCHEMA_SQL, /SourceType IN \('SEASON', 'ACCOLADE', 'TOURNAMENT', 'LEGACY_RANK', 'MANUAL'\)/);
-  // A title's game is one of the three, or none; test unlocks are their own table, once per player and title.
-  assert.match(
-    SCHEMA_SQL,
-    /GameCode VARCHAR\(8\) NULL CONSTRAINT CK_PlayerTitle_GameCode CHECK \(GameCode IN \('MSBL', 'MSC', 'SMS'\)\)/,
-  );
-  assert.match(SCHEMA_SQL, /CONSTRAINT UQ_PlayerTitleTestUnlock_Player_Title UNIQUE \(PlayerId, TitleId\)/);
-  assert.match(SCHEMA_SQL, /FK_PlayerTitleTestUnlock_Title REFERENCES dbo\.PlayerTitle \(Id\)/);
-});
+  // A title's values in column order: Code, Name, CategoryCode, SortOrder, RuleKind, RuleParams, StyleKey,
+  // ExclusiveGroup, ExclusiveLevel, GameCode, IsActive.
+  const titles = insertedValues(database.statements, "dbo.PlayerTitle", 11);
+  const title = (code: string): unknown[] => titles.find((values) => values[0] === code) ?? [];
+  assert.equal(title("tournament-winner-green")[1], "TOURNAMENT WINNER");
+  assert.deepEqual(title("tournament-winner-green").slice(5), ['{"min":5}', "green", null, null, null, false]);
+  assert.deepEqual(title("tournament-winner-green-sms").slice(9), ["SMS", true]);
+  assert.deepEqual(title("legacy-legend").slice(7, 9), ["legacy-rank", 4]);
+  assert.equal(title("og-player")[5], null);
 
-test("an older PlayerTitle gets the GameCode column only when it is missing, and nothing else", () => {
-  assert.match(
-    GAME_COLUMN_SQL,
-    /^IF COL_LENGTH\(N'dbo\.PlayerTitle', N'GameCode'\) IS NULL ALTER TABLE dbo\.PlayerTitle ADD GameCode /,
-  );
-  assert.doesNotMatch(GAME_COLUMN_SQL, /\b(?:DROP|TRUNCATE|DELETE|UPDATE)\b/i);
-});
-
-test("the seed adds only missing categories and titles, every value a typed parameter", () => {
-  const categories = recordingRequest();
-  const categorySql = buildSeedCategoriesQuery(TITLE_CATEGORIES, categories.request);
-  assert.match(categorySql, /WHERE NOT EXISTS \(SELECT 1 FROM dbo\.PlayerTitleCategory c WHERE c\.Code = v\.Code\);/);
-  assert.equal(categories.inputs.cCode6, "free");
-  assert.equal(categories.inputs.cGlobal6, true);
-
-  const titles = recordingRequest();
-  const titleSql = buildSeedTitlesQuery(TITLE_CATALOG, titles.request);
-  assert.match(titleSql, /WHERE NOT EXISTS \(SELECT 1 FROM dbo\.PlayerTitle t WHERE t\.Code = v\.Code\);/);
-  assert.match(titleSql, /SELECT @@ROWCOUNT AS inserted;$/);
-  assert.doesNotMatch(titleSql, /CAN'T|KRITTER|"FOOTBALL"/);
-  const index = TITLE_CATALOG.findIndex((title) => title.code === "tournament-winner-green");
-  assert.equal(titles.inputs[`tName${index}`], "TOURNAMENT WINNER");
-  assert.equal(titles.inputs[`tParams${index}`], '{"min":5}');
-  assert.equal(titles.inputs[`tStyle${index}`], "green");
-  assert.equal(titles.inputs[`tGroup${index}`], null);
-  assert.equal(titles.inputs[`tActive${index}`], false);
-  assert.equal(titles.inputs[`tGame${index}`], null);
-  const variant = TITLE_CATALOG.findIndex((title) => title.code === "tournament-winner-green-sms");
-  assert.equal(titles.inputs[`tGame${variant}`], "SMS");
-  assert.equal(titles.inputs[`tActive${variant}`], true);
-  const legacy = TITLE_CATALOG.findIndex((title) => title.code === "legacy-legend");
-  assert.equal(titles.inputs[`tGroup${legacy}`], "legacy-rank");
-  assert.equal(titles.inputs[`tLevel${legacy}`], 4);
-  const free = TITLE_CATALOG.findIndex((title) => title.code === "og-player");
-  assert.equal(titles.inputs[`tParams${free}`], null);
-  // 11 parameters per title stay far below SQL Server's 2100 per request.
-  assert.ok(Object.keys(titles.inputs).length < 2100);
+  // ops:player-titles checks the catalog against the stored codes.
+  assert.deepEqual([...(await fetchTitleCodes(database))], ["og-player", "npc"]);
+  assert.equal(flat(database.statements.at(-1)?.text), "SELECT Code FROM dbo.PlayerTitle;");
 });
 
 test("the catalog is read once per five minutes, again after invalidate and after a failure", async () => {
   let fail = false;
   const database = createFakeDatabase(() => {
     if (fail) throw new Error("Connection is closed.");
-    return {
-      recordset: [
-        {
-          Id: 3,
-          Code: "og-player",
-          Name: "OG PLAYER ",
-          CategoryCode: "free",
-          SortOrder: 12,
-          RuleKind: "everyone",
-          RuleParams: null,
-          StyleKey: null,
-          ExclusiveGroup: null,
-          ExclusiveLevel: null,
-          GameCode: null,
-          IsActive: true,
-          CategoryName: "Free Titles",
-          CategorySort: 6,
-          IsGlobal: 1,
-        },
-      ],
-    };
+    return [
+      {
+        Id: 3,
+        Code: "og-player",
+        Name: "OG PLAYER ",
+        CategoryCode: "free",
+        SortOrder: 12,
+        RuleKind: "everyone",
+        RuleParams: null,
+        StyleKey: null,
+        ExclusiveGroup: null,
+        ExclusiveLevel: null,
+        GameCode: null,
+        IsActive: true,
+        CategoryName: "Free Titles",
+        CategorySort: 6,
+        IsGlobal: 1,
+      },
+    ];
   });
   const catalog = createTitleCatalog(database);
   const [title] = await catalog.get();
@@ -142,22 +118,25 @@ test("the catalog is read once per five minutes, again after invalidate and afte
     isActive: true,
   });
   await catalog.get();
-  assert.equal(database.queries.length, 1);
-  assert.equal(database.queries[0]?.sql, CATALOG_QUERY);
+  assert.equal(database.statements.length, 1);
+  assert.match(
+    flat(database.statements[0]?.text),
+    /^SELECT t\.Id, t\.Code, t\.Name, .*, c\.IsGlobal FROM dbo\.PlayerTitle t INNER JOIN dbo\.PlayerTitleCategory c ON c\.Code = t\.CategoryCode;$/,
+  );
   catalog.invalidate();
   fail = true;
   await assert.rejects(catalog.get(), /Connection is closed/);
   fail = false;
   await catalog.get();
-  assert.equal(database.queries.length, 3);
+  assert.equal(database.statements.length, 3);
 });
 
 test("the sources are read in one batch; the legacy ranks only when asked for", async () => {
-  const database = createFakeDatabase((sql) =>
-    sql.includes("DECLARE @cutoff")
-      ? { recordset: [{ Player: 4, GameType: 3, Rank: 7, Rank2v2: 2, Singles: 31, Teams: 3 }] }
+  const database = createFakeDatabase(({ text }) =>
+    text.includes("DECLARE @cutoff")
+      ? [{ Player: 4, GameType: 3, Rank: 7, Rank2v2: 2, Singles: 31, Teams: 3 }]
       : {
-          recordsets: [
+          sets: [
             [],
             [{ PlayerId: 4, TitleId: 9 }],
             [{ ID: 4, DiscordID: " 195905866527014912 " }],
@@ -177,8 +156,10 @@ test("the sources are read in one batch; the legacy ranks only when asked for", 
         },
   );
   const daily = await readTitleSources(database, { legacy: false });
-  assert.equal(database.queries.length, 1);
-  assert.match(database.queries[0]?.sql ?? "", /CompetitiveSeasonRewardEarned e WHERE e\.TierOrder = 7;$/);
+  assert.equal(database.statements.length, 1);
+  const [batch] = database.statements;
+  assert.match(flat(batch?.text), /FROM rocci121_toby\.CompetitiveSeasonRewardEarned e WHERE e\.TierOrder = @p0;$/);
+  assert.deepEqual(batch?.values, [7]);
   assert.equal(daily.legacyRanks, undefined);
   assert.deepEqual(daily.tournaments, [
     {
@@ -191,6 +172,7 @@ test("the sources are read in one batch; the legacy ranks only when asked for", 
     },
   ]);
   assert.deepEqual(daily.seasons, [{ id: 2, seasonNumber: 1, displayName: "Burst Season 2026", status: "completed" }]);
+  assert.deepEqual(daily.unlocks, [{ playerId: 4, titleId: 9 }]);
   assert.deepEqual([...daily.playerIds], [4]);
   assert.deepEqual([...daily.discordIds], [[4, "195905866527014912"]]);
   assert.deepEqual(daily.titans, [{ seasonId: 2, playerId: 4, gameType: 3 }]);
@@ -205,11 +187,15 @@ test("the sources are read in one batch; the legacy ranks only when asked for", 
 
 test("the last run comes from the newest WebsiteTitleSync row", async () => {
   const at = new Date("2026-10-02T04:00:00Z");
-  const logged = createFakeDatabase(() => ({ recordset: [{ TimeOfCommand: at }] }));
+  const logged = createFakeDatabase(() => [{ TimeOfCommand: at }]);
   assert.deepEqual(await readLastSyncRun(logged), at);
-  assert.equal(logged.queries[0]?.sql, LAST_SYNC_QUERY);
-  assert.match(LAST_SYNC_QUERY, /WHERE Command = N'WebsiteTitleSync' ORDER BY Id DESC;$/);
-  assert.equal(await readLastSyncRun(createFakeDatabase(() => ({ recordset: [] }))), null);
+  const [read] = logged.statements;
+  assert.match(
+    flat(read?.text),
+    /^SELECT TOP 1 TimeOfCommand FROM dbo\.CommandLog WHERE Command = @p0 ORDER BY Id DESC;$/,
+  );
+  assert.deepEqual(read?.values, ["WebsiteTitleSync"]);
+  assert.equal(await readLastSyncRun(createFakeDatabase(() => [])), null);
 });
 
 const PLAN: TitleAwardPlan = {
@@ -233,47 +219,54 @@ const PLAN: TitleAwardPlan = {
   openPoints: [],
 };
 
+/** The grants of a recorded INSERT: GrantedBy comes once, then four values per grant. */
+const grantCount = (statement: RecordedStatement): number => (statement.values.length - 1) / 4;
+
 test("grants are written in chunks in one transaction with the run in dbo.CommandLog", async () => {
-  const database = createFakeDatabase((sql, inputs) => {
-    if (!sql.includes("INSERT INTO dbo.PlayerTitleUnlock")) return { recordset: [] };
-    return { recordset: [{ inserted: Object.keys(inputs).filter((name) => name.startsWith("player")).length }] };
-  });
+  const database = createFakeDatabase((statement) =>
+    statement.text.includes("INSERT INTO dbo.PlayerTitleUnlock") ? [{ inserted: grantCount(statement) }] : undefined,
+  );
   const inserted = await writeTitleAwards(database, PLAN, { grantedBy: "ops:title-sync", log: { granted: 450 } });
   assert.equal(inserted, 450);
   assert.deepEqual(database.transactions, ["begin", "commit"]);
-  const [newTitle, ...rest] = database.queries;
-  assert.match(newTitle?.sql ?? "", /^IF NOT EXISTS \(SELECT 1 FROM dbo\.PlayerTitle WHERE Code = @code\) INSERT/);
-  assert.equal(newTitle?.inputs.name, "BURST 2026 STRIKERS TITAN");
-  assert.equal(newTitle.inputs.gameCode, "MSBL");
-  const grants = rest.filter((query) => query.sql.includes("PlayerTitleUnlock"));
-  assert.deepEqual(
-    grants.map((query) => Object.keys(query.inputs).filter((name) => name.startsWith("player")).length),
-    [200, 200, 50],
+  const [newTitle, ...rest] = database.statements;
+  assert.match(
+    flat(newTitle?.text),
+    /^IF NOT EXISTS \(SELECT 1 FROM dbo\.PlayerTitle WHERE Code = @p0\) INSERT INTO dbo\.PlayerTitle /,
   );
+  assert.deepEqual(newTitle?.values, [
+    "season-titan-2",
+    "season-titan-2",
+    "BURST 2026 STRIKERS TITAN",
+    "competitive-season",
+    1,
+    "season-titan",
+    '{"season_id":2}',
+    "MSBL",
+  ]);
+  const grants = rest.filter((statement) => statement.text.includes("PlayerTitleUnlock"));
+  assert.deepEqual(grants.map(grantCount), [200, 200, 50]);
   const [firstGrant] = grants;
   assert.ok(firstGrant);
-  assert.equal(firstGrant.inputs.grantedBy, "ops:title-sync");
-  assert.equal(firstGrant.inputs.code0, "season-titan-2");
+  assert.deepEqual(firstGrant.values.slice(0, 5), ["ops:title-sync", 1, "season-titan-2", "SEASON", "ref 0"]);
+  assert.match(
+    flat(firstGrant.text),
+    /WHERE NOT EXISTS \(SELECT 1 FROM dbo\.PlayerTitleUnlock u WHERE u\.PlayerId = v\.PlayerId AND u\.TitleId = t\.Id\); SELECT @@ROWCOUNT AS inserted;$/,
+  );
   const log = rest.at(-1);
-  assert.match(
-    log?.sql ?? "",
-    /INSERT INTO dbo\.CommandLog \(Command, Parameters\) VALUES \(N'WebsiteTitleSync', @log\);/,
-  );
-  assert.deepEqual(JSON.parse(String(log?.inputs.log)), { granted_by: "ops:title-sync", granted: 450 });
-  assert.match(
-    buildGrantQuery(1),
-    /WHERE NOT EXISTS \(SELECT 1 FROM dbo\.PlayerTitleUnlock u WHERE u\.PlayerId = v\.PlayerId AND u\.TitleId = t\.Id\);/,
-  );
+  assert.match(flat(log?.text), /^INSERT INTO dbo\.CommandLog \(Command, Parameters\) VALUES \(@p0, @p1\);$/);
+  assert.equal(log?.values[0], "WebsiteTitleSync");
+  assert.deepEqual(JSON.parse(String(log.values[1])), { granted_by: "ops:title-sync", granted: 450 });
 });
 
 test("fewer inserted rows than planned roll the whole run back", async () => {
-  const database = createFakeDatabase((sql) => ({
-    recordset: sql.includes("INSERT INTO dbo.PlayerTitleUnlock") ? [{ inserted: 1 }] : [],
-  }));
+  const database = createFakeDatabase(({ text }) =>
+    text.includes("INSERT INTO dbo.PlayerTitleUnlock") ? [{ inserted: 1 }] : undefined,
+  );
   await assert.rejects(
     writeTitleAwards(database, PLAN, { grantedBy: "website title sync", log: {} }),
     /Planned 450 title unlocks but inserted 3; nothing was saved\./,
   );
   assert.deepEqual(database.transactions, ["begin", "rollback"]);
-  assert.ok(!database.queries.some((query) => query.sql.includes("CommandLog")));
+  assert.ok(!database.statements.some((statement) => statement.text.includes("CommandLog")));
 });

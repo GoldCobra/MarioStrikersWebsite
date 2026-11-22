@@ -19,3 +19,4 @@ change a record's status instead of deleting it when it is replaced.
 | [0011](0011-hidden-admin-page.md) | A hidden admin page behind the Discord admin role |
 | [0012](0012-club-management-on-the-website.md) | Club management on the website, the bot performs its effects |
 | [0013](0013-club-logo-uploads-with-sharp.md) | Club logo uploads are decoded and re-encoded with sharp |
+| [0014](0014-data-access-on-the-local-database.md) | One SQL core for the database next to the API |

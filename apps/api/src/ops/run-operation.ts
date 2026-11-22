@@ -1,8 +1,8 @@
-// One-off maintenance commands against the live database configured in apps/api/.env.
+// Maintenance commands (npm run ops:*) against the database configured in apps/api/.env.
 
 import path from "node:path";
 import { loadConfig, loadEnvFile, type Config } from "../config.ts";
-import { Database } from "../db/database.ts";
+import { createDatabase, type Database } from "../db/database.ts";
 import type { Logger } from "../lib/logger.ts";
 import { createLogger } from "../server.ts";
 
@@ -20,7 +20,7 @@ export async function runOperation(
   loadEnvFile(path.resolve(process.cwd(), ".env"));
   const config = loadConfig(process.env);
   const log = createLogger(config);
-  const database = new Database(config.mssql, log);
+  const database = createDatabase(config.mssql, log);
   try {
     console.log(JSON.stringify(await operation({ config, database, log }), null, 2));
   } catch (error) {

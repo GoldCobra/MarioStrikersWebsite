@@ -1,20 +1,18 @@
 // Leaderboard rows: the active season's ELO ladders, and the all-time legacy WHR ladder that futbot
 // recalculates. Both produce the same row shape.
 
-import { normalizeText, toText } from "@ms/shared/text";
-import type { Database } from "../../db/database.ts";
+import { normalizeText } from "@ms/shared/text";
+import type { Queries } from "../../db/database.ts";
 import { toPositiveIntOrNull, toSafeCount } from "../../lib/numbers.ts";
 import {
   COMPETITIVE_MODE_BY_CODE,
   GAME_TYPE_BY_CODE,
-  LEGACY_MODE_TO_FLAGS,
   assertGameAndMode,
   parseLimit,
   parseOffset,
   type GameCode,
 } from "./params.ts";
-import { fetchCompetitiveLeaderboard, fetchPlayerIdentities, fetchRawRatings, fetchWinsLosses } from "./repository.ts";
-import { normalizeCompetitiveRank } from "./whr-ranks.ts";
+import { fetchCompetitiveLeaderboard, fetchWhrLeaderboard } from "./repository.ts";
 
 export interface LeaderboardRow {
   rank: number;
@@ -72,38 +70,14 @@ function isVisibleCompetitiveRank(rankName: unknown, rankNumber: unknown): boole
   return Boolean(rank) && rank.toLowerCase() !== "unranked";
 }
 
-export interface ParsedRatingLine {
-  readonly displayName: string;
-  readonly rating: number;
-  readonly competitiveRank: string;
-}
-
-/** Parses a GetRatingsForDiscord line such as "<:rookie:123>`Player Name 1500`". */
-export function parseRatingLine(lineValue: unknown): ParsedRatingLine | null {
-  const text = toText(lineValue);
-  const rankEmoji = /<:([^:>]+):\d+>/i.exec(text);
-  const rawRankCode = rankEmoji ? (rankEmoji[1] ?? "").trim().toLowerCase() : "";
-  const canonicalRank = normalizeCompetitiveRank(rawRankCode);
-  const parts = text.split("`");
-  if (parts.length < 2) return null;
-  const match = /^(.*?)(-?\d+(?:\.\d+)?)\s*$/.exec((parts[1] ?? "").trim());
-  if (!match) return null;
-  const displayName = (match[1] ?? "").trim();
-  const rating = Number(match[2]);
-  if (!displayName || !Number.isFinite(rating)) return null;
-  return { displayName, rating, competitiveRank: canonicalRank ? canonicalRank.name : rawRankCode };
-}
-
 async function getCompetitiveRows(
-  database: Pick<Database, "withPool">,
+  db: Queries,
   game: GameCode,
   mode: string,
   limit: number,
   offset: number,
 ): Promise<LeaderboardRow[]> {
-  const records = await database.withPool((pool) =>
-    fetchCompetitiveLeaderboard(pool, GAME_TYPE_BY_CODE[game], mode, limit, offset),
-  );
+  const records = await fetchCompetitiveLeaderboard(db, GAME_TYPE_BY_CODE[game], mode, limit, offset);
   return records
     .filter((row) => isVisibleCompetitiveRank(row.competitive_rank, row.rank_number))
     .map((row, index) => {
@@ -131,66 +105,46 @@ async function getCompetitiveRows(
     .filter((row) => Boolean(row.display_name));
 }
 
-async function getWhrRows(
-  database: Pick<Database, "withPool">,
-  game: GameCode,
-  limit: number,
-  offset: number,
-): Promise<LeaderboardRow[]> {
-  const gameType = GAME_TYPE_BY_CODE[game];
+/** The query reads the whole ladder; it is sorted and paged here. A player without a name is not listed. */
+async function getWhrRows(db: Queries, game: GameCode, limit: number, offset: number): Promise<LeaderboardRow[]> {
   const activityDays = ACTIVITY_FILTER_DAYS_BY_GAME[game];
   const playedWithin = activityDays === null ? null : new Date();
   playedWithin?.setDate(playedWithin.getDate() - (activityDays ?? 0));
 
-  return database.withPool(async (pool) => {
-    const parsed = (await fetchRawRatings(pool, gameType, LEGACY_MODE_TO_FLAGS.whr, playedWithin))
-      .map((row) => parseRatingLine(row.line))
-      .filter((row): row is ParsedRatingLine => row !== null);
-    const names = parsed.map((row) => row.displayName);
-    const [records, identities] = await Promise.all([
-      fetchWinsLosses(pool, gameType, names),
-      fetchPlayerIdentities(pool, names),
-    ]);
-    const updatedAt = new Date().toISOString();
-    const merged = parsed.map((row) => {
-      const key = row.displayName.toLowerCase();
-      const record = records.get(key) ?? { totalWins: 0, totalLosses: 0, totalDraws: 0 };
-      const identity = identities.get(key);
+  const records = await fetchWhrLeaderboard(db, GAME_TYPE_BY_CODE[game], playedWithin);
+  const updatedAt = new Date().toISOString();
+  return records
+    .map((record) => ({ ...record, display_name: normalizeText(record.display_name) }))
+    .filter((record) => Boolean(record.display_name))
+    .sort((a, b) => b.rating - a.rating || a.display_name.localeCompare(b.display_name))
+    .slice(offset, offset + limit)
+    .map((record, index) => {
+      const wins = toSafeCount(record.total_wins);
+      const losses = toSafeCount(record.total_losses);
+      const draws = toSafeCount(record.total_draws);
       return {
-        player_id: identity?.playerId ?? null,
-        discord_user_id: identity?.discordUserId ?? null,
-        display_name: row.displayName,
-        total_matches: record.totalWins + record.totalLosses + record.totalDraws,
-        total_wins: record.totalWins,
-        total_losses: record.totalLosses,
-        total_draws: record.totalDraws,
-        rating: row.rating,
-        competitive_rank: row.competitiveRank,
+        rank: offset + index + 1,
+        player_id: record.player_id,
+        discord_user_id: normalizeText(record.discord_user_id) || null,
+        display_name: record.display_name,
+        total_matches: wins + losses + draws,
+        total_wins: wins,
+        total_losses: losses,
+        total_draws: draws,
+        total_game_diff: 0,
+        total_goals_for: 0,
+        total_goals_against: 0,
+        total_goal_diff: 0,
+        rating: record.rating,
+        // WHR has no rank tiers.
+        competitive_rank: "",
+        updated_at: updatedAt,
       };
     });
-    merged.sort((a, b) => b.rating - a.rating || a.display_name.localeCompare(b.display_name));
-    return merged.slice(offset, offset + limit).map((row, index) => ({
-      rank: offset + index + 1,
-      player_id: row.player_id,
-      discord_user_id: row.discord_user_id,
-      display_name: row.display_name,
-      total_matches: row.total_matches,
-      total_wins: row.total_wins,
-      total_losses: row.total_losses,
-      total_draws: row.total_draws,
-      total_game_diff: 0,
-      total_goals_for: 0,
-      total_goals_against: 0,
-      total_goal_diff: 0,
-      rating: row.rating,
-      competitive_rank: row.competitive_rank,
-      updated_at: updatedAt,
-    }));
-  });
 }
 
 export async function getLeaderboardRows(
-  database: Pick<Database, "withPool">,
+  db: Queries,
   query: LeaderboardQuery,
   limits: LeaderboardLimits,
 ): Promise<LeaderboardRow[]> {
@@ -198,6 +152,6 @@ export async function getLeaderboardRows(
   const limit = parseLimit(query.limit, limits.defaultLimit, limits.maxLimit);
   const offset = parseOffset(query.offset);
   return mode === "whr"
-    ? getWhrRows(database, game, limit, offset)
-    : getCompetitiveRows(database, game, COMPETITIVE_MODE_BY_CODE[mode], limit, offset);
+    ? getWhrRows(db, game, limit, offset)
+    : getCompetitiveRows(db, game, COMPETITIVE_MODE_BY_CODE[mode], limit, offset);
 }
