@@ -901,6 +901,13 @@ test("players list only includes rows with visible profile content", async () =>
   assert.match(sql, /Tournament/);
   assert.match(sql, /IdStartGG/);
   assert.doesNotMatch(sql, /PlayerStats/);
+  // The four kinds of ids are collected once and joined once: the placements are split once, never matched
+  // against every player with LIKE (1.1 s instead of 10 ms).
+  assert.equal(sql.match(/\bUNION\b/g)?.length, 3);
+  assert.match(sql, /STRING_SPLIT\(ISNULL\(placement\.list, N''\), N','\)/);
+  assert.match(sql, /INNER JOIN listed ON listed\.player_id = p\.ID/);
+  assert.doesNotMatch(sql, /\bLIKE\b|\bEXISTS\b/);
+  assert.deepEqual(database.statements[0]?.values, []);
 });
 
 test("buildSeasonAwards maps award rows and keeps the SQL ordering", () => {

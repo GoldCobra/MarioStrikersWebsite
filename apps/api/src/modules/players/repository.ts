@@ -239,47 +239,46 @@ export function fetchPlayerProfileRecordsets(db: Queries, playerId: number): Pro
 
 /**
  * The player list: a player is listed once they have a start.gg id, a friend code, a rated match this season or a
- * tournament placement. Duplicate names are marked for the display name (mappers.ts).
+ * tournament placement. The ids of each kind are collected first and joined once; one OR of four EXISTS made SQL
+ * Server test every tournament placement against every player (1.1 s instead of 10 ms). Duplicate names are marked
+ * for the display name (mappers.ts).
  */
 export function fetchPlayersList(db: Queries): Promise<PlayerListRecord[]> {
   return db.rows<PlayerListRecord>(sql`
+    WITH placed AS (
+      -- Tournament.Winner, RunnerUp and Bronze hold comma-separated player ids.
+      SELECT DISTINCT REPLACE(part.value, N' ', N'') AS token
+      FROM dbo.Tournament t
+      CROSS APPLY (VALUES (t.Winner), (t.RunnerUp), (t.Bronze)) placement (list)
+      CROSS APPLY STRING_SPLIT(ISNULL(placement.list, N''), N',') part
+    ),
+    listed AS (
+      SELECT p.ID AS player_id FROM dbo.Player p WHERE LTRIM(RTRIM(ISNULL(p.IdStartGG, N''))) <> N''
+      UNION
+      SELECT fc.Player FROM dbo.FriendCodes fc WHERE LTRIM(RTRIM(ISNULL(fc.Code, N''))) <> N''
+      UNION
+      SELECT lb.PlayerId
+      FROM rocci121_toby.CompetitiveLeaderboard lb
+      INNER JOIN rocci121_toby.CompetitiveSeason season ON season.Id = lb.SeasonId
+      WHERE ${ACTIVE_SEASON}
+      UNION
+      SELECT p.ID FROM dbo.Player p INNER JOIN placed ON placed.token = CONVERT(NVARCHAR(20), p.ID)
+    )
     SELECT p.ID AS player_id, p.Name AS name, p.Country AS country, p.Activity AS activity, club.club_id AS club_id,
       club.ClubName AS club_name, club.ClanTag AS club_tag,
       CASE WHEN duplicates.normalized_name IS NULL THEN 0 ELSE 1 END AS duplicate_name
     FROM dbo.Player p
+    INNER JOIN listed ON listed.player_id = p.ID
     LEFT JOIN (
-      SELECT LOWER(LTRIM(RTRIM(ISNULL(Name, '')))) AS normalized_name
+      SELECT LOWER(LTRIM(RTRIM(ISNULL(Name, N'')))) AS normalized_name
       FROM dbo.Player
-      WHERE LTRIM(RTRIM(ISNULL(Name, ''))) <> ''
-      GROUP BY LOWER(LTRIM(RTRIM(ISNULL(Name, ''))))
+      WHERE LTRIM(RTRIM(ISNULL(Name, N''))) <> N''
+      GROUP BY LOWER(LTRIM(RTRIM(ISNULL(Name, N''))))
       HAVING COUNT(*) > 1
-    ) duplicates ON duplicates.normalized_name = LOWER(LTRIM(RTRIM(ISNULL(p.Name, ''))))
+    ) duplicates ON duplicates.normalized_name = LOWER(LTRIM(RTRIM(ISNULL(p.Name, N''))))
     ${PLAYER_CLUB_APPLY}
-    WHERE LTRIM(RTRIM(ISNULL(p.Name, ''))) <> ''
-      AND (
-        LTRIM(RTRIM(ISNULL(p.IdStartGG, ''))) <> ''
-        OR EXISTS (
-          SELECT 1
-          FROM dbo.FriendCodes fc
-          WHERE fc.Player = p.ID
-            AND LTRIM(RTRIM(ISNULL(fc.Code, ''))) <> ''
-        )
-        OR EXISTS (
-          SELECT 1
-          FROM rocci121_toby.CompetitiveLeaderboard lb
-          INNER JOIN rocci121_toby.CompetitiveSeason season ON season.Id = lb.SeasonId
-          WHERE ${ACTIVE_SEASON}
-            AND lb.PlayerId = p.ID
-        )
-        OR EXISTS (
-          SELECT 1
-          FROM dbo.Tournament t
-          WHERE (',' + REPLACE(CONVERT(NVARCHAR(MAX), ISNULL(t.Winner, '')), ' ', '') + ',') LIKE '%,' + CONVERT(NVARCHAR(20), p.ID) + ',%'
-             OR (',' + REPLACE(CONVERT(NVARCHAR(MAX), ISNULL(t.RunnerUp, '')), ' ', '') + ',') LIKE '%,' + CONVERT(NVARCHAR(20), p.ID) + ',%'
-             OR (',' + REPLACE(CONVERT(NVARCHAR(MAX), ISNULL(t.Bronze, '')), ' ', '') + ',') LIKE '%,' + CONVERT(NVARCHAR(20), p.ID) + ',%'
-        )
-      )
-    ORDER BY LOWER(LTRIM(RTRIM(ISNULL(p.Name, '')))) ASC, LTRIM(RTRIM(ISNULL(p.Name, ''))) ASC;
+    WHERE LTRIM(RTRIM(ISNULL(p.Name, N''))) <> N''
+    ORDER BY LOWER(LTRIM(RTRIM(ISNULL(p.Name, N'')))) ASC, LTRIM(RTRIM(ISNULL(p.Name, N''))) ASC;
   `);
 }
 
