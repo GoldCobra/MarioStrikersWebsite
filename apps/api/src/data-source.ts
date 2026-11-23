@@ -163,8 +163,8 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
         settings: {
           roleIds: config.admin.roleIds,
           pathToken: config.admin.pathToken,
-          sessionMaxAgeMs: config.admin.sessionMaxAgeMs,
         },
+        memberList,
         members: new DiscordMemberDirectory({
           ...discordRest,
           guildId: config.discord.guildId,

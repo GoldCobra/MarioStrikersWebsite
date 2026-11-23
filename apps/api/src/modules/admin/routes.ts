@@ -72,7 +72,7 @@ export function registerAdminRoutes(app: FastifyInstance, { config, data }: Rout
       return reply.code(401).send();
     }
     const { admin } = check;
-    const key = `${admin.discordUserId}:${String(admin.accessUntil)}:${String(Math.floor(data.now() / DAY_MS))}`;
+    const key = `${admin.discordUserId}:${String(admin.loginAt)}:${String(Math.floor(data.now() / DAY_MS))}`;
     if (audit && isPageDocument(uri) && !opened.has(key)) {
       opened.set(key, true);
       await audit
@@ -98,8 +98,8 @@ export function registerAdminRoutes(app: FastifyInstance, { config, data }: Rout
           ? await guard.check(request.headers.cookie, { fresh: !SAFE_METHODS.has(request.method) })
           : null;
         if (!check?.ok) {
-          // Members without the login's admin claim are everyday visitors; only former admins are logged.
-          if (check && check.reason !== "no_session" && check.reason !== "no_claim") {
+          // Members the member list shows without an admin role are everyday visitors; only former admins are logged.
+          if (check && check.reason !== "no_session" && check.reason !== "not_admin") {
             logRefusal(request, check, "Admin API");
           }
           return sendNotFound(reply);
@@ -122,7 +122,6 @@ export function registerAdminRoutes(app: FastifyInstance, { config, data }: Rout
             username: identity.username,
             global_name: identity.globalName,
           },
-          access_until: new Date(identity.accessUntil).toISOString(),
           role_checked_at: new Date(identity.checkedAt).toISOString(),
           audit: entries?.map(toAuditResponse) ?? null,
         });

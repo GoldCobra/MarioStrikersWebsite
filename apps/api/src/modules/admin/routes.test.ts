@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { FastifyInstance, LightMyRequestResponse } from "fastify";
 import type { Config } from "../../config.ts";
+import type { GuildMemberSnapshot } from "../../integrations/discord/guild-members.ts";
 import { UNKNOWN_MEMBER, type GuildMember } from "../../integrations/discord/members.ts";
 import { createFixtureDataSource } from "../../fixtures/data-source.ts";
 import { TEST_NOW, cookiePair, createTestApp, setCookies, tamper } from "../../test-support/app.ts";
@@ -35,8 +36,10 @@ interface AdminApp {
   member: { value: GuildMember };
   lookups: string[];
   audit: ReturnType<typeof createMemoryAdminAuditStore>;
-  /** A session as a login with (or without) the admin role at that moment would issue it. */
-  cookie: (adminCandidate?: boolean) => string;
+  /** The test user's roles in the server's member list (read in the background). */
+  listed: { roles: readonly string[] };
+  /** A session as the login issues it. */
+  cookie: () => string;
 }
 
 async function createAdminApp({
@@ -46,6 +49,7 @@ async function createAdminApp({
 } = {}): Promise<AdminApp> {
   let sessions: SessionManager | undefined;
   const member = { value: ADMIN_MEMBER };
+  const listed: { roles: readonly string[] } = { roles: [DISCORD_TEST_ADMIN_ROLE] };
   const lookups: string[] = [];
   const audit = createMemoryAdminAuditStore();
   const { app } = await createTestApp({
@@ -54,7 +58,14 @@ async function createAdminApp({
     data: (config: Config) => {
       sessions = new SessionManager({ ...config.session, now: Date.now });
       const admin: AdminAccess = {
-        settings: { roleIds: [DISCORD_TEST_ADMIN_ROLE], pathToken: TOKEN, sessionMaxAgeMs: 12 * 60 * 60 * 1000 },
+        settings: { roleIds: [DISCORD_TEST_ADMIN_ROLE], pathToken: TOKEN },
+        memberList: {
+          peek: (): GuildMemberSnapshot => {
+            const { id, username, global_name: globalName } = DISCORD_TEST_USER;
+            const entry = { id, username, globalName, nick: "", roles: [...listed.roles], joinedAt: null };
+            return { takenAt: Date.now(), members: new Map([[id, entry]]) };
+          },
+        },
         members: {
           getMember: (id) => {
             lookups.push(id);
@@ -88,8 +99,8 @@ async function createAdminApp({
     member,
     lookups,
     audit,
-    cookie: (adminCandidate = true) =>
-      cookiePair(manager.createSessionCookie(DISCORD_TEST_USER, "", { adminCandidate })),
+    listed,
+    cookie: () => cookiePair(manager.createSessionCookie(DISCORD_TEST_USER, "")),
   };
 }
 
@@ -118,7 +129,6 @@ test("a confirmed admin reads the overview; it shows no rate limit headers", asy
   );
   const body = response.json<{
     admin: Record<string, string>;
-    access_until: string;
     audit: Record<string, string>[];
   }>();
   assert.deepEqual(body.admin, {
@@ -126,7 +136,6 @@ test("a confirmed admin reads the overview; it shows no rate limit headers", asy
     username: "goldcobra",
     global_name: "GoldCobra",
   });
-  assert.ok(Date.parse(body.access_until) > Date.now());
   assert.deepEqual(
     body.audit.map((entry) => ({ ...entry, at: Number.isNaN(Date.parse(entry.at ?? "")) ? "invalid" : "date" })),
     [{ at: "date", discord_user_id: "1", action: "page.open", target: "", outcome: "allowed" }],
@@ -136,27 +145,36 @@ test("a confirmed admin reads the overview; it shows no rate limit headers", asy
 });
 
 test("every refused admin request looks exactly like an unknown path", async () => {
-  const { app, cookie, member, sessions } = await createAdminApp();
+  const { app, cookie, member, sessions, listed } = await createAdminApp();
   const unknown = visible(await app.inject("/api/admin/does-not-exist"));
   assert.deepEqual(visible(await app.inject("/api/no-such-route")), unknown);
   assert.equal(unknown.status, 404);
 
   const signed = (issuedAt: number, expiresAt: number): string =>
     `msc_session=${createSignedToken(
-      { discord_user_id: DISCORD_TEST_USER.id, adm: true, issued_at: issuedAt, expires_at: expiresAt },
+      { discord_user_id: DISCORD_TEST_USER.id, issued_at: issuedAt, expires_at: expiresAt },
       DISCORD_TEST_ENV.SESSION_SECRET,
     )}`;
   const hour = 60 * 60 * 1000;
   assert.ok(sessions.readSession(signed(Date.now() - hour, Date.now() + hour)));
+  // Admin access lasts as long as the login: a session from days ago still reads the overview.
+  const daysOld = signed(Date.now() - 6 * 24 * hour, Date.now() + hour);
+  assert.equal((await app.inject({ url: "/api/admin/overview", headers: { cookie: daysOld } })).statusCode, 200);
   const refusals: [string, () => Record<string, string>][] = [
     ["logged out", () => ({})],
-    ["session without the claim", () => ({ cookie: cookie(false) })],
+    [
+      "no admin role in the member list",
+      () => {
+        listed.roles = ["902508392227176489"];
+        return { cookie: cookie() };
+      },
+    ],
     ["tampered session", () => ({ cookie: tamper(cookie()) })],
     ["expired session", () => ({ cookie: signed(Date.now() - 8 * 24 * hour, Date.now() - 1000) })],
-    ["admin session too old", () => ({ cookie: signed(Date.now() - 13 * hour, Date.now() + hour) })],
     [
       "role removed",
       () => {
+        listed.roles = [DISCORD_TEST_ADMIN_ROLE];
         member.value = { ...ADMIN_MEMBER, roles: ["902508392227176489"] };
         return { cookie: cookie() };
       },
@@ -200,7 +218,7 @@ test("without the admin page switched on nobody is an admin", async () => {
 });
 
 test("nginx's gate opens the page only for an admin with the exact path, and logs the opening once", async () => {
-  const { app, cookie, member, audit, lookups } = await createAdminApp();
+  const { app, cookie, member, audit, lookups, listed } = await createAdminApp();
   const session = cookie();
   const opened = await gate(app, PAGE, session);
   assert.equal(opened.statusCode, 204);
@@ -221,46 +239,54 @@ test("nginx's gate opens the page only for an admin with the exact path, and log
     assert.equal((await gate(app, uri, cookie())).statusCode, 401, uri);
   }
   assert.equal(lookups.length, asked);
-  for (const headers of [undefined, cookie(false)]) assert.equal((await gate(app, PAGE, headers)).statusCode, 401);
+  assert.equal((await gate(app, PAGE)).statusCode, 401);
+  listed.roles = [];
+  assert.equal((await gate(app, PAGE, cookie())).statusCode, 401);
+  listed.roles = [DISCORD_TEST_ADMIN_ROLE];
   member.value = { ...ADMIN_MEMBER, roles: [] };
   assert.equal((await gate(app, PAGE, cookie())).statusCode, 401);
   assert.equal(audit.events.length, 1);
 });
 
 test("only a confirmed admin's account carries the admin link", async () => {
-  const { app, cookie, member, lookups } = await createAdminApp();
+  const { app, cookie, member, lookups, listed } = await createAdminApp();
   const me = async (sessionCookie?: string) =>
     (await app.inject({ url: "/api/auth/me", headers: sessionCookie ? { cookie: sessionCookie } : {} })).json<
       Record<string, unknown>
     >();
   assert.deepEqual((await me(cookie())).account_links, [{ label: "Admin Panel", href: PAGE }]);
-  const plain = await me(cookie(false));
+  listed.roles = [];
+  const plain = await me(cookie());
   assert.deepEqual(Object.keys(plain), ["authenticated", "user", "expires_at", "login_available"]);
   assert.deepEqual(await me(), { authenticated: false, login_available: true });
-  // Members without the claim never cause a Discord lookup.
+  // Members the member list shows without an admin role never cause a Discord lookup.
   assert.deepEqual(lookups, [DISCORD_TEST_USER.id]);
+  listed.roles = [DISCORD_TEST_ADMIN_ROLE];
   member.value = { ...ADMIN_MEMBER, roles: [] };
   assert.equal(Object.hasOwn(await me(cookie()), "account_links"), false);
 });
 
-test("the login marks the session of a member who holds an admin role, and only then", async () => {
-  for (const [roles, claimed] of [
-    [[DISCORD_TEST_ADMIN_ROLE, "902508392227176489"], true],
-    [["902508392227176489"], false],
-    [[], false],
-  ] as const) {
-    const { app, sessions } = await createAdminApp({ loginRoles: roles });
-    const start = await app.inject("/api/auth/discord/start?returnTo=%2F");
-    const state = new URL(String(start.headers.location)).searchParams.get("state") ?? "";
-    const [stateCookie = ""] = setCookies(start.headers["set-cookie"]);
-    assert.ok(stateCookie.startsWith(`${OAUTH_STATE_COOKIE}=`));
-    const callback = await app.inject({
-      url: `/api/auth/discord/callback?code=abc&state=${encodeURIComponent(state)}`,
-      headers: { cookie: cookiePair(stateCookie) },
-    });
-    const session = setCookies(callback.headers["set-cookie"]).find((value) => value.startsWith("msc_session="));
-    assert.equal(sessions.readSession(cookiePair(session ?? ""))?.adm === true, claimed, roles.join(","));
-  }
+test("the login marks nothing: a role given in Discord later counts for the same session", async () => {
+  const { app, sessions, listed } = await createAdminApp({ loginRoles: [] });
+  listed.roles = [];
+  const start = await app.inject("/api/auth/discord/start?returnTo=%2F");
+  const state = new URL(String(start.headers.location)).searchParams.get("state") ?? "";
+  const [stateCookie = ""] = setCookies(start.headers["set-cookie"]);
+  assert.ok(stateCookie.startsWith(`${OAUTH_STATE_COOKIE}=`));
+  const callback = await app.inject({
+    url: `/api/auth/discord/callback?code=abc&state=${encodeURIComponent(state)}`,
+    headers: { cookie: cookiePair(stateCookie) },
+  });
+  const session = cookiePair(
+    setCookies(callback.headers["set-cookie"]).find((value) => value.startsWith("msc_session=")) ?? "",
+  );
+  assert.equal(Object.hasOwn(sessions.readSession(session) ?? {}, "adm"), false);
+  const links = async () =>
+    (await app.inject({ url: "/api/auth/me", headers: { cookie: session } })).json<Record<string, unknown>>()
+      .account_links;
+  assert.equal(await links(), undefined);
+  listed.roles = [DISCORD_TEST_ADMIN_ROLE];
+  assert.deepEqual(await links(), [{ label: "Admin Panel", href: PAGE }]);
 });
 
 test("B2: the Admin Panel lists every club with its backend id, and each club action is logged", async () => {

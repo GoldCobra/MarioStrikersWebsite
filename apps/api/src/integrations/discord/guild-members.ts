@@ -95,6 +95,11 @@ export class GuildMemberList {
     return (await this.refresh()) ?? this.snapshot;
   }
 
+  /** The list as it is in memory, without reading or waiting; null until the first read has finished. */
+  peek(): GuildMemberSnapshot | null {
+    return this.snapshot;
+  }
+
   /** Reads the list now (one read at a time); resolves to the new list, or null when the read failed. */
   refresh(): Promise<GuildMemberSnapshot | null> {
     if (!this.options.botToken || !this.options.guildId) return Promise.resolve(null);

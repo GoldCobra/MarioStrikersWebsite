@@ -1,4 +1,4 @@
-// The admin page's overview (docs/adr/0011) as markup: who is signed in, how long the admin access lasts, and
+// The admin page's overview (docs/adr/0011) as markup: who is signed in, when Discord last confirmed the role, and
 // the latest admin activity. Pure, so it is tested in Node; admin-page.ts loads the data and shows it.
 
 import { escapeHtml } from "@ms/shared/html";
@@ -14,7 +14,6 @@ export interface AdminAuditRow {
 /** GET /api/admin/overview. */
 export interface AdminOverviewResponse {
   readonly admin: { readonly discord_user_id: string; readonly username: string; readonly global_name: string };
-  readonly access_until: string;
   readonly role_checked_at: string;
   /** null when the log could not be read. */
   readonly audit: readonly AdminAuditRow[] | null;
@@ -53,7 +52,6 @@ export function adminOverviewHtml(overview: AdminOverviewResponse): string {
     "<h2>Admin</h2>",
     `<p>Signed in as <strong>${escapeHtml(name)}</strong>${escapeHtml(handle)}.</p>`,
     "<ul>",
-    `<li>Admin access until ${escapeHtml(formatUtc(overview.access_until))}; log in again after that.</li>`,
     `<li>Discord role confirmed ${escapeHtml(formatUtc(overview.role_checked_at))}.</li>`,
     "</ul>",
     "<h3>Recent admin activity</h3>",

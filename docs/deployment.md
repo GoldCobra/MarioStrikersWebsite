@@ -158,7 +158,6 @@ never shown or committed:
 `node -e "console.log(crypto.randomBytes(24).toString('base64url'))"`), and
 recreate the backend like after any `.env` change. The API logs
 `[admin] ADMIN_ENABLED is set, but the admin page stays off` with the settings
-at fault when something is missing. Admins log in once more, so their session
-carries the role. Check from outside that `/_/<token>/` without a login answers
+at fault when something is missing. Check from outside that `/_/<token>/` without a login answers
 exactly like an unknown URL. Off again: `ADMIN_ENABLED=false` and recreate the
 backend; a new path: a new `ADMIN_PATH_TOKEN`.

@@ -1,4 +1,4 @@
-// The admin page's overview: who is signed in, the access window and the latest admin activity.
+// The admin page's overview: who is signed in, the role confirmation and the latest admin activity.
 
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -6,7 +6,6 @@ import { adminOverviewHtml, formatUtc, type AdminOverviewResponse } from "./admi
 
 const OVERVIEW: AdminOverviewResponse = {
   admin: { discord_user_id: "195905866527014912", username: "goldcobra111", global_name: "GoldCobra" },
-  access_until: "2026-10-06T22:00:00.000Z",
   role_checked_at: "2026-10-06T10:01:00.000Z",
   audit: [
     {
@@ -25,11 +24,11 @@ test("dates are shown in UTC; a missing one as -", () => {
   assert.equal(formatUtc("not a date"), "-");
 });
 
-test("the overview names the admin, the access window and each activity", () => {
+test("the overview names the admin, the role confirmation and each activity", () => {
   const html = adminOverviewHtml(OVERVIEW);
   assert.match(html, /^<h2>Admin<\/h2>/);
   assert.match(html, /Signed in as <strong>GoldCobra<\/strong> \(goldcobra111\)\./);
-  assert.match(html, /Admin access until 6 Oct 2026, 22:00 UTC; log in again after that\./);
+  assert.doesNotMatch(html, /log in again/);
   assert.match(html, /Discord role confirmed 6 Oct 2026, 10:01 UTC\./);
   assert.match(html, /<li>6 Oct 2026, 10:00 UTC · page\.open · allowed · Discord 195905866527014912<\/li>/);
 });

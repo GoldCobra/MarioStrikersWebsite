@@ -216,13 +216,12 @@ are refused for members who left the server, checked with the bot token
 (`integrations/discord/members.ts`).
 A bot token enables Discord name lookups and event discovery.
 
-**Admins** (`modules/admin/`, [ADR 0011](adr/0011-hidden-admin-page.md)). The login
-keeps the member's server roles and marks the session when one of
-`ADMIN_ROLE_IDS` is among them. `guard.ts` is the one check for the admin page,
-its API and the menu link: a marked session not older than
-`ADMIN_SESSION_MAX_AGE_MS` whose member holds the role now (bot token, cached
-`ADMIN_ROLE_CACHE_TTL_MS`; a change asks without the cache). Anything else, a
-Discord failure included, is no. `/api/admin/*` routes sit in one plugin whose
+**Admins** (`modules/admin/`, [ADR 0011](adr/0011-hidden-admin-page.md)). `guard.ts`
+is the one check for the admin page, its API, the menu link and My Club's mode
+`admins`: a session whose member the server's member list shows with one of
+`ADMIN_ROLE_IDS` and who holds the role now (bot token, cached
+`ADMIN_ROLE_CACHE_TTL_MS`; a change asks without the cache), for as long as the
+login lasts. Anything else, a Discord failure included, is no. `/api/admin/*` routes sit in one plugin whose
 first hook is the guard and answer a refusal with the standard 404 (`sendNotFound`,
 no rate limit headers); `/internal/admin-gate` answers nginx (204/401) and is not
 reachable from outside. The audit log is `dbo.WebsiteAdminAudit`
