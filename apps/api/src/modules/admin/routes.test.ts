@@ -60,10 +60,10 @@ async function createAdminApp({
       const admin: AdminAccess = {
         settings: { roleIds: [DISCORD_TEST_ADMIN_ROLE], pathToken: TOKEN },
         memberList: {
-          get: (): Promise<GuildMemberSnapshot> => {
+          peek: (): GuildMemberSnapshot => {
             const { id, username, global_name: globalName } = DISCORD_TEST_USER;
             const entry = { id, username, globalName, nick: "", roles: [...listed.roles], joinedAt: null };
-            return Promise.resolve({ takenAt: Date.now(), members: new Map([[id, entry]]) });
+            return { takenAt: Date.now(), members: new Map([[id, entry]]) };
           },
         },
         members: {

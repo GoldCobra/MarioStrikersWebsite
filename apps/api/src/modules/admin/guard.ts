@@ -24,8 +24,11 @@ export interface AdminSettings {
 /** What the data source provides when the admin page is on. */
 export interface AdminAccess {
   readonly settings: AdminSettings;
-  /** The server's member list (guild-members.ts), read in the background: who holds an admin role at all. */
-  readonly memberList: { get(): Promise<GuildMemberSnapshot | null> };
+  /**
+   * The server's member list (guild-members.ts) as it is in memory: who holds an admin role at all. Never waited for,
+   * so no request waits on its first read after a start (until then nobody is an admin).
+   */
+  readonly memberList: { peek(): GuildMemberSnapshot | null };
   /** Members with their current roles, read with the bot token and cached briefly: the confirmation. */
   readonly members: GuildMemberLookup;
   readonly audit: AdminAuditStore;
@@ -92,8 +95,8 @@ export class AdminGuard {
     const discordUserId = session.discord_user_id;
     const refuse = (reason: AdminRefusal): AdminCheck => ({ ok: false, reason, discordUserId });
     const { roleIds } = this.access.settings;
-    // Everyday visitors end here, without a Discord request: the list shows who holds an admin role at all.
-    const listed = (await this.access.memberList.get().catch(() => null))?.members.get(discordUserId);
+    // Everyday visitors end here, without a Discord request or any wait: the list shows who holds an admin role.
+    const listed = this.access.memberList.peek()?.members.get(discordUserId);
     if (!listed || !hasAdminRole(listed.roles, roleIds)) return refuse("not_admin");
 
     let member: GuildMember;

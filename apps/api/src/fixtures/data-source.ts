@@ -871,7 +871,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
   const admin: AdminAccess = {
     settings: { roleIds: [FIXTURE_ADMIN_ROLE], pathToken: FIXTURE_ADMIN_PATH_TOKEN },
     // The simulated server's member list, built further down; asked only once requests come in.
-    memberList: { get: () => Promise.resolve(memberSnapshot) },
+    memberList: { peek: () => memberSnapshot },
     members,
     audit: createMemoryAdminAuditStore(nowFn),
   };

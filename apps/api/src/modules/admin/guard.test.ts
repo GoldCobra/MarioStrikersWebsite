@@ -63,7 +63,7 @@ function harness(): Harness {
   const guard = new AdminGuard(
     {
       settings: { roleIds: [ADMIN_ROLE], pathToken: TOKEN },
-      memberList: { get: () => Promise.resolve(snapshot()) },
+      memberList: { peek: snapshot },
       members: {
         getMember: (id, options) => {
           lookups.push({ id, fresh: options?.fresh ?? false });
@@ -181,11 +181,33 @@ test("role ids match exactly; no admin page without the admin settings or the lo
   const { sessions } = harness();
   const access = {
     settings: { roleIds: [ADMIN_ROLE], pathToken: TOKEN },
-    memberList: { get: () => Promise.resolve(null) },
+    memberList: { peek: () => null },
     members: { getMember: () => Promise.resolve(UNKNOWN_MEMBER) },
     audit: createMemoryAdminAuditStore(),
   };
   assert.equal(createAdminGuard({ admin: null, login: { sessions }, now: Date.now }), null);
   assert.equal(createAdminGuard({ admin: access, login: null, now: Date.now }), null);
   assert.ok(createAdminGuard({ admin: access, login: { sessions }, now: Date.now }));
+});
+
+test("before the member list's first read nobody is an admin, and no request waits for it", async () => {
+  const { sessions } = harness();
+  const lookups: string[] = [];
+  const guard = new AdminGuard(
+    {
+      settings: { roleIds: [ADMIN_ROLE], pathToken: TOKEN },
+      memberList: { peek: () => null },
+      members: {
+        getMember: (id) => {
+          lookups.push(id);
+          return Promise.resolve(UNKNOWN_MEMBER);
+        },
+      },
+      audit: createMemoryAdminAuditStore(),
+    },
+    sessions,
+    Date.now,
+  );
+  assert.equal(refusal(await guard.check(adminCookie(sessions))), "not_admin");
+  assert.deepEqual(lookups, []);
 });

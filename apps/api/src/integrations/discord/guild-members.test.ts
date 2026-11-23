@@ -141,3 +141,12 @@ test("entries without a user id are dropped; names, roles and the join date are 
   );
   assert.equal(toSnapshotMember({ user: { id: "1" }, joined_at: "not a date" })?.joinedAt, null);
 });
+
+test("peek gives the list in memory without reading or waiting", async () => {
+  const { list, requests } = memberList(() => 3);
+  assert.equal(list.peek(), null);
+  assert.deepEqual(requests, []);
+  const read = await list.get();
+  assert.equal(list.peek(), read);
+  assert.equal(requests.length, 1);
+});
