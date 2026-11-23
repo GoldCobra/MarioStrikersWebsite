@@ -1,6 +1,6 @@
 # 0011: A hidden admin page behind the Discord admin role
 
-Status: accepted (2026-10-06)
+Status: accepted (2026-10-06), amended 2026-11-23 (no time limit, no marked login)
 
 ## Context
 
@@ -15,14 +15,16 @@ whether a role was taken away since.
 
 ## Decision
 
-- **Roles.** The login already asks for `guilds.members.read`; it now keeps the
-  member's role ids and marks the session (`adm: true`, signed) when one of
-  `ADMIN_ROLE_IDS` was among them. Only those sessions are ever checked further:
-  the API asks Discord with the bot token (`GET /guilds/{guild}/members/{user}`,
-  cached `ADMIN_ROLE_CACHE_TTL_MS`, default 60 s; changes skip the cache) and
-  allows only a member who holds the role now. A session older than
-  `ADMIN_SESSION_MAX_AGE_MS` (default 12 h) or an unanswered Discord request
+- **Roles.** Who holds one of `ADMIN_ROLE_IDS` at all comes from the server's
+  member list, which the API reads in the background every five minutes
+  (`integrations/discord/guild-members.ts`). Only those members are checked
+  further: the API asks Discord with the bot token
+  (`GET /guilds/{guild}/members/{user}`, cached `ADMIN_ROLE_CACHE_TTL_MS`,
+  default 60 s; changes skip the cache) and allows only a member who holds the
+  role now. Access lasts as long as the login; an unanswered Discord request
   means no. Everything is off unless `ADMIN_ENABLED` is set and complete.
+  (Until 2026-11-23 the login marked the session and access ended 12 hours
+  after it, so admins had to log in again; both are gone.)
 - **One guard** (`apps/api/src/modules/admin/guard.ts`) answers for the page,
   its API and the account menu. Its API routes sit in one Fastify plugin under
   `/api/admin` whose first hook is the guard; a refusal is the API's standard
@@ -43,8 +45,10 @@ whether a role was taken away since.
 ## Consequences
 
 - A role removed on Discord closes the page within the cache time (60 s), a
-  change at once. A member who gets the role must log in once more.
-- Members without the claim never cause a Discord request, so the site's
+  change at once; a role given opens it with the member list's next read
+  (within five minutes), without logging in again.
+- Members the member list shows without an admin role never cause a Discord
+  request, so the site's
   behaviour and timing for them stay as they were; requests below `/_/` take
   one extra hop to the API, which only shows that `/_/` is guarded (as the
   public code does anyway).

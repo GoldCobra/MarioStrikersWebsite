@@ -51,8 +51,6 @@ export interface AdminConfig {
   readonly pathToken: string;
   /** How long a member's roles are trusted before Discord is asked again. */
   readonly roleCacheTtlMs: number;
-  /** How long after the login a session may open the admin page; then the admin logs in again. */
-  readonly sessionMaxAgeMs: number;
 }
 
 /** Club management (docs/adr/0012). */
@@ -206,7 +204,6 @@ export function loadConfig(env: Env, options: LoadConfigOptions = {}): Config {
         Math.max(readInt(env, "ADMIN_ROLE_CACHE_TTL_MS", 60_000), ADMIN_ROLE_CACHE_TTL_MS.min),
         ADMIN_ROLE_CACHE_TTL_MS.max,
       ),
-      sessionMaxAgeMs: readInt(env, "ADMIN_SESSION_MAX_AGE_MS", 12 * 60 * 60 * 1000),
     },
     mssql: {
       host: readString(env, "MSSQL_HOST"),
@@ -270,7 +267,6 @@ export function adminConfigProblems(config: Config): string[] {
     problems.push("ADMIN_ROLE_IDS");
   }
   if (!ADMIN_PATH_TOKEN.test(admin.pathToken)) problems.push("ADMIN_PATH_TOKEN");
-  if (!(admin.sessionMaxAgeMs > 0)) problems.push("ADMIN_SESSION_MAX_AGE_MS");
   return problems;
 }
 

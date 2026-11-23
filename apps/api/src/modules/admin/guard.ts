@@ -1,33 +1,32 @@
-// The one check behind the admin page, its API and the "Admin" link of the account menu (docs/adr/0011).
-// It fails closed: without a session, without the admin claim of the login, with a session older than the
-// admin limit, or when Discord does not confirm (or cannot be asked) that the member holds an admin role
-// right now, the answer is no. Only members whose login carried the claim are ever looked up, so nobody
-// else causes a Discord request or waits for one.
+// The one check behind the admin page, its API, the "Admin Panel" link of the account menu and My Club's admins mode
+// (docs/adr/0011). It fails closed: without a session, when the server's member list shows the member without an
+// admin role, or when Discord does not confirm (or cannot be asked) that the member holds one right now, the answer
+// is no. Access lasts as long as the login: a role given or taken in Discord counts without logging in again. Only
+// members the member list shows with an admin role are ever looked up, so nobody else causes a Discord request or
+// waits for one.
 
 import crypto from "node:crypto";
+import type { GuildMemberSnapshot } from "../../integrations/discord/guild-members.ts";
 import type { GuildMember, GuildMemberLookup } from "../../integrations/discord/members.ts";
-import type { Session, SessionManager } from "../auth/session.ts";
+import type { SessionManager } from "../auth/session.ts";
 import type { AdminAuditStore } from "./audit.ts";
 
 /** Where the admin page lives: nginx asks the gate for every file under it (infra/nginx/frontend.conf). */
 export const ADMIN_PAGE_PREFIX = "/_/";
-
-/** A session issued this far in the future is not trusted (clock skew between containers is far smaller). */
-const MAX_CLOCK_SKEW_MS = 60_000;
 
 export interface AdminSettings {
   /** Discord role ids of the community server that make a member an admin. */
   readonly roleIds: readonly string[];
   /** The page's secret path segment. */
   readonly pathToken: string;
-  /** How long after the login a session may use the admin page. */
-  readonly sessionMaxAgeMs: number;
 }
 
 /** What the data source provides when the admin page is on. */
 export interface AdminAccess {
   readonly settings: AdminSettings;
-  /** Members with their current roles, read with the bot token and cached briefly. */
+  /** The server's member list (guild-members.ts), read in the background: who holds an admin role at all. */
+  readonly memberList: { get(): Promise<GuildMemberSnapshot | null> };
+  /** Members with their current roles, read with the bot token and cached briefly: the confirmation. */
   readonly members: GuildMemberLookup;
   readonly audit: AdminAuditStore;
 }
@@ -36,14 +35,13 @@ export interface AdminIdentity {
   readonly discordUserId: string;
   readonly username: string;
   readonly globalName: string;
-  /** When this session stops opening the admin page: the admin limit after login, at most the session's end. */
-  readonly accessUntil: number;
+  /** When this session's login happened (the page's opening is logged once per login and day). */
+  readonly loginAt: number;
   /** When Discord's answer (possibly cached) was taken as confirmed. */
   readonly checkedAt: number;
 }
 
-export type AdminRefusal =
-  "no_session" | "no_claim" | "session_too_old" | "not_member" | "no_role" | "discord_unavailable";
+export type AdminRefusal = "no_session" | "not_admin" | "not_member" | "no_role" | "discord_unavailable";
 
 export type AdminCheck =
   | { readonly ok: true; readonly admin: AdminIdentity }
@@ -93,9 +91,10 @@ export class AdminGuard {
     if (!session) return { ok: false, reason: "no_session", discordUserId: "" };
     const discordUserId = session.discord_user_id;
     const refuse = (reason: AdminRefusal): AdminCheck => ({ ok: false, reason, discordUserId });
-    if (session.adm !== true) return refuse("no_claim");
-    const accessUntil = this.accessUntil(session);
-    if (accessUntil === null) return refuse("session_too_old");
+    const { roleIds } = this.access.settings;
+    // Everyday visitors end here, without a Discord request: the list shows who holds an admin role at all.
+    const listed = (await this.access.memberList.get().catch(() => null))?.members.get(discordUserId);
+    if (!listed || !hasAdminRole(listed.roles, roleIds)) return refuse("not_admin");
 
     let member: GuildMember;
     try {
@@ -105,29 +104,17 @@ export class AdminGuard {
     }
     if (member.membership === "unknown") return refuse("discord_unavailable");
     if (member.membership !== "member") return refuse("not_member");
-    if (!hasAdminRole(member.roles, this.access.settings.roleIds)) return refuse("no_role");
+    if (!hasAdminRole(member.roles, roleIds)) return refuse("no_role");
     return {
       ok: true,
       admin: {
         discordUserId,
         username: member.username || session.discord_user?.username || "",
         globalName: member.globalName || session.discord_user?.global_name || "",
-        accessUntil,
+        loginAt: Number(session.issued_at) || 0,
         checkedAt: this.now(),
       },
     };
-  }
-
-  /** The end of this session's admin access, or null when it is over (or the session has no usable age). */
-  private accessUntil(session: Session): number | null {
-    const now = this.now();
-    const issuedAt = Number(session.issued_at);
-    if (!Number.isFinite(issuedAt) || issuedAt <= 0 || issuedAt > now + MAX_CLOCK_SKEW_MS) return null;
-    const until = Math.min(
-      issuedAt + this.access.settings.sessionMaxAgeMs,
-      Number(session.expires_at) || Number.POSITIVE_INFINITY,
-    );
-    return now < until ? until : null;
   }
 }
 

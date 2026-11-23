@@ -89,7 +89,6 @@ test("the admin page is off unless switched on and completely configured", () =>
   assert.equal(isAdminConfigured(config), true);
   assert.deepEqual(config.admin.roleIds, ["1070908166725967942", "902508392227176489"]);
   assert.equal(config.admin.roleCacheTtlMs, 60_000);
-  assert.equal(config.admin.sessionMaxAgeMs, 12 * 60 * 60 * 1000);
 
   // Off by default, even when complete; nothing else is required while it is off.
   assert.equal(isAdminConfigured(loadConfig({ ...env, ADMIN_ENABLED: "" })), false);
@@ -104,7 +103,6 @@ test("the admin page is off unless switched on and completely configured", () =>
     ["ADMIN_PATH_TOKEN", "", "ADMIN_PATH_TOKEN"],
     ["ADMIN_PATH_TOKEN", "admin", "ADMIN_PATH_TOKEN"],
     ["ADMIN_PATH_TOKEN", `${"a".repeat(21)}/`, "ADMIN_PATH_TOKEN"],
-    ["ADMIN_SESSION_MAX_AGE_MS", "0", "ADMIN_SESSION_MAX_AGE_MS"],
   ] as const) {
     const broken = loadConfig({ ...env, [key]: value });
     assert.equal(isAdminConfigured(broken), false, `${key}=${value}`);

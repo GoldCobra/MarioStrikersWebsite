@@ -5,7 +5,7 @@
 import type { FastifyInstance } from "fastify";
 import { HttpError } from "../../http/errors.ts";
 import { isCrossSiteRequest, rateLimit, sendNoStore, type RouteContext } from "../../http/route-context.ts";
-import { createAdminGuard, hasAdminRole } from "../admin/guard.ts";
+import { createAdminGuard } from "../admin/guard.ts";
 import { identityFromLogin } from "../profile/mappers.ts";
 import { NotGuildMemberError, type DiscordLogin } from "./discord-oauth.ts";
 import { SessionManager } from "./session.ts";
@@ -15,7 +15,6 @@ export function registerAuthRoutes(app: FastifyInstance, { config, data }: Route
   const limit = rateLimit(config, 30);
   const sessions = data.login?.sessions ?? null;
   const adminGuard = createAdminGuard(data);
-  const adminRoleIds = data.admin?.settings.roleIds ?? [];
 
   app.get<{ Querystring: { returnTo?: unknown } }>("/api/auth/discord/start", limit, async (request, reply) => {
     const returnTo = normalizeReturnTo(request.query.returnTo);
@@ -56,10 +55,8 @@ export function registerAuthRoutes(app: FastifyInstance, { config, data }: Route
       } catch (err) {
         request.log.error({ err }, "[auth] Player profile could not be created at login");
       }
-      // An admin role at login marks the session, so only those members are ever checked live later.
-      const adminCandidate = adminGuard !== null && hasAdminRole(login.roles, adminRoleIds);
       return reply
-        .header("Set-Cookie", [clearState, manager.createSessionCookie(login.user, login.nick, { adminCandidate })])
+        .header("Set-Cookie", [clearState, manager.createSessionCookie(login.user, login.nick)])
         .redirect(appendQuery(verified.returnTo, { auth: "success" }), 302);
     },
   );

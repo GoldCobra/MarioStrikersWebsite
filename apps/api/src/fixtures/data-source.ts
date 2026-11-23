@@ -869,7 +869,9 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
 
   // The admin page is always on with fixtures; its path and role are invented and public (never production).
   const admin: AdminAccess = {
-    settings: { roleIds: [FIXTURE_ADMIN_ROLE], pathToken: FIXTURE_ADMIN_PATH_TOKEN, sessionMaxAgeMs: DAY_MS },
+    settings: { roleIds: [FIXTURE_ADMIN_ROLE], pathToken: FIXTURE_ADMIN_PATH_TOKEN },
+    // The simulated server's member list, built further down; asked only once requests come in.
+    memberList: { get: () => Promise.resolve(memberSnapshot) },
     members,
     audit: createMemoryAdminAuditStore(nowFn),
   };
