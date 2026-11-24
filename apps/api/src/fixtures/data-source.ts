@@ -22,7 +22,8 @@ import type { LeaderboardRow } from "../modules/leaderboards/service.ts";
 import { normalizeCountryCode } from "@ms/shared/countries";
 import { toText } from "@ms/shared/text";
 import { UNKNOWN_MEMBER, type GuildMemberLookup } from "../integrations/discord/members.ts";
-import type { PlayerListItem, PlayerProfile, RatingBlock, SeasonRewardLevelDto } from "../modules/players/mappers.ts";
+import type { PlayerProfile, RatingBlock, SeasonRewardLevelDto } from "../modules/players/mappers.ts";
+import { buildPlayerList, clubTagList, withListedName } from "../modules/players/server-names.ts";
 import {
   applyPlan,
   createProfileService,
@@ -267,8 +268,21 @@ const FIXTURE_SELECTED_TITLES: Readonly<Record<number, string>> = {
   5: "legacy-superstar",
 };
 
+/** A fixture player as leaderboards, clubs and profiles read it (the player list builds its own rows). */
+interface FixturePlayer {
+  readonly player_id: number;
+  readonly name: string;
+  readonly display_name: string;
+  readonly country: string;
+  readonly club_id: number | null;
+  readonly club_name: string;
+  readonly club_tag: string;
+  readonly activity: string | null;
+  readonly is_active: boolean;
+}
+
 interface RatingEntry {
-  readonly player: PlayerListItem & { player_id: number };
+  readonly player: FixturePlayer;
   readonly elo: number | null;
   readonly whr: number | null;
   readonly wins: number;
@@ -929,7 +943,21 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
   })();
 
   function publicPayload(key: string): unknown {
-    if (key === PLAYERS_LIST_KEY) return { count: players.length, rows: players };
+    if (key === PLAYERS_LIST_KEY) {
+      // As the live list: the profiles of the members of the fixture server (below), by server name.
+      const rows = buildPlayerList(
+        players.map((player) => ({
+          playerId: player.player_id,
+          discordId: discordIdFor(player) ?? fakeDiscordId(player.player_id),
+          country: normalizeCountryCode(player.country),
+          activity: player.activity,
+          isActive: player.is_active,
+        })),
+        memberSnapshot.members,
+        clubTagList(clubs.map((club) => club.tag)),
+      );
+      return { count: rows.length, rows };
+    }
     if (key === MSBL_CLUBS_KEY) return { game: "msbl", count: clubs.length, rows: clubs };
     if (key === COMPETITIVE_SEASON_KEY) {
       return {
@@ -1012,6 +1040,14 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
     roles: login.roles,
     joinedAt: now - 400 * DAY_MS,
   });
+  // On the server: the sample logins, the players with a Discord id, and players 2, 4 and 5 (the popup checks open
+  // them from the player list; their nicknames carry the club tag the way the bot sets it). Player 24 goes by player
+  // 18's name, so the player list tells the two apart by username (docs/adr/0015).
+  const ALSO_ON_SERVER = new Set([2, 4, 5]);
+  const serverNick = (player: { player_id: number; name: string; club_tag: string | null }): string => {
+    if (player.player_id === 24) return "Rocket Toad";
+    return ALSO_ON_SERVER.has(player.player_id) && player.club_tag ? `[${player.club_tag}] ${player.name}` : "";
+  };
   const memberSnapshot: GuildMemberSnapshot = {
     takenAt: now,
     members: new Map([
@@ -1020,11 +1056,12 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
         loginMember(login),
       ]),
       ...players
-        .filter((player) => discordIdFor(player) !== null)
+        .filter((player) => discordIdFor(player) !== null || ALSO_ON_SERVER.has(player.player_id))
         .map((player): [string, SnapshotMember] => {
-          const id = discordIdFor(player) ?? "";
+          const id = discordIdFor(player) ?? fakeDiscordId(player.player_id);
           const username = player.name.toLowerCase().replace(/[^a-z0-9]+/g, "_");
-          return [id, { id, username, globalName: player.name, nick: "", roles: [], joinedAt: now - 500 * DAY_MS }];
+          const nick = serverNick(player);
+          return [id, { id, username, globalName: player.name, nick, roles: [], joinedAt: now - 500 * DAY_MS }];
         }),
     ]),
   };
@@ -1081,7 +1118,9 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
     },
     getPlayerProfile: (playerId) => {
       const player = findPlayer(playerId);
-      return Promise.resolve(player ? buildPlayerProfile(player) : null);
+      return Promise.resolve(
+        player ? withListedName(buildPlayerProfile(player), publicPayload(PLAYERS_LIST_KEY)) : null,
+      );
     },
     getPlayerProfileByDiscordId: (discordId) => {
       const player = findPlayer(1);

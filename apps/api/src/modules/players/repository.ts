@@ -21,16 +21,16 @@ export const PROFILE_RECORDSET = {
   testUnlockedTitles: 11,
 } as const;
 
-/** A player of the player list, with the club and whether another player has the same name. */
-export interface PlayerListRecord extends Row {
+/** A profile as the player list reads it; the name comes from the server's member list (server-names.ts). */
+export interface ListProfileRecord extends Row {
   player_id: number;
-  name: string;
+  discord_id: string;
   country: string | null;
   activity: Date | null;
-  club_id: number | null;
-  club_name: string | null;
-  club_tag: string | null;
-  duplicate_name: number;
+}
+
+interface ClubTagRecord extends Row {
+  tag: string;
 }
 
 /** A player whose stored Discord id names the account in one of its legacy forms. */
@@ -238,48 +238,17 @@ export function fetchPlayerProfileRecordsets(db: Queries, playerId: number): Pro
 }
 
 /**
- * The player list: a player is listed once they have a start.gg id, a friend code, a rated match this season or a
- * tournament placement. The ids of each kind are collected first and joined once; one OR of four EXISTS made SQL
- * Server test every tournament placement against every player (1.1 s instead of 10 ms). Duplicate names are marked
- * for the display name (mappers.ts).
+ * Every profile with what the player list needs, and every club tag, in one round trip. Which profiles are listed,
+ * and by which name, the server's member list decides (server-names.ts): the stored name is not read.
  */
-export function fetchPlayersList(db: Queries): Promise<PlayerListRecord[]> {
-  return db.rows<PlayerListRecord>(sql`
-    WITH placed AS (
-      -- Tournament.Winner, RunnerUp and Bronze hold comma-separated player ids.
-      SELECT DISTINCT REPLACE(part.value, N' ', N'') AS token
-      FROM dbo.Tournament t
-      CROSS APPLY (VALUES (t.Winner), (t.RunnerUp), (t.Bronze)) placement (list)
-      CROSS APPLY STRING_SPLIT(ISNULL(placement.list, N''), N',') part
-    ),
-    listed AS (
-      SELECT p.ID AS player_id FROM dbo.Player p WHERE LTRIM(RTRIM(ISNULL(p.IdStartGG, N''))) <> N''
-      UNION
-      SELECT fc.Player FROM dbo.FriendCodes fc WHERE LTRIM(RTRIM(ISNULL(fc.Code, N''))) <> N''
-      UNION
-      SELECT lb.PlayerId
-      FROM rocci121_toby.CompetitiveLeaderboard lb
-      INNER JOIN rocci121_toby.CompetitiveSeason season ON season.Id = lb.SeasonId
-      WHERE ${ACTIVE_SEASON}
-      UNION
-      SELECT p.ID FROM dbo.Player p INNER JOIN placed ON placed.token = CONVERT(NVARCHAR(20), p.ID)
-    )
-    SELECT p.ID AS player_id, p.Name AS name, p.Country AS country, p.Activity AS activity, club.club_id AS club_id,
-      club.ClubName AS club_name, club.ClanTag AS club_tag,
-      CASE WHEN duplicates.normalized_name IS NULL THEN 0 ELSE 1 END AS duplicate_name
-    FROM dbo.Player p
-    INNER JOIN listed ON listed.player_id = p.ID
-    LEFT JOIN (
-      SELECT LOWER(LTRIM(RTRIM(ISNULL(Name, N'')))) AS normalized_name
-      FROM dbo.Player
-      WHERE LTRIM(RTRIM(ISNULL(Name, N''))) <> N''
-      GROUP BY LOWER(LTRIM(RTRIM(ISNULL(Name, N''))))
-      HAVING COUNT(*) > 1
-    ) duplicates ON duplicates.normalized_name = LOWER(LTRIM(RTRIM(ISNULL(p.Name, N''))))
-    ${PLAYER_CLUB_APPLY}
-    WHERE LTRIM(RTRIM(ISNULL(p.Name, N''))) <> N''
-    ORDER BY LOWER(LTRIM(RTRIM(ISNULL(p.Name, N'')))) ASC, LTRIM(RTRIM(ISNULL(p.Name, N''))) ASC;
-  `);
+export async function fetchPlayerListSource(
+  db: Queries,
+): Promise<{ profiles: ListProfileRecord[]; clubTags: string[] }> {
+  const [profiles = [], tags = []] = (await db.sets(sql`
+    SELECT p.ID AS player_id, p.DiscordID AS discord_id, p.Country AS country, p.Activity AS activity FROM dbo.Player p;
+    SELECT DISTINCT LTRIM(RTRIM(c.ClanTag)) AS tag FROM dbo.Club c WHERE LTRIM(RTRIM(ISNULL(c.ClanTag, N''))) <> N'';
+  `)) as [ListProfileRecord[]?, ClubTagRecord[]?];
+  return { profiles, clubTags: tags.map((row) => row.tag) };
 }
 
 /**

@@ -1,4 +1,5 @@
-// The players page: every player, active ones first, then by name. A name opens the profile popup.
+// The players page: every player on the Discord server, by server name (docs/adr/0015), active ones first, then by
+// name. A name opens the profile popup.
 
 import { toPositiveInt, toText } from "@ms/shared/text";
 import { escapeHtml } from "@ms/shared/html";
@@ -7,8 +8,8 @@ import { flagTitleAttribute, flagUrl, normalizeCountryCode } from "../../lib/cou
 
 interface PlayerRow {
   readonly player_id?: unknown;
+  /** The server name; "Name (@username)" when two players share it. */
   readonly name?: unknown;
-  readonly display_name?: unknown;
   readonly country?: unknown;
   readonly is_active?: unknown;
 }
@@ -18,9 +19,7 @@ function isActive(row: PlayerRow | null | undefined): boolean {
 }
 
 function sortName(row: PlayerRow | null | undefined): string {
-  return toText(row?.display_name || row?.name)
-    .trim()
-    .toLowerCase();
+  return toText(row?.name).trim().toLowerCase();
 }
 
 function comparePlayers(a: PlayerRow, b: PlayerRow): number {
@@ -34,7 +33,6 @@ function comparePlayers(a: PlayerRow, b: PlayerRow): number {
 
 function rowHtml(row: PlayerRow): string {
   const name = toText(row.name).trim() || "-";
-  const displayName = toText(row.display_name || row.name).trim() || "-";
   const playerId = toPositiveInt(row.player_id);
   const countryCode = normalizeCountryCode(row.country);
   const rowClass = isActive(row) ? "lb-row players-row" : "lb-row players-row is-inactive";
@@ -42,8 +40,8 @@ function rowHtml(row: PlayerRow): string {
     ? `<img class="players-flag" src="${escapeHtml(flagUrl(countryCode))}" alt="" aria-hidden="true"${flagTitleAttribute(countryCode)} loading="lazy" data-on-error="remove">`
     : "";
   const nameInner = playerId
-    ? `<button type="button" class="players-name-trigger" data-player-id="${playerId}" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for ${escapeHtml(name)}">${escapeHtml(displayName)}</button>`
-    : `<span class="players-name-static">${escapeHtml(displayName)}</span>`;
+    ? `<button type="button" class="players-name-trigger" data-player-id="${playerId}" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for ${escapeHtml(name)}">${escapeHtml(name)}</button>`
+    : `<span class="players-name-static">${escapeHtml(name)}</span>`;
   return [
     `<article class="${rowClass}" role="listitem">`,
     '<div class="lb-inner-frame players-inner-frame">',

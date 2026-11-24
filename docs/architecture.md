@@ -296,8 +296,9 @@ serves it before a link logo (`uploaded-logos.ts` knows which clubs have one, re
 a minute and after every change), and `Club.Logo` gets its public URL. The server's
 member list (`integrations/discord/guild-members.ts`, read with the bot token at start
 and every five minutes in the background, so no request waits for Discord) answers who
-is on the server for the invite list, succession and the absence rule, and gives club
-rosters and the profile editor the members' current names. `/internal/clubs/invitations/:id/answer` takes the bot's Accept/Decline buttons
+is on the server for the invite list, succession, the absence rule and the player list
+([ADR 0015](adr/0015-player-list-by-server-membership.md): members only, by server name), and
+gives club rosters and the profile editor the members' current names. `/internal/clubs/invitations/:id/answer` takes the bot's Accept/Decline buttons
 with the shared `CLUB_INTERNAL_SECRET` (404 otherwise; nginx never proxies `/internal/`).
 `lifecycle.ts` runs every `CLUB_LIFECYCLE_INTERVAL_MS` (default 5 minutes; `dev:live`
 sets 0): invitations expire, the new-club counter marks clubs alone 30 days after
@@ -365,8 +366,8 @@ All endpoints below use the same origin as the website.
 | GET | `/api/clubs/msbl` (alias `/api/clubs`) | Club list |
 | GET | `/api/clubs/msbl/:clubId/profile` | Club details and roster |
 | GET | `/api/clubs/msbl/:clubId/logo` | Club image: the uploaded logo (immutable under `?v=<hash>`), else the cached link image |
-| GET | `/api/players` | Player list |
-| GET | `/api/players/:playerId/profile` | Player profile |
+| GET | `/api/players` | Player list: the server's members by server name ([ADR 0015](adr/0015-player-list-by-server-membership.md)) |
+| GET | `/api/players/:playerId/profile` | Player profile (a listed player under the list's name) |
 | GET | `/api/competitive-season/current` | Current competitive season |
 | GET | `/api/events/community` | Community events |
 | GET | `/api/wiimmfi/msc-charged` | Online MSC players |

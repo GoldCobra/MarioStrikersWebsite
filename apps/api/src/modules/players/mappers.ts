@@ -60,18 +60,6 @@ export interface RatingCard {
 /** A rating card, or {} when the player has no card for that game and mode. */
 export type RatingBlock = Partial<RatingCard>;
 
-export interface PlayerListItem {
-  player_id: number | null;
-  name: string;
-  display_name: string;
-  country: string;
-  club_id: number | null;
-  club_name: string;
-  club_tag: string;
-  activity: string | null;
-  is_active: boolean;
-}
-
 export interface SeasonAward {
   season_name: string;
   game_code: string;
@@ -226,35 +214,6 @@ export function buildFriendCodes(rows: readonly Row[]): FriendCodes {
     grouped[bucket].push(line);
   }
   return grouped;
-}
-
-/** Duplicate names get the club tag, or the player id when there is no club, as a suffix. */
-export function buildPlayerDisplayName(row: Row | null, name: unknown): string {
-  const playerName = normalizeText(name);
-  if (!row || (row.duplicate_name !== true && Number(row.duplicate_name) !== 1)) return playerName;
-  const clubTag = normalizeText(row.club_tag);
-  if (clubTag) return `${playerName} [${clubTag}]`;
-  const playerId = toPositiveIntId(row.player_id);
-  return playerId ? `${playerName} [#${playerId}]` : playerName;
-}
-
-export function toPlayerListDTO(
-  row: Row,
-  options: { now?: unknown; activityWindowDays?: unknown } = {},
-): PlayerListItem | null {
-  const name = normalizeText(row.name);
-  if (!name) return null;
-  return {
-    player_id: Number(row.player_id) || null,
-    name,
-    display_name: buildPlayerDisplayName(row, name),
-    country: normalizeCountryCode(row.country),
-    club_id: Number(row.club_id) || null,
-    club_name: normalizeText(row.club_name),
-    club_tag: normalizeText(row.club_tag),
-    activity: toActivityIso(row.activity),
-    is_active: isActivityActive(row.activity, options.now, options.activityWindowDays),
-  };
 }
 
 function hasCompetitiveMatches(row: Row | null): boolean {
