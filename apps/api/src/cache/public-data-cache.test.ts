@@ -33,6 +33,24 @@ test("returns a fresh hit after the initial cold miss", async () => {
   assert.equal(calls, 1);
 });
 
+test("peek answers from memory only: nothing before the first load, and it never starts one", async () => {
+  let calls = 0;
+  const cache = createCache({
+    loaders: {
+      alpha: () => {
+        calls += 1;
+        return Promise.resolve({ value: calls });
+      },
+    },
+  });
+  assert.equal(cache.peek("alpha"), null);
+  assert.equal(calls, 0);
+  await cache.refresh("alpha");
+  assert.deepEqual(cache.peek("alpha"), { value: 1 });
+  assert.equal(cache.peek("unknown"), null);
+  assert.equal(calls, 1);
+});
+
 test("returns stale data immediately and refreshes in the background", async () => {
   let calls = 0;
   const cache = createCache({

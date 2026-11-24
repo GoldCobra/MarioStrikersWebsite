@@ -33,18 +33,22 @@ test("the player list joins every profile with the member list: members only, by
           activity: new Date("2026-11-20T10:00:00Z"),
         },
         { player_id: 225, discord_id: "100000000000000225", country: "de", activity: null },
+        // A mention form a bot might store still finds its member.
+        { player_id: 2600, discord_id: "<@!300000000000000001>", country: null, activity: null },
       ],
       [{ tag: "KFC" }],
     ],
   }));
   const rows = await getPlayersList(
     database,
-    memberList({ "756535384686461008": { username: "virt", nick: "[KFC] Virt" } }),
-    {
-      now: NOW,
-    },
+    memberList({
+      "756535384686461008": { username: "virt", nick: "[KFC] Virt" },
+      "300000000000000001": { username: "mentioned" },
+    }),
+    { now: NOW },
   );
   assert.deepEqual(rows, [
+    { player_id: 2600, name: "mentioned", country: "", activity: null, is_active: false },
     { player_id: 1632, name: "Virt", country: "gb-eng", activity: "2026-11-20T10:00:00.000Z", is_active: true },
   ]);
 });

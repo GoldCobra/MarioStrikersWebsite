@@ -248,13 +248,11 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     healthCheck: () => database.ping(),
     publicData,
     getLeaderboardRows: (query) => getLeaderboardRows(database, query, limits),
-    // The popup goes by the player list's name (docs/adr/0015); without the list it keeps the stored one.
+    // The popup goes by the player list's name (docs/adr/0015) as the list is in memory. It never waits for the list,
+    // so Discord never holds up a profile: until the first read after a start it keeps the stored name.
     getPlayerProfile: async (playerId) => {
-      const [profile, list] = await Promise.all([
-        getPlayerProfile(database, playerId, () => titleCatalog.get()),
-        publicData.get(PLAYERS_LIST_KEY).catch(() => null),
-      ]);
-      return profile && withListedName(profile, list?.payload);
+      const profile = await getPlayerProfile(database, playerId, () => titleCatalog.get());
+      return profile && withListedName(profile, publicData.peek(PLAYERS_LIST_KEY));
     },
     getPlayerProfileByDiscordId: (discordId) =>
       getPlayerProfileByDiscordId(database, discordId, () => titleCatalog.get()),

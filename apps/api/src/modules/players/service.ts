@@ -32,7 +32,8 @@ export async function getPlayersList(
   }
   const profiles = source.profiles.map((row) => ({
     playerId: row.player_id,
-    discordId: normalizeText(row.discord_id),
+    // All ids are plain digits today; a mention form ("<@!id>") a bot might write still finds its member.
+    discordId: normalizeDiscordId(row.discord_id),
     country: normalizeCountryCode(row.country),
     activity: toActivityIso(row.activity),
     isActive: isActivityActive(row.activity, options.now, options.activityWindowDays),

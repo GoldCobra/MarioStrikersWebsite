@@ -32,8 +32,11 @@ whole member list of the server in the background
   themselves, never by its shape, like the bot does (old tags such as `]IB[`).
 - **Players who share a name are all listed, each with the username**:
   `Spiky (@spiky123)`. Usernames are unique on Discord.
-- **The popup opened from the list goes by the same name.** Leaderboards,
-  rosters and the bots keep `dbo.Player.Name`; the database is not changed.
+- **The popup opened from the list goes by the same name**, taken from the
+  list in memory; it never waits for the list, so Discord never holds up a
+  profile (right after a start it shows the stored name until the first read).
+  Leaderboards, rosters and the bots keep `dbo.Player.Name`; the database is
+  not changed.
 - **No member list, no player list**: without a complete member list the list
   answers 503 instead of showing players who may have left. Once a list
   exists, a failed refresh keeps the last one (public data cache and member
