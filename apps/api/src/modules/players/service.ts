@@ -1,26 +1,44 @@
-// Player list and profiles from the database.
+// Player list and profiles from the database; the list's players and names from the server's member list.
 
+import { normalizeCountryCode } from "@ms/shared/countries";
 import { normalizeText } from "@ms/shared/text";
 import type { Queries } from "../../db/database.ts";
 import { HttpError } from "../../http/errors.ts";
+import type { GuildMemberSnapshot } from "../../integrations/discord/guild-members.ts";
+import { isActivityActive, toActivityIso } from "../../lib/dates.ts";
 import { normalizeDiscordId } from "../../lib/discord-id.ts";
 import type { CatalogTitle } from "../titles/availability.ts";
-import {
-  buildPlayerProfileFromRecordsets,
-  toPlayerListDTO,
-  type PlayerListItem,
-  type PlayerProfile,
-} from "./mappers.ts";
-import { fetchPlayerProfileRecordsets, fetchPlayersByDiscordId, fetchPlayersList } from "./repository.ts";
+import { buildPlayerProfileFromRecordsets, type PlayerProfile } from "./mappers.ts";
+import { fetchPlayerListSource, fetchPlayerProfileRecordsets, fetchPlayersByDiscordId } from "./repository.ts";
+import { buildPlayerList, clubTagList, type PlayerListRow } from "./server-names.ts";
 
 /** The title catalog (titles/repository.ts, cached); without one, profiles show no title. */
 export type TitleCatalogSource = () => Promise<readonly CatalogTitle[]>;
 
 const NO_TITLES: TitleCatalogSource = () => Promise.resolve([]);
 
-export async function getPlayersList(db: Queries): Promise<PlayerListItem[]> {
-  const rows = await fetchPlayersList(db);
-  return rows.map((row) => toPlayerListDTO(row)).filter((row): row is PlayerListItem => row !== null);
+/**
+ * The player list (docs/adr/0015): every profile whose Discord account is on the server now, by server name. It is
+ * never built without the member list: a list that cannot tell who is on the server would show those who left.
+ */
+export async function getPlayersList(
+  db: Queries,
+  memberList: { get(): Promise<GuildMemberSnapshot | null> },
+  options: { now?: Date; activityWindowDays?: number } = {},
+): Promise<PlayerListRow[]> {
+  const [source, snapshot] = await Promise.all([fetchPlayerListSource(db), memberList.get()]);
+  if (!snapshot) {
+    throw new HttpError(503, "UPSTREAM_UNAVAILABLE", "The player list is not available right now.");
+  }
+  const profiles = source.profiles.map((row) => ({
+    playerId: row.player_id,
+    // All ids are plain digits today; a mention form ("<@!id>") a bot might write still finds its member.
+    discordId: normalizeDiscordId(row.discord_id),
+    country: normalizeCountryCode(row.country),
+    activity: toActivityIso(row.activity),
+    isActive: isActivityActive(row.activity, options.now, options.activityWindowDays),
+  }));
+  return buildPlayerList(profiles, snapshot.members, clubTagList(source.clubTags));
 }
 
 async function loadProfile(db: Queries, playerId: number, titles: TitleCatalogSource): Promise<PlayerProfile | null> {

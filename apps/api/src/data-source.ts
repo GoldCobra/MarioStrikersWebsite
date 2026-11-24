@@ -32,6 +32,7 @@ import { getMsblClubProfile, getMsblClubs } from "./modules/clubs/service.ts";
 import { CommunityEventsCache, fetchCommunityEvents, type EventsPayload } from "./modules/events/service.ts";
 import { getLeaderboardRows, type LeaderboardQuery, type LeaderboardRow } from "./modules/leaderboards/service.ts";
 import type { PlayerProfile } from "./modules/players/mappers.ts";
+import { withListedName } from "./modules/players/server-names.ts";
 import { getPlayerProfile, getPlayerProfileByDiscordId, getPlayersList } from "./modules/players/service.ts";
 import { createSqlProfileStore } from "./modules/profile/repository.ts";
 import { createProfileService, type ProfileService } from "./modules/profile/service.ts";
@@ -85,8 +86,9 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     botToken: config.discord.botToken,
     fetchTimeoutMs: config.discord.memberFetchTimeoutMs,
   };
-  // The server's member list, read at start and every five minutes in the background: club rosters, the profile
-  // editor's names and My Club (invite list, absence, succession) read it without waiting for Discord.
+  // The server's member list, read at start and every five minutes in the background: the player list (who is
+  // listed, by which name), club rosters, the profile editor's names and My Club (invite list, absence, succession)
+  // read it without waiting for Discord.
   const memberList = new GuildMemberList({ ...discordRest, guildId: config.discord.guildId, maxAgeMs: 5 * 60 * 1000 });
   const logos = new ClubLogoCache({
     cacheDir: config.clubLogos.cachePath,
@@ -118,7 +120,7 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
 
   const loaders: Record<string, () => Promise<unknown>> = {
     [PLAYERS_LIST_KEY]: async () => {
-      const rows = await getPlayersList(database);
+      const rows = await getPlayersList(database, memberList);
       return { count: rows.length, rows };
     },
     [MSBL_CLUBS_KEY]: async () => {
@@ -246,7 +248,12 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     healthCheck: () => database.ping(),
     publicData,
     getLeaderboardRows: (query) => getLeaderboardRows(database, query, limits),
-    getPlayerProfile: (playerId) => getPlayerProfile(database, playerId, () => titleCatalog.get()),
+    // The popup goes by the player list's name (docs/adr/0015) as the list is in memory. It never waits for the list,
+    // so Discord never holds up a profile: until the first read after a start it keeps the stored name.
+    getPlayerProfile: async (playerId) => {
+      const profile = await getPlayerProfile(database, playerId, () => titleCatalog.get());
+      return profile && withListedName(profile, publicData.peek(PLAYERS_LIST_KEY));
+    },
     getPlayerProfileByDiscordId: (discordId) =>
       getPlayerProfileByDiscordId(database, discordId, () => titleCatalog.get()),
     getProfileStatsByDiscordId: (discordId) => getProfileStatsByDiscordId(database, discordId),

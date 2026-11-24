@@ -51,23 +51,6 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/ca.png" alt="" aria-hidden="true" title="Canada" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="16" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for <i>Escaped Name</i>">
-                    #text "<i>Escaped Name</i>"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
                   <img class="players-flag" src="/assets/flags/gb-wls.png" alt="" aria-hidden="true" title="Wales" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
@@ -119,23 +102,6 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/be.png" alt="" aria-hidden="true" title="Belgium" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="22" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Crystal Cleat">
-                    #text "Crystal Cleat"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
                   <img class="players-flag" src="/assets/flags/mx.png" alt="" aria-hidden="true" title="Mexico" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
@@ -143,38 +109,6 @@
                 <span class="players-name-text">
                   <button type="button" class="players-name-trigger" data-player-id="15" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for dotted.sample">
                     #text "dotted.sample"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/us.png" alt="" aria-hidden="true" title="United States" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="26" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Galactic Goal">
-                    #text "Galactic Goal"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot"/>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="20" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Goalie Gumba">
-                    #text "Goalie Gumba"
                   </button>
                 </span>
               </span>
@@ -202,91 +136,6 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/nl.png" alt="" aria-hidden="true" title="Netherlands" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="10" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Koopa Kicker">
-                    #text "Koopa Kicker"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/se.png" alt="" aria-hidden="true" title="Sweden" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="11" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Lakitu Loop">
-                    #text "Lakitu Loop"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/at.png" alt="" aria-hidden="true" title="Austria" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="23" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Lava Lob">
-                    #text "Lava Lob"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/it.png" alt="" aria-hidden="true" title="Italy" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="8" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Mega Striker">
-                    #text "Mega Striker"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/pt.png" alt="" aria-hidden="true" title="Portugal" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="19" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Midfield Mushroom">
-                    #text "Midfield Mushroom"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
                   <img class="players-flag" src="/assets/flags/gb-eng.png" alt="" aria-hidden="true" title="England" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
@@ -294,23 +143,6 @@
                 <span class="players-name-text">
                   <button type="button" class="players-name-trigger" data-player-id="4" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Pixel Piranha">
                     #text "Pixel Piranha"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/au.png" alt="" aria-hidden="true" title="Australia" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="17" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Player 42">
-                    #text "Player 42"
                   </button>
                 </span>
               </span>
@@ -343,8 +175,25 @@
               </div>
               <span class="lb-player players-name">
                 <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="18" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Rocket Toad">
-                    #text "Rocket Toad"
+                  <button type="button" class="players-name-trigger" data-player-id="18" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Rocket Toad (@rocket_toad)">
+                    #text "Rocket Toad (@rocket_toad)"
+                  </button>
+                </span>
+              </span>
+              <div class="lb-points players-points-spacer" aria-hidden="true"/>
+            </div>
+          </article>
+          <article class="lb-row players-row" role="listitem">
+            <div class="lb-inner-frame players-inner-frame">
+              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
+                <span class="players-flag-slot">
+                  <img class="players-flag" src="/assets/flags/no.png" alt="" aria-hidden="true" title="Norway" loading="lazy" data-on-error="remove"/>
+                </span>
+              </div>
+              <span class="lb-player players-name">
+                <span class="players-name-text">
+                  <button type="button" class="players-name-trigger" data-player-id="24" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Rocket Toad (@sand_tomb_sam)">
+                    #text "Rocket Toad (@sand_tomb_sam)"
                   </button>
                 </span>
               </span>
@@ -362,57 +211,6 @@
                 <span class="players-name-text">
                   <button type="button" class="players-name-trigger" data-player-id="1" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Sample Player">
                     #text "Sample Player"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/no.png" alt="" aria-hidden="true" title="Norway" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="24" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Sand Tomb Sam">
-                    #text "Sand Tomb Sam"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/de.png" alt="" aria-hidden="true" title="Germany" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="25" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Stormship Sky">
-                    #text "Stormship Sky"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/fr.png" alt="" aria-hidden="true" title="France" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="31" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Sudden Death">
-                    #text "Sudden Death"
                   </button>
                 </span>
               </span>
@@ -470,91 +268,6 @@
               <div class="lb-points players-points-spacer" aria-hidden="true"/>
             </div>
           </article>
-          <article class="lb-row players-row" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/gb-sct.png" alt="" aria-hidden="true" title="Scotland" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="29" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Wasteland Will">
-                    #text "Wasteland Will"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/kr.png" alt="" aria-hidden="true" title="South Korea" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="13" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Zoë Ñandú">
-                    #text "Zoë Ñandú"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row is-inactive" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/br.png" alt="" aria-hidden="true" title="Brazil" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="38" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Bicycle Ben">
-                    #text "Bicycle Ben"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row is-inactive" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/br.png" alt="" aria-hidden="true" title="Brazil" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="14" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Captain Incredibly Long Sample Name">
-                    #text "Captain Incredibly Long Sample Name"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row is-inactive" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/fr.png" alt="" aria-hidden="true" title="France" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="7" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Chain Chomper">
-                    #text "Chain Chomper"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
           <article class="lb-row players-row is-inactive" role="listitem">
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
@@ -593,23 +306,6 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/gb-eng.png" alt="" aria-hidden="true" title="England" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="28" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Dump Truck Dan">
-                    #text "Dump Truck Dan"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row is-inactive" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
                   <img class="players-flag" src="/assets/flags/ve.png" alt="" aria-hidden="true" title="Venezuela" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
@@ -617,57 +313,6 @@
                 <span class="players-name-text">
                   <button type="button" class="players-name-trigger" data-player-id="45" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Extra Time Eve">
                     #text "Extra Time Eve"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row is-inactive" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/pt.png" alt="" aria-hidden="true" title="Portugal" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="43" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Free Kick Finn">
-                    #text "Free Kick Finn"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row is-inactive" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/be.png" alt="" aria-hidden="true" title="Belgium" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="46" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Golden Goal Gus">
-                    #text "Golden Goal Gus"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row is-inactive" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/at.png" alt="" aria-hidden="true" title="Austria" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="47" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Hat-trick Hal">
-                    #text "Hat-trick Hal"
                   </button>
                 </span>
               </span>
@@ -712,23 +357,6 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/se.png" alt="" aria-hidden="true" title="Sweden" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="35" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Loading Lou">
-                    #text "Loading Lou"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row is-inactive" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
                   <img class="players-flag" src="/assets/flags/mx.png" alt="" aria-hidden="true" title="Mexico" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
@@ -746,89 +374,6 @@
             <div class="lb-inner-frame players-inner-frame">
               <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
                 <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/au.png" alt="" aria-hidden="true" title="Australia" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="41" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Offside Olly">
-                    #text "Offside Olly"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row is-inactive" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/nl.png" alt="" aria-hidden="true" title="Netherlands" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="34" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Pause Menu">
-                    #text "Pause Menu"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row is-inactive" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/ca.png" alt="" aria-hidden="true" title="Canada" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="40" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Penalty Pete">
-                    #text "Penalty Pete"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row is-inactive" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/it.png" alt="" aria-hidden="true" title="Italy" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="32" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Results Rita">
-                    #text "Results Rita"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row is-inactive" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot"/>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="44" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Throw-in Theo">
-                    #text "Throw-in Theo"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row is-inactive" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
                   <img class="players-flag" src="/assets/flags/ve.png" alt="" aria-hidden="true" title="Venezuela" loading="lazy" data-on-error="remove"/>
                 </span>
               </div>
@@ -836,23 +381,6 @@
                 <span class="players-name-text">
                   <button type="button" class="players-name-trigger" data-player-id="21" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Thunder Boot">
                     #text "Thunder Boot"
-                  </button>
-                </span>
-              </span>
-              <div class="lb-points players-points-spacer" aria-hidden="true"/>
-            </div>
-          </article>
-          <article class="lb-row players-row is-inactive" role="listitem">
-            <div class="lb-inner-frame players-inner-frame">
-              <div class="lb-rank-cell players-flag-cell" aria-hidden="true">
-                <span class="players-flag-slot">
-                  <img class="players-flag" src="/assets/flags/kr.png" alt="" aria-hidden="true" title="South Korea" loading="lazy" data-on-error="remove"/>
-                </span>
-              </div>
-              <span class="lb-player players-name">
-                <span class="players-name-text">
-                  <button type="button" class="players-name-trigger" data-player-id="37" aria-haspopup="dialog" aria-controls="player-profile-popup" aria-label="Open profile for Volley Vera">
-                    #text "Volley Vera"
                   </button>
                 </span>
               </span>

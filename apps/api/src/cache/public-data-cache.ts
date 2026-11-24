@@ -77,6 +77,11 @@ export class PublicDataCache implements PublicDataSource {
     return this.toResult(await this.refresh(key), "miss");
   }
 
+  /** The dataset as it is in memory, without loading or waiting; null before its first load. */
+  peek(key: string): unknown {
+    return this.entries.get(key)?.payload ?? null;
+  }
+
   refresh(key: string): Promise<Entry> {
     const running = this.inFlight.get(key);
     if (running) return running;

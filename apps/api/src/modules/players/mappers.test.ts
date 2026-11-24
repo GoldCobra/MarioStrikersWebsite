@@ -5,7 +5,6 @@ import { isActivityActive, toActivityIso } from "../../lib/dates.ts";
 import { normalizeDiscordId } from "../../lib/discord-id.ts";
 import {
   buildAccolades,
-  buildPlayerDisplayName,
   buildPlayerProfileFromRecordsets,
   buildRatings,
   buildSeasonAwards,
@@ -14,13 +13,12 @@ import {
   formatSeasonAwardSeasonName,
   isWorldChampionTitle,
   stripEventWord,
-  toPlayerListDTO,
 } from "./mappers.ts";
 import {
   SEASON_AWARD_DISPLAY_ORDER,
   SEASON_AWARD_GAME_ORDER,
+  fetchPlayerListSource,
   fetchPlayerProfileRecordsets,
-  fetchPlayersList,
 } from "./repository.ts";
 import { seededCatalog } from "../titles/catalog.ts";
 import { createFakeDatabase, type RecordedStatement } from "../../test-support/fake-database.ts";
@@ -44,48 +42,6 @@ function statementWith(batch: string, marker: string): string {
   return statement;
 }
 
-function createPlayerRow(activity: Date | null) {
-  return {
-    player_id: 223,
-    name: "GoldCobra",
-    country: "US",
-    club_id: 8,
-    club_name: "Chaos Edge",
-    club_tag: "CE",
-    duplicate_name: 0,
-    activity: activity,
-  };
-}
-
-test("Player.Activity NULL is exposed as inactive", () => {
-  const row = toPlayerListDTO(createPlayerRow(null), { now: NOW });
-
-  assert.equal(row?.activity, null);
-  assert.equal(row.is_active, false);
-  assert.equal(row.name, "GoldCobra");
-  assert.equal(row.display_name, "GoldCobra");
-  assert.equal(row.country, "us");
-  assert.equal(row.club_id, 8);
-  assert.equal(row.club_name, "Chaos Edge");
-  assert.equal(row.club_tag, "CE");
-});
-
-test("Player.Activity within 90 days is active", () => {
-  const activity = new Date("2026-04-01T12:00:00.000Z");
-  const row = toPlayerListDTO(createPlayerRow(activity), { now: NOW });
-
-  assert.equal(row?.activity, "2026-04-01T12:00:00.000Z");
-  assert.equal(row.is_active, true);
-});
-
-test("Player.Activity older than 90 days is inactive", () => {
-  const activity = new Date("2026-01-01T12:00:00.000Z");
-  const row = toPlayerListDTO(createPlayerRow(activity), { now: NOW });
-
-  assert.equal(row?.activity, "2026-01-01T12:00:00.000Z");
-  assert.equal(row.is_active, false);
-});
-
 test("player activity helpers normalize invalid values safely", () => {
   assert.equal(toActivityIso(""), null);
   assert.equal(toActivityIso("not a date"), null);
@@ -97,35 +53,6 @@ test("player country flags normalize UK subdivision aliases", () => {
   assert.equal(normalizeCountry("England"), "gb-eng");
   assert.equal(normalizeCountry("UK"), "gb");
   assert.equal(normalizeCountry("CA"), "ca");
-  assert.equal(toPlayerListDTO(Object.assign(createPlayerRow(null), { country: "GB-SCT" }))?.country, "gb-sct");
-});
-
-test("duplicate player names get a club tag display suffix", () => {
-  const row = toPlayerListDTO(
-    {
-      player_id: 2215,
-      name: "Wally",
-      club_tag: "CB",
-      duplicate_name: 1,
-    },
-    { now: NOW },
-  );
-
-  assert.equal(row?.name, "Wally");
-  assert.equal(row.display_name, "Wally [CB]");
-});
-
-test("duplicate player names without club tag get a player id display suffix", () => {
-  assert.equal(
-    buildPlayerDisplayName(
-      {
-        player_id: 1264,
-        duplicate_name: true,
-      },
-      "Wally",
-    ),
-    "Wally [#1264]",
-  );
 });
 
 test("normalizeDiscordId supports raw IDs and mention formats", () => {
@@ -890,24 +817,25 @@ test("only first place counts as a tournament winner", () => {
   );
 });
 
-test("players list only includes rows with visible profile content", async () => {
-  const database = createFakeDatabase();
-  await fetchPlayersList(database);
+test("the player list reads every profile and the club tags in one round trip, never the stored name", async () => {
+  const database = createFakeDatabase(() => ({
+    sets: [
+      [{ player_id: 7, discord_id: "123456789012345678", country: "england", activity: null }],
+      [{ tag: "KFC" }, { tag: "]IB[" }],
+    ],
+  }));
+  const source = await fetchPlayerListSource(database);
   assert.equal(database.statements.length, 1);
-  const sql = database.statements[0]?.text ?? "";
-
-  assert.match(sql, /FriendCodes/);
-  assert.match(sql, /CompetitiveLeaderboard/);
-  assert.match(sql, /Tournament/);
-  assert.match(sql, /IdStartGG/);
-  assert.doesNotMatch(sql, /PlayerStats/);
-  // The four kinds of ids are collected once and joined once: the placements are split once, never matched
-  // against every player with LIKE (1.1 s instead of 10 ms).
-  assert.equal(sql.match(/\bUNION\b/g)?.length, 3);
-  assert.match(sql, /STRING_SPLIT\(ISNULL\(placement\.list, N''\), N','\)/);
-  assert.match(sql, /INNER JOIN listed ON listed\.player_id = p\.ID/);
-  assert.doesNotMatch(sql, /\bLIKE\b|\bEXISTS\b/);
+  const batch = database.statements[0]?.text ?? "";
+  // Every profile: who is listed is decided by the member list (server-names.ts), not by the database.
+  assert.match(batch, /SELECT p\.ID AS player_id, p\.DiscordID AS discord_id, p\.Country AS country, p\.Activity/);
+  assert.doesNotMatch(statementWith(batch, "dbo.Player p"), /\bWHERE\b|\bJOIN\b|p\.Name/);
+  assert.match(statementWith(batch, "dbo.Club c"), /ClanTag/);
   assert.deepEqual(database.statements[0]?.values, []);
+  assert.deepEqual(source, {
+    profiles: [{ player_id: 7, discord_id: "123456789012345678", country: "england", activity: null }],
+    clubTags: ["KFC", "]IB["],
+  });
 });
 
 test("buildSeasonAwards maps award rows and keeps the SQL ordering", () => {

@@ -65,6 +65,19 @@
     {
       "screenshots": ["states/club-popup-*"],
       "reason": "Owner 2026-11-19 (club management, plan 4.7): the club popup names the club's captain CAPTAIN instead of OWNER, as My Club does; the badge grows by the two letters. The rest of the popup and every page are unchanged."
+    },
+    {
+      "screenshots": [
+        "pages/players-320-*",
+        "pages/players-390-*",
+        "pages/players-768-*",
+        "pages/players-1024-*",
+        "pages/players-1280-*",
+        "pages/players-1440-*",
+        "states/players-popup*",
+        "states/error-profile-popup*"
+      ],
+      "reason": "Owner 2026-11-24 (docs/adr/0015): the player list shows the members of the Discord server only, by server name. Of the 48 fixture players 20 are on the fixture server, so the list is shorter, and players 18 and 24 share the name Rocket Toad, each with the username in brackets. The popup states, the failed-profile one included, open over that list (and the first trigger is another player now); the popups themselves are unchanged."
     }
   ]
 }

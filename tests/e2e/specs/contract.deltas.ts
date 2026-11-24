@@ -23,6 +23,20 @@ const UNLINKED_SAMPLE_ACCOUNT = "900000000000000002";
 // game (player.title_game_code, since 2026-10-02).
 const PLAYER_PROFILE_PATH = /^\/api\/players\/\d+\/profile$/;
 
+// 2026-11-24 (docs/adr/0015): the player list holds the members of the Discord server only, by server name, with
+// "(@username)" when two share one (rows: player_id, name, country, activity, is_active). Its body is new as a whole.
+// The popup goes by the list's name: fixture players 18 and 24 share theirs.
+const PLAYERS_LIST_PATH = "/api/players";
+const SHARED_NAME_PROFILE_PATHS = new Set(["/api/players/18/profile", "/api/players/24/profile"]);
+
+function withoutPlayerName(profile: unknown): unknown {
+  const player = (profile as { player?: unknown } | null)?.player;
+  if (!player || typeof player !== "object") return profile;
+  const rest = { ...(player as Record<string, unknown>) };
+  delete rest.name;
+  return { ...(profile as Record<string, unknown>), player: rest };
+}
+
 // 2026-11-04: the MSC platform Dolphin became Recharged, and the fixtures' Dolphin codes with it.
 function withRechargedPlatform(value: unknown): unknown {
   if (typeof value === "string")
@@ -74,6 +88,8 @@ export function normalizeContract(record: ContractRecord): ContractRecord {
     if (typeof code === "string" && NEW_ERROR_CODES.has(code)) body = rest;
   }
   if (PLAYER_PROFILE_PATH.test(record.path)) body = withoutPlayerTitle(body);
+  if (SHARED_NAME_PROFILE_PATHS.has(record.path)) body = withoutPlayerName(body);
+  if (record.path === PLAYERS_LIST_PATH && record.status === 200) body = "player list: members by server name";
   if (record.path === "/api/profile/me" && body && typeof body === "object" && "profile" in body) {
     body = { ...body, profile: withoutPlayerTitle(body.profile) };
   }
