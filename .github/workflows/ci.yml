@@ -151,6 +151,18 @@ jobs:
               assert response.status == 404 and body == get('/api/no-such-route')[1]
           print('The admin page opens for the admin only; everyone else gets the ordinary not-found page.')
           PY
+      - name: Club logos of the largest allowed size pass nginx (docs/adr/0013)
+        run: |
+          python3 - <<'PY'
+          import http.client, json
+          conn = http.client.HTTPConnection('127.0.0.1', 8080, timeout=10)
+          conn.request('PUT', '/api/my-club/logo', b'\0' * (2 * 1024 * 1024), {'Content-Type': 'image/png'})
+          response = conn.getresponse()
+          body = response.read()
+          # Signed out, the API itself answers; nginx's own 413 page would mean it stopped the upload.
+          assert response.status == 401 and json.loads(body) == {'error': 'Authentication required.', 'code': 'AUTH_REQUIRED'}, (response.status, body[:200])
+          print('A 2 MB logo upload reaches the API through nginx.')
+          PY
       - name: Install end-to-end tools
         run: |
           npm ci

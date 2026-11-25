@@ -41,7 +41,9 @@ on Alpine (musl).
   same logo.
 - `PUT /api/my-club/logo` takes the raw image as the request body
   (`image/png`, `image/jpeg` or `image/webp`) with a 2 MB limit on this route
-  only; every other route keeps its 16 KB limit.
+  only; every other route keeps its 16 KB limit. nginx in front allows the
+  same 2 MB for this route (`infra/nginx/frontend.conf`; its 1 MB default
+  holds for every other request).
 
 ## Consequences
 
