@@ -21,3 +21,4 @@ change a record's status instead of deleting it when it is replaced.
 | [0013](0013-club-logo-uploads-with-sharp.md) | Club logo uploads are decoded and re-encoded with sharp |
 | [0014](0014-data-access-on-the-local-database.md) | One SQL core for the database next to the API |
 | [0015](0015-player-list-by-server-membership.md) | The player list shows the server's members by server name |
+| [0016](0016-recharged-api-with-keys.md) | The Recharged API gives the Recharged WFC server MSC rated, behind keys |

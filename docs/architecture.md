@@ -316,6 +316,12 @@ the profile page's way (`club-edit.ts`; the save bar `features/profile/edit-bar.
 account panels `account-page.ts` are shared with My Profile); without a club it shows the member's
 invitations, creating a club and the open clubs.
 
+The Recharged API ([ADR 0016](adr/0016-recharged-api-with-keys.md); the contract for its team is
+[recharged-api.md](recharged-api.md)) serves the Recharged WFC server under `/api/recharged/v1/`, only
+with a key whose SHA-256 is in `RECHARGED_API_KEYS` (without one the routes do not exist): a player's
+MSC 1v1 rating by Discord id, the rank ladder, and match reports, stored in
+`rocci121_toby.ExternalMatchReport` but not rated yet; a test key's reports never are.
+
 Responses use snake_case keys throughout; code inside the API uses camelCase
 and converts at the route (the season route shows how, since its cached
 data keeps the service's shape).
@@ -336,7 +342,7 @@ Everything lives under `apps/api/src/`:
 | `fixtures/` | The invented `DataSource` of local development and tests |
 | `modules/<domain>/` | `routes.ts`, `service.ts`, `repository.ts` (SQL), `mappers.ts` and their tests |
 | `cache/`, `db/`, `http/`, `integrations/`, `lib/` | Public data cache, SQL statements and the database (ADR 0014), reply helpers and errors, Discord REST, small utilities |
-| `ops/` | Maintenance commands (`npm run ops:*` in `apps/api`): `check-db`, `player-titles`, `title-sync`, `title-test-unlocks` |
+| `ops/` | Maintenance commands (`npm run ops:*` in `apps/api`): `check-db`, `player-titles`, `recharged-key`, `recharged-schema`, `title-sync`, `title-test-unlocks` |
 
 A new endpoint goes into the module of its domain: SQL in `repository.ts` (`sql` templates),
 shaping in `service.ts`/`mappers.ts`, the HTTP contract in `routes.ts`, which
@@ -400,6 +406,10 @@ All endpoints below use the same origin as the website.
 | POST | `/api/admin/clubs/:clubId/rename` | Admin only: a club's new name and/or tag (JSON: `name`, `tag`), logged |
 | DELETE | `/api/admin/clubs/:clubId/logo` | Admin only: remove a club's logo, logged |
 | POST | `/api/admin/clubs/:clubId/delete` | Admin only: delete a club (JSON: `confirm_tag`, the exact tag), logged |
+| GET | `/api/recharged/v1/players/:discordId` | Recharged key only (404 without keys, 401 without one): the player's MSC 1v1 rating of the active season |
+| GET | `/api/recharged/v1/ranks` | Recharged key only: the rank ladder, the starting ELO and the placement matches |
+| POST | `/api/recharged/v1/matches` | Recharged key only: store a match report (JSON), once per match id and key environment |
+| GET | `/api/recharged/v1/matches/:matchId` | Recharged key only: a stored report and its status |
 | GET | `/api/health` | Service health |
 
 Leaderboard games are `msbl`, `msc` and `sms`; modes are `elo1v1`,

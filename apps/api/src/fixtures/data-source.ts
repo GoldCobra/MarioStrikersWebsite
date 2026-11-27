@@ -41,6 +41,7 @@ import {
   type CatalogTitle,
 } from "../modules/titles/availability.ts";
 import { buildProfileStats, type ProfileStats } from "../modules/profile/stats.ts";
+import { PLACEMENT_MATCHES, createMemoryRechargedStore } from "../modules/recharged/service.ts";
 import { TITLE_CATEGORIES, TITLE_CATEGORY, seededCatalog } from "../modules/titles/catalog.ts";
 
 const DAY_MS = 86_400_000;
@@ -329,6 +330,12 @@ function rewardLevel(
 function rankNumberForRating(rating: number): number {
   if (rating >= 1750) return 19;
   return Math.max(1, Math.min(18, Math.floor((rating - 400) / 75) + 1));
+}
+
+/** The lowest ELO of a rank of this invented ladder (rankNumberForRating's steps); rank 0 starts where Bronze I does. */
+function fixtureRankMinElo(rankNumber: number): number {
+  if (rankNumber >= 19) return 1750;
+  return 400 + Math.max(0, rankNumber - 1) * 75;
 }
 
 function fakeFriendCode(random: () => number, prefix?: string): string {
@@ -1103,6 +1110,45 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
     now: nowFn,
   });
 
+  // The Recharged API (docs/adr/0016): this invented ladder and the MSC ratings above, by the players' Discord ids, in
+  // the season of the countdown; reports stay in memory.
+  const rechargedSeason = { id: 3, name: "Dusk Season 2026", endsAt: new Date(now + 50 * DAY_MS + 5 * 3600000) };
+  const recharged = createMemoryRechargedStore({
+    now: nowFn,
+    ranks: RANK_NAMES.map((name, rankNumber) => ({
+      rankNumber,
+      name,
+      tier: name === "Strikers Titan" ? "Titan" : (name.split(" ")[0] ?? name),
+      minElo: fixtureRankMinElo(rankNumber),
+    })),
+    players: (discordId) => {
+      const index = players.findIndex((player) => discordIdFor(player) === discordId);
+      const player = players[index];
+      if (!player) return null;
+      const entry = ratingsByGame.msc[index];
+      const rankNumber = entry?.elo ? rankNumberForRating(entry.elo) : 0;
+      return {
+        playerId: player.player_id,
+        name: player.name,
+        hideStats: false,
+        season: rechargedSeason,
+        rating:
+          entry?.played && entry.elo
+            ? {
+                elo: entry.elo,
+                rankNumber,
+                rankName: RANK_NAMES[rankNumber] ?? "",
+                placementPlayed: PLACEMENT_MATCHES,
+                placementComplete: true,
+                wins: entry.wins,
+                losses: entry.losses,
+              }
+            : null,
+        unranked: { elo: fixtureRankMinElo(0), name: RANK_NAMES[0] ?? "Unranked" },
+      };
+    },
+  });
+
   return {
     source: "fixtures",
     now: nowFn,
@@ -1167,6 +1213,7 @@ export function createFixtureDataSource(options: FixtureOptions = {}): DataSourc
     login: { sessions, oauth },
     admin,
     clubs: clubManagement,
+    recharged,
     start: () => undefined,
     stop: () => Promise.resolve(),
   };

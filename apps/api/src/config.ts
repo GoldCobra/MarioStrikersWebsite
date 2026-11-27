@@ -61,6 +61,12 @@ export interface ClubConfig {
   readonly lifecycleIntervalMs: number;
 }
 
+/** The Recharged API (docs/adr/0016). */
+export interface RechargedConfig {
+  /** RECHARGED_API_KEYS: "test:<sha256 hex>" and "live:<sha256 hex>" entries; none keeps the API off. */
+  readonly apiKeys: readonly string[];
+}
+
 export type LogLevel = "fatal" | "error" | "warn" | "info" | "debug" | "trace" | "silent";
 
 export interface Config {
@@ -90,6 +96,7 @@ export interface Config {
   /** Time between two runs of the player title sync; 0 switches it off. */
   readonly titleSyncIntervalMs: number;
   readonly clubs: ClubConfig;
+  readonly recharged: RechargedConfig;
   readonly discord: DiscordConfig;
   readonly session: SessionConfig;
   readonly admin: AdminConfig;
@@ -177,6 +184,9 @@ export function loadConfig(env: Env, options: LoadConfigOptions = {}): Config {
     clubs: {
       internalSecret: readString(env, "CLUB_INTERNAL_SECRET"),
       lifecycleIntervalMs: readInt(env, "CLUB_LIFECYCLE_INTERVAL_MS", 5 * 60 * 1000),
+    },
+    recharged: {
+      apiKeys: readList(env, "RECHARGED_API_KEYS"),
     },
     discord: {
       clientId: readString(env, "DISCORD_CLIENT_ID"),

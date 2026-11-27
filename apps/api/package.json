@@ -13,6 +13,8 @@
     "dev:live": "node --watch src/dev-live.ts",
     "ops:check-db": "node src/ops/check-database.ts",
     "ops:player-titles": "node src/ops/apply-player-titles.ts",
+    "ops:recharged-key": "node src/ops/recharged-key.ts",
+    "ops:recharged-schema": "node src/ops/apply-recharged-schema.ts",
     "ops:title-sync": "node src/ops/sync-player-titles.ts",
     "ops:title-test-unlocks": "node src/ops/title-test-unlocks.ts",
     "test": "node --import ./src/test-support/isolate.ts --test \"src/**/*.test.ts\"",
