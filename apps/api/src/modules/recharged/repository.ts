@@ -109,10 +109,13 @@ function toStoredReport(record: ReportRecord): StoredMatchReport {
   };
 }
 
+// Statistics show only for HideStats = 0, as on the profile (players/repository.ts); anything else counts as hidden,
+// even a NULL the NOT NULL column cannot hold today.
 async function findPlayer(db: Queries, discordId: string): Promise<RechargedPlayerRecord | null> {
   const [players = [], seasons = [], ratings = [], unranked = []] = await db.sets(sql`
     DECLARE @playerId INT = (SELECT TOP 1 ID FROM dbo.Player WHERE DiscordID = ${t.nvarchar(discordId, 25)} ORDER BY ID);
-    SELECT p.ID AS player_id, p.Name AS name, p.HideStats AS hide_stats FROM dbo.Player p WHERE p.ID = @playerId;
+    SELECT p.ID AS player_id, p.Name AS name, CAST(CASE WHEN p.HideStats = 0 THEN 0 ELSE 1 END AS BIT) AS hide_stats
+    FROM dbo.Player p WHERE p.ID = @playerId;
     SELECT TOP 1 season.Id AS season_id, season.DisplayName AS season_name, season.EndDateUtc AS ends_at
     FROM rocci121_toby.CompetitiveSeason season
     WHERE ${ACTIVE_SEASON}

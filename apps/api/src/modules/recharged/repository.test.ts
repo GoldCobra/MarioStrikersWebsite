@@ -87,6 +87,8 @@ test("a player is read in one batch: the player, the active season, the MSC 1v1 
   assert.deepEqual(statement?.values, [ALICE]);
   const text = flat(statement.text);
   assert.match(text, /DECLARE @playerId INT = \(SELECT TOP 1 ID FROM dbo\.Player WHERE DiscordID = @p0 ORDER BY ID\);/);
+  // Only HideStats = 0 shows statistics, as on the profile; anything else, NULL included, is hidden.
+  assert.match(text, /CAST\(CASE WHEN p\.HideStats = 0 THEN 0 ELSE 1 END AS BIT\) AS hide_stats/);
   assert.match(text, /rating\.PlayerId = @playerId AND rating\.GameId = 1 AND rating\.ModeCode = '1v1'/);
   assert.equal(text.match(/season\.IsActive = 1 AND season\.LifecycleStatus = 'active'/g)?.length, 2);
   assert.match(text, /WHERE threshold\.IsActive = 1 AND threshold\.RankNumber = 0;$/);
