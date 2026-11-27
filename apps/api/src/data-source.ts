@@ -38,6 +38,8 @@ import { createSqlProfileStore } from "./modules/profile/repository.ts";
 import { createProfileService, type ProfileService } from "./modules/profile/service.ts";
 import { getProfileStatsByDiscordId } from "./modules/profile/stats-repository.ts";
 import type { ProfileStats } from "./modules/profile/stats.ts";
+import { createSqlRechargedStore } from "./modules/recharged/repository.ts";
+import type { RechargedStore } from "./modules/recharged/service.ts";
 import { getCompetitiveSeasonStatus } from "./modules/season/service.ts";
 import { createTitleCatalog } from "./modules/titles/repository.ts";
 import { createTitleSyncSchedule } from "./modules/titles/service.ts";
@@ -74,6 +76,8 @@ export interface DataSource {
   readonly admin: AdminAccess | null;
   /** My Club (docs/adr/0012); absent when Discord login is not configured. */
   readonly clubs: ClubManagement | null;
+  /** The Recharged API's data (docs/adr/0016); its routes exist only with RECHARGED_API_KEYS. */
+  readonly recharged: RechargedStore;
   start(): void;
   stop(): Promise<void>;
 }
@@ -266,6 +270,7 @@ export function createLiveDataSource(config: Config, log: Logger): DataSource {
     login,
     admin,
     clubs,
+    recharged: createSqlRechargedStore(database),
     start() {
       memberList.start();
       publicData.start();

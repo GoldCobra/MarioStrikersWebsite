@@ -163,6 +163,30 @@ jobs:
           assert response.status == 401 and json.loads(body) == {'error': 'Authentication required.', 'code': 'AUTH_REQUIRED'}, (response.status, body[:200])
           print('A 2 MB logo upload reaches the API through nginx.')
           PY
+      - name: The Recharged API stays closed without keys (docs/adr/0016)
+        run: |
+          python3 - <<'PY'
+          import http.client, json
+
+          def request(method, path, body=None):
+              conn = http.client.HTTPConnection('127.0.0.1', 8080, timeout=10)
+              headers = {'Authorization': 'Bearer rch_test_' + 'x' * 43, 'Content-Type': 'application/json'}
+              conn.request(method, path, body, headers)
+              response = conn.getresponse()
+              data = response.read()
+              conn.close()
+              return response.status, data
+
+          for method, path, body in [
+              ('GET', '/api/recharged/v1/ranks', None),
+              ('GET', '/api/recharged/v1/players/195905866527014912', None),
+              ('POST', '/api/recharged/v1/matches', b'{}'),
+              ('GET', '/api/recharged/v1/matches/wfc-1', None),
+          ]:
+              status, data = request(method, path, body)
+              assert status == 404 and json.loads(data) == {'error': 'Not found.', 'code': 'NOT_FOUND'}, (path, status, data[:200])
+          print('Without RECHARGED_API_KEYS the Recharged routes do not exist, a key or not.')
+          PY
       - name: Install end-to-end tools
         run: |
           npm ci
